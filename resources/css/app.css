@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+@import '@nuxt/ui';
+
+@source '../views/**/*.blade.php';
+@source '../js/**/*.{vue,ts}';
+
+/* The Homi tokens (DESIGN_SYSTEM §2–4) and the self-hosted fonts (ASSETS §1) are added in Phase 1. */
