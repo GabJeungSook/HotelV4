@@ -587,6 +587,12 @@
         }
     }
 
+    /* Rooms by floor (37c) prints in landscape (DESIGN_SYSTEM §6.10). */
+    @page landscape {
+        size: A4 landscape;
+        margin: 12mm;
+    }
+
     /* 80 mm thermal slip: printed on its own named page. */
     @page slip {
         size: 80mm auto;

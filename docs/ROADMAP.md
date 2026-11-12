@@ -166,23 +166,23 @@ No screens in this phase. Everything is driven by tests.
 
 ## Phase 8 — Reports
 
-- [ ] `ReportQuery` and `ReportService` (shift, zReport, daily, summary, occupancy, housekeeping, inventory)
-- [ ] Report hub (36)
-- [ ] Shift report (37) with the three roll-forwards and non-cash line
-- [ ] `ReportService::zReport()` returns one array of sections and lines; the screen, the 80 mm slip, the PDF and the CSV all render that array and compute nothing of their own (TRD §4.10)
-- [ ] Z-report — sales and cash (37b): Z number, the sales-and-cash column from gross sales to short or over, by front desk, the fixed exceptions list (printed at zero), document number ranges, running grand total, signature block with names pre-printed
-- [ ] Z-report — rooms by floor (37c, `?tab=rooms`): floor × category summary with the "No room" column, per-room chart with FWD and EXT; tabs for cleaning chart, housekeeping log, stocks, expenses
-- [ ] Preview for an open shift: built live from the ledger, marked "Preview. Do not sign.", no Z number, export refused
-- [ ] Exports: Z-report and day Z as PDF (dompdf, A4, Blade view over the builder array) and CSV (streamed, UTF-8 BOM, columns Section / Line / Count / Amount); other reports as CSV; exports need the reports permission
-- [ ] Print log: every print and export writes `print_logs`; a second print of the same document is marked `is_reprint` and counted under "Slip reprints"
-- [ ] Daily sales (38) for day, week, month
-- [ ] Close the day (38b): `CloseDay` with its three refusals, day Z number, shift Z range, grand total carried forward, short and over summed separately; the day paper in the 37b layout
-- [ ] Optional VAT block: only when `branches.vat_enabled`; VATable sales, VAT and VAT-exempt on 37b and the day Z, TIN and registered name in the header; with it off no VAT code path runs
-- [ ] Occupancy and guests (40); housekeeping report (41); inventory report (42); audit trail (43)
-- [ ] Drill-down from any figure to the ledger rows behind it
-- [ ] A4 print styles for all reports
-- [ ] `ReconcileBusinessDay` (daily 09:00) and `CheckInvariants` (09:05); result line on 36 and 38
-- [ ] Every "Reports" and "Z-report and day close" test in TRD §10; invariant 7
+- [x] `ReportQuery` and `ReportService` (shift, zReport, daily, summary, occupancy, housekeeping, inventory)
+- [x] Report hub (36)
+- [x] Shift report (37) with the three roll-forwards and non-cash line
+- [x] `ReportService::zReport()` returns one array of sections and lines; the screen, the 80 mm slip, the PDF and the CSV all render that array and compute nothing of their own (TRD §4.10)
+- [x] Z-report — sales and cash (37b): Z number, the sales-and-cash column from gross sales to short or over, by front desk, the fixed exceptions list (printed at zero), document number ranges, running grand total, signature block with names pre-printed
+- [x] Z-report — rooms by floor (37c, `?tab=rooms`): floor × category summary with the "No room" column, per-room chart with FWD and EXT; tabs for cleaning chart, housekeeping log, stocks, expenses
+- [x] Preview for an open shift: built live from the ledger, marked "Preview. Do not sign.", no Z number, export refused
+- [x] Exports: Z-report and day Z as PDF (dompdf, A4, Blade view over the builder array) and CSV (streamed, UTF-8 BOM, columns Section / Line / Count / Amount); other reports as CSV; exports need the reports permission
+- [x] Print log: every print and export writes `print_logs`; a second print of the same document is marked `is_reprint` and counted under "Slip reprints"
+- [x] Daily sales (38) for day, week, month
+- [x] Close the day (38b): `CloseDay` with its three refusals, day Z number, shift Z range, grand total carried forward, short and over summed separately; the day paper in the 37b layout
+- [x] Optional VAT block: only when `branches.vat_enabled`; VATable sales, VAT and VAT-exempt on 37b and the day Z, TIN and registered name in the header; with it off no VAT code path runs
+- [x] Occupancy and guests (40); housekeeping report (41); inventory report (42); audit trail (43)
+- [x] Drill-down from any figure to the ledger rows behind it
+- [x] A4 print styles for all reports
+- [x] `ReconcileBusinessDay` (daily 09:00) and `CheckInvariants` (09:05); result line on 36 and 38
+- [x] Every "Reports" and "Z-report and day close" test in TRD §10; invariant 7
 
 **Done when:** for the seeded demo shift, screens 37, 37b and 37c show the same figures as the mockup (Z-0629, net sales ₱18,160.00, expected ₱13,195.00, short ₱50.00, grand total after ₱11,500,500.00) and the PDF and CSV carry the same figures as the screen; for a generated month of data, every day equals the sum of its shifts, every day can be closed in date order, and the reconcile job reports no mismatch; changing one ledger row by hand makes the job flag that day and `CloseDay` refuse it.
 

@@ -16,7 +16,7 @@ use App\Services\ReportService;
 use Illuminate\Support\Facades\DB;
 
 /**
- * The data invariants of TRD §8, items 1–6 and 8 (7, the business day, comes with the day close). Each check returns one sentence per broken row;
+ * The data invariants of TRD §8, items 1–8. Each check returns one sentence per broken row;
  * an empty list means the data is consistent. Shared by the CheckInvariants command (Phase 8)
  * and by the hook that runs after every Feature test. It never fixes anything.
  */
@@ -32,6 +32,7 @@ final class Invariants
             ...self::checkedOutStaysAreSettled(),
             ...self::stockMatchesLastMovement(),
             ...self::closedShiftTotalsHold(),
+            ...self::businessDaysAgree(),
             ...self::forwardedChainHolds(),
         ];
     }
@@ -184,15 +185,43 @@ final class Invariants
             if ($stored === []) {
                 continue;
             }
-            $again = $reports->computeShiftTotals($shift, $reports->forwardedIn($shift), ShiftForwardedStay::query()->where('shift_session_id', $shift->id)->orderBy('id')->get());
+            $again = $reports->recompute($shift);
 
-            if (self::canonical($again) !== self::canonical($stored)) {
+            // Figures only: a renamed person or discount is not a ledger change.
+            if ($reports->totalsDiff($stored, $again) !== []) {
                 $problems[] = "6. {$label}: the totals recomputed from the ledger differ from the frozen totals.";
             }
 
             foreach ($cash->rollForwardsBalance($stored) as $name => $balances) {
                 if (! $balances) {
                     $problems[] = "6. {$label}: the {$name} roll-forward does not balance.";
+                }
+            }
+        }
+
+        return $problems;
+    }
+
+    /**
+     * 7. For every business day: the sum of its closed shifts' totals equals the day read
+     * straight from the ledger (net sales, collected, cash in). Shift-level differences are
+     * invariant 6; this adds the day as a whole.
+     *
+     * @return list<string>
+     */
+    public static function businessDaysAgree(): array
+    {
+        $reports = app(ReportService::class);
+        $problems = [];
+        $days = DB::table('shift_sessions')->where('status', ShiftStatus::Closed->value)->whereNotNull('totals')
+            ->select('branch_id', 'business_date')->distinct()->get();
+
+        foreach ($days as $day) {
+            $date = substr((string) $day->business_date, 0, 10);
+
+            foreach ($reports->reconcileDay((int) $day->branch_id, $date, shiftLevel: false) as $difference) {
+                if ($difference['shift_id'] === null) {
+                    $problems[] = "7. Branch {$day->branch_id}, {$date}: {$difference['figure']} is {$difference['stored']} in the shifts' totals but {$difference['recomputed']} in the ledger.";
                 }
             }
         }
@@ -240,23 +269,5 @@ final class Invariants
         $value = is_array($part) ? ($part[$key] ?? null) : null;
 
         return is_int($value) ? $value : null;
-    }
-
-    /** JSON with its keys sorted, as MySQL stores it, so two totals arrays compare exactly. */
-    private static function canonical(mixed $value): string
-    {
-        $sort = static function (mixed $v) use (&$sort): mixed {
-            if (! is_array($v)) {
-                return $v;
-            }
-
-            if (! array_is_list($v)) {
-                ksort($v);
-            }
-
-            return array_map($sort, $v);
-        };
-
-        return (string) json_encode($sort($value));
     }
 }

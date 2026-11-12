@@ -5,6 +5,7 @@ import { computed, onMounted } from 'vue';
 import Slip from '@/Components/Slip.vue';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
+import { usePrintLog } from '@/Composables/usePrintLog';
 import FrontDeskLayout from '@/Layouts/FrontDeskLayout.vue';
 
 /**
@@ -64,8 +65,11 @@ const giveText = computed(() => {
     return parts.join(' ');
 });
 
+// Each print is logged first; the second print of this slip says REPRINT (print_logs).
+const log = usePrintLog();
+
 function printSlip(): void {
-    window.print();
+    void log.print(route('stays.print', props.stay.id), { document: 'checkin_slip' });
 }
 
 onMounted(() => setTimeout(printSlip, 300));
@@ -75,9 +79,10 @@ onMounted(() => setTimeout(printSlip, 300));
     <FrontDeskLayout current="board" title="Checked in">
         <UAlert class="no-print mb-4" color="success" variant="subtle" icon="i-lucide-check" :title="`${stay.guest_name} is checked in to Room ${stay.room}.`" :description="giveText" />
         <div class="grid grid-cols-[minmax(0,340px)_220px] gap-6 max-[700px]:grid-cols-1">
-            <Slip :header="slip.header" title="CHECK-IN SLIP" :sections="sections" :footer="footer" />
+            <Slip :header="slip.header" title="CHECK-IN SLIP" :sections="sections" :footer="footer" :reprint="log.reprint.value" />
             <div class="no-print flex flex-col gap-2">
-                <UButton block icon="i-lucide-printer" label="Print again" @click="printSlip" />
+                <UButton block icon="i-lucide-printer" label="Print again" :loading="log.printing.value" @click="printSlip" />
+                <UAlert v-if="log.error.value" color="error" variant="subtle" :description="log.error.value" />
                 <UButton block color="neutral" variant="outline" label="Open guest folio" @click="router.visit(route('stays.show', stay.id))" />
                 <UButton block color="neutral" variant="ghost" label="Back to room board" @click="router.visit(route('board'))" />
             </div>

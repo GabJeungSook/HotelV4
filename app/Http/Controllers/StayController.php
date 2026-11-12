@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Reports\LogPrint;
 use App\Actions\Stays\AddCharges;
 use App\Actions\Stays\CancelStay;
 use App\Actions\Stays\CheckInGuest;
@@ -15,6 +16,7 @@ use App\Actions\Stays\TakePayment;
 use App\Actions\Stays\TransferRoom;
 use App\Actions\Stays\VoidLine;
 use App\Enums\PaymentMethod;
+use App\Enums\PrintDocument;
 use App\Enums\RoomStatus;
 use App\Enums\StayKind;
 use App\Enums\StaySource;
@@ -41,6 +43,7 @@ use App\Queries\HoldScreenQuery;
 use App\Queries\RoomQuery;
 use App\Queries\StayScreenQuery;
 use App\Support\Money;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -372,6 +375,20 @@ final class StayController extends Controller
         );
 
         return redirect()->route('stays.checkout', $stay);
+    }
+
+    /**
+     * Logs one print of the check-in slip (8) or the receipt (18) before the browser prints it
+     * (print_logs, TRD §4.10); a second print of the same slip is a reprint, counted on the
+     * Z-report under "Slip reprints".
+     */
+    public function slipPrint(Request $request, Stay $stay, LogPrint $log): JsonResponse
+    {
+        Gate::authorize('view', $stay);
+        $document = $request->input('document') === 'receipt' ? PrintDocument::Receipt : PrintDocument::CheckinSlip;
+        $row = $log->handle($this->user($request), (int) $stay->branch_id, $document, $stay->id);
+
+        return response()->json(['reprint' => $row->is_reprint]);
     }
 
     private function user(Request $request): User

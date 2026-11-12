@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import CheckResult from '@/Components/CheckResult.vue';
 import CleanTimer from '@/Components/CleanTimer.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
+import DateNav from '@/Components/DateNav.vue';
 import EmptyState from '@/Components/EmptyState.vue';
+import ExportMenu from '@/Components/ExportMenu.vue';
 import KioskFooter from '@/Components/KioskFooter.vue';
 import KioskHoldCard from '@/Components/KioskHoldCard.vue';
 import KioskTypeCard from '@/Components/KioskTypeCard.vue';
@@ -19,8 +22,10 @@ import StatusLabel from '@/Components/StatusLabel.vue';
 import StepBar from '@/Components/StepBar.vue';
 import TaskCard from '@/Components/TaskCard.vue';
 import TotalRow from '@/Components/TotalRow.vue';
+import ZPaper from '@/Components/ZPaper.vue';
 import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { formatMoney } from '@/Composables/useMoney';
+import { demoPaper } from '@/Components/__tests__/fixtures/zpaper';
 import Block from './Block.vue';
 
 defineProps<{ kiosk: boolean; phone: boolean; state: 'data' | 'loading' | 'empty' }>();
@@ -129,6 +134,8 @@ const tableRows = [
 function saveToast(): void {
     toast.add({ title: 'Payment saved. Change ₱85.00', color: 'success', icon: 'i-lucide-check' });
 }
+
+const reportDate = ref('2026-11-11');
 </script>
 
 <template>
@@ -330,6 +337,17 @@ function saveToast(): void {
             <Slip class="mt-3" preview reprint header="Hotel Dalisay GenSan" title="SHIFT REPORT · AM · 11 NOV 2026" number="Z-0629" :sections="[[{ label: 'Cash collected', value: formatMoney(1816000, 'slip'), bold: true }]]" />
         </Block>
 
+        <Block title="Reports — ZPaper, ExportMenu, DateNav, CheckResult (37b, 38b)" wide>
+            <div class="mb-3 flex flex-wrap items-center gap-3">
+                <DateNav v-model="reportDate" />
+                <ExportMenu pdf csv />
+                <ExportMenu pdf csv disabled />
+            </div>
+            <ZPaper :paper="demoPaper" drillable />
+            <ZPaper class="mt-4" :paper="{ ...demoPaper, preview: true, header: { ...demoPaper.header, number: null, printed: null } }" />
+            <CheckResult pass-text="AM ₱17,420.00 + PM ₱21,860.00 = ₱39,280.00. Matches the ledger for the business day." />
+            <CheckResult :problems="['Net sales shows ₱18,160.00 but the lines above add up to ₱18,060.00.']" />
+        </Block>
         <Block title="Tables — .dtable" wide>
             <div class="overflow-x-auto">
                 <table class="dtable">

@@ -15,6 +15,7 @@ require __DIR__.'/auth.php';
 require __DIR__.'/frontdesk.php';
 require __DIR__.'/housekeeping.php';
 require __DIR__.'/kiosk.php';
+require __DIR__.'/reports.php';
 
 Route::middleware(['auth', 'pin.set'])->group(function (): void {
     // The role home (APP_FLOW §1.1): the redirect after sign-in and the button on screen 51.

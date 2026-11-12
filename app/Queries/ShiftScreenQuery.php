@@ -29,6 +29,7 @@ use App\Models\Stay;
 use App\Models\User;
 use App\Services\CashMath;
 use App\Services\CurrentShift;
+use App\Services\ReportService;
 use App\Services\ShiftCalendar;
 use App\Support\CashPieces;
 use App\Support\Clock;
@@ -51,6 +52,7 @@ final class ShiftScreenQuery
         private readonly CurrentShift $currentShift,
         private readonly ShiftCalendar $calendar,
         private readonly Clock $clock,
+        private readonly ReportService $reports,
     ) {}
 
     /** @return array{id: int, period_name: string, business_date: string, status: string} */
@@ -364,8 +366,9 @@ final class ShiftScreenQuery
     }
 
     /**
-     * Shift report slip (26): read from the frozen totals, the Z number and the handover.
-     * Nothing is recomputed.
+     * Shift report slip (26): read from the frozen totals, the Z number and the handover. Its
+     * money lines are the 80 mm form of the Z builder array (ReportService::slip). Nothing is
+     * recomputed.
      *
      * @return array<string, mixed>
      */
@@ -373,8 +376,6 @@ final class ShiftScreenQuery
     {
         $branch = Branch::query()->withoutGlobalScopes()->findOrFail($shift->branch_id);
         $handover = ShiftHandover::query()->with('receiver')->where('from_shift_id', $shift->id)->first();
-        /** @var array<string, mixed> $totals */
-        $totals = $shift->totals ?? [];
         $names = User::query()->whereIn('id', array_filter([$shift->opened_by, $shift->closed_by]))->pluck('name', 'id');
         /** @var Collection<int, string> $with */
         $with = User::query()
@@ -402,7 +403,7 @@ final class ShiftScreenQuery
                 'grand_total_after' => $shift->grand_total_after?->centavos(),
             ],
             'header' => $branch->slip_header,
-            'sections' => $this->slipSections($shift, $totals),
+            'sections' => $this->reports->slip($shift),
             'handover' => $handover === null ? null : [
                 'received_by' => $handover->receiver->name ?? null,
                 'received_cash' => $handover->received_cash?->centavos(),
@@ -410,61 +411,6 @@ final class ShiftScreenQuery
                 'note' => $handover->note,
             ],
         ];
-    }
-
-    /**
-     * The money sections of slip 26, in the mockup's order, read from the frozen totals and the
-     * frozen expected, counted and variance. Amounts in centavos; the page only formats them.
-     *
-     * @param  array<string, mixed>  $totals
-     * @return list<list<array{label: string, amount?: int, text?: string, bold?: bool}>>
-     */
-    private function slipSections(ShiftSession $shift, array $totals): array
-    {
-        $n = static function (string $section, string $key) use ($totals): int {
-            $part = $totals[$section] ?? null;
-            $value = is_array($part) ? ($part[$key] ?? 0) : 0;
-
-            return is_int($value) ? $value : 0;
-        };
-
-        $sales = [];
-        foreach (['room' => 'Room', 'extension' => 'Extension', 'transfer_difference' => 'Transfer diff.', 'food_drink' => 'Food & drinks', 'amenity' => 'Amenities', 'damage' => 'Damages', 'forfeited_deposit' => 'Forfeited dep.', 'discount' => 'Discounts'] as $key => $label) {
-            if ($n('sales', $key) !== 0 || in_array($key, ['room', 'extension', 'transfer_difference', 'food_drink', 'amenity', 'damage'], true)) {
-                $sales[] = ['label' => $label, 'amount' => $n('sales', $key)];
-            }
-        }
-        $sales[] = ['label' => 'SALES', 'amount' => $n('sales', 'total'), 'bold' => true];
-        $sales[] = ['label' => 'Unpaid fwd out', 'amount' => -$n('unpaid', 'forwarded_out')];
-        $sales[] = ['label' => 'Paid fwd in', 'amount' => $n('unpaid', 'forwarded_in')];
-        $sales[] = ['label' => 'COLLECTED', 'amount' => $n('unpaid', 'collected'), 'bold' => true];
-
-        $cash = [
-            ['label' => 'Opening cash', 'amount' => $n('cash', 'opening')],
-            ['label' => 'Deposits in', 'amount' => $n('deposits', 'taken')],
-            ['label' => 'Deposits out', 'amount' => -$n('deposits', 'returned')],
-            ['label' => 'Expenses', 'amount' => -$n('cash', 'expenses')],
-            ['label' => 'Remittance', 'amount' => -$n('cash', 'remittance')],
-        ];
-
-        if ($n('cash', 'shortage_payments') !== 0) {
-            $cash[] = ['label' => 'Shortage paid', 'amount' => $n('cash', 'shortage_payments')];
-        }
-
-        $variance = $shift->variance_amount?->centavos() ?? 0;
-        $result = [
-            ['label' => 'Expected', 'amount' => $shift->expected_cash?->centavos() ?? 0],
-            ['label' => 'Counted', 'amount' => $shift->counted_cash?->centavos() ?? 0],
-            ['label' => $variance < 0 ? 'SHORT' : ($variance > 0 ? 'OVER' : 'SHORT / OVER'), 'amount' => $variance, 'bold' => true],
-        ];
-
-        $guests = [
-            ['label' => 'Guests fwd in', 'text' => (string) $n('guests', 'forwarded_in')],
-            ['label' => 'Guests fwd out', 'text' => (string) $n('guests', 'forwarded_out')],
-            ['label' => 'Deposits held', 'amount' => $n('deposits', 'held_close')],
-        ];
-
-        return [$sales, $cash, $result, $guests];
     }
 
     private function nextPeriodName(ShiftSession $shift): string

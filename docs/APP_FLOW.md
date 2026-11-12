@@ -976,6 +976,9 @@ These fill gaps the mockup does not draw. The rules are in [TRD §4.9](TRD.md); 
 | `/pin/setup` | `Auth\PinController@edit` / `update` | frontdesk, supervisor, admin at first sign-in | Set your 4-digit PIN (uses PinPad) |
 | `/password/change` | `Auth\PasswordController@edit` / `update` | any user with a temporary password | Replace a temporary password |
 | `/reports/shifts` | `ReportController@shifts` | backoffice, supervisor, admin, owner | List of shifts by business date with their Z numbers; each row opens 37, 37b or 37c. An open shift opens as a preview. |
+| `/reports/z` | `ReportController@zLatest` | backoffice, supervisor, admin, owner | "Z-report" in the menu: redirects to the Z-report (37b) of the last closed shift, or to the shifts list when there is none |
+| `POST /reports/shifts/{id}/print`, `POST /reports/daily/{date}/print` | `ReportController@shiftPrint`, `@dayPrint` | Same as `/reports` | Log a browser print of 37, 37b/37c or the day paper in `print_logs` before the print dialog opens; a preview cannot be printed |
+| `POST /stays/{stay}/print` | `StayController@slipPrint` | frontdesk, supervisor | Log a print of the check-in slip (8) or the receipt (18) before the print dialog opens; a second print is a reprint |
 | `POST /owner/branches/{branch}/open` | `Owner\BranchController@open` | owner | Stores the opened branch in the session and goes to that branch's dashboard (61) |
 | `/owner/accounts` | `Owner\AccountController@index` / `store` / `update` | owner | Owner accounts list and form |
 | `POST /stays/{stay}/release` | `StayController@release` | frontdesk, supervisor | `ReleaseKioskHold` (from 5 and 7) |

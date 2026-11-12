@@ -456,9 +456,15 @@ CREATE TABLE shift_sessions (
   "exceptions": {"cancelled_stays": {"count": 1, "amount": 70000}, "voided_lines": {"count": 0, "amount": 0}, "cash_refunds": {"count": 1, "amount": 70000}, "transfers": {"count": 1, "amount": 15000}, "forfeited_deposits": {"count": 0, "amount": 0}, "voided_cash_movements": {"count": 1, "amount": 300000}, "reprints": {"count": 2}, "force_closed": false},
   "by_user": [{"user_id": 12, "name": "Jessa Mae Dela Cruz", "checkins": 15, "cash": 1048000, "non_cash": 0, "given_back": 0}, {"user_id": 14, "name": "Rhea Bautista", "checkins": 12, "cash": 756500, "non_cash": 0, "given_back": 70000}],
   "documents": {"stays": {"first": "DGS-26-004112", "last": "DGS-26-004138", "count": 27}, "pos_orders": {"first": "P-008821", "last": "P-008861", "count": 41}},
+  "drawer": {"cash_collected": 1804500, "non_cash": {"gcash": 0, "card": 0, "deposit": 0}, "non_cash_counts": {"gcash": 0, "card": 0, "deposit": 0},
+             "deposits_taken": {"count": 27, "amount": 540000}, "deposits_returned": {"count": 23, "amount": 460000},
+             "guest_deposits": {"count": 2, "amount": 0}, "other_cash": 0, "cash_in": 1884500,
+             "counts": {"expenses": 3, "remittance": 1, "shortage_payments": 0, "unpaid_forwarded_out": 3, "unpaid_forwarded_in": 2}},
   "vat": null
 }
 ```
+
+Added in Phase 8 (Z-report, 37b): `drawer` carries what the "Sales and cash" column needs and the counts printed beside its lines; `discounts[].label` is the name with its value ("Promo ₱50", "Senior citizen 20%"), frozen so a later change of the discount does not change an old paper; `guests.cancelled` counts stays cancelled after check-in during the shift (included in `guests.checked_out`); `vat`, when on, is `{"rate": 12, "vatable": …, "vat": …, "exempt": …}`. `drawer.cash_collected` is the cash applied to bills (payments and refunds); `drawer.cash_in` is every cash payment row of the shift, for the reconcile check. Only numbers and flags are compared when a shift is recomputed; names and labels are not ledger figures.
 
 ### 4.8 shift_members, cash_counts, shift_handovers, shift_forwarded_stays
 

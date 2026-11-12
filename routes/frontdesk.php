@@ -49,6 +49,7 @@ Route::middleware(['auth', 'pin.set', 'role:frontdesk,supervisor'])->group(funct
         Route::post('/stays/{stay}/extend', [StayController::class, 'extendStore'])->name('stays.extend.store');
         Route::get('/stays/{stay}/transfer', [StayController::class, 'transfer'])->name('stays.transfer');
         Route::post('/stays/{stay}/transfer', [StayController::class, 'transferStore'])->name('stays.transfer.store');
+        Route::post('/stays/{stay}/print', [StayController::class, 'slipPrint'])->name('stays.print');
         Route::get('/stays/{stay}/checkout', [StayController::class, 'checkout'])->name('stays.checkout');
         Route::post('/stays/{stay}/checkout', [StayController::class, 'checkoutStore'])->name('stays.checkout.store');
 

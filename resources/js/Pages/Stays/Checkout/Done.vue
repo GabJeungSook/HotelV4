@@ -5,6 +5,7 @@ import { computed } from 'vue';
 import Slip from '@/Components/Slip.vue';
 import { formatDateTime, formatDuration } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
+import { usePrintLog } from '@/Composables/usePrintLog';
 
 /**
  * Check-out step 3 — done (18): how long the guest stayed, the deposit handed back, and the
@@ -20,7 +21,7 @@ export interface DoneView {
     receipt: { header: string; lines: { label: string; amount: number }[]; payments: { label: string; amount: number }[]; total: number; by: string };
 }
 
-const props = defineProps<{ room: string | null; guest: string; code: string; done: DoneView }>();
+const props = defineProps<{ stayId: number; room: string | null; guest: string; code: string; done: DoneView }>();
 
 const statusWord = computed(() => ({ uncleaned: 'Uncleaned', available: 'Available', maintenance: 'Maintenance', cleaning: 'Cleaning' })[props.done.room_status ?? ''] ?? props.done.room_status);
 const depositText = computed(() => {
@@ -41,8 +42,11 @@ const sections = computed(() => [
     props.done.receipt.payments.map((p) => ({ label: p.label, value: formatMoney(p.amount, 'slip') })),
 ]);
 
+// Each print is logged first; the second print of this receipt says REPRINT (print_logs).
+const log = usePrintLog();
+
 function print(): void {
-    window.print();
+    void log.print(route('stays.print', props.stayId), { document: 'receipt' });
 }
 </script>
 
@@ -59,11 +63,12 @@ function print(): void {
             </p>
             <div class="mt-5 flex justify-center gap-2">
                 <UButton label="Back to room board" @click="router.visit(route('board'))" />
-                <UButton color="neutral" variant="outline" icon="i-lucide-printer" label="Print receipt" @click="print" />
+                <UButton color="neutral" variant="outline" icon="i-lucide-printer" label="Print receipt" :loading="log.printing.value" @click="print" />
             </div>
+            <UAlert v-if="log.error.value" class="mt-4 max-w-[420px]" color="error" variant="subtle" :description="log.error.value" />
         </section>
         <div class="print-only">
-            <Slip :header="done.receipt.header" title="RECEIPT" :sections="sections" :footer="[`Front desk: ${done.receipt.by}`, 'Thank you for staying with us.']" />
+            <Slip :header="done.receipt.header" title="RECEIPT" :sections="sections" :footer="[`Front desk: ${done.receipt.by}`, 'Thank you for staying with us.']" :reprint="log.reprint.value" />
         </div>
     </div>
 </template>

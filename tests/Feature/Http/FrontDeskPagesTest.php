@@ -234,7 +234,7 @@ it('builds the navigation on the server from the role and the pages that exist',
     ]);
 
     $adminNav = $this->actingAs(Hotel::user('ramil.ortega'))->get('/dashboard')->viewData('page')['props']['nav'];
-    expect(collect($adminNav)->pluck('items')->flatten(1)->pluck('key')->all())->toBe(['dashboard']);
+    expect(collect($adminNav)->pluck('items')->flatten(1)->pluck('key')->all())->toBe(['dashboard', 'reports']);
 });
 
 it('shares the open shift without any money', function (): void {

@@ -76,7 +76,7 @@ function checkOut(): void {
         <UAlert v-if="error && current !== 3" class="mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="error" />
 
         <template v-if="screen.done">
-            <Done :room="screen.stay.room" :guest="screen.stay.guest_name" :code="screen.stay.code" :done="screen.done" />
+            <Done :stay-id="screen.stay.id" :room="screen.stay.room" :guest="screen.stay.guest_name" :code="screen.stay.code" :done="screen.done" />
         </template>
         <template v-else-if="step === 1">
             <Returns v-model:key-returned="key" v-model:remote-returned="remote" v-model:damages="damages" :lost="screen.lost ?? { key: 0, remote: 0 }" :products="screen.damage_products ?? []" />

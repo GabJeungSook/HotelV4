@@ -61,7 +61,7 @@ it('walks the 37b sales-and-cash column with every bold line equal to its arithm
     $expected = $fromShift + $t['cash']['opening'];
 
     expect($t['gross_sales'])->toBe(1846000)
-        ->and($t['discounts'])->toBe([['name' => 'Promo', 'count' => 4, 'amount' => 20000], ['name' => 'Senior citizen', 'count' => 1, 'amount' => 10000]])
+        ->and($t['discounts'])->toEqual([['name' => 'Promo', 'label' => 'Promo ₱50', 'count' => 4, 'amount' => 20000], ['name' => 'Senior citizen', 'label' => 'Senior citizen 20%', 'count' => 1, 'amount' => 10000]])
         ->and($netSales)->toBe(1816000)->and($t['sales']['total'])->toBe($netSales)
         ->and($t['unpaid']['forwarded_out'])->toBe(34000)
         ->and($paidEarlier)->toBe(22500)

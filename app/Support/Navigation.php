@@ -25,6 +25,9 @@ final class Navigation
 
     private const BACK = [Role::Admin, Role::Backoffice, Role::Supervisor, Role::Owner];
 
+    /** Every report in the menu (DESIGN_SYSTEM §6.1): back office; admin and owner reach them from the hub (36). */
+    private const REPORTS_FULL = [Role::Backoffice, Role::Supervisor];
+
     /**
      * Every page in the menus, grouped per layout. `home` marks the role homes in order.
      *
@@ -61,8 +64,13 @@ final class Navigation
             ]],
             ['layout' => 'backoffice', 'heading' => 'Reports', 'items' => [
                 ['key' => 'reports', 'label' => 'Reports', 'route' => 'reports.index', 'icon' => 'i-lucide-list', 'roles' => self::BACK],
-                ['key' => 'shift-reports', 'label' => 'Shift reports', 'route' => 'reports.shifts', 'icon' => 'i-lucide-banknote', 'roles' => self::BACK],
-                ['key' => 'daily', 'label' => 'Daily sales', 'route' => 'reports.daily', 'icon' => 'i-lucide-chart-column', 'roles' => self::BACK],
+                ['key' => 'shift-reports', 'label' => 'Shift reports', 'route' => 'reports.shifts', 'icon' => 'i-lucide-banknote', 'roles' => self::REPORTS_FULL],
+                ['key' => 'z-report', 'label' => 'Z-report', 'route' => 'reports.z.latest', 'icon' => 'i-lucide-list', 'roles' => self::REPORTS_FULL],
+                ['key' => 'daily', 'label' => 'Daily sales', 'route' => 'reports.daily', 'icon' => 'i-lucide-chart-column', 'roles' => self::REPORTS_FULL],
+                ['key' => 'occupancy', 'label' => 'Occupancy', 'route' => 'reports.occupancy', 'icon' => 'i-lucide-bed', 'roles' => self::REPORTS_FULL],
+                ['key' => 'housekeeping-report', 'label' => 'Housekeeping', 'route' => 'reports.housekeeping', 'icon' => 'i-lucide-brush', 'roles' => self::REPORTS_FULL],
+                ['key' => 'inventory', 'label' => 'Inventory', 'route' => 'reports.inventory', 'icon' => 'i-lucide-package', 'roles' => self::REPORTS_FULL],
+                ['key' => 'audit', 'label' => 'Audit trail', 'route' => 'reports.audit', 'icon' => 'i-lucide-lock', 'roles' => self::REPORTS_FULL],
                 ['key' => 'stats', 'label' => 'Stats', 'route' => 'stats', 'icon' => 'i-lucide-chart-column', 'roles' => self::BACK],
             ]],
             ['layout' => 'owner', 'heading' => 'People', 'items' => [
