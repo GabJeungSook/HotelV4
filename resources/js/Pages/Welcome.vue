@@ -8,10 +8,8 @@ defineProps<{
 </script>
 
 <template>
-    <UApp>
-        <Head title="Welcome" />
-        <main class="flex min-h-screen items-center justify-center">
-            <UButton label="Homi is set up" icon="i-lucide-check" />
-        </main>
-    </UApp>
+    <Head title="Welcome" />
+    <main class="flex min-h-screen items-center justify-center">
+        <UButton label="Homi is set up" icon="i-lucide-check" />
+    </main>
 </template>

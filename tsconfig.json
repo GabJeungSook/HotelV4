@@ -10,6 +10,7 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "noEmit": true,
+        "allowImportingTsExtensions": true,
         "lib": ["ESNext", "DOM", "DOM.Iterable"],
         "types": ["vite/client", "vitest/globals"],
         "paths": {
@@ -23,6 +24,7 @@
         "auto-imports.d.ts",
         "components.d.ts",
         "vite.config.ts",
-        "vitest.config.ts"
+        "vitest.config.ts",
+        "nuxt-ui.config.ts"
     ]
 }

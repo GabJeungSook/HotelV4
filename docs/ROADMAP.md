@@ -44,17 +44,17 @@ Build one phase at a time, in order. A phase is done only when every box is tick
 
 ## Phase 1 — Design system and components
 
-- [ ] Theme Nuxt UI with the Homi tokens: Tailwind theme with every token in DESIGN_SYSTEM §2–4, Nuxt UI primary and neutral colours mapped to them; self-hosted fonts per ASSETS
-- [ ] Helpers: `formatMoney`, `formatDateTime`, `formatDuration` (DESIGN_SYSTEM §7)
-- [ ] Nuxt UI components first (TRD §12): `UButton`, `UInput`, `UFormField`, `UModal`, `USkeleton`, `UDropdownMenu`, toasts through `UApp`; set their sizes, radius and states once in the theme, not per page
-- [ ] Our own components, only where Nuxt UI has none, each with all variants and states: MoneyInput, OptionTiles, StepBar, StatusLabel (small soft label), RoomTable, MoneyRow, TotalRow, StatCard, PinPad, ConfirmDialog, EmptyState (side sheets use Nuxt UI USlideover), Slip
-- [ ] Tables are plain `<table>` with the `.dtable` style (no table library)
-- [ ] Chart kit in `Components/Charts`: `VBars`, `HBars`, `Shares`, `HeatGrid`, `Spark` — theme tokens only, value on hover, plain empty state when there is no data
-- [ ] Layouts: FrontDeskLayout, BackOfficeLayout, AdminLayout, OwnerLayout, KioskLayout, PhoneLayout (static nav for now)
-- [ ] Print stylesheets: 80 mm slip and A4 report
-- [ ] Download the six chosen photographs (ASSETS) at the listed sizes, plus the copy named for each room type into `public/images/photos/`; self-host IBM Plex Sans, IBM Plex Mono and Newsreader
-- [ ] Component gallery at `/dev/components` (local only) showing every Nuxt UI component we use, every component of our own and every chart, in every state
-- [ ] Vitest tests for MoneyInput, PinPad, OptionTiles, RoomTable, ConfirmDialog, and one per chart (renders values, renders the empty state)
+- [x] Theme Nuxt UI with the Homi tokens: Tailwind theme with every token in DESIGN_SYSTEM §2–4, Nuxt UI primary and neutral colours mapped to them; self-hosted fonts per ASSETS
+- [x] Helpers: `formatMoney`, `formatDateTime`, `formatDuration` (DESIGN_SYSTEM §7)
+- [x] Nuxt UI components first (TRD §12): `UButton`, `UInput`, `UFormField`, `UModal`, `USkeleton`, `UDropdownMenu`, toasts through `UApp`; set their sizes, radius and states once in the theme, not per page
+- [x] Our own components, only where Nuxt UI has none, each with all variants and states: MoneyInput, OptionTiles, StepBar, StatusLabel (small soft label), RoomTable, MoneyRow, TotalRow, StatCard, PinPad, ConfirmDialog, EmptyState (side sheets use Nuxt UI USlideover), Slip
+- [x] Tables are plain `<table>` with the `.dtable` style (no table library)
+- [x] Chart kit in `Components/Charts`: `VBars`, `HBars`, `Shares`, `HeatGrid`, `Spark` — theme tokens only, value on hover, plain empty state when there is no data
+- [x] Layouts: FrontDeskLayout, BackOfficeLayout, AdminLayout, OwnerLayout, KioskLayout, PhoneLayout (static nav for now)
+- [x] Print stylesheets: 80 mm slip and A4 report
+- [x] Download the six chosen photographs (ASSETS) at the listed sizes, plus the copy named for each room type into `public/images/photos/`; self-host IBM Plex Sans, IBM Plex Mono and Newsreader
+- [x] Component gallery at `/dev/components` (local only) showing every Nuxt UI component we use, every component of our own and every chart, in every state
+- [x] Vitest tests for MoneyInput, PinPad, OptionTiles, RoomTable, ConfirmDialog, and one per chart (renders values, renders the empty state)
 
 **Done when:** the gallery matches the mockup's "Building blocks" section and the cards and charts of screens 60–63 side by side, including disabled, loading, error and empty states, at desktop, kiosk and phone widths.
 

@@ -4,4 +4,613 @@
 @source '../views/**/*.blade.php';
 @source '../js/**/*.{vue,ts}';
 
-/* The Homi tokens (DESIGN_SYSTEM §2–4) and the self-hosted fonts (ASSETS §1) are added in Phase 1. */
+/*
+|--------------------------------------------------------------------------
+| Homi theme (DESIGN_SYSTEM §2–4, ASSETS §1.1)
+|--------------------------------------------------------------------------
+| 1. Self-hosted fonts   2. Primary scale + font stacks   3. The --hm-* layer
+| 4. Nuxt UI's --ui-* variables pointed at it   5. Homi utilities
+| 6. Base type   7. Shared component styles (.dtable, .num, chart tip)
+| 8. Motion for the photo pages   9. Print (80 mm slip and A4)
+| Pages never contain a hex value; everything below is the one place colours live.
+*/
+
+/* 1. Fonts: woff2 copied once from @fontsource (SIL OFL 1.1, licences beside the files).
+      IBM Plex Sans ships latin + latin-ext (latin-ext carries the peso sign U+20B1). */
+@font-face {
+    font-family: 'IBM Plex Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/ibm-plex-sans-latin-ext-400-normal.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'IBM Plex Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'IBM Plex Sans';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('../fonts/ibm-plex-sans-latin-ext-500-normal.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'IBM Plex Sans';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('../fonts/ibm-plex-sans-latin-500-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'IBM Plex Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('../fonts/ibm-plex-sans-latin-ext-600-normal.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'IBM Plex Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('../fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'IBM Plex Mono';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('../fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'IBM Plex Mono';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('../fonts/ibm-plex-mono-latin-600-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Newsreader';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/newsreader-latin-400-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* 2. The primary scale Nuxt UI needs, built around #0077c2. The logo blue #009ef5 is not part of it. */
+@theme static {
+    --color-homi-50: #eaf2f8;
+    --color-homi-100: #d4e6f3;
+    --color-homi-200: #a9cde8;
+    --color-homi-300: #5aa9e0;
+    --color-homi-400: #2b8dd0;
+    --color-homi-500: #0f82c9;
+    --color-homi-600: #0077c2;
+    --color-homi-700: #0b5f96;
+    --color-homi-800: #0d4b73;
+    --color-homi-900: #0f3a57;
+    --color-homi-950: #0b2638;
+    --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --font-serif: 'Newsreader', Georgia, serif;
+}
+
+/* 3. The Homi layer, light (DESIGN_SYSTEM §2.1). .hm-light re-declares it for light-only surfaces. */
+:root,
+.hm-light {
+    color-scheme: light;
+    --hm-ink: #1d2329;
+    --hm-text: #3d434a;
+    --hm-muted: #6b7178;
+    --hm-line: #e6e3dd;
+    --hm-line-strong: #d9d6cf;
+    --hm-row: #f0f0f0;
+    --hm-bg: #f5f4f1;
+    --hm-card: #ffffff;
+    --hm-sidebar: #fbfaf8;
+    --hm-nav-active: #ecebe6;
+    --hm-hover: #f7f6f3;
+    --hm-blocked: #f7f6f3;
+    --hm-track: #e9e9ec;
+    --hm-step: #eeedea;
+
+    --hm-brand: #009ef5;
+    --hm-primary: #0077c2;
+    --hm-on-primary: #ffffff;
+    --hm-primary-ink: #0b5f96;
+    --hm-primary-50: #eaf2f8;
+    --hm-select: #eef4f9;
+    --hm-select-line: #9fc3de;
+    --hm-focus: #e2edf6;
+    --hm-accent: #b7791f;
+    --hm-accent-50: #fbf1dc;
+
+    --hm-ok: #2f6b47;
+    --hm-ok-50: #e8f1eb;
+    --hm-warn: #8a5a12;
+    --hm-warn-50: #f6eedd;
+    --hm-warn-line: #e6d6b2;
+    --hm-bad: #9b3328;
+    --hm-bad-50: #f7e8e5;
+    --hm-bad-line: #e6c2bc;
+    --hm-info: #3b5373;
+    --hm-info-50: #ecf0f5;
+    --hm-held-line: #95bcd9;
+    --hm-violet: #5a4f80;
+    --hm-violet-50: #efedf5;
+    --hm-clay: #7a5236;
+    --hm-clay-50: #f3ece5;
+    --hm-grey: #5f646b;
+    --hm-grey-50: #eeeeeb;
+
+    --hm-control-dash: #cfd5df;
+    --hm-disabled: #d7dce4;
+    --hm-disabled-ink: #8b93a2;
+    --hm-void: #9aa3b2;
+    --hm-empty-icon: #b3bac6;
+    --hm-bar-soft: #d6e2eb;
+    --hm-promo-line: #eccf8f;
+    --hm-slip-line: #b9c0cc;
+    --hm-row-hover: #faf9f7;
+    --hm-row-line: #efede8;
+    --hm-row-selected: #f2f7fb;
+    --hm-overlay: rgba(18, 24, 34, 0.5);
+    --hm-shadow-modal: 0 14px 34px rgba(29, 35, 41, 0.18);
+    --hm-shadow-segment: 0 1px 2px rgba(0, 0, 0, 0.08);
+    --hm-shadow-sheet: -14px 0 40px rgba(0, 0, 0, 0.2);
+    --hm-radius: 6px;
+
+    /* Photo layer: light only, never themed. */
+    --hm-photo-fallback: #5b554d;
+    --hm-scrim: rgba(22, 24, 27, 0.4);
+    --hm-scrim-kiosk: rgba(20, 22, 25, 0.52);
+    --hm-on-photo-soft: rgba(255, 255, 255, 0.85);
+    --hm-on-photo-body: rgba(255, 255, 255, 0.92);
+    --hm-on-photo-line: rgba(255, 255, 255, 0.4);
+    --hm-on-photo-divider: rgba(255, 255, 255, 0.28);
+    --hm-slide-off: rgba(255, 255, 255, 0.45);
+}
+
+/* Dark values (DESIGN_SYSTEM §2.4). `.dark .hm-light` keeps light-only surfaces light. */
+.dark:not(.hm-light) {
+    color-scheme: dark;
+    --hm-ink: #f2f0ec;
+    --hm-text: #d9d6d0;
+    --hm-muted: #a39f98;
+    --hm-line: #34322e;
+    --hm-line-strong: #45423d;
+    --hm-row: #2b2926;
+    --hm-bg: #161513;
+    --hm-card: #1e1d1b;
+    --hm-sidebar: #1a1917;
+    --hm-nav-active: #2c2a27;
+    --hm-hover: #262422;
+    --hm-blocked: #242320;
+    --hm-track: #2c2a27;
+    --hm-step: #2c2a27;
+
+    --hm-primary: #5aa9e0;
+    --hm-on-primary: #121416;
+    --hm-primary-ink: #8cc4ec;
+    --hm-primary-50: #1a2a36;
+    --hm-select: #1a2a36;
+    --hm-select-line: #3f6b8c;
+    --hm-focus: #1f3445;
+    --hm-accent: #e0a94a;
+    --hm-accent-50: #33290f;
+
+    --hm-ok: #8cc7a1;
+    --hm-ok-50: #1f2e25;
+    --hm-warn: #e0b56a;
+    --hm-warn-50: #33291a;
+    --hm-warn-line: #5a4a2c;
+    --hm-bad: #eb9a8f;
+    --hm-bad-50: #3a2320;
+    --hm-bad-line: #5e3a34;
+    --hm-info: #a4b8d4;
+    --hm-info-50: #232a35;
+    --hm-held-line: #3f6b8c;
+    --hm-violet: #b8aee0;
+    --hm-violet-50: #2a2735;
+    --hm-clay: #d6a98a;
+    --hm-clay-50: #342a22;
+    --hm-grey: #b0b3b8;
+    --hm-grey-50: #2a2a28;
+
+    --hm-control-dash: #45423d;
+    --hm-disabled: #2c2a27;
+    --hm-disabled-ink: #8a867f;
+    --hm-void: #6f6b65;
+    --hm-empty-icon: #57534d;
+    --hm-bar-soft: #2f3f4b;
+    --hm-promo-line: #6b5726;
+    --hm-row-hover: #232220;
+    --hm-row-line: #2b2926;
+    --hm-row-selected: #1a2a36;
+    --hm-overlay: rgba(0, 0, 0, 0.6);
+    --hm-shadow-modal: 0 14px 34px rgba(0, 0, 0, 0.45);
+}
+
+/* 4. Nuxt UI's variables point at the Homi layer, on the same selectors so a light-only
+      subtree resolves them again. Nuxt UI v4 derives rounded-sm/md/lg/xl as 1×/1.5×/2×/3×
+      --ui-radius, so --ui-radius is the 6 px base ÷ 1.5: rounded-md = 6 px (controls),
+      rounded-lg = 8 px, rounded-xl = 12 px (modals), exactly the radii of DESIGN_SYSTEM §4.2. */
+:root,
+.dark,
+.hm-light {
+    --ui-primary: var(--hm-primary);
+    --ui-success: var(--hm-ok);
+    --ui-warning: var(--hm-warn);
+    --ui-error: var(--hm-bad);
+    --ui-info: var(--hm-info);
+    --ui-bg: var(--hm-card);
+    --ui-bg-muted: var(--hm-bg);
+    --ui-bg-elevated: var(--hm-hover);
+    --ui-bg-accented: var(--hm-line);
+    --ui-bg-inverted: var(--hm-ink);
+    --ui-border: var(--hm-line);
+    --ui-border-muted: var(--hm-row);
+    --ui-border-accented: var(--hm-line-strong);
+    --ui-border-inverted: var(--hm-ink);
+    --ui-text: var(--hm-text);
+    --ui-text-muted: var(--hm-muted);
+    --ui-text-toned: var(--hm-text);
+    --ui-text-dimmed: var(--hm-disabled-ink);
+    --ui-text-highlighted: var(--hm-ink);
+    --ui-text-inverted: var(--hm-on-primary);
+    --ui-radius: calc(var(--hm-radius) / 1.5);
+}
+
+/* 5. Homi-only utilities (bg-ok-50, text-primary-ink, border-select-line, bg-sidebar, …). */
+@theme inline {
+    --color-brand: var(--hm-brand);
+    --color-primary-50: var(--hm-primary-50);
+    --color-primary-ink: var(--hm-primary-ink);
+    --color-accent: var(--hm-accent);
+    --color-accent-50: var(--hm-accent-50);
+    --color-ok: var(--hm-ok);
+    --color-ok-50: var(--hm-ok-50);
+    --color-warn: var(--hm-warn);
+    --color-warn-50: var(--hm-warn-50);
+    --color-warn-line: var(--hm-warn-line);
+    --color-bad: var(--hm-bad);
+    --color-bad-50: var(--hm-bad-50);
+    --color-bad-line: var(--hm-bad-line);
+    --color-info: var(--hm-info);
+    --color-info-50: var(--hm-info-50);
+    --color-held-line: var(--hm-held-line);
+    --color-violet: var(--hm-violet);
+    --color-violet-50: var(--hm-violet-50);
+    --color-clay: var(--hm-clay);
+    --color-clay-50: var(--hm-clay-50);
+    --color-grey: var(--hm-grey);
+    --color-grey-50: var(--hm-grey-50);
+    --color-sidebar: var(--hm-sidebar);
+    --color-nav-active: var(--hm-nav-active);
+    --color-blocked: var(--hm-blocked);
+    --color-select: var(--hm-select);
+    --color-select-line: var(--hm-select-line);
+    --color-track: var(--hm-track);
+    --color-step: var(--hm-step);
+    --color-row: var(--hm-row);
+    --color-control-dash: var(--hm-control-dash);
+    --color-empty-icon: var(--hm-empty-icon);
+    --color-bar-soft: var(--hm-bar-soft);
+    --color-void: var(--hm-void);
+    --color-slip-line: var(--hm-slip-line);
+    --color-on-primary: var(--hm-on-primary);
+    --radius-label: 4px;
+    --radius-card: 10px;
+}
+
+/* 6. Base type: 14 px / 20 px body in IBM Plex Sans; bold is 600 in ink (DESIGN_SYSTEM §3). */
+@layer base {
+    html {
+        font-family: var(--font-sans);
+    }
+
+    body {
+        font-size: 14px;
+        line-height: 20px;
+        color: var(--hm-text);
+        background: var(--hm-bg);
+    }
+
+    b,
+    strong {
+        font-weight: 600;
+        color: var(--hm-ink);
+    }
+}
+
+/* 7. Shared styles used by our components. */
+@utility num {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    color: var(--hm-ink);
+}
+
+@utility tabular {
+    font-variant-numeric: tabular-nums;
+}
+
+/* The one table style (DESIGN_SYSTEM §5.2 DataTable). */
+.dtable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    line-height: 20px;
+
+    & th {
+        text-align: left;
+        font-size: 13px;
+        line-height: 18px;
+        font-weight: 500;
+        color: var(--hm-muted);
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--hm-line);
+        white-space: nowrap;
+        background: transparent;
+    }
+
+    & td {
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--hm-row);
+        vertical-align: top;
+        color: var(--hm-text);
+    }
+
+    & tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    & td:first-child,
+    & th:first-child {
+        white-space: nowrap;
+    }
+
+    & .r {
+        text-align: right;
+    }
+
+    & td.r {
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        color: var(--hm-ink);
+    }
+
+    & td.code {
+        font-family: var(--font-mono);
+        font-weight: 500;
+    }
+
+    & tfoot td {
+        font-weight: 600;
+        color: var(--hm-ink);
+        border-top: 1.5px solid var(--hm-ink);
+        border-bottom: 0;
+    }
+
+    & tr.grp td {
+        font-weight: 600;
+        color: var(--hm-ink);
+        padding-top: 18px;
+    }
+
+    & tr.void td {
+        color: var(--hm-void);
+        text-decoration: line-through;
+    }
+
+    & tr.forwarded td {
+        color: var(--hm-bad);
+    }
+
+    & tbody tr.link {
+        cursor: pointer;
+    }
+
+    & tbody tr.link:hover td {
+        background: var(--hm-hover);
+    }
+
+    &.dense {
+        font-size: 12px;
+        line-height: 16px;
+
+        & th,
+        & td {
+            padding: 6px 10px;
+        }
+    }
+}
+
+/* The static "on duty" dot (60, 61): not a status label, it does not blink. */
+.live {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--hm-ok);
+    margin-right: 6px;
+    vertical-align: 2px;
+}
+
+.sr-table {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* Keyboard focus on our own controls: 2 px primary ring, 2 px offset (DESIGN_SYSTEM §8.2). */
+.hm-focus:focus-visible {
+    outline: 2px solid var(--hm-primary);
+    outline-offset: 2px;
+}
+
+/* 8. Motion for the photo pages, sign-in and kiosk welcome (DESIGN_SYSTEM §4.5). */
+@keyframes hm-drift {
+    from {
+        transform: scale(1.03);
+    }
+    to {
+        transform: scale(1.13) translate(-1.5%, -1%);
+    }
+}
+@keyframes hm-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+@keyframes hm-xfade {
+    0% {
+        opacity: 0;
+    }
+    5%,
+    33% {
+        opacity: 1;
+    }
+    38%,
+    100% {
+        opacity: 0;
+    }
+}
+.hm-drift {
+    animation: hm-drift 24s ease-in-out infinite alternate;
+}
+.hm-up {
+    animation: hm-up 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+    .hm-drift,
+    .hm-up,
+    .hm-slides > * {
+        animation: none !important;
+    }
+    .hm-slides > :first-child {
+        opacity: 1;
+    }
+}
+
+/* 9. Print (DESIGN_SYSTEM §6.10). Light tokens forced, app chrome hidden. */
+.print-only {
+    display: none;
+}
+
+@media print {
+    :root,
+    .dark {
+        color-scheme: light;
+        --hm-ink: #000000;
+        --hm-text: #1d2329;
+        --hm-muted: #4a4f55;
+        --hm-line: #cccccc;
+        --hm-row: #dddddd;
+        --hm-bg: #ffffff;
+        --hm-card: #ffffff;
+    }
+
+    html,
+    body {
+        background: #ffffff !important;
+    }
+
+    .no-print,
+    [data-print='hide'],
+    nav,
+    header[data-shell],
+    aside[data-shell],
+    button,
+    [role='status'] {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block;
+    }
+
+    /* A4 report: thin grey rules instead of card borders, status labels as plain words. */
+    @page {
+        size: A4;
+        margin: 12mm;
+    }
+
+    .print-a4 {
+        font-size: 10pt;
+        line-height: 1.4;
+
+        & .dtable {
+            font-size: 9pt;
+        }
+
+        & .dtable thead {
+            display: table-header-group;
+        }
+
+        & .dtable tr {
+            break-inside: avoid;
+        }
+
+        & .rounded-card {
+            border: 0.5pt solid #999999;
+            border-radius: 0;
+        }
+
+        & [data-status-label] {
+            background: none !important;
+            color: inherit !important;
+            padding: 0 !important;
+        }
+    }
+
+    /* 80 mm thermal slip: printed on its own named page. */
+    @page slip {
+        size: 80mm auto;
+        margin: 0;
+    }
+
+    body:has(.slip-print) .print-a4 {
+        display: none;
+    }
+
+    .slip-print {
+        page: slip;
+        width: 72mm;
+        margin: 0 auto;
+        padding: 0 0 3em;
+        border: 0 !important;
+        border-radius: 0 !important;
+        font-family: var(--font-mono);
+        font-size: 11pt;
+        line-height: 1.4;
+        color: #000000 !important;
+        background: #ffffff !important;
+
+        & * {
+            color: #000000 !important;
+        }
+    }
+}

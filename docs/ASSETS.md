@@ -17,15 +17,15 @@ Three families, all under the SIL Open Font License 1.1, self-hosted. The mockup
 
 | Path in repo | What it is | Status | Fallback until supplied | Source and licence |
 |---|---|---|---|---|
-| `resources/fonts/ibm-plex-sans-latin-400-normal.woff2` | IBM Plex Sans Regular — body text, inputs, table cells | Not yet (roadmap phase 1) | `system-ui, sans-serif` | `@fontsource/ibm-plex-sans` · SIL OFL 1.1 |
-| `resources/fonts/ibm-plex-sans-latin-500-normal.woff2` | IBM Plex Sans Medium — buttons, field labels, status labels, table headers, public-page figures and prices | Not yet | as above | as above |
-| `resources/fonts/ibm-plex-sans-latin-600-normal.woff2` | IBM Plex Sans SemiBold — titles, numbers, KPI figures, room numbers, bold text | Not yet | as above | as above |
-| `resources/fonts/ibm-plex-sans-latin-ext-400-normal.woff2`, `-500-`, `-600-` (three files) | The latin-ext subset of the same three weights. It carries the peso sign ₱ (U+20B1). | Not yet | as above | as above |
-| `resources/fonts/ibm-plex-mono-latin-500-normal.woff2` | IBM Plex Mono Medium — slips, printed receipts, stay codes | Not yet | `ui-monospace, monospace` | `@fontsource/ibm-plex-mono` · SIL OFL 1.1 |
-| `resources/fonts/ibm-plex-mono-latin-600-normal.woff2` | IBM Plex Mono SemiBold — slip header and totals, the stay code on the kiosk hold screen | Not yet | as above | as above |
-| `resources/fonts/newsreader-latin-400-normal.woff2` | Newsreader Regular — display headings on 1, 59 and 27 only ("Good morning.", "Sign in", the welcome headline, "Three ways to stay", 01 / 02 / 03, "Welcome to …") | Not yet | `Georgia, serif` | `@fontsource/newsreader` · SIL OFL 1.1 |
-| `resources/fonts/OFL-IBM-Plex.txt` | Licence text for IBM Plex Sans and IBM Plex Mono | Not yet | — | Copied from the package |
-| `resources/fonts/OFL-Newsreader.txt` | Licence text for Newsreader | Not yet | — | Copied from the package |
+| `resources/fonts/ibm-plex-sans-latin-400-normal.woff2` | IBM Plex Sans Regular — body text, inputs, table cells | Have (phase 1) | `system-ui, sans-serif` | `@fontsource/ibm-plex-sans` · SIL OFL 1.1 |
+| `resources/fonts/ibm-plex-sans-latin-500-normal.woff2` | IBM Plex Sans Medium — buttons, field labels, status labels, table headers, public-page figures and prices | Have (phase 1) | as above | as above |
+| `resources/fonts/ibm-plex-sans-latin-600-normal.woff2` | IBM Plex Sans SemiBold — titles, numbers, KPI figures, room numbers, bold text | Have (phase 1) | as above | as above |
+| `resources/fonts/ibm-plex-sans-latin-ext-400-normal.woff2`, `-500-`, `-600-` (three files) | The latin-ext subset of the same three weights. It carries the peso sign ₱ (U+20B1). | Have (phase 1) | as above | as above |
+| `resources/fonts/ibm-plex-mono-latin-500-normal.woff2` | IBM Plex Mono Medium — slips, printed receipts, stay codes | Have (phase 1) | `ui-monospace, monospace` | `@fontsource/ibm-plex-mono` · SIL OFL 1.1 |
+| `resources/fonts/ibm-plex-mono-latin-600-normal.woff2` | IBM Plex Mono SemiBold — slip header and totals, the stay code on the kiosk hold screen | Have (phase 1) | as above | as above |
+| `resources/fonts/newsreader-latin-400-normal.woff2` | Newsreader Regular — display headings on 1, 59 and 27 only ("Good morning.", "Sign in", the welcome headline, "Three ways to stay", 01 / 02 / 03, "Welcome to …") | Have (phase 1) | `Georgia, serif` | `@fontsource/newsreader` · SIL OFL 1.1 |
+| `resources/fonts/OFL-IBM-Plex.txt` | Licence text for IBM Plex Sans and IBM Plex Mono | Have (phase 1) | — | Copied from the package |
+| `resources/fonts/OFL-Newsreader.txt` | Licence text for Newsreader | Have (phase 1) | — | Copied from the package |
 
 Notes:
 
@@ -72,7 +72,7 @@ One icon set: Lucide, through Nuxt UI's Iconify integration. An icon is written 
 
 | Path in repo | What it is | Status | Fallback until supplied | Source and licence |
 |---|---|---|---|---|
-| `node_modules/@iconify-json/lucide` (not committed; a dev dependency) | The Lucide icon data. Only the icons named above end up in the built CSS. | Not yet (installed with Nuxt UI in roadmap phase 0) | — | Lucide · ISC |
+| `node_modules/@iconify-json/lucide` (not committed; a dev dependency) | The Lucide icon data. Only the icons named above end up in the built CSS. | Have (bundled by Nuxt UI `icon.clientBundle.scan`, nuxt-ui.config.ts) | — | Lucide · ISC |
 
 A new icon may be used only from Lucide and is added to this table first. Lucide renames icons from time to time and keeps the old names as aliases; if the installed set has renamed one of the names above, use the current name and keep the row here unchanged in meaning. The up and down marks on a stat card ("▲ 8%") are text characters, not icons.
 
@@ -82,12 +82,12 @@ A new icon may be used only from Lucide and is added to this table first. Lucide
 |---|---|---|---|---|
 | `resources/images/brand/homi-logo.png` | Homi logo for light backgrounds: blue wordmark "HOMI" with a house in the H, transparent background. Master file, about 2048 × 619 px. Used in the sidebar, on the sign-in panel, in the welcome footer, on the Z paper and on A4 report headers. | Have | If the image fails to load: the `i-lucide-bed` icon in white on a `primary` rounded square (radius 8 px), followed by the text "Homi" | The owner's own artwork, copied from the old project · owned by the client |
 | `resources/images/brand/homi-logo-white.png` | White version for photographs and dark backgrounds: the welcome hero (59), the kiosk welcome (27), the sidebar in dark mode. Master file, same size. | Have | The same fallback with the colours inverted (`primary` icon on a white square) and white text | as above |
-| `resources/images/brand/homi-logo-400.png` and `homi-logo-800.png` | Web exports of the blue logo: 400 px wide (about 121 px tall) and its 2x, served with `srcset` | Not yet (exported from the master in roadmap phase 1) | The master file, scaled by the browser | Exported from the master |
-| `resources/images/brand/homi-logo-white-400.png` and `homi-logo-white-800.png` | Web exports of the white logo, same sizes | Not yet (roadmap phase 1) | The white master file | Exported from the master |
+| `resources/images/brand/homi-logo-400.png` and `homi-logo-800.png` | Web exports of the blue logo: 400 px wide (about 121 px tall) and its 2x, served with `srcset` | Have (phase 1, 400 × 121 and 800 × 242 px) | The master file, scaled by the browser | Exported from the master |
+| `resources/images/brand/homi-logo-white-400.png` and `homi-logo-white-800.png` | Web exports of the white logo, same sizes | Have (phase 1, 400 × 121 and 800 × 242 px) | The white master file | Exported from the master |
 | — (config) | Product name in page titles, the browser tab and the fallback text | Have | `config('hotel.name')`, value `Homi` | Own text |
-| `public/favicon.svg` | Browser tab icon and the mark shown in the collapsed sidebar rail: the "H with house" part of the logo, white on a blue rounded square, 32 × 32 viewBox | Not yet (traced from the logo in roadmap phase 1) | A `primary` (`#0077c2`) rounded square with a bold white "H", written by hand as a short SVG | Derived from the owner's logo; the fallback is our own shape |
-| `public/favicon.ico` | 32 × 32 fallback for browsers that ignore SVG favicons | Not yet (exported from `favicon.svg`) | `favicon.svg` | as above |
-| `public/apple-touch-icon.png` | 180 × 180 icon used when a housekeeper adds the page to a phone home screen; blue fills the whole square | Not yet (exported from `favicon.svg`) | The phone uses a page screenshot | as above |
+| `public/favicon.svg` | Browser tab icon and the mark shown in the collapsed sidebar rail: the "H with house" part of the logo, white on a blue rounded square, 32 × 32 viewBox | Have (phase 1: the H-with-house mark redrawn by hand as a 32 × 32 SVG on `#0077c2`) | A `primary` (`#0077c2`) rounded square with a bold white "H", written by hand as a short SVG | Derived from the owner's logo; the fallback is our own shape |
+| `public/favicon.ico` | 32 × 32 fallback for browsers that ignore SVG favicons | Have (phase 1, 32 × 32 PNG inside an ICO) | `favicon.svg` | as above |
+| `public/apple-touch-icon.png` | 180 × 180 icon used when a housekeeper adds the page to a phone home screen; blue fills the whole square | Have (phase 1, 180 × 180) | The phone uses a page screenshot | as above |
 
 Logo display sizes. The logo's ratio is about 3.3 : 1. Never stretch it, recolour it, put the blue logo on a photograph or a blue background, or put any logo on a busy part of a photo.
 
@@ -113,7 +113,7 @@ There is no web app manifest, no service worker and no install prompt: the app i
 | — (database) | TIN and registered name on the Z paper, only for a VAT-registered branch | Have | Left out when `branches.vat_enabled` is off | `branches.tin`, `branches.registered_name` (46) |
 | — (CSS) | 80 mm and A4 print layouts | Have (built with the `Slip` and `ZPaper` components and print styles in `resources/css/app.css`) | — | Own code |
 | `resources/views/reports/zreport.blade.php` | The PDF twin of the Z paper, rendered by dompdf from the same builder array as the screen | Not yet (roadmap phase for reports) | — | Own code |
-| `resources/images/brand/homi-logo-400.png` (read from disk by the Blade view) | Logo in the PDF header | Not yet (same export as section 1.3) | **The product name as bold text** (`config('hotel.name')`) | as section 1.3 |
+| `resources/images/brand/homi-logo-400.png` (read from disk by the Blade view) | Logo in the PDF header | Have (phase 1, 400 × 121 and 800 × 242 px) | **The product name as bold text** (`config('hotel.name')`) | as section 1.3 |
 | — (inside `dompdf/dompdf`) | DejaVu Sans, the PDF text font | Have with the dependency | — | DejaVu Fonts licence (free, Bitstream Vera derivative) |
 
 PDF logo note. dompdf embeds a PNG only when the PHP **GD** extension is loaded (it needs GD to handle the PNG's transparency). The Blade view checks `extension_loaded('gd')` and that the logo file exists; when either is false it prints the product name as text in the logo's place, so a PDF never fails or shows a broken image on a shared host without GD. The view reads the file from the local path (not a URL), and dompdf's remote loading stays off. START_HERE lists GD among the server's PHP extensions. Printed output never contains a photograph.

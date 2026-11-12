@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
+import { nuxtUiOptions } from './nuxt-ui.config.ts';
 
 export default defineConfig({
     plugins: [
@@ -20,11 +21,8 @@ export default defineConfig({
                 },
             },
         }),
-        // Nuxt UI v4 for Vue + Inertia. The Homi theme (primary and neutral
-        // colours, component defaults) is set here in Phase 1 (DESIGN_SYSTEM §2.2, §5.1).
-        ui({
-            router: 'inertia',
-        }),
+        // Nuxt UI v4 for Vue + Inertia, themed once with the Homi tokens (nuxt-ui.config.ts).
+        ui(nuxtUiOptions),
     ],
     resolve: {
         alias: {

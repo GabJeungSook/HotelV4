@@ -162,7 +162,7 @@ Utilities follow the token name without the prefix: `text-ok`, `bg-ok-50`, `bord
   --ui-text-toned: var(--hm-text);
   --ui-text-dimmed: var(--hm-disabled-ink);
   --ui-text-highlighted: var(--hm-ink);
-  --ui-radius: var(--hm-radius);            /* 6px */
+  --ui-radius: calc(var(--hm-radius) / 1.5); /* 4px: Nuxt UI v4 makes rounded-md 1.5 × this = 6px */
 }
 
 /* 4. Homi-only utilities for what Nuxt UI has no semantic name for. */
@@ -188,7 +188,7 @@ Utilities follow the token name without the prefix: `text-ok`, `bg-ok-50`, `bord
 | `--ui-text-muted` | `--hm-muted` | `#6b7178` | `text-muted` |
 | `--ui-text-highlighted` | `--hm-ink` | `#1d2329` | `text-highlighted`: titles and numbers |
 | `--ui-success` / `--ui-warning` / `--ui-error` / `--ui-info` | `--hm-ok` / `--hm-warn` / `--hm-bad` / `--hm-info` | `#2f6b47` / `#8a5a12` / `#9b3328` / `#3b5373` | Toast and alert colours, the red confirm button |
-| `--ui-radius` | `--hm-radius` | `6px` | `rounded-md` = 6 px on every control |
+| `--ui-radius` | `--hm-radius` ÷ 1.5 | `4px` | Nuxt UI v4 derives `rounded-sm/md/lg/xl` as 1×/1.5×/2×/3× this, so `rounded-md` = 6 px on every control, `rounded-lg` = 8 px, `rounded-xl` = 12 px |
 
 `vite.config.ts` (the Nuxt UI Vite plugin; full list of overrides in section 5.1):
 
