@@ -8,13 +8,16 @@ use App\Actions\Stays\AddCharges;
 use App\Actions\Stays\CancelStay;
 use App\Actions\Stays\CheckInGuest;
 use App\Actions\Stays\CheckOutGuest;
+use App\Actions\Stays\ConfirmKioskHold;
 use App\Actions\Stays\ExtendStay;
+use App\Actions\Stays\ReleaseKioskHold;
 use App\Actions\Stays\TakePayment;
 use App\Actions\Stays\TransferRoom;
 use App\Actions\Stays\VoidLine;
 use App\Enums\PaymentMethod;
 use App\Enums\RoomStatus;
 use App\Enums\StayKind;
+use App\Enums\StaySource;
 use App\Enums\StayState;
 use App\Exceptions\ActionRefused;
 use App\Http\Middleware\EnsureDeviceKey;
@@ -22,6 +25,7 @@ use App\Http\Requests\AddChargesRequest;
 use App\Http\Requests\CancelStayRequest;
 use App\Http\Requests\CheckInGuestRequest;
 use App\Http\Requests\CheckOutGuestRequest;
+use App\Http\Requests\ConfirmHoldRequest;
 use App\Http\Requests\ExtendStayRequest;
 use App\Http\Requests\TakePaymentRequest;
 use App\Http\Requests\TransferRoomRequest;
@@ -33,6 +37,8 @@ use App\Models\Room;
 use App\Models\Stay;
 use App\Models\TransferReason;
 use App\Models\User;
+use App\Queries\HoldScreenQuery;
+use App\Queries\RoomQuery;
 use App\Queries\StayScreenQuery;
 use App\Support\Money;
 use Illuminate\Http\RedirectResponse;
@@ -50,12 +56,35 @@ final class StayController extends Controller
 {
     private const SLIP_KEY = 'homi.slip';
 
-    public function __construct(private readonly StayScreenQuery $screens) {}
+    public function __construct(
+        private readonly StayScreenQuery $screens,
+        private readonly RoomQuery $rooms,
+    ) {}
 
-    /** Walk-in check-in (6, 52, 53). */
+    /**
+     * Check-in (6, 52, 53): a walk-in on a free room, or from a reservation (57 → 6) with the
+     * guest, stay option and room filled in. An "any room" reservation opens on the first free
+     * room of its type, and the desk may pick another.
+     */
     public function create(Request $request): Response|RedirectResponse
     {
         Gate::authorize('create', Stay::class);
+        $reservation = $request->filled('reservation')
+            ? Stay::query()->whereIn('state', [StayState::Reserved, StayState::NoShow])->findOrFail($request->integer('reservation'))
+            : null;
+
+        if ($reservation !== null && ! $request->filled('room')) {
+            $roomId = $reservation->room_id ?? $this->rooms->free((int) $reservation->branch_id, $reservation->room_type_id)->first()?->id;
+
+            if ($roomId === null) {
+                Inertia::flash('error', ['code' => 'room_not_available', 'message' => "No room of that type is free for {$reservation->guest_name} right now."]);
+
+                return redirect()->route('reservations.index');
+            }
+
+            return redirect()->route('stays.create', ['reservation' => $reservation->id, 'room' => $roomId]);
+        }
+
         $room = Room::query()->findOrFail($request->integer('room'));
 
         // Coming back from a refused save, the form stays on screen under dialog 53 with the
@@ -65,10 +94,10 @@ final class StayController extends Controller
         if (! $conflict && ($room->status !== RoomStatus::Available || $room->activeStay()->exists())) {
             Inertia::flash('error', ['code' => 'room_not_available', 'message' => "Room {$room->number} is not free for a check-in."]);
 
-            return redirect()->route('board');
+            return redirect()->route($reservation === null ? 'board' : 'reservations.index');
         }
 
-        return Inertia::render('Stays/Create', $this->screens->checkIn($room));
+        return Inertia::render('Stays/Create', $this->screens->checkIn($room, $reservation));
     }
 
     public function store(CheckInGuestRequest $request, CheckInGuest $checkIn): RedirectResponse
@@ -77,6 +106,7 @@ final class StayController extends Controller
         $room = Room::query()->findOrFail($request->integer('room_id'));
         $discount = $request->filled('discount_id') ? Discount::query()->where('is_active', true)->findOrFail($request->integer('discount_id')) : null;
         $method = PaymentMethod::from($request->string('method')->toString());
+        $reservation = $request->filled('reservation_id') ? Stay::query()->findOrFail($request->integer('reservation_id')) : null;
 
         $stay = $checkIn->handle(
             $this->user($request),
@@ -92,12 +122,59 @@ final class StayController extends Controller
             $discount,
             $request->filled('guest_mobile') ? $request->string('guest_mobile')->toString() : null,
             $request->filled('plate_number') ? mb_strtoupper($request->string('plate_number')->trim()->toString()) : null,
+            $reservation,
         );
 
         // The slip (8) is shown once, right after the check-in.
         $request->session()->flash(self::SLIP_KEY, $stay->id);
 
         return redirect()->route('stays.show', $stay);
+    }
+
+    /** Confirm a kiosk hold (7): opened from the holds sheet (5) or by scanning the guest's QR. */
+    public function confirm(Stay $stay, HoldScreenQuery $holds): Response|RedirectResponse
+    {
+        Gate::authorize('update', $stay);
+
+        if ($stay->source !== StaySource::Kiosk) {
+            abort(404);
+        }
+
+        if ($stay->state === StayState::CheckedIn) {
+            return redirect()->route('stays.show', $stay);
+        }
+
+        return Inertia::render('Stays/ConfirmHold', $holds->confirm($stay));
+    }
+
+    public function confirmStore(ConfirmHoldRequest $request, Stay $stay, ConfirmKioskHold $confirm): RedirectResponse
+    {
+        Gate::authorize('update', $stay);
+
+        $checkedIn = $confirm->handle(
+            $this->user($request),
+            $stay,
+            PaymentMethod::from($request->string('method')->toString()),
+            $request->string('idempotency_key')->toString(),
+            $request->filled('tendered') ? Money::ofCentavos($request->integer('tendered')) : null,
+            $request->filled('reference_no') ? $request->string('reference_no')->trim()->toString() : null,
+            $request->boolean('keep_change'),
+        );
+
+        $request->session()->flash(self::SLIP_KEY, $checkedIn->id);
+
+        return redirect()->route('stays.show', $checkedIn);
+    }
+
+    /** "Release room" on the holds sheet (5) or on 7, after the confirm dialog. */
+    public function release(Request $request, Stay $stay, ReleaseKioskHold $release): RedirectResponse
+    {
+        Gate::authorize('update', $stay);
+        $released = $release->handle($this->user($request), $stay);
+        $room = $released->room()->withoutGlobalScopes()->value('number');
+        Inertia::flash('toast', ['type' => 'success', 'message' => "Room {$room} released. It is back on sale."]);
+
+        return redirect()->route('board');
     }
 
     /** The slip (8) right after check-in, otherwise the guest folio (9) with its sheets. */

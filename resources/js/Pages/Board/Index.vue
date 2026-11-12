@@ -1,4 +1,4 @@
-<!-- Mockup 4 · 4c (nothing found) · 4b in Skeleton.vue -->
+<!-- Mockup 4 · 4c (nothing found) · 4b in Skeleton.vue · 5 in KioskHolds.vue -->
 <script setup lang="ts">
 import { Deferred, router } from '@inertiajs/vue3';
 import { useLocalStorage, watchDebounced } from '@vueuse/core';
@@ -9,22 +9,30 @@ import RoomTable, { type BoardFloor, type RoomFilter } from '@/Components/RoomTa
 import { usePolling } from '@/Composables/usePolling';
 import { useShared } from '@/Composables/useShared';
 import FrontDeskLayout from '@/Layouts/FrontDeskLayout.vue';
+import KioskHolds, { type KioskHold } from './KioskHolds.vue';
 import Skeleton from './Skeleton.vue';
 
 /**
  * The room board (4): one row per room, grouped by floor, from BoardQuery. The display status is
  * the server's; the page only filters, sorts and counts the rows it was sent. Refreshes every
  * 15 s by a partial reload, rows updated in place. Search and floor are in the query string.
+ * A Held row or the "Kiosk holds" button opens the holds sheet (5); a hold code typed or scanned
+ * into the search opens that hold's confirm screen (7) on the server.
  */
 type Row = BoardRoom & { stayId: number | null };
 
 const props = defineProps<{
     board?: { floors: (BoardFloor & { rooms: Row[] })[]; total: number; floorOptions: { value: string; label: string }[]; now: string };
+    holds: KioskHold[];
     filters: { q: string; floor: string };
     poll: number;
+    holdsPoll: number;
 }>();
 
-const { flash } = useShared();
+const { flash, props: shared } = useShared();
+const holdsOpen = ref(false);
+const liveHolds = computed(() => props.holds.filter((h) => !h.expired).length);
+const kiosk = computed(() => !!shared.value.branch?.modules?.kiosk_enabled || props.holds.length > 0);
 usePolling(['board'], props.poll);
 
 const initialTab = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search).get('tab');
@@ -73,6 +81,8 @@ function open(room: BoardRoom): void {
 
     if (row.status === 'vacant') {
         router.visit(route('stays.create', { room: row.id }));
+    } else if (row.status === 'held') {
+        holdsOpen.value = true;
     } else if (row.stayId && ['occupied', 'due_out', 'overdue'].includes(row.status)) {
         router.visit(route('stays.show', row.stayId));
     }
@@ -105,6 +115,9 @@ function open(room: BoardRoom): void {
                 <USelect v-model="floor" :items="floorItems" class="w-36" aria-label="Floor" @update:model-value="visit" />
                 <USelect v-model="sort" :items="sortItems" class="w-56" aria-label="Sort" />
                 <span class="flex-1" />
+                <UButton v-if="kiosk" color="neutral" variant="outline" icon="i-lucide-monitor" data-test="holds-button" @click="holdsOpen = true">
+                    Kiosk holds<span class="rounded-label bg-primary-50 px-1.5 text-xs text-primary-ink tabular">{{ liveHolds }}</span>
+                </UButton>
                 <UButton icon="i-lucide-plus" label="Walk-in check-in" @click="tab = 'vacant'" />
             </div>
 
@@ -119,5 +132,6 @@ function open(room: BoardRoom): void {
             </div>
             <RoomTable v-else :floors="board?.floors ?? []" :filter="tab" :sort="sort" :now="board?.now" @select="open" />
         </Deferred>
+        <KioskHolds v-model:open="holdsOpen" :holds="holds" :poll="holdsPoll" />
     </FrontDeskLayout>
 </template>

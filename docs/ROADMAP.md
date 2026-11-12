@@ -150,17 +150,17 @@ No screens in this phase. Everything is driven by tests.
 
 ## Phase 7 — Kiosk and reservations
 
-- [ ] Kiosk device sign-in and `KioskLayout`; routes limited to `/kiosk/*`
-- [ ] Welcome (27), room and hours (28) with `RoomRotation`, your name (29), room held (30) with QR and countdown
-- [ ] No rooms (31) and offline (31b)
-- [ ] `HoldRoom`; `ExpireKioskHolds` command every minute
-- [ ] Kiosk holds sheet on the board (5); confirm hold (7) with `ConfirmKioskHold`
-- [ ] Reservations list (57) and new reservation (58): `ReserveRoom`, availability by date overlap, money paid ahead
-- [ ] Check in from a reservation (prefilled screen 6); "Reserved · <time>" in the board row
-- [ ] `ReleaseNoShows` command; cancel reservation and refund no-show with approval
-- [ ] Reason lists: cancel-reservation reasons from `reasons` (kind `cancel_reservation`) with their note and manager flags
-- [ ] Modules respect `branches.kiosk_enabled` and `reservations_enabled` (menus and routes disappear when off)
-- [ ] "Kiosk and reservations" tests in TRD §10, including "kiosk hold expires" and "confirm after expiry refused" (moved from Phase 3)
+- [x] Kiosk device sign-in and `KioskLayout`; routes limited to `/kiosk/*`
+- [x] Welcome (27), room and hours (28) with `RoomRotation`, your name (29), room held (30) with QR and countdown
+- [x] No rooms (31) and offline (31b)
+- [x] `HoldRoom`; `ExpireKioskHolds` command every minute
+- [x] Kiosk holds sheet on the board (5); confirm hold (7) with `ConfirmKioskHold`
+- [x] Reservations list (57) and new reservation (58): `ReserveRoom`, availability by date overlap, money paid ahead
+- [x] Check in from a reservation (prefilled screen 6); "Reserved · <time>" in the board row
+- [x] `ReleaseNoShows` command; cancel reservation and refund no-show with approval
+- [x] Reason lists: cancel-reservation reasons from `reasons` (kind `cancel_reservation`) with their note and manager flags
+- [x] Modules respect `branches.kiosk_enabled` and `reservations_enabled` (menus and routes disappear when off)
+- [x] "Kiosk and reservations" tests in TRD §10, including "kiosk hold expires" and "confirm after expiry refused" (moved from Phase 3)
 
 **Done when:** a guest can hold a room on the kiosk and the front desk can confirm it before it expires; an expired hold frees the room without leaving any record to clean up; a reservation blocks its room for its dates and its money paid ahead comes off the bill at check-in.
 

@@ -16,4 +16,10 @@ final class RoomTaken extends DomainException
     {
         return new self("Room {$number} was just taken.", $roomId);
     }
+
+    /** The kiosk (29): every room of the type was taken a moment ago. */
+    public static function type(string $type): self
+    {
+        return new self("The last {$type} room was just taken.", null);
+    }
 }

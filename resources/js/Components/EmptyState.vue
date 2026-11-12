@@ -25,8 +25,17 @@ defineEmits<{ action: [] }>();
             class="mb-3"
             :class="[size === 'kiosk' ? 'size-24' : 'size-10', tone === 'ok' ? 'text-ok' : tone === 'bad' ? 'text-bad' : 'text-empty-icon']"
         />
-        <p :class="compact ? 'text-sm text-muted' : 'font-semibold text-highlighted'">{{ title }}</p>
-        <p v-if="text && !compact" class="mt-1 text-sm">{{ text }}</p>
-        <UButton v-if="actionLabel" class="mt-4" color="neutral" variant="outline" :label="actionLabel" @click="$emit('action')" />
+        <p :class="compact ? 'text-sm text-muted' : ['font-semibold text-highlighted', size === 'kiosk' ? 'text-[40px] leading-[48px]' : '']">{{ title }}</p>
+        <p v-if="text && !compact" class="mt-1" :class="size === 'kiosk' ? 'mt-3 max-w-[760px] text-2xl leading-[34px]' : 'text-sm'">{{ text }}</p>
+        <UButton
+            v-if="actionLabel"
+            class="mt-4"
+            :class="size === 'kiosk' ? 'mt-8 h-[72px] px-12 text-2xl' : ''"
+            :size="size === 'kiosk' ? 'xl' : 'md'"
+            color="neutral"
+            variant="outline"
+            :label="actionLabel"
+            @click="$emit('action')"
+        />
     </div>
 </template>

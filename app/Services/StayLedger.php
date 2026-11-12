@@ -242,6 +242,33 @@ final class StayLedger
     }
 
     /**
+     * Settle the money paid ahead on a reservation that will not be checked in (TRD §4.9,
+     * CancelReservation and RefundNoShow): hand it back in cash (deposit_refund), or keep it as
+     * income with a forfeited_deposit line paid by a deposit_applied. Returns what was held, or
+     * null when nothing was.
+     */
+    public function settleGuestDeposit(ShiftSession $shift, Stay $stay, User $by, bool $refund, string $note, ?int $approvalId = null): ?Money
+    {
+        $held = $this->stays->depositHeld($stay->id, DepositType::Guest);
+
+        if (! $held->isPositive()) {
+            return null;
+        }
+
+        if ($refund) {
+            $this->refundDeposit($shift, $stay, $by, DepositType::Guest, $note, $approvalId);
+
+            return $held;
+        }
+
+        $line = $this->line($shift, $stay, $by, LineKind::ForfeitedDeposit, 'Paid ahead, kept', $held, approvalId: $approvalId);
+        $applied = $this->payment($shift, $stay, $by, PaymentKind::DepositApplied, PaymentMethod::Deposit, $held, DepositType::Guest, note: $note, approvalId: $approvalId);
+        $this->allocate($applied, [[$line, $held]]);
+
+        return $held;
+    }
+
+    /**
      * Reverse lines (DATABASE_SCHEMA §8.9 step 2): for each, a reversing line with the quantity
      * negated, stamped with the open shift; one cash refund whose negative allocations settle
      * what had been paid on each line; stock back for stock-tracked products, locked by id.

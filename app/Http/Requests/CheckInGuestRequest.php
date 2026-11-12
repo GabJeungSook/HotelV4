@@ -6,7 +6,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/** Walk-in check-in (6). Never a price: the server prices the stay (SYSTEM_DESIGN §4.1). Validation only; the action enforces the business rules. */
+/** Check-in (6), walk-in or from a reservation (reservation_id). Never a price: the server prices the stay (SYSTEM_DESIGN §4.1). Validation only; the action enforces the business rules. */
 final class CheckInGuestRequest extends FormRequest
 {
     public function authorize(): bool
@@ -19,6 +19,7 @@ final class CheckInGuestRequest extends FormRequest
     {
         return [
             'room_id' => ['required', 'integer'],
+            'reservation_id' => ['nullable', 'integer'],
             'guest_name' => ['required', 'string', 'min:2', 'max:80'],
             'guest_mobile' => ['nullable', 'string', 'regex:/^09\d{9}$/'],
             'plate_number' => ['nullable', 'string', 'max:12'],

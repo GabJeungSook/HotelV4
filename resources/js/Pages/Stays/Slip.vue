@@ -18,6 +18,7 @@ const props = defineProps<{
         deposit_name: string;
         lines: { label: string; amount: number }[];
         deposit: number | null;
+        paid_ahead?: number | null;
         total: number;
         method: string;
         tendered: number | null;
@@ -42,6 +43,7 @@ const sections = computed(() => [
         ...props.slip.lines.map((l) => ({ label: l.label, value: m(l.amount) })),
         ...(props.slip.deposit ? [{ label: `${props.slip.deposit_name} dep.`, value: m(props.slip.deposit) }] : []),
         { label: 'TOTAL', value: m(props.slip.total), bold: true },
+        ...(props.slip.paid_ahead ? [{ label: 'Paid ahead', value: m(-props.slip.paid_ahead) }] : []),
         ...(props.slip.tendered !== null ? [{ label: props.slip.method, value: m(props.slip.tendered) }] : []),
         ...(props.slip.reference_no ? [{ label: 'Ref.', value: props.slip.reference_no }] : []),
         ...(props.slip.change > 0 ? [{ label: 'Change', value: m(props.slip.change) }] : []),

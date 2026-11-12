@@ -3,6 +3,10 @@ import { onMounted, ref } from 'vue';
 import CleanTimer from '@/Components/CleanTimer.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
 import EmptyState from '@/Components/EmptyState.vue';
+import KioskFooter from '@/Components/KioskFooter.vue';
+import KioskHoldCard from '@/Components/KioskHoldCard.vue';
+import KioskTypeCard from '@/Components/KioskTypeCard.vue';
+import KioskWelcome from '@/Components/KioskWelcome.vue';
 import MoneyInput from '@/Components/MoneyInput.vue';
 import MoneyRow from '@/Components/MoneyRow.vue';
 import OptionTiles from '@/Components/OptionTiles.vue';
@@ -26,6 +30,8 @@ const confirm = useConfirmDialog();
 
 /** A fixed "now" so the board's times read like the mockup: Wed 11 Nov 2026, 11:44 AM Manila. */
 const now = '2026-11-11T03:44:00Z';
+// A live countdown for the KioskHoldCard sample: ten minutes from when the gallery opened.
+const holdUntil = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
 const stay = ref<string | null>('12');
 const stayOptions = [
@@ -291,6 +297,23 @@ function saveToast(): void {
                 <TaskCard room="221" :waiting-minutes="5" detail="Deluxe · checked out 2:09 PM" />
                 <CleanTimer started-at="2026-11-11T06:15:00Z" :now="Date.parse('2026-11-11T06:21:12Z')" :target-minutes="15" />
             </div>
+        </Block>
+
+        <Block title="Kiosk — KioskWelcome, KioskTypeCard, KioskHoldCard, KioskFooter (27–30)" wide>
+            <div class="h-[560px] overflow-hidden rounded-card border border-default">
+                <KioskWelcome hotel="Hotel Dalisay GenSan" :rules="['A valid ID may be asked at the front desk.', 'No smoking inside the rooms.']" :free="12" />
+            </div>
+            <div class="mt-3 flex flex-col gap-3">
+                <KioskTypeCard name="Deluxe" description="Queen bed · aircon · TV · hot shower" room="Room 210 · 2nd floor" selected />
+                <KioskTypeCard name="Standard" description="Double bed · aircon · TV" room="Room 104 · 1st floor" />
+                <KioskTypeCard name="Suite" description="King bed · sofa · bathtub" full />
+            </div>
+            <KioskHoldCard class="mt-4" code="DGS-26-004127" :amount="60000" :expires-at="holdUntil" :qr-size="200" />
+            <KioskHoldCard class="mt-4" code="DGS-26-004104" :amount="60000" :expires-at="null" :qr-size="120" />
+            <KioskFooter>
+                <template #back><UButton class="h-[72px] justify-center text-2xl" size="xl" block color="neutral" variant="outline" label="Back" /></template>
+                <UButton class="h-[72px] justify-center text-2xl" size="xl" block label="Next" />
+            </KioskFooter>
         </Block>
 
         <Block title="Empty and loading — EmptyState, USkeleton">

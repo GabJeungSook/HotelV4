@@ -1,4 +1,4 @@
-<!-- Mockup 6 · 52 (missing rate) · 53 (room just taken) -->
+<!-- Mockup 6 · 52 (missing rate) · 53 (room just taken) · from a reservation (57 → 6) -->
 <script setup lang="ts">
 import { router, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
@@ -20,6 +20,10 @@ import FrontDeskLayout from '@/Layouts/FrontDeskLayout.vue';
  * this page only picks one. An option without a rate is greyed out with the missing-rate alert
  * (52). A room taken by someone else at the same moment opens dialog 53, which keeps the guest's
  * details and reopens the form on the next free room of the type.
+ *
+ * From a reservation (57 → 6): the guest, the stay option and the room come filled in and the
+ * option is fixed; the money paid ahead comes off the total ("Paid ahead"), as the server applies
+ * it with a deposit_applied. For an "any room" reservation the desk picks a free room of the type.
  */
 interface Choice {
     quantity: number;
@@ -46,20 +50,40 @@ const props = defineProps<{
     discounts: { id: number; name: string }[];
     methods: { value: string; label: string; needs_reference: boolean }[];
     now: string;
+    reservation?: {
+        id: number;
+        code: string;
+        state: string;
+        guest_name: string;
+        guest_mobile: string | null;
+        kind: Option['kind'];
+        quantity: number;
+        option_key: string;
+        option_label: string;
+        arrival_at: string | null;
+        any_room: boolean;
+        booked_amount: number;
+        paid_ahead: number;
+    } | null;
+    rooms?: { value: number; label: string }[];
 }>();
 
 const { flash } = useShared();
 const { key } = useIdempotencyKey();
-const firstEnabled = props.options.find((o) => !o.disabled && o.key === 'hourly-12') ?? props.options.find((o) => !o.disabled);
+const reserved = props.reservation ?? null;
+const firstEnabled = reserved
+    ? props.options.find((o) => o.key === reserved.option_key)
+    : (props.options.find((o) => !o.disabled && o.key === 'hourly-12') ?? props.options.find((o) => !o.disabled));
 
 const optionKey = ref<string | null>(firstEnabled?.key ?? null);
 const form = useForm({
     room_id: props.room.id,
-    guest_name: '',
-    guest_mobile: '',
+    reservation_id: reserved?.id ?? null,
+    guest_name: reserved?.guest_name ?? '',
+    guest_mobile: reserved?.guest_mobile ?? '',
     plate_number: '',
     kind: firstEnabled?.kind ?? 'hourly',
-    quantity: firstEnabled?.choices[0]?.quantity ?? 1,
+    quantity: reserved?.quantity ?? firstEnabled?.choices[0]?.quantity ?? 1,
     discount_id: null as number | null,
     method: props.methods[0]?.value ?? 'cash',
     tendered: 0,
@@ -80,7 +104,7 @@ const choice = computed(() => option.value?.choices.find((c) => c.quantity === f
 const maxQuantity = computed(() => option.value?.choices.at(-1)?.quantity ?? 1);
 
 watch(optionKey, () => {
-    if (option.value) {
+    if (option.value && !reserved) {
         form.kind = option.value.kind;
         form.quantity = option.value.choices[0]?.quantity ?? 1;
     }
@@ -91,10 +115,10 @@ const tiles = computed(() =>
         value: o.key,
         label: o.label,
         sub: o.disabled ? 'no rate' : `${formatMoney(o.price ?? 0, 'tile')}${o.per_unit}`,
-        disabled: o.disabled,
+        disabled: o.disabled || (reserved !== null && o.key !== reserved.option_key),
     })),
 );
-const missing = computed(() => props.options.filter((o) => o.disabled).map((o) => o.missing ?? ''));
+const missing = computed(() => props.options.filter((o) => o.disabled && (!reserved || o.key === reserved.option_key)).map((o) => o.missing ?? ''));
 
 const discountItems = computed(() => [
     { label: 'None', value: null },
@@ -110,7 +134,9 @@ watch(choice, () => {
 });
 
 const roomAmount = computed(() => choice.value?.room_amount ?? 0);
-const total = computed(() => roomAmount.value - discountAmount.value + props.deposit.amount);
+// Money paid ahead pays the room first, never the deposit (CheckInLedger::due).
+const paidAhead = computed(() => Math.min(reserved?.paid_ahead ?? 0, Math.max(0, roomAmount.value - discountAmount.value)));
+const total = computed(() => roomAmount.value - discountAmount.value - paidAhead.value + props.deposit.amount);
 const isCash = computed(() => form.method === 'cash');
 const method = computed(() => props.methods.find((m) => m.value === form.method));
 const change = computed(() => (isCash.value ? form.tendered - total.value : 0));
@@ -128,7 +154,7 @@ const ready = computed(
     () =>
         !!choice.value &&
         form.guest_name.trim().length >= 2 &&
-        (isCash.value ? form.tendered >= total.value : form.reference_no.trim() !== '') &&
+        (isCash.value ? form.tendered >= total.value : total.value <= 0 || form.reference_no.trim() !== '') &&
         (form.guest_mobile === '' || /^09\d{9}$/.test(form.guest_mobile.replace(/\s/g, ''))),
 );
 
@@ -160,6 +186,12 @@ function pickAnother(): void {
     }
 }
 
+function pickRoom(roomId: number): void {
+    if (reserved && roomId !== props.room.id) {
+        router.get(route('stays.create'), { reservation: reserved.id, room: roomId }, { preserveState: true });
+    }
+}
+
 function submit(): void {
     if (!ready.value) {
         return;
@@ -178,14 +210,24 @@ function submit(): void {
 
 <template>
     <FrontDeskLayout current="board" :title="`Check in — Room ${room.number}`">
-        <div class="mb-4 flex items-center gap-2">
+        <div class="mb-4 flex flex-wrap items-center gap-2">
             <StatusLabel :label="`${room.type} · ${room.floor}`" />
+            <StatusLabel v-if="reservation" tone="info" :label="`Reservation ${reservation.code}`" data-test="from-reservation" />
+            <USelect
+                v-if="reservation?.any_room && rooms?.length"
+                :model-value="room.id"
+                :items="rooms"
+                class="w-40"
+                aria-label="Room for this reservation"
+                @update:model-value="(v) => pickRoom(Number(v))"
+            />
         </div>
         <UAlert v-if="error" color="error" variant="subtle" icon="i-lucide-triangle-alert" class="mb-4" :description="error.message" />
         <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="submit">
             <section class="rounded-card border border-default bg-default p-5">
                 <h2 class="mb-3 text-base font-semibold text-highlighted">Stay</h2>
                 <OptionTiles v-model="optionKey" :options="tiles" label="Length of stay" />
+                <p v-if="reservation" class="mt-2 text-xs text-muted">Booked as {{ reservation.option_label }}{{ reservation.booked_amount ? ` at ${formatMoney(reservation.booked_amount)}` : '' }}. The price is today's rate.</p>
                 <UAlert
                     v-for="m in missing"
                     :key="m"
@@ -198,7 +240,7 @@ function submit(): void {
                     data-test="missing-rate"
                 />
                 <UFormField v-if="multi" :label="option?.kind === 'overnight' ? 'Nights' : 'Days'" name="quantity" class="mt-4 max-w-40">
-                    <UInputNumber v-model="form.quantity" :min="1" :max="maxQuantity" class="w-full" />
+                    <UInputNumber v-model="form.quantity" :min="1" :max="maxQuantity" class="w-full" :disabled="!!reservation" />
                 </UFormField>
                 <div class="mt-4 flex flex-col gap-1.5">
                     <MoneyRow label="Check-in" :text="formatDateTime(now, 'auto', now)" />
@@ -227,6 +269,7 @@ function submit(): void {
                 <div class="flex flex-col gap-1.5">
                     <MoneyRow :label="choice ? `Room · ${choice.description}` : 'Room'" :amount="choice ? roomAmount : null" />
                     <MoneyRow v-if="discountAmount > 0" :label="discountName" :amount="-discountAmount" />
+                    <MoneyRow v-if="paidAhead > 0" label="Paid ahead" :amount="-paidAhead" data-test="paid-ahead" />
                     <MoneyRow v-if="deposit.amount > 0" :label="`${deposit.name} deposit`" :amount="deposit.amount" />
                 </div>
                 <TotalRow label="Total" :amount="choice ? total : null" />

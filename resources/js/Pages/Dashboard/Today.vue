@@ -7,6 +7,7 @@ import StatCards from '@/Components/StatCards.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import { formatDateTime, formatDuration, formatStayLength } from '@/Composables/useDateTime';
 import { usePolling } from '@/Composables/usePolling';
+import { useShared } from '@/Composables/useShared';
 import FrontDeskLayout from '@/Layouts/FrontDeskLayout.vue';
 import { toneFill } from '@/types/ui';
 
@@ -53,11 +54,15 @@ const holdLeft = computed(() => {
 
 const list = (rooms: string[], max = 3) => (rooms.length > max ? `${rooms.slice(0, max).join(', ')} +${rooms.length - max}` : rooms.join(', '));
 
+const { props: sharedProps } = useShared();
+// Rows and the Arriving card open the reservations list (57) when the module is on.
+const reservations = computed(() => !!sharedProps.value.branch?.modules?.reservations_enabled);
+
 const cards = computed<StatCardProps[]>(() => {
     const c = props.today.counts;
 
     return [
-        { label: 'Arriving', value: c.arriving, sub: 'reservations' },
+        { label: 'Arriving', value: c.arriving, sub: 'reservations', to: reservations.value ? route('reservations.index') : undefined },
         { label: 'Due out soon', value: c.due_soon, sub: c.due_soon ? list(props.today.due_soon_rooms) : `next ${props.today.due_soon_minutes} min`, to: route('board') },
         { label: 'Overdue', value: c.overdue, sub: c.overdue ? `Room ${list(props.today.overdue_rooms, 2)}` : 'none', tone: c.overdue ? 'bad' : 'default', to: route('board') },
         {
@@ -101,7 +106,10 @@ const stayText = (kind: string, q: number | null) => (q === null ? '' : formatSt
                         <tbody>
                             <tr v-for="a in today.arriving" :key="a.id">
                                 <td class="w-20 tabular">{{ formatDateTime(a.at, 'time') }}</td>
-                                <td>{{ a.guest }}</td>
+                                <td>
+                                    <Link v-if="reservations" :href="route('reservations.show', a.id)" class="hm-focus font-medium text-highlighted hover:underline">{{ a.guest }}</Link>
+                                    <template v-else>{{ a.guest }}</template>
+                                </td>
                                 <td>{{ a.room }} · {{ stayText(a.kind, a.quantity) }}</td>
                             </tr>
                         </tbody>

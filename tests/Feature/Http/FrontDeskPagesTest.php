@@ -224,6 +224,7 @@ it('builds the navigation on the server from the role and the pages that exist',
         ['heading' => 'Front desk', 'items' => [
             ['key' => 'today', 'label' => 'Today', 'route' => '/today', 'icon' => 'i-lucide-clock', 'subtitle' => null],
             ['key' => 'board', 'label' => 'Room board', 'route' => '/board', 'icon' => 'i-lucide-bed', 'subtitle' => null],
+            ['key' => 'reservations', 'label' => 'Reservations', 'route' => '/reservations', 'icon' => 'i-lucide-list', 'subtitle' => null],
             ['key' => 'pos', 'label' => 'POS', 'route' => '/pos', 'icon' => 'i-lucide-shopping-cart', 'subtitle' => null],
             ['key' => 'stock', 'label' => 'Stock', 'route' => '/stock', 'icon' => 'i-lucide-package', 'subtitle' => null],
         ]],
@@ -255,7 +256,6 @@ it('shows placeholder homes for pages of later phases', function (string $userna
 })->with([
     ['ramil.ortega', '/dashboard', 'backoffice'],
     ['ramon.alvarez', '/owner', 'owner'],
-    ['kiosk-gensan-1', '/kiosk', 'kiosk'],
 ]);
 
 it('answers the heartbeat for a signed-in user', function (): void {

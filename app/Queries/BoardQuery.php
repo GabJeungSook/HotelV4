@@ -39,12 +39,18 @@ final class BoardQuery
             ->where('rooms.is_active', true)
             ->get(['rooms.*', 'room_types.name as type_name']);
 
-        $stays = Stay::query()->withoutGlobalScopes()
+        // The open stays, and in the same query the reservations of a room arriving today
+        // ("Reserved · 2:00 PM" on a Vacant row, DESIGN_SYSTEM §2.3).
+        $local = $this->clock->local();
+        $all = Stay::query()->withoutGlobalScopes()
             ->where('branch_id', $branchId)
-            ->whereIn('state', [StayState::CheckedIn, StayState::Held])
-            ->whereNotNull('active_room_id')
-            ->get(['id', 'room_id', 'state', 'guest_name', 'expected_checkout_at', 'hold_expires_at'])
-            ->keyBy('room_id');
+            ->where(fn ($q) => $q->whereNotNull('active_room_id')
+                ->orWhere(fn ($q) => $q->where('state', StayState::Reserved)->whereNotNull('room_id')
+                    ->whereBetween('arrival_at', [$local->startOfDay()->utc(), $local->endOfDay()->utc()])))
+            ->orderBy('arrival_at')
+            ->get(['id', 'room_id', 'state', 'guest_name', 'expected_checkout_at', 'hold_expires_at', 'arrival_at']);
+        $stays = $all->filter(fn (Stay $s): bool => $s->state !== StayState::Reserved)->keyBy('room_id');
+        $reserved = $all->filter(fn (Stay $s): bool => $s->state === StayState::Reserved)->unique('room_id')->keyBy('room_id');
 
         $checkedIn = $stays->filter(fn (Stay $s): bool => $s->state === StayState::CheckedIn)->pluck('id')->all();
         $balances = $this->balances($checkedIn);
@@ -62,6 +68,7 @@ final class BoardQuery
         foreach ($rooms as $room) {
             $stay = $stays->get($room->id);
             $row = $this->row($room, $stay, $tasks->get($room->id), (string) $room->getAttribute('type_name'), $balances, $branch, $now);
+            $row['reservedAt'] = $row['status'] === 'vacant' ? $reserved->get($room->id)?->arrival_at?->toIso8601String() : null;
 
             if ($search !== '' && ! $this->matches($room, $stay, $search)) {
                 continue;

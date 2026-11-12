@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Kiosk holds and reservations (SYSTEM_DESIGN §5.4, APP_FLOW §4.18 step 10 and §4.19).
+Schedule::command('homi:expire-kiosk-holds')->everyMinute()->withoutOverlapping();
+Schedule::command('homi:release-no-shows')->everyFiveMinutes()->withoutOverlapping();

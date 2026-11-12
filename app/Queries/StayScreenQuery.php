@@ -54,9 +54,13 @@ final class StayScreenQuery
      * card can follow a click without asking the server again. An option without a rate is
      * sent disabled with "no rate" (52).
      *
+     * From a reservation (57 → 6) the guest, the stay option and the room come filled in, and
+     * the money paid ahead (the guest deposit held) comes off the total. For an "any room"
+     * reservation the free rooms of its type are sent for the desk to pick from.
+     *
      * @return array<string, mixed>
      */
-    public function checkIn(Room $room): array
+    public function checkIn(Room $room, ?Stay $reservation = null): array
     {
         $branch = Branch::query()->findOrFail($room->branch_id);
         $card = RateCard::forBranch($branch);
@@ -95,6 +99,37 @@ final class StayScreenQuery
             'discounts' => array_values($discounts->map(fn (Discount $d): array => ['id' => $d->id, 'name' => $d->name])->all()),
             'methods' => $this->methods($branch, false),
             'now' => $now->toIso8601String(),
+            'reservation' => $reservation === null ? null : $this->reservationInfo($reservation),
+            'rooms' => $reservation === null || $reservation->room_id !== null ? [] : array_values($this->rooms
+                ->free($branch->id, $reservation->room_type_id)
+                ->map(fn (Room $r): array => ['value' => $r->id, 'label' => "Room {$r->number}"])
+                ->all()),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function reservationInfo(Stay $stay): array
+    {
+        $quantity = (int) ($stay->hours ?? $stay->nights ?? $stay->days ?? 1);
+
+        return [
+            'id' => $stay->id,
+            'code' => $stay->code,
+            'state' => $stay->state->value,
+            'guest_name' => $stay->guest_name,
+            'guest_mobile' => $stay->guest_mobile,
+            'kind' => $stay->stay_kind->value,
+            'quantity' => $quantity,
+            'option_key' => match ($stay->stay_kind) {
+                StayKind::Hourly => "hourly-{$quantity}",
+                StayKind::Overnight => 'overnight',
+                StayKind::LongStay => 'long_stay',
+            },
+            'option_label' => $this->optionLabel($stay),
+            'arrival_at' => $stay->arrival_at?->toIso8601String(),
+            'any_room' => $stay->room_id === null,
+            'booked_amount' => $stay->quoted_amount?->centavos() ?? 0,
+            'paid_ahead' => $this->stays->depositHeld($stay->id, DepositType::Guest)->centavos(),
         ];
     }
 
@@ -410,7 +445,11 @@ final class StayScreenQuery
         $byType = [];
         $rooms = [];
 
-        foreach ($this->rooms->free($stay->branch_id, null, $stay->room_id) as $room) {
+        $now = $this->clock->now();
+        $until = $stay->expected_checkout_at !== null && $stay->expected_checkout_at->greaterThan($now) ? $stay->expected_checkout_at : $now->addMinute();
+
+        // Rooms reserved for the rest of this stay are left out, as TransferRoom refuses them.
+        foreach ($this->rooms->free($stay->branch_id, null, $stay->room_id, $now, $until) as $room) {
             $typeId = $room->room_type_id;
 
             if (! array_key_exists($typeId, $byType)) {
@@ -559,13 +598,18 @@ final class StayScreenQuery
         $payments = Payment::query()->where('stay_id', $stay->id)->where('shift_session_id', $stay->checkin_shift_id)->whereIn('kind', [PaymentKind::Payment, PaymentKind::DepositIn])->orderBy('id')->get();
         $room = $payments->first(fn (Payment $p): bool => $p->kind === PaymentKind::Payment);
         $key = $payments->first(fn (Payment $p): bool => $p->kind === PaymentKind::DepositIn && $p->deposit_type === DepositType::Key);
-        $kept = $payments->first(fn (Payment $p): bool => $p->kind === PaymentKind::DepositIn && $p->deposit_type === DepositType::Guest);
+        // Only the change kept at check-in; money paid ahead on a reservation is a guest deposit_in too.
+        $kept = $payments->first(fn (Payment $p): bool => $p->kind === PaymentKind::DepositIn && $p->deposit_type === DepositType::Guest && $p->note === 'change kept as deposit');
         $total = Money::sum($lines->map(fn (FolioLine $l): Money => $l->amount ?? Money::zero())->all())->plus($key->amount ?? Money::zero());
         $by = User::query()->find($stay->checked_in_by);
+        // Money paid ahead on a reservation, applied to the room at check-in (APP_FLOW §4.19).
+        $paidAhead = (int) Payment::query()->where('stay_id', $stay->id)->where('shift_session_id', $stay->checkin_shift_id)
+            ->where('kind', PaymentKind::DepositApplied)->where('note', 'paid ahead, applied at check-in')->sum('amount');
 
         return [
             'header' => $branch->slip_header,
             'deposit_name' => $branch->deposit_name,
+            'paid_ahead' => $paidAhead > 0 ? $paidAhead : null,
             'lines' => array_values($lines->map(fn (FolioLine $l): array => ['label' => $l->kind === LineKind::Room ? 'Room '.$this->optionLabel($stay) : $l->description, 'amount' => $l->amount?->centavos() ?? 0])->all()),
             'deposit' => $key?->amount?->centavos(),
             'total' => $total->centavos(),

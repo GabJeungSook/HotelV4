@@ -588,7 +588,7 @@ Screens 57, 58, 6 · Action `ReserveRoom` · [DATABASE_SCHEMA](DATABASE_SCHEMA.m
 2. Money paid ahead stays as guest deposit on the stay.
 3. A supervisor may refund it (action `RefundNoShow`\*, sheet 14): writes `approvals` (`action = refund_no_show`) and a `deposit_refund` payment on the open shift.
 
-**Cancel a reservation** (action `CancelReservation`\*, sheet 14): a reason from the list (`reasons`, kind `cancel_reservation`) and a PIN; writes `approvals` (`action = cancel_reservation`), `stays.state = cancelled`, `closed_reason`, and a `deposit_refund` for any money paid ahead.
+**Cancel a reservation** (action `CancelReservation`\*, sheet 14): a reason from the list (`reasons`, kind `cancel_reservation`) and a PIN; writes `approvals` (`action = cancel_reservation`), `stays.state = cancelled`, `closed_reason`, and settles any money paid ahead: handed back as a `deposit_refund`, or kept as a `forfeited_deposit` line paid by a `deposit_applied` (the desk chooses; the no-show settlement offers the same choice and uses the same reason list). The check-in from a reservation is priced at today's rates; the booked price is shown for reference (Gab, 12 Nov; TRD §4.9).
 
 ### 4.20 Owner creates a branch and opens it
 

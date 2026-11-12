@@ -29,6 +29,12 @@ final class StayPolicy
         return $this->view($user, $stay);
     }
 
+    /** The lobby kiosk of a branch makes holds (27–30). */
+    public function hold(User $user): bool
+    {
+        return $user->is_active && $user->role === Role::Kiosk && $user->branch_id !== null;
+    }
+
     private function frontDesk(User $user): bool
     {
         return $user->is_active && in_array($user->role, [Role::Frontdesk, Role::Supervisor], true) && $user->branch_id !== null;

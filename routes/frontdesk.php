@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\PosController;
+use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\StayController;
 use App\Http\Controllers\StockController;
@@ -36,6 +37,10 @@ Route::middleware(['auth', 'pin.set', 'role:frontdesk,supervisor'])->group(funct
         Route::get('/stays/create', [StayController::class, 'create'])->name('stays.create');
         Route::post('/stays', [StayController::class, 'store'])->name('stays.store');
         Route::get('/stays/{stay}', [StayController::class, 'show'])->name('stays.show');
+        // Kiosk holds (5, 7), APP_FLOW §4.6 and §8.1.
+        Route::get('/stays/{stay}/confirm', [StayController::class, 'confirm'])->name('stays.confirm');
+        Route::post('/stays/{stay}/confirm', [StayController::class, 'confirmStore'])->name('stays.confirm.store');
+        Route::post('/stays/{stay}/release', [StayController::class, 'release'])->name('stays.release');
         Route::post('/stays/{stay}/charges', [StayController::class, 'charge'])->name('stays.charge');
         Route::post('/stays/{stay}/payments', [StayController::class, 'pay'])->name('stays.pay');
         Route::post('/stays/{stay}/lines/{line}/void', [StayController::class, 'void'])->name('stays.void');
@@ -46,6 +51,16 @@ Route::middleware(['auth', 'pin.set', 'role:frontdesk,supervisor'])->group(funct
         Route::post('/stays/{stay}/transfer', [StayController::class, 'transferStore'])->name('stays.transfer.store');
         Route::get('/stays/{stay}/checkout', [StayController::class, 'checkout'])->name('stays.checkout');
         Route::post('/stays/{stay}/checkout', [StayController::class, 'checkoutStore'])->name('stays.checkout.store');
+
+        // Reservations (57, 58 and the detail sheet), APP_FLOW §4.19 and §8.1.
+        Route::middleware('module:reservations_enabled')->group(function (): void {
+            Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
+            Route::get('/reservations/create', [ReservationController::class, 'create'])->name('reservations.create');
+            Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+            Route::get('/reservations/{stay}', [ReservationController::class, 'show'])->whereNumber('stay')->name('reservations.show');
+            Route::post('/reservations/{stay}/cancel', [ReservationController::class, 'cancel'])->whereNumber('stay')->name('reservations.cancel');
+            Route::post('/reservations/{stay}/refund', [ReservationController::class, 'refund'])->whereNumber('stay')->name('reservations.refund');
+        });
 
         // POS (19) and stock (20), APP_FLOW §4.13–4.14: only where the branch sells products.
         Route::middleware('module:pos_enabled')->group(function (): void {

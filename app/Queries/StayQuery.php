@@ -196,4 +196,73 @@ final class StayQuery
 
         return $rows;
     }
+
+    /**
+     * Kiosk holds of the branch (5, DATABASE_SCHEMA §7): the live ones by hold_expires_at, then
+     * the ones that expired in the last hour, newest first, as "Expired 9:41 AM".
+     *
+     * @return list<Stay>
+     */
+    public function kioskHolds(int $branchId, CarbonImmutable $now): array
+    {
+        $live = Stay::query()->withoutGlobalScopes()
+            ->with(['room' => fn ($q) => $q->withoutGlobalScopes(), 'roomType' => fn ($q) => $q->withoutGlobalScopes()])
+            ->where('branch_id', $branchId)
+            ->where('state', StayState::Held)
+            ->orderBy('hold_expires_at')
+            ->get();
+
+        $expired = Stay::query()->withoutGlobalScopes()
+            ->with(['room' => fn ($q) => $q->withoutGlobalScopes(), 'roomType' => fn ($q) => $q->withoutGlobalScopes()])
+            ->where('branch_id', $branchId)
+            ->where('state', StayState::Expired)
+            ->where('hold_expires_at', '>', $now->subHour())
+            ->orderByDesc('hold_expires_at')
+            ->get();
+
+        return [...$live->all(), ...$expired->all()];
+    }
+
+    /**
+     * Reservations of the branch by arrival (57, DATABASE_SCHEMA §7), with the room and type.
+     *
+     * @param  list<StayState>  $states
+     * @return list<Stay>
+     */
+    public function reservations(int $branchId, CarbonImmutable $from, CarbonImmutable $to, array $states, bool $newestFirst = false): array
+    {
+        return Stay::query()->withoutGlobalScopes()
+            ->with(['room' => fn ($q) => $q->withoutGlobalScopes(), 'roomType' => fn ($q) => $q->withoutGlobalScopes()])
+            ->where('branch_id', $branchId)
+            ->where('source', 'reservation')
+            ->whereIn('state', $states)
+            ->where('arrival_at', '>=', $from)
+            ->where('arrival_at', '<', $to)
+            ->orderBy('arrival_at', $newestFirst ? 'desc' : 'asc')
+            ->get()
+            ->all();
+    }
+
+    /**
+     * Money paid ahead per stay: every guest deposit_in on it (what was paid, not what is left).
+     *
+     * @param  list<int>  $stayIds
+     * @return array<int, int>
+     */
+    public function paidAhead(array $stayIds): array
+    {
+        if ($stayIds === []) {
+            return [];
+        }
+
+        return DB::table('payments')
+            ->whereIn('stay_id', $stayIds)
+            ->where('kind', PaymentKind::DepositIn->value)
+            ->where('deposit_type', DepositType::Guest->value)
+            ->groupBy('stay_id')
+            ->selectRaw('stay_id, SUM(amount) AS paid')
+            ->pluck('paid', 'stay_id')
+            ->map(static fn ($v): int => (int) $v)
+            ->all();
+    }
 }
