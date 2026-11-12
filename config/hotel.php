@@ -26,6 +26,12 @@ return [
         'code' => 'PHP',
     ],
 
+    // The bills of the blind count at close (screen 23), in centavos, largest first. Coins
+    // are typed as one total (cash_counts.denominations "coins").
+    'cash_count' => [
+        'bills' => [100000, 50000, 20000, 10000, 5000, 2000],
+    ],
+
     'pin' => [
         // Digits in a staff PIN.
         'length' => 4,

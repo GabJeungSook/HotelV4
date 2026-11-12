@@ -28,7 +28,7 @@ pest()->extend(TestCase::class)
             return;
         }
 
-        expect(Invariants::check())->toBe([], 'TRD §8 invariants 1–5 after the test');
+        expect(Invariants::check())->toBe([], 'TRD §8 invariants 1–6 and 8 after the test');
     })
     ->in('Feature');
 

@@ -5,6 +5,7 @@ import EmptyState from '@/Components/EmptyState.vue';
 import MoneyInput from '@/Components/MoneyInput.vue';
 import MoneyRow from '@/Components/MoneyRow.vue';
 import OptionTiles from '@/Components/OptionTiles.vue';
+import OverdueBar from '@/Components/OverdueBar.vue';
 import PinPad from '@/Components/PinPad.vue';
 import RoomTable, { type BoardFloor } from '@/Components/RoomTable.vue';
 import Slip from '@/Components/Slip.vue';
@@ -213,6 +214,14 @@ function saveToast(): void {
                 <UAlert color="warning" icon="i-lucide-triangle-alert" title="Warning, can continue" />
                 <UAlert color="error" icon="i-lucide-triangle-alert" title="Error, cannot continue" role="alert" />
                 <UAlert color="info" icon="i-lucide-clock" title="Note: check-out is at 12:00 NN" />
+            </div>
+        </Block>
+
+        <Block title="Shift running late — OverdueBar (54)" wide>
+            <div class="flex flex-col gap-2 overflow-hidden rounded-card border border-default">
+                <OverdueBar period-name="AM" ended-at="2026-11-11T12:00:00Z" :minutes-past="40" />
+                <OverdueBar period-name="AM" ended-at="2026-11-11T12:00:00Z" :minutes-past="245" blocked />
+                <OverdueBar period-name="AM" ended-at="2026-11-11T12:00:00Z" :minutes-past="40" :closable="false" />
             </div>
         </Block>
 

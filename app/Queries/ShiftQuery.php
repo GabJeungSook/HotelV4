@@ -67,7 +67,7 @@ final class ShiftQuery
      * The shared `shift` prop (SYSTEM_DESIGN §4.3): who is on it and how late it is. Never
      * expected cash, collected amounts or anything they can be derived from.
      *
-     * @return array{id: int, period_name: string, business_date: string, status: string, opened_at: string|null, defined_end: string, minutes_past_end: int, overdue: bool, stale: bool, members: list<array{id: int, name: string}>}|null
+     * @return array{id: int, period_name: string, business_date: string, status: string, opened_at: string|null, defined_end: string, minutes_past_end: int, overdue: bool, stale: bool, closing_by: string|null, members: list<array{id: int, name: string}>}|null
      */
     public function current(int $branchId): ?array
     {
@@ -92,6 +92,7 @@ final class ShiftQuery
             'minutes_past_end' => $past,
             'overdue' => $past >= $branch->shift_overdue_warn_minutes,
             'stale' => $past >= $branch->shift_stale_block_minutes,
+            'closing_by' => $shift->status === ShiftStatus::Closing ? $this->currentShift->closerName($shift->id) : null,
             'members' => $this->members($shift->id),
         ];
     }

@@ -49,6 +49,13 @@ function press(key: string): void {
 }
 
 function onKeydown(event: KeyboardEvent): void {
+    // Digits typed into a field on the same page (the drawer count on 25) belong to that field.
+    const target = event.target as HTMLElement | null;
+
+    if (target && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) {
+        return;
+    }
+
     if (/^\d$/.test(event.key)) {
         press(event.key);
     } else if (event.key === 'Backspace') {

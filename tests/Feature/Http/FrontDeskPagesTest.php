@@ -225,6 +225,9 @@ it('builds the navigation on the server from the role and the pages that exist',
             ['key' => 'today', 'label' => 'Today', 'route' => '/today', 'icon' => 'i-lucide-clock', 'subtitle' => null],
             ['key' => 'board', 'label' => 'Room board', 'route' => '/board', 'icon' => 'i-lucide-bed', 'subtitle' => null],
         ]],
+        ['heading' => 'Shift', 'items' => [
+            ['key' => 'shift', 'label' => 'Shift cash', 'route' => '/shift', 'icon' => 'i-lucide-banknote', 'subtitle' => null],
+        ]],
     ]);
 
     $adminNav = $this->actingAs(Hotel::user('ramil.ortega'))->get('/dashboard')->viewData('page')['props']['nav'];

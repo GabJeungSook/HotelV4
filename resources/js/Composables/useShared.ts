@@ -13,6 +13,7 @@ export interface SharedShift {
     minutes_past_end: number;
     overdue: boolean;
     stale: boolean;
+    closing_by: string | null;
     members: { id: number; name: string }[];
 }
 

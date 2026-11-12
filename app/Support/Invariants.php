@@ -9,10 +9,14 @@ use App\Enums\PaymentKind;
 use App\Enums\RoomStatus;
 use App\Enums\ShiftStatus;
 use App\Enums\StayState;
+use App\Models\ShiftForwardedStay;
+use App\Models\ShiftSession;
+use App\Services\CashMath;
+use App\Services\ReportService;
 use Illuminate\Support\Facades\DB;
 
 /**
- * The data invariants of TRD §8, items 1–5. Each check returns one sentence per broken row;
+ * The data invariants of TRD §8, items 1–6 and 8 (7, the business day, comes with the day close). Each check returns one sentence per broken row;
  * an empty list means the data is consistent. Shared by the CheckInvariants command (Phase 8)
  * and by the hook that runs after every Feature test. It never fixes anything.
  */
@@ -27,6 +31,8 @@ final class Invariants
             ...self::checkedInStaysHaveARoomLine(),
             ...self::checkedOutStaysAreSettled(),
             ...self::stockMatchesLastMovement(),
+            ...self::closedShiftTotalsHold(),
+            ...self::forwardedChainHolds(),
         ];
     }
 
@@ -150,5 +156,107 @@ final class Invariants
         }
 
         return $problems;
+    }
+
+    /**
+     * 6. For every closed shift: the totals recomputed from the ledger equal the frozen
+     * `totals`, and the three roll-forwards balance. A closed row with no totals (null or an
+     * empty array: a factory placeholder in a test) has nothing to compare and is skipped.
+     *
+     * @return list<string>
+     */
+    public static function closedShiftTotalsHold(): array
+    {
+        $reports = app(ReportService::class);
+        $cash = app(CashMath::class);
+        $problems = [];
+
+        $shifts = ShiftSession::query()->withoutGlobalScopes()
+            ->where('status', ShiftStatus::Closed->value)
+            ->whereNotNull('totals')
+            ->orderBy('id')
+            ->get();
+
+        foreach ($shifts as $shift) {
+            $label = "{$shift->period_name} {$shift->business_date->toDateString()} (shift {$shift->id})";
+            $stored = $shift->totals ?? [];
+
+            if ($stored === []) {
+                continue;
+            }
+            $again = $reports->computeShiftTotals($shift, $reports->forwardedIn($shift), ShiftForwardedStay::query()->where('shift_session_id', $shift->id)->orderBy('id')->get());
+
+            if (self::canonical($again) !== self::canonical($stored)) {
+                $problems[] = "6. {$label}: the totals recomputed from the ledger differ from the frozen totals.";
+            }
+
+            foreach ($cash->rollForwardsBalance($stored) as $name => $balances) {
+                if (! $balances) {
+                    $problems[] = "6. {$label}: the {$name} roll-forward does not balance.";
+                }
+            }
+        }
+
+        return $problems;
+    }
+
+    /**
+     * 8. Shift N's forwarded-out rows are shift N+1's forwarded-in: the same stays and amounts,
+     * as frozen in both shifts' totals.
+     *
+     * @return list<string>
+     */
+    public static function forwardedChainHolds(): array
+    {
+        $problems = [];
+        $handovers = DB::table('shift_handovers')->whereNotNull('to_shift_id')->get(['from_shift_id', 'to_shift_id']);
+
+        foreach ($handovers as $handover) {
+            $from = ShiftSession::query()->withoutGlobalScopes()->find((int) $handover->from_shift_id);
+            $to = ShiftSession::query()->withoutGlobalScopes()->find((int) $handover->to_shift_id);
+            $rows = ShiftForwardedStay::query()->where('shift_session_id', (int) $handover->from_shift_id)->get();
+            $count = $rows->count();
+            $unpaid = (int) $rows->sum(fn (ShiftForwardedStay $r): int => $r->unpaid_amount?->centavos() ?? 0);
+            $key = (int) $rows->sum(fn (ShiftForwardedStay $r): int => $r->key_deposit_held?->centavos() ?? 0);
+
+            if ($from !== null && ($from->totals ?? []) !== [] && (self::figure($from->totals ?? [], 'guests', 'forwarded_out') !== $count || self::figure($from->totals ?? [], 'unpaid', 'forwarded_out') !== $unpaid)) {
+                $problems[] = "8. Shift {$from->id}'s forwarded-out figures differ from its forwarded rows.";
+            }
+
+            if ($to !== null && ($to->totals ?? []) !== [] && (self::figure($to->totals ?? [], 'guests', 'forwarded_in') !== $count
+                || self::figure($to->totals ?? [], 'unpaid', 'forwarded_in') !== $unpaid
+                || self::figure($to->totals ?? [], 'deposits', 'held_open') !== $key)) {
+                $problems[] = "8. Shift {$to->id}'s forwarded-in figures differ from shift {$handover->from_shift_id}'s forwarded-out rows.";
+            }
+        }
+
+        return $problems;
+    }
+
+    /** @param  array<array-key, mixed>  $totals */
+    private static function figure(array $totals, string $section, string $key): ?int
+    {
+        $part = $totals[$section] ?? null;
+        $value = is_array($part) ? ($part[$key] ?? null) : null;
+
+        return is_int($value) ? $value : null;
+    }
+
+    /** JSON with its keys sorted, as MySQL stores it, so two totals arrays compare exactly. */
+    private static function canonical(mixed $value): string
+    {
+        $sort = static function (mixed $v) use (&$sort): mixed {
+            if (! is_array($v)) {
+                return $v;
+            }
+
+            if (! array_is_list($v)) {
+                ksort($v);
+            }
+
+            return array_map($sort, $v);
+        };
+
+        return (string) json_encode($sort($value));
     }
 }

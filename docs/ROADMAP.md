@@ -116,21 +116,21 @@ No screens in this phase. Everything is driven by tests.
 
 ## Phase 5 — Shift cash, close and handover
 
-- [ ] Shift cash screen (21): expense, remittance, shortage payment; void with reason and approval
-- [ ] `RecordCashMovement`, `VoidCashMovement`; idempotency key on the form (a double tap saves one row); cash-out cap (an expense or remittance above the cash expected in the drawer is refused)
-- [ ] Reason lists on the shift forms: `reasons` and `expense_categories` with `needs_note` and `needs_manager` enforced by the form
-- [ ] Close step 1 check (22) with `StayQuery::inHouse` and the pending list; papers check list as counts only, no peso amounts; shift goes to `closing`
-- [ ] Second member refused while closing: their next write gets `ShiftClosing`, their form stays on screen, and they see who is closing
-- [ ] Close step 2 blind count by denomination (23): no response to the outgoing team carries `expected_cash` or a figure it can be derived from before `cash_counts` is saved; the server adds up the pieces and ignores any total sent
-- [ ] Count draft: pieces saved to `cash_count_drafts` after each change (debounced 1 s), restored on reload, deleted at confirm
-- [ ] Close step 3 result (24): expected cash line by line, variance, required explanation; the person who counted cannot approve their own variance (`approve_variance`)
-- [ ] Close step 4 handover (25): the receiver cannot be the person who counted; `CloseShift` freezes `totals` and writes `shift_forwarded_stays`; `HandOverShift` opens the next shift in the same transaction; "amount is different" path; close without handover with approval
-- [ ] Z number and grand total at close: `next_z_number` taken with the branch row locked, `z_no`, `grand_total_before`, `grand_total_after` written in the closing transaction; the same for a force-closed shift
-- [ ] Open shift (2) picks up the opening cash from the last handover
-- [ ] Shift report slip (26) with its Z number and print; every print writes `print_logs`, a second print is a reprint
-- [ ] Shift running late bar (54) from `shift_overdue_warn_minutes`; a shift `shift_stale_block_minutes` past its end refuses new payments and charges until it is closed
-- [ ] `ReportService::computeShiftTotals` with the version 1.1 keys of `totals` (DATABASE_SCHEMA §4.7) and the three roll-forwards
-- [ ] Every "Shifts" and "Shift safeguards" test in TRD §10; invariants 6 and 8
+- [x] Shift cash screen (21): expense, remittance, shortage payment; void with reason and approval
+- [x] `RecordCashMovement`, `VoidCashMovement`; idempotency key on the form (a double tap saves one row); cash-out cap (an expense or remittance above the cash expected in the drawer is refused)
+- [x] Reason lists on the shift forms: `reasons` and `expense_categories` with `needs_note` and `needs_manager` enforced by the form
+- [x] Close step 1 check (22) with `StayQuery::inHouse` and the pending list; papers check list as counts only, no peso amounts; shift goes to `closing`
+- [x] Second member refused while closing: their next write gets `ShiftClosing`, their form stays on screen, and they see who is closing
+- [x] Close step 2 blind count by denomination (23): no response to the outgoing team carries `expected_cash` or a figure it can be derived from before `cash_counts` is saved; the server adds up the pieces and ignores any total sent
+- [x] Count draft: pieces saved to `cash_count_drafts` after each change (debounced 1 s), restored on reload, deleted at confirm
+- [x] Close step 3 result (24): expected cash line by line, variance, required explanation; the person who counted cannot approve their own variance (`approve_variance`)
+- [x] Close step 4 handover (25): the receiver cannot be the person who counted; `CloseShift` freezes `totals` and writes `shift_forwarded_stays`; `HandOverShift` opens the next shift in the same transaction; "amount is different" path; close without handover with approval
+- [x] Z number and grand total at close: `next_z_number` taken with the branch row locked, `z_no`, `grand_total_before`, `grand_total_after` written in the closing transaction; the same for a force-closed shift
+- [x] Open shift (2) picks up the opening cash from the last handover
+- [x] Shift report slip (26) with its Z number and print; every print writes `print_logs`, a second print is a reprint
+- [x] Shift running late bar (54) from `shift_overdue_warn_minutes`; a shift `shift_stale_block_minutes` past its end refuses new payments and charges until it is closed
+- [x] `ReportService::computeShiftTotals` with the version 1.1 keys of `totals` (DATABASE_SCHEMA §4.7) and the three roll-forwards
+- [x] Every "Shifts" and "Shift safeguards" test in TRD §10; invariants 6 and 8
 
 **Done when:** two consecutive shifts can be run end to end in the browser and get consecutive Z numbers with a chained grand total; the second shift's forwarded-in list equals the first shift's forwarded-out list; a charge made in shift A and paid in shift B shows as a sale in A and cash in B; a reload in the middle of the count restores the pieces; the counter is refused as receiver; logging out or letting the session expire mid-shift changes nothing about the shift.
 

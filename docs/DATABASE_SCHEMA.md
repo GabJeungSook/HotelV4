@@ -900,7 +900,7 @@ CREATE TABLE audit_logs (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   branch_id BIGINT UNSIGNED NULL,
   actor_id BIGINT UNSIGNED NULL,
-  action VARCHAR(60) NOT NULL,                -- 'rate.updated','user.pin_reset','branch.created','shift.closed'
+  action VARCHAR(60) NOT NULL,                -- 'rate.updated','user.pin_reset','branch.created','shift.closing','shift.closing_stopped','shift.closed'
   subject_type VARCHAR(40) NOT NULL,
   subject_id BIGINT UNSIGNED NOT NULL,
   before_json JSON NULL,
@@ -1263,7 +1263,7 @@ At check-in the reserved stay goes through 8.1 with its id; the guest deposit is
 
 ### 8.10 Close a shift and hand over (`CloseShift`, `HandOverShift`, screens 22–25)
 
-1. Step 1 (22): set `status = 'closing'`. From here the outgoing team cannot record payments, charges or cash movements (`ShiftClosing` error), so the figures cannot change during the close.
+1. Step 1 (22): set `status = 'closing'`. From here the outgoing team cannot record payments, charges or cash movements (`ShiftClosing` error), so the figures cannot change during the close. The same transaction writes `audit_logs` (`shift.closing`, `actor_id` = who pressed Next), which is how `ShiftClosing` and the shared `shift.closing_by` name the person closing; "Not yet" writes `shift.closing_stopped`.
 2. Step 2 (23): insert `cash_counts` and delete the `cash_count_drafts` row, in one transaction. The expected amount has not been sent to the browser yet.
 3. Step 3 (24): compute `expected_cash`; store `expected_cash`, `counted_cash`, `variance_amount = counted − expected` and, when the variance is not 0, the required `variance_note`. The shift is still `closing`.
 4. Step 4 (25), with a receiver present, in **one transaction**: verify the incoming user's PIN (the receiver must not be the person who counted); lock the branch row and take `next_z_number`; read the previous closed shift's `grand_total_after`; build `totals` with `ReportService::computeShiftTotals()`; insert one `shift_forwarded_stays` row per `checked_in` stay; set `status = 'closed'`, `closed_at`, `closed_by`, `z_no`, `grand_total_before`, `grand_total_after`; insert the new `shift_sessions` row (`opening_cash = received_cash`) and its `shift_members`; insert `shift_handovers` (`difference_amount = received_cash − counted_cash`). There is never a moment with no open shift and never two.

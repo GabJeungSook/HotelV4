@@ -8,6 +8,7 @@ use App\Enums\ShiftStatus;
 use App\Exceptions\NoOpenShift;
 use App\Exceptions\ShiftClosing;
 use App\Exceptions\ShiftStale;
+use App\Models\AuditLog;
 use App\Models\Branch;
 use App\Models\ShiftSession;
 use App\Support\Clock;
@@ -23,6 +24,9 @@ use App\Support\Clock;
  */
 final class CurrentShift
 {
+    /** audit_logs.action written when a member starts the close (screen 22). */
+    public const CLOSING_STARTED = 'shift.closing';
+
     public function __construct(
         private readonly Clock $clock,
         private readonly ShiftCalendar $calendar,
@@ -47,10 +51,33 @@ final class CurrentShift
         $shift = $this->for($branchId);
 
         if ($shift->status === ShiftStatus::Closing) {
-            throw ShiftClosing::make();
+            throw ShiftClosing::make($this->closerName($shift->id));
         }
 
         return $shift;
+    }
+
+    /**
+     * Who pressed "Next: count cash" (22) on this shift, from the audit_logs row CloseShift
+     * writes when the close starts ("Jessa Mae is closing the shift"). The first name only.
+     */
+    public function closerName(int $shiftId): ?string
+    {
+        $name = AuditLog::query()
+            ->join('users', 'users.id', '=', 'audit_logs.actor_id')
+            ->where('audit_logs.action', self::CLOSING_STARTED)
+            ->where('audit_logs.subject_type', 'shift_session')
+            ->where('audit_logs.subject_id', $shiftId)
+            ->orderByDesc('audit_logs.id')
+            ->value('users.name');
+
+        if (! is_string($name)) {
+            return null;
+        }
+
+        $parts = preg_split('/\s+/', trim($name)) ?: [];
+
+        return count($parts) > 2 ? "{$parts[0]} {$parts[1]}" : ($parts[0] ?? null);
     }
 
     public function forPayment(int $branchId): ShiftSession

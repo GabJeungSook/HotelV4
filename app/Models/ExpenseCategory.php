@@ -9,7 +9,16 @@ use Database\Factories\ExpenseCategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/** List for screen 21 (DATABASE_SCHEMA §4.6). */
+/**
+ * List for screen 21 (DATABASE_SCHEMA §4.6).
+ *
+ * @property int $id
+ * @property int $branch_id
+ * @property string $name
+ * @property bool $needs_note
+ * @property bool $needs_manager
+ * @property bool $is_active
+ */
 class ExpenseCategory extends Model
 {
     use BelongsToBranch;

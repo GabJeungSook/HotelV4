@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace Tests\Support;
 
+use App\Actions\Shifts\CloseShift;
+use App\Actions\Shifts\HandOverShift;
 use App\Actions\Shifts\OpenShift;
+use App\Actions\Shifts\RecordCashMovement;
 use App\Actions\Stays\CheckInGuest;
+use App\Enums\CashMovementKind;
 use App\Enums\PaymentMethod;
 use App\Enums\ReasonKind;
 use App\Enums\StayKind;
 use App\Models\Branch;
+use App\Models\CashMovement;
 use App\Models\Discount;
+use App\Models\ExpenseCategory;
 use App\Models\Product;
 use App\Models\Reason;
 use App\Models\Room;
@@ -18,6 +24,7 @@ use App\Models\ShiftSession;
 use App\Models\Stay;
 use App\Models\TransferReason;
 use App\Models\User;
+use App\Services\CurrentShift;
 use App\Services\Pricing\DiscountTerms;
 use App\Services\Pricing\RateCard;
 use App\Services\PricingService;
@@ -117,6 +124,59 @@ final class Hotel
         return $action->handle(
             $by ?? self::frontdesk(), $roomRow, $guest, $kind, $quantity, PaymentMethod::Cash,
             $key ?? (string) Str::uuid(), $tenderedMoney, keepChangeAsDeposit: $keepChange, discount: $discount,
+        );
+    }
+
+    /** An expense (default), remittance or shortage payment through RecordCashMovement. */
+    public static function movement(
+        CashMovementKind $kind,
+        int $amount,
+        ?User $by = null,
+        string $note = 'Test entry',
+        string $category = 'Drinking water',
+        ?int $forShiftId = null,
+        ?string $key = null,
+    ): CashMovement {
+        return app(RecordCashMovement::class)->handle(
+            $by ?? self::frontdesk(), self::branch()->id, $kind, Money::ofCentavos($amount), $note, $key ?? (string) Str::uuid(),
+            $kind === CashMovementKind::Expense ? ExpenseCategory::query()->where('name', $category)->firstOrFail() : null,
+            $forShiftId,
+        );
+    }
+
+    /** The cash expected in the open shift's drawer (for arranging counts; never shown before the count). */
+    public static function expectedCash(): Money
+    {
+        $shift = app(CurrentShift::class)->find(self::branch()->id) ?? throw new \RuntimeException('No open shift');
+
+        return app(CloseShift::class)->expected($shift);
+    }
+
+    /**
+     * Steps 1–3 of the close: start, count the expected cash plus $offset as coins, and save the
+     * result (a variance gets "Wrong change given" with a note).
+     */
+    public static function closeToStep4(?User $by = null, int $offset = 0): ShiftSession
+    {
+        $by ??= self::frontdesk();
+        $close = app(CloseShift::class);
+        $branchId = self::branch()->id;
+        $close->begin($by, $branchId);
+        $close->count($by, $branchId, ['coins' => self::expectedCash()->centavos() + $offset]);
+        $variance = $offset === 0 ? null : self::reason(ReasonKind::Variance, 'Wrong change given');
+
+        return $close->result($by, $branchId, $variance, $offset === 0 ? null : 'Gave wrong change');
+    }
+
+    /** The whole close with a handover to $receiver, who counts what was counted unless told. Returns the new shift. */
+    public static function closeAndHandOver(User $receiver, ?User $by = null, int $offset = 0, ?int $received = null, ?string $differenceNote = null): ShiftSession
+    {
+        $by ??= self::frontdesk();
+        $shift = self::closeToStep4($by, $offset);
+
+        return app(HandOverShift::class)->toReceiver(
+            $by, self::branch()->id, $receiver, self::PIN,
+            Money::ofCentavos($received ?? ($shift->counted_cash?->centavos() ?? 0)), self::device(), 'Handover note', $differenceNote,
         );
     }
 }
