@@ -76,17 +76,17 @@ Build one phase at a time, in order. A phase is done only when every box is tick
 
 No screens in this phase. Everything is driven by tests.
 
-- [ ] `PricingService` (TRD §4.2–4.4) with every pricing test in TRD §10
-- [ ] `CashMath` (TRD §4.5) and `RoomRotation` (TRD §4.8) with unit tests
-- [ ] `CurrentShift`, `RoomStatusService` (transitions in APP_FLOW §5.2, with log rows)
-- [ ] `Auth/VerifyPin`, `Auth/ApproveByPin` (approver ≠ requester, role check, lockout)
-- [ ] PIN attempts and locks with the approvals (TRD §4.12): every try writes `pin_attempts` for the computer; ten wrong tries in a row write `pin_locks`; a locked computer refuses every PIN; a supervisor or admin unlocks it with their own password, recorded on `pin_locks.unlocked_at` / `unlocked_by` and in `audit_logs`, not in `approvals`
-- [ ] Shift actions needed by the rest: `OpenShift`, `JoinShift`
-- [ ] Stay actions: `CheckInGuest`, `AddCharges`, `TakePayment`, `ExtendStay`, `TransferRoom`, `VoidLine`, `CancelStay`, `CheckOutGuest` (DATABASE_SCHEMA §8.1–8.9); every money row records `created_by` as well as the shift
-- [ ] `StayQuery` (folio, balance due, deposit held, in-house)
-- [ ] Domain exceptions in TRD §8 with user messages
-- [ ] Every "Stays" test in TRD §10, including the two-simultaneous-check-ins test and idempotency
-- [ ] Invariants helper (TRD §8, items 1–5) run after every Feature test
+- [x] `PricingService` (TRD §4.2–4.4) with every pricing test in TRD §10
+- [x] `CashMath` (TRD §4.5) and `RoomRotation` (TRD §4.8) with unit tests
+- [x] `CurrentShift`, `RoomStatusService` (transitions in APP_FLOW §5.2, with log rows)
+- [x] `Auth/VerifyPin`, `Auth/ApproveByPin` (approver ≠ requester, role check, lockout)
+- [x] PIN attempts and locks with the approvals (TRD §4.12): every try writes `pin_attempts` for the computer; ten wrong tries in a row write `pin_locks`; a locked computer refuses every PIN; a supervisor or admin unlocks it with their own password, recorded on `pin_locks.unlocked_at` / `unlocked_by` and in `audit_logs`, not in `approvals`
+- [x] Shift actions needed by the rest: `OpenShift`, `JoinShift`
+- [x] Stay actions: `CheckInGuest`, `AddCharges`, `TakePayment`, `ExtendStay`, `TransferRoom`, `VoidLine`, `CancelStay`, `CheckOutGuest` (DATABASE_SCHEMA §8.1–8.9); every money row records `created_by` as well as the shift
+- [x] `StayQuery` (folio, balance due, deposit held, in-house)
+- [x] Domain exceptions in TRD §8 with user messages
+- [x] Every "Stays" test in TRD §10, including the two-simultaneous-check-ins test and idempotency (the two kiosk-hold tests moved to Phase 7 with `HoldRoom` and `ConfirmKioskHold`; Gab, 12 Nov)
+- [x] Invariants helper (TRD §8, items 1–5) run after every Feature test
 
 **Done when:** a scripted test can open a shift, check in, add charges, pay partly, extend, transfer, void a line and check out, and afterwards the balance is 0, deposits held are 0, the room is `uncleaned`, and all invariants hold; ten wrong PINs lock the test computer and a supervisor unlocks it.
 
@@ -105,6 +105,7 @@ No screens in this phase. Everything is driven by tests.
 - [ ] Walk-in check-in (6) with stay options, discount, payment method, change or keep as deposit, idempotency key
 - [ ] Checked-in slip (8) with 80 mm print
 - [ ] Guest folio (9); add charge sheet (10); take payment (11)
+- [ ] Migration 000032: `payments.idempotency_key CHAR(36) NULL` with a unique key, and `TakePayment` returns the first payment for a repeated key (APP_FLOW §4.8, TRD §3.11; Gab, 12 Nov). Add the column to DATABASE_SCHEMA §4.12 and §6.
 - [ ] Extend (12); transfer (13); supervisor approval sheet (14); cancel stay and void line (15)
 - [ ] Check-out wizard (16, 17, 18)
 - [ ] Problem states: connection bar (50), missing rate (52), room just taken (53)
@@ -159,7 +160,7 @@ No screens in this phase. Everything is driven by tests.
 - [ ] `ReleaseNoShows` command; cancel reservation and refund no-show with approval
 - [ ] Reason lists: cancel-reservation reasons from `reasons` (kind `cancel_reservation`) with their note and manager flags
 - [ ] Modules respect `branches.kiosk_enabled` and `reservations_enabled` (menus and routes disappear when off)
-- [ ] "Kiosk and reservations" tests in TRD §10
+- [ ] "Kiosk and reservations" tests in TRD §10, including "kiosk hold expires" and "confirm after expiry refused" (moved from Phase 3)
 
 **Done when:** a guest can hold a room on the kiosk and the front desk can confirm it before it expires; an expired hold frees the room without leaving any record to clean up; a reservation blocks its room for its dates and its money paid ahead comes off the bill at check-in.
 

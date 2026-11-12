@@ -13,10 +13,13 @@ use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 /**
  * A hotel branch and all its settings (DATABASE_SCHEMA §4.1). Not branch-scoped:
  * it is the branch. Per-branch values are read from here, never hard-coded.
+ *
+ * @property Collection<int, PaymentMethod> $payment_methods
  */
 class Branch extends Model
 {

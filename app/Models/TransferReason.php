@@ -9,7 +9,14 @@ use Database\Factories\TransferReasonFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/** List for screen 13 (DATABASE_SCHEMA §4.6). */
+/**
+ * List for screen 13 (DATABASE_SCHEMA §4.6).
+ *
+ * @property string $name
+ * @property bool $needs_note
+ * @property bool $needs_manager
+ * @property bool $is_active
+ */
 class TransferReason extends Model
 {
     use BelongsToBranch;
