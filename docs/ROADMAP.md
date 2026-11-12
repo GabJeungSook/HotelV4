@@ -136,15 +136,15 @@ No screens in this phase. Everything is driven by tests.
 
 ## Phase 6 — POS, stock and housekeeping
 
-- [ ] POS (19): walk-in cash sale and charge to room; `CompleteSale`, `VoidSale`
-- [ ] Stock (20): per-shift opening, in, sold, wastage, on hand; `ReceiveStock`, `RecordWastage`
-- [ ] Reason lists: wastage reasons from `reasons` (kind `wastage`) with their note and manager flags
-- [ ] Out-of-stock and low-stock states in POS and Add charge (10)
-- [ ] Housekeeping queue (32) with startable rule and urgent flag; empty state (35)
-- [ ] Cleaning in progress (33): `StartCleaning`, `FinishCleaning`, report a problem
-- [ ] My cleans (34)
-- [ ] `CleaningQuery`; `last_seen_at` heartbeat
-- [ ] POS, stock and "Housekeeping" tests in TRD §10
+- [x] POS (19): walk-in cash sale and charge to room; `CompleteSale`, `VoidSale`
+- [x] Stock (20): per-shift opening, in, sold, wastage, on hand; `ReceiveStock`, `RecordWastage`
+- [x] Reason lists: wastage reasons from `reasons` (kind `wastage`) with their note and manager flags
+- [x] Out-of-stock and low-stock states in POS and Add charge (10)
+- [x] Housekeeping queue (32) with startable rule and urgent flag; empty state (35)
+- [x] Cleaning in progress (33): `StartCleaning`, `FinishCleaning`, report a problem
+- [x] My cleans (34)
+- [x] `CleaningQuery`; `last_seen_at` heartbeat
+- [x] POS, stock and "Housekeeping" tests in TRD §10
 
 **Done when:** a POS sale reduces stock and appears in the shift's cash; a check-out puts the room in a housekeeper's queue on their phone and "Room is ready" shows the room as Vacant on the board within one refresh.
 

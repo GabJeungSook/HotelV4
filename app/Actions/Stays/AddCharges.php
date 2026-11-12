@@ -9,12 +9,12 @@ use App\Enums\PaymentMethod;
 use App\Enums\PosMode;
 use App\Enums\StayState;
 use App\Exceptions\ActionRefused;
-use App\Models\Branch;
 use App\Models\PosOrder;
 use App\Models\Product;
 use App\Models\Stay;
 use App\Models\User;
 use App\Services\CurrentShift;
+use App\Services\PosOrderNumber;
 use App\Services\StayLedger;
 use App\Support\Clock;
 use App\Support\DuplicateKey;
@@ -37,6 +37,7 @@ final class AddCharges
         private readonly CurrentShift $currentShift,
         private readonly StayLedger $ledger,
         private readonly Transaction $transaction,
+        private readonly PosOrderNumber $orderNumber,
     ) {}
 
     /**
@@ -98,7 +99,7 @@ final class AddCharges
                     'mode' => PosMode::RoomCharge,
                     'total_amount' => $total,
                     'created_by' => $by->id,
-                    'order_no' => $this->nextOrderNo($locked->branch_id),
+                    'order_no' => $this->orderNumber->next($locked->branch_id),
                     'idempotency_key' => $idempotencyKey,
                     'occurred_at' => $now,
                     'created_at' => $now,
@@ -126,16 +127,6 @@ final class AddCharges
 
             throw $e;
         }
-    }
-
-    /** P-008821 from branches.next_pos_number, the branch row locked last (DATABASE_SCHEMA §4.1). */
-    private function nextOrderNo(int $branchId): string
-    {
-        $branch = Branch::query()->lockForUpdate()->findOrFail($branchId);
-        $number = $branch->next_pos_number;
-        $branch->update(['next_pos_number' => $number + 1]);
-
-        return sprintf('P-%06d', $number);
     }
 
     private function replay(string $idempotencyKey): ?PosOrder

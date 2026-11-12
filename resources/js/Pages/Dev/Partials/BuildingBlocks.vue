@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import CleanTimer from '@/Components/CleanTimer.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import MoneyInput from '@/Components/MoneyInput.vue';
@@ -12,6 +13,7 @@ import Slip from '@/Components/Slip.vue';
 import StatCard from '@/Components/StatCard.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import StepBar from '@/Components/StepBar.vue';
+import TaskCard from '@/Components/TaskCard.vue';
 import TotalRow from '@/Components/TotalRow.vue';
 import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { formatMoney } from '@/Composables/useMoney';
@@ -279,6 +281,16 @@ function saveToast(): void {
                 <UButton color="neutral" variant="outline" icon="i-lucide-lock" label="Open with reasons" @click="openConfirm(true)" />
             </div>
             <p v-if="lastResult" class="mt-2 text-xs break-all text-muted" role="status">{{ lastResult }}</p>
+        </Block>
+
+        <Block title="Housekeeping — TaskCard, CleanTimer (32, 33)">
+            <div class="flex flex-col gap-3">
+                <TaskCard room="117" :waiting-minutes="130" tone="bad" urgent startable detail="Standard · checked out 12:04 PM · clean by 4:04 PM" />
+                <TaskCard room="203" :waiting-minutes="48" tone="warn" startable detail="Deluxe · checked out 1:26 PM · clean by 5:26 PM" />
+                <TaskCard room="108" :waiting-minutes="12" next-in-line detail="Standard · transfer-out 2:02 PM" />
+                <TaskCard room="221" :waiting-minutes="5" detail="Deluxe · checked out 2:09 PM" />
+                <CleanTimer started-at="2026-11-11T06:15:00Z" :now="Date.parse('2026-11-11T06:21:12Z')" :target-minutes="15" />
+            </div>
         </Block>
 
         <Block title="Empty and loading — EmptyState, USkeleton">

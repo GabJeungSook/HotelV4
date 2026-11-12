@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
+import ConnectionBar from '@/Components/ConnectionBar.vue';
+import { useFlashToast } from '@/Composables/useFlashToast';
 
 /**
  * Housekeeper phone layout, 360 px and wider (DESIGN_SYSTEM §6.9): a flat coloured header band
  * with two links (queue, my cleans), then one column with 12 px padding. Follows the colour mode.
+ * Owns the connection bar (50) and the flash toasts, like the desktop layouts.
  */
 withDefaults(
     defineProps<{
@@ -15,6 +18,8 @@ withDefaults(
     { subtitle: undefined, tone: 'primary', current: 'queue' },
 );
 
+useFlashToast();
+
 const links = [
     { key: 'queue', label: 'Queue', href: '/housekeeping' },
     { key: 'history', label: 'My cleans', href: '/housekeeping/history' },
@@ -23,6 +28,7 @@ const links = [
 
 <template>
     <div class="min-h-dvh bg-muted text-base leading-6 text-default">
+        <ConnectionBar />
         <header data-shell class="p-4 text-on-primary" :class="tone === 'violet' ? 'bg-violet' : 'bg-primary'">
             <div class="mx-auto flex max-w-xl items-start justify-between gap-3">
                 <div class="min-w-0">

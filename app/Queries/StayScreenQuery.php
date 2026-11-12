@@ -298,7 +298,7 @@ final class StayScreenQuery
         ];
     }
 
-    /** @return list<array{id: int, name: string, kind: string, price: int, stock: int|null}> */
+    /** @return list<array{id: int, name: string, kind: string, price: int, stock: int|null, low: bool}> */
     public function products(): array
     {
         return array_values(Product::query()
@@ -312,6 +312,7 @@ final class StayScreenQuery
                 'kind' => $p->kind->value,
                 'price' => $p->price_amount?->centavos() ?? 0,
                 'stock' => $p->tracks_stock ? $p->stock_on_hand : null,
+                'low' => $p->tracks_stock && $p->stock_on_hand > 0 && $p->stock_on_hand <= $p->low_stock_at,
             ])
             ->all());
     }

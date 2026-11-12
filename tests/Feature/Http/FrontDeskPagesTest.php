@@ -224,6 +224,8 @@ it('builds the navigation on the server from the role and the pages that exist',
         ['heading' => 'Front desk', 'items' => [
             ['key' => 'today', 'label' => 'Today', 'route' => '/today', 'icon' => 'i-lucide-clock', 'subtitle' => null],
             ['key' => 'board', 'label' => 'Room board', 'route' => '/board', 'icon' => 'i-lucide-bed', 'subtitle' => null],
+            ['key' => 'pos', 'label' => 'POS', 'route' => '/pos', 'icon' => 'i-lucide-shopping-cart', 'subtitle' => null],
+            ['key' => 'stock', 'label' => 'Stock', 'route' => '/stock', 'icon' => 'i-lucide-package', 'subtitle' => null],
         ]],
         ['heading' => 'Shift', 'items' => [
             ['key' => 'shift', 'label' => 'Shift cash', 'route' => '/shift', 'icon' => 'i-lucide-banknote', 'subtitle' => null],
@@ -253,7 +255,6 @@ it('shows placeholder homes for pages of later phases', function (string $userna
 })->with([
     ['ramil.ortega', '/dashboard', 'backoffice'],
     ['ramon.alvarez', '/owner', 'owner'],
-    ['dodong.lumayag', '/housekeeping', 'phone'],
     ['kiosk-gensan-1', '/kiosk', 'kiosk'],
 ]);
 

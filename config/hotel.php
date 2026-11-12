@@ -67,6 +67,17 @@ return [
         'cleaning_in_progress_minutes' => 60,
     ],
 
+    // Housekeeping queue (32, TRD §4.7). A housekeeper counts as online when last_seen_at is
+    // within online_minutes; the queue touches last_seen_at at most once a touch_seconds. A
+    // waiting room's label turns amber from waiting_warn_minutes (red "Urgent" comes from
+    // branches.cleaning_urgent_minutes).
+    'housekeeping' => [
+        'online_minutes' => 2,
+        'touch_seconds' => 60,
+        'waiting_warn_minutes' => 30,
+        'checklist' => ['Fresh sheets and towels', 'Bathroom', 'Trash', 'Remote and key on the table'],
+    ],
+
     // Welcome page (59) headline and sub-line (TRD §4.11), text from the mockup.
     'welcome' => [
         'headline' => 'Rest well, by the hour or the night.',

@@ -17,6 +17,8 @@ export interface Product {
     kind: 'food_drink' | 'amenity' | 'damage';
     price: number;
     stock: number | null;
+    /** At or under the product's low-stock level (still for sale). */
+    low?: boolean;
 }
 
 const props = defineProps<{ stayId: number; products: Product[] }>();
@@ -104,7 +106,7 @@ function payNow(): void {
                         <td>
                             <span :class="out(p) ? 'text-muted' : 'text-highlighted'">{{ p.name }}</span>
                             <span v-if="out(p)" class="block text-xs font-semibold text-bad">Out of stock</span>
-                            <span v-else-if="p.stock !== null" class="block text-xs text-muted">{{ p.stock }} in stock</span>
+                            <span v-else-if="p.stock !== null" class="block text-xs" :class="p.low ? 'font-medium text-warn' : 'text-muted'">{{ p.low ? `Low · ${p.stock} left` : `${p.stock} in stock` }}</span>
                         </td>
                         <td class="num text-right" :class="out(p) ? 'text-muted' : ''">{{ formatMoney(p.price, 'column') }}</td>
                         <td class="w-28 text-right">

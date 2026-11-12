@@ -19,7 +19,6 @@ use App\Models\PosOrder;
 use App\Models\Product;
 use App\Models\ShiftSession;
 use App\Models\Stay;
-use App\Models\StockMovement;
 use App\Models\User;
 use App\Queries\StayQuery;
 use App\Support\Clock;
@@ -38,6 +37,7 @@ final class StayLedger
     public function __construct(
         private readonly Clock $clock,
         private readonly StayQuery $stays,
+        private readonly StockBook $stock,
     ) {}
 
     /** One folio_lines row: amount = quantity × unit_amount (folio_lines_math_chk). */
@@ -375,22 +375,6 @@ final class StayLedger
 
     private function moveStock(ShiftSession $shift, Product $product, StockMovementKind $kind, int $quantity, FolioLine $line, User $by): void
     {
-        $balance = $product->stock_on_hand + $quantity;
-        $now = $this->clock->now();
-
-        StockMovement::query()->create([
-            'branch_id' => $product->branch_id,
-            'product_id' => $product->id,
-            'shift_session_id' => $shift->id,
-            'kind' => $kind,
-            'quantity' => $quantity,
-            'balance_after' => $balance,
-            'folio_line_id' => $line->id,
-            'created_by' => $by->id,
-            'occurred_at' => $now,
-            'created_at' => $now,
-        ]);
-
-        $product->update(['stock_on_hand' => $balance]);
+        $this->stock->move($shift, $product, $kind, $quantity, $by, $line);
     }
 }

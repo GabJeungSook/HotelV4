@@ -1177,8 +1177,8 @@ Model rules: `$fillable` on every model (no `$guarded = []`), enum casts for eve
 | `ReportQuery::salesByFloor($shiftId)` | 37c | Folio lines joined to `rooms.floor_id`, grouped by floor and report group; `stay_id IS NULL` is the "No room" column |
 | `ReportQuery::roomChart($shiftId)` | 37c | Every room, with each stay that was in house during the shift (forwarded in ∪ checked in), its lines of this shift, deposit held at close |
 | `ReportQuery::occupancy($branchId, $date)` | 40 | Counts from `stays.checked_in_at` / `checked_out_at` inside the business day's shifts |
-| `ReportQuery::stock($branchId, $date)` | 20, 42 | `stock_movements` grouped by product and kind |
-| `CleaningQuery::queue($userId)` | 32 | `queued` tasks on the user's floors ordered by `queued_at`, with startable flag for the first N (N = housekeepers online) |
+| `ReportQuery::stock($shift)` | 20 (42 per day in Phase 8) | `stock_movements` of the shift grouped by product and kind: opening (worked back from `stock_on_hand` less every movement from this shift on), in (receive + adjustment), sold (sale + sale_reversal), wastage, closing = opening + in − sold − wastage = the next shift's opening |
+| `CleaningQuery::queue($user)` | 32 | `queued` tasks on the user's floors ordered by `queued_at`, with startable flag for the first N (N = housekeepers of those floors with `last_seen_at` in the last 2 minutes, at least 1); none while the user has a task `in_progress` |
 
 ## 8. Business transactions
 

@@ -384,7 +384,8 @@
         white-space: nowrap;
     }
 
-    & .r {
+    & .r,
+    & th.text-right {
         text-align: right;
     }
 
