@@ -92,14 +92,14 @@ final class TransferRoom
             }
 
             $from = $lockedRooms[$locked->room_id];
-            $to = $lockedRooms[$target->id] ?? throw RoomNotAvailable::room($target->number);
+            $to = $lockedRooms[$target->id] ?? throw RoomNotAvailable::room($target->number, $target->id);
 
             if ($from->id === $to->id) {
                 throw ActionRefused::because('Pick a different room.');
             }
 
             if ($to->branch_id !== $locked->branch_id || $to->status !== RoomStatus::Available || ! $to->is_active || $this->reservedDuring($to, $locked)) {
-                throw RoomNotAvailable::room($to->number);
+                throw RoomNotAvailable::room($to->number, $to->id);
             }
 
             $charged = Money::ofCentavos((int) FolioLine::query()->withoutGlobalScopes()
@@ -132,7 +132,7 @@ final class TransferRoom
                 $locked->update(['room_id' => $to->id, 'room_type_id' => $to->room_type_id]);
             } catch (QueryException $e) {
                 if (DuplicateKey::on($e, 'stays_one_active_per_room')) {
-                    throw RoomTaken::room($to->number);
+                    throw RoomTaken::room($to->number, $to->id);
                 }
 
                 throw $e;

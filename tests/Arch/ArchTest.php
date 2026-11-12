@@ -75,3 +75,11 @@ arch('ledger and log models are append-only')
         'App\Models\Approval', 'App\Models\AuditLog', 'App\Models\PinAttempt', 'App\Models\PrintLog',
     ])
     ->toUseTrait('App\Models\Concerns\AppendOnly');
+
+arch('Today (62) carries no money: its query never touches Money or the cash ledger model')
+    ->expect('App\Queries\TodayQuery')
+    ->not->toUse(['App\Support\Money', 'App\Models\Payment', 'App\Models\CashMovement', 'App\Services\CashMath']);
+
+arch('front desk controllers never read the open shift totals or expected cash')
+    ->expect(['App\Http\Controllers\TodayController', 'App\Http\Controllers\BoardController', 'App\Http\Controllers\StayController', 'App\Http\Controllers\ShiftController'])
+    ->not->toUse(['App\Services\CashMath', 'App\Models\CashCount', 'App\Models\CashMovement']);

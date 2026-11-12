@@ -8,7 +8,10 @@ use App\Services\CurrentBranch;
 use App\Services\ShiftCalendar;
 use App\Support\Clock;
 use App\Support\Transaction;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,5 +32,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::preventLazyLoading(! $this->app->isProduction());
+
+        // A guard per computer against guessing many accounts; each account also locks after
+        // five wrong passwords for 15 minutes (users.locked_until, TRD §9).
+        RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(30)->by((string) $request->ip()));
     }
 }

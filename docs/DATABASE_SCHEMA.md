@@ -702,9 +702,11 @@ CREATE TABLE payments (
   reversal_of_id BIGINT UNSIGNED NULL,
   approval_id BIGINT UNSIGNED NULL,
   note VARCHAR(255) NULL,
+  idempotency_key CHAR(36) NULL,              -- take payment form (11); added by migration 000032
   created_by BIGINT UNSIGNED NOT NULL,
   occurred_at TIMESTAMP NOT NULL,
   created_at TIMESTAMP NOT NULL,
+  UNIQUE KEY payments_idempotency_unique (idempotency_key),
   KEY payments_shift_idx (branch_id, shift_session_id, method, kind),
   KEY payments_stay_idx (stay_id, kind),
   CONSTRAINT payments_branch_fk FOREIGN KEY (branch_id) REFERENCES branches(id),
@@ -1133,6 +1135,7 @@ File names use the prefix `2026_11_12_` plus a running number so they sort in de
 | 000029 | `create_pin_tables` | `pin_attempts`, `pin_locks` |
 | 000030 | `create_print_logs_table` | `print_logs` |
 | 000031 | `create_summary_tables` | `summary_days`, `daily_summaries`, `hourly_sales_summaries`, `daily_payment_summaries`, `daily_report_lines` |
+| 000032 | `add_idempotency_key_to_payments_table` | `payments.idempotency_key` (`CHAR(36) NULL`, unique `payments_idempotency_unique`): the take payment form (11) carries a UUID; a repeated key returns the first payment (Gab, 12 Nov 2026) |
 
 Generated columns and CHECK constraints are added with `DB::statement()` inside the migration, because the schema builder cannot express them.
 
@@ -1212,6 +1215,7 @@ Same as 8.1 from step 1, except the stay already exists: lock it, fail with `Hol
 3. Insert one `payments` row (`kind = 'payment'`, or `deposit_applied` with `deposit_type = 'guest'` when paying from guest deposit; fail if it exceeds the guest deposit held).
 4. Insert `payment_allocations` oldest line first until the amount is used up.
 5. If cash given exceeds the balance: record `change_amount`, or insert a `deposit_in` (`guest`) for the excess when the guest asks to keep it.
+6. The form's `idempotency_key` is stored on the first `payments` row the action writes. A repeated key returns that payment and writes nothing; two requests racing with one key hit `payments_idempotency_unique`, and the loser returns the winner's payment.
 
 ### 8.5 Extend (`ExtendStay`, screen 12)
 

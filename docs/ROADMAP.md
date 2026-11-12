@@ -92,25 +92,25 @@ No screens in this phase. Everything is driven by tests.
 
 ## Phase 4 — Front desk core flow
 
-- [ ] Sign in (1) as the split screen: time-of-day photograph and greeting, white sign-in panel, fade-in and photo drift with reduced-motion support, lockout, sign out
-- [ ] Sign-in facts for the remembered branch: four counts and the open-shift line on a computer that has signed in before; greeting only on a new computer; no money and no guest names
-- [ ] Role-based redirect to the role homes in APP_FLOW §1.1; a home built in a later phase (60, 61) gets a plain placeholder page until then
-- [ ] Role middleware and policies (TRD §4.1); no-permission page (51)
-- [ ] Navigation built on the server: the menu items sent to each layout come from the role, the branch's module flags and the open branch, never from a list in Vue
-- [ ] Open shift (2) and join shift (2b); front desk routes require shift membership
-- [ ] Switch user by PIN (3) with the tries-left count and the locked-computer state; first-sign-in "set your PIN" step
-- [ ] Top bar with branch, shift chip, user, Close shift button (button wired in phase 5)
-- [ ] Front desk "Today" (62): arriving, due out, overdue, unpaid folios, kiosk holds, leaving-soon and arriving lists, rooms by status; counts and names only; arch test that its props carry no money
-- [ ] Room board (4) with `BoardQuery`, 15 s polling, search, floor filter, loading (4b) and empty (4c) states
-- [ ] Walk-in check-in (6) with stay options, discount, payment method, change or keep as deposit, idempotency key
-- [ ] Checked-in slip (8) with 80 mm print
-- [ ] Guest folio (9); add charge sheet (10); take payment (11)
-- [ ] Migration 000032: `payments.idempotency_key CHAR(36) NULL` with a unique key, and `TakePayment` returns the first payment for a repeated key (APP_FLOW §4.8, TRD §3.11; Gab, 12 Nov). Add the column to DATABASE_SCHEMA §4.12 and §6.
-- [ ] Extend (12); transfer (13); supervisor approval sheet (14); cancel stay and void line (15)
-- [ ] Check-out wizard (16, 17, 18)
-- [ ] Problem states: connection bar (50), missing rate (52), room just taken (53)
-- [ ] Feature tests for each controller: happy path, validation, permission
-- [ ] Manual pass: each screen compared with its mockup frame
+- [x] Sign in (1) as the split screen: time-of-day photograph and greeting, white sign-in panel, fade-in and photo drift with reduced-motion support, lockout, sign out
+- [x] Sign-in facts for the remembered branch: four counts and the open-shift line on a computer that has signed in before; greeting only on a new computer; no money and no guest names
+- [x] Role-based redirect to the role homes in APP_FLOW §1.1; a home built in a later phase (60, 61) gets a plain placeholder page until then
+- [x] Role middleware and policies (TRD §4.1); no-permission page (51)
+- [x] Navigation built on the server: the menu items sent to each layout come from the role, the branch's module flags and the open branch, never from a list in Vue
+- [x] Open shift (2) and join shift (2b); front desk routes require shift membership
+- [x] Switch user by PIN (3) with the tries-left count and the locked-computer state; first-sign-in "set your PIN" step
+- [x] Top bar with branch, shift chip, user, Close shift button (button wired in phase 5)
+- [x] Front desk "Today" (62): arriving, due out, overdue, unpaid folios, kiosk holds, leaving-soon and arriving lists, rooms by status; counts and names only; arch test that its props carry no money
+- [x] Room board (4) with `BoardQuery`, 15 s polling, search, floor filter, loading (4b) and empty (4c) states
+- [x] Walk-in check-in (6) with stay options, discount, payment method, change or keep as deposit, idempotency key
+- [x] Checked-in slip (8) with 80 mm print
+- [x] Guest folio (9); add charge sheet (10); take payment (11)
+- [x] Migration 000032: `payments.idempotency_key CHAR(36) NULL` with a unique key, and `TakePayment` returns the first payment for a repeated key (APP_FLOW §4.8, TRD §3.11; Gab, 12 Nov). Add the column to DATABASE_SCHEMA §4.12 and §6.
+- [x] Extend (12); transfer (13); supervisor approval sheet (14); cancel stay and void line (15)
+- [x] Check-out wizard (16, 17, 18)
+- [x] Problem states: connection bar (50), missing rate (52), room just taken (53)
+- [x] Feature tests for each controller: happy path, validation, permission
+- [x] Manual pass: each screen compared with its mockup frame
 
 **Done when:** a front desk user signs in, lands on Today (62), and can run a full guest stay to check-out in the browser using only screens 1–18 and 62; two browsers racing for one room produce screen 53 for the loser; no front desk page receives a sales or cash figure; and nothing in the flow needs the database to be edited by hand.
 

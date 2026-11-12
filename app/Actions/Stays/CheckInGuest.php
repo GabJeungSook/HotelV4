@@ -108,7 +108,7 @@ final class CheckInGuest
         $locked = Room::query()->withoutGlobalScopes()->lockForUpdate()->findOrFail($room->id);
 
         if ($locked->status !== RoomStatus::Available || ! $locked->is_active) {
-            throw RoomNotAvailable::room($locked->number);
+            throw RoomNotAvailable::room($locked->number, $locked->id);
         }
 
         $this->ledger->assertAccepted($locked->branch_id, $method, $referenceNo);
@@ -157,7 +157,7 @@ final class CheckInGuest
             ]);
         } catch (QueryException $e) {
             if (DuplicateKey::on($e, 'stays_one_active_per_room')) {
-                throw RoomTaken::room($locked->number);
+                throw RoomTaken::room($locked->number, $locked->id);
             }
 
             throw $e;

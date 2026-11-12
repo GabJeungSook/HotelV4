@@ -30,7 +30,7 @@ class Payment extends Model
     protected $fillable = [
         'branch_id', 'shift_session_id', 'stay_id', 'pos_order_id', 'kind', 'method', 'deposit_type',
         'amount', 'tendered_amount', 'change_amount', 'reference_no', 'reversal_of_id', 'approval_id',
-        'note', 'created_by', 'occurred_at', 'created_at',
+        'note', 'idempotency_key', 'created_by', 'occurred_at', 'created_at',
     ];
 
     protected function casts(): array

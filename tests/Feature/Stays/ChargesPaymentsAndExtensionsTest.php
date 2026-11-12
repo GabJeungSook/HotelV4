@@ -21,6 +21,7 @@ use App\Models\StockMovement;
 use App\Queries\StayQuery;
 use App\Support\Money;
 use Database\Seeders\DatabaseSeeder;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Str;
 use Tests\Support\Hotel;
 
@@ -144,6 +145,29 @@ it('pays from the guest deposit, refuses more than is held, and never uses the k
         ->and($this->stays->depositHeld($stay->id, DepositType::Guest)->isZero())->toBeTrue()
         ->and($this->stays->depositHeld($stay->id, DepositType::Key)->centavos())->toBe(20000)
         ->and($this->stays->balanceDue($stay->id)->centavos())->toBe(3000);
+});
+
+it('returns the first payment for a repeated idempotency key and writes nothing the second time', function (): void {
+    ($this->charge)([Hotel::product('Cup noodles')->id => 2]);
+    $key = (string) Str::uuid();
+
+    $first = ($this->pay)(PaymentMethod::Cash, 5000, idempotencyKey: $key);
+    $count = Payment::query()->count();
+    $second = ($this->pay)(PaymentMethod::Cash, 5000, idempotencyKey: $key);
+
+    expect($second->id)->toBe($first->id)
+        ->and($first->idempotency_key)->toBe($key)
+        ->and(Payment::query()->count())->toBe($count)
+        ->and($this->stays->balanceDue($this->stay->id)->centavos())->toBe(4000);
+});
+
+it('refuses a second payment row with the same idempotency key in the database', function (): void {
+    ($this->charge)([Hotel::product('Cup noodles')->id => 2]);
+    $key = (string) Str::uuid();
+    $first = ($this->pay)(PaymentMethod::Cash, 5000, idempotencyKey: $key);
+
+    expect(fn () => Payment::query()->create([...$first->only(['branch_id', 'shift_session_id', 'stay_id', 'kind', 'method', 'amount', 'created_by', 'occurred_at', 'created_at']), 'idempotency_key' => $key]))
+        ->toThrow(QueryException::class, 'payments_idempotency_unique');
 });
 
 it('refuses a payment when nothing is due', function (): void {

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useLocalStorage } from '@vueuse/core';
+import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import SidebarNav from '@/Components/SidebarNav.vue';
 import TopBar from '@/Components/TopBar.vue';
+import { useConnection } from '@/Composables/useConnection';
 import type { NavGroup } from '@/types/ui';
 
 /**
@@ -22,17 +24,19 @@ const props = withDefaults(
     { current: undefined, title: undefined, subtitle: undefined, user: undefined, canSwitch: false },
 );
 
-const emit = defineEmits<{ signOut: [] }>();
+const emit = defineEmits<{ signOut: []; switchUser: [] }>();
 
 const startCollapsed = typeof window !== 'undefined' && window.innerWidth < 1100;
 const collapsed = useLocalStorage('homi.sidebar.collapsed', startCollapsed);
 const drawer = ref(false);
+const { online } = useConnection();
 
 const fallbackTitle = () => props.nav.flatMap((g) => g.items).find((i) => i.key === props.current)?.label ?? '';
 </script>
 
 <template>
     <div class="flex min-h-dvh bg-muted">
+        <Head v-if="title ?? fallbackTitle()" :title="title ?? fallbackTitle()" />
         <aside
             data-shell
             class="sticky top-0 h-dvh shrink-0 border-r border-default transition-[width] duration-160 ease-out max-md:hidden"
@@ -49,11 +53,14 @@ const fallbackTitle = () => props.nav.flatMap((g) => g.items).find((i) => i.key 
             </template>
         </USlideover>
         <div class="flex min-w-0 flex-1 flex-col">
-            <TopBar :title="title ?? fallbackTitle()" :subtitle="subtitle" :user="user" :can-switch="canSwitch" @menu="drawer = true">
+            <TopBar :title="title ?? fallbackTitle()" :subtitle="subtitle" :user="user" :can-switch="canSwitch" @menu="drawer = true" @switch-user="emit('switchUser')">
                 <template #status><slot name="status" /></template>
             </TopBar>
             <slot name="bars" />
-            <main class="min-w-0 flex-1 p-6 max-md:p-4"><slot /></main>
+            <main class="min-w-0 flex-1 p-6 max-md:p-4" :class="online ? '' : 'opacity-50'">
+                <!-- While the connection bar shows, every control on the page is disabled (50). -->
+                <fieldset :disabled="!online" class="contents"><slot /></fieldset>
+            </main>
         </div>
     </div>
 </template>

@@ -8,7 +8,7 @@ withDefaults(defineProps<{ title: string; subtitle?: string; user?: { name: stri
     canSwitch: false,
 });
 
-const emit = defineEmits<{ menu: [] }>();
+const emit = defineEmits<{ menu: []; switchUser: [] }>();
 </script>
 
 <template>
@@ -19,7 +19,7 @@ const emit = defineEmits<{ menu: [] }>();
         <div id="page-actions" class="flex items-center gap-2" />
         <div class="ms-auto flex items-center gap-2">
             <div class="flex items-center gap-2 max-md:hidden"><slot name="status" /></div>
-            <UserMenu v-if="user" :user="user" :can-switch="canSwitch" />
+            <UserMenu v-if="user" :user="user" :can-switch="canSwitch" @switch-user="emit('switchUser')" />
         </div>
     </header>
 </template>

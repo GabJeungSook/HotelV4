@@ -91,6 +91,7 @@ final class StayLedger
         ?string $referenceNo = null,
         ?string $note = null,
         ?int $approvalId = null,
+        ?string $idempotencyKey = null,
     ): Payment {
         $now = $this->clock->now();
 
@@ -107,6 +108,7 @@ final class StayLedger
             'reference_no' => $referenceNo,
             'approval_id' => $approvalId,
             'note' => $note,
+            'idempotency_key' => $idempotencyKey,
             'created_by' => $by->id,
             'occurred_at' => $now,
             'created_at' => $now,
@@ -147,6 +149,7 @@ final class StayLedger
         ?string $referenceNo = null,
         bool $keepChangeAsDeposit = false,
         ?DepositType $fromDeposit = null,
+        ?string $idempotencyKey = null,
     ): ?Payment {
         if (! $given->isPositive()) {
             throw ActionRefused::because('Type the amount received.');
@@ -172,7 +175,7 @@ final class StayLedger
                 throw ActionRefused::notEnoughDeposit();
             }
 
-            $payment = $this->payment($shift, $stay, $by, PaymentKind::DepositApplied, PaymentMethod::Deposit, $apply, DepositType::Guest);
+            $payment = $this->payment($shift, $stay, $by, PaymentKind::DepositApplied, PaymentMethod::Deposit, $apply, DepositType::Guest, idempotencyKey: $idempotencyKey);
             $this->allocate($payment, $this->spread($stay->id, $apply));
 
             return $payment;
@@ -188,6 +191,7 @@ final class StayLedger
             tendered: $isCash ? $given : null,
             change: $isCash ? ($keepChangeAsDeposit ? Money::zero() : $excess) : null,
             referenceNo: $referenceNo,
+            idempotencyKey: $idempotencyKey,
         );
         $this->allocate($payment, $this->spread($stay->id, $apply));
 
