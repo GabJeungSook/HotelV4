@@ -3,6 +3,8 @@ includes:
 
 parameters:
     level: 6
+    # Read the models' casts() method, so Money and enum casts type the attributes.
+    parseModelCastsMethod: true
     paths:
         - app
         - bootstrap/app.php

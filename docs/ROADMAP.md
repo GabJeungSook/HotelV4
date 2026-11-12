@@ -60,15 +60,15 @@ Build one phase at a time, in order. A phase is done only when every box is tick
 
 ## Phase 2 — Data layer
 
-- [ ] All 31 migrations in the order of DATABASE_SCHEMA §6, with foreign keys, CHECK constraints and generated columns
-- [ ] The version 1.1 tables (migrations 000026–000031, DATABASE_SCHEMA §4.16): `day_closings`, `cash_count_drafts`, `reasons`, `pin_attempts`, `pin_locks`, `print_logs`, and the summary tables `summary_days`, `daily_summaries`, `hourly_sales_summaries`, `daily_payment_summaries`, `daily_report_lines`
-- [ ] The version 1.1 columns: `branches` Z counters, `shift_stale_block_minutes`, VAT and welcome settings (§4.1); `shift_sessions.z_no` and the grand totals (§4.7); `needs_note` / `needs_manager` on the reason lists (§4.6); `cash_movements.reason_id` and `idempotency_key` (§4.9)
-- [ ] Enums in `app/Enums` for every ENUM column
-- [ ] Models with `$fillable`, casts, relationships (DATABASE_SCHEMA §6), `BelongsToBranch`, `AppendOnly` (including `pin_attempts` and `print_logs`); models for the new tables
-- [ ] `CurrentBranch` service and global scope; arch test that operational models use the trait
-- [ ] Factories for every model
-- [ ] Seeders in DATABASE_SCHEMA §5, including `DemoShiftSeeder`
-- [ ] Tests: each unique/generated-column rule rejects a violating insert (second active stay in a room, second open shift, second in-progress task per housekeeper, repeated `z_no` in a branch, second day closing for a date, second open PIN lock for a computer); append-only models refuse update and delete; CHECK constraints reject bad rows
+- [x] All 31 migrations in the order of DATABASE_SCHEMA §6, with foreign keys, CHECK constraints and generated columns
+- [x] The version 1.1 tables (migrations 000026–000031, DATABASE_SCHEMA §4.16): `day_closings`, `cash_count_drafts`, `reasons`, `pin_attempts`, `pin_locks`, `print_logs`, and the summary tables `summary_days`, `daily_summaries`, `hourly_sales_summaries`, `daily_payment_summaries`, `daily_report_lines`
+- [x] The version 1.1 columns: `branches` Z counters, `shift_stale_block_minutes`, VAT and welcome settings (§4.1); `shift_sessions.z_no` and the grand totals (§4.7); `needs_note` / `needs_manager` on the reason lists (§4.6); `cash_movements.reason_id` and `idempotency_key` (§4.9)
+- [x] Enums in `app/Enums` for every ENUM column
+- [x] Models with `$fillable`, casts, relationships (DATABASE_SCHEMA §6), `BelongsToBranch`, `AppendOnly` (including `pin_attempts` and `print_logs`); models for the new tables
+- [x] `CurrentBranch` service and global scope; arch test that operational models use the trait
+- [x] Factories for every model
+- [x] Seeders in DATABASE_SCHEMA §5, including `DemoShiftSeeder`
+- [x] Tests: each unique/generated-column rule rejects a violating insert (second active stay in a room, second open shift, second in-progress task per housekeeper, repeated `z_no` in a branch, second day closing for a date, second open PIN lock for a computer); append-only models refuse update and delete; CHECK constraints reject bad rows
 
 **Done when:** `php artisan migrate:fresh --seed` builds "Hotel Dalisay GenSan" with 46 rooms and the demo shift, all 31 migrations run, and the constraint tests pass on MySQL.
 

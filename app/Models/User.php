@@ -4,48 +4,71 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Role;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
+/**
+ * Staff, owner accounts and kiosk devices (DATABASE_SCHEMA §4.2).
+ * Not branch-scoped: sign-in looks users up before any branch is known,
+ * and owners have no branch. No shift state is stored here.
+ *
+ * @property Role $role
+ * @property int|null $branch_id
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'branch_id', 'name', 'username', 'password', 'pin_hash', 'role',
+        'is_active', 'failed_logins', 'locked_until', 'last_seen_at',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
+        'pin_hash',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'pin_hash' => 'hashed',
+            'role' => Role::class,
+            'is_active' => 'boolean',
+            'locked_until' => 'immutable_datetime',
+            'last_seen_at' => 'immutable_datetime',
+            'created_at' => 'immutable_datetime',
+            'updated_at' => 'immutable_datetime',
         ];
+    }
+
+    /** @return BelongsTo<Branch, $this> */
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    /**
+     * Housekeeper floor assignment (47).
+     *
+     * @return BelongsToMany<Floor, $this>
+     */
+    public function floors(): BelongsToMany
+    {
+        return $this->belongsToMany(Floor::class);
+    }
+
+    /** @return HasMany<ShiftMember, $this> */
+    public function shiftMemberships(): HasMany
+    {
+        return $this->hasMany(ShiftMember::class);
     }
 }

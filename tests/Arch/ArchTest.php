@@ -50,3 +50,28 @@ it('has no Carbon::now(), Date::now() or similar static clock calls in app/ outs
 
     expect($offenders)->toBe([]);
 });
+
+/*
+| Branch scope and append-only (TRD §3.6, §3.10). The Feature test
+| ModelsTest checks this list against the tables that have branch_id NOT NULL.
+*/
+
+arch('operational models use BelongsToBranch')
+    ->expect([
+        'App\Models\ShiftDefinition', 'App\Models\Floor', 'App\Models\RoomType', 'App\Models\Room',
+        'App\Models\Rate', 'App\Models\ExtensionRate', 'App\Models\Discount', 'App\Models\TransferReason',
+        'App\Models\ExpenseCategory', 'App\Models\ShiftSession', 'App\Models\CashMovement', 'App\Models\Stay',
+        'App\Models\FolioLine', 'App\Models\Payment', 'App\Models\Product', 'App\Models\PosOrder',
+        'App\Models\StockMovement', 'App\Models\CleaningTask', 'App\Models\Approval', 'App\Models\DayClosing',
+        'App\Models\Reason', 'App\Models\PrintLog', 'App\Models\SummaryDay', 'App\Models\DailySummary',
+        'App\Models\HourlySalesSummary', 'App\Models\DailyPaymentSummary', 'App\Models\DailyReportLine',
+    ])
+    ->toUseTrait('App\Models\Concerns\BelongsToBranch');
+
+arch('ledger and log models are append-only')
+    ->expect([
+        'App\Models\FolioLine', 'App\Models\Payment', 'App\Models\PaymentAllocation', 'App\Models\CashCount',
+        'App\Models\StockMovement', 'App\Models\ShiftForwardedStay', 'App\Models\RoomStatusLog',
+        'App\Models\Approval', 'App\Models\AuditLog', 'App\Models\PinAttempt', 'App\Models\PrintLog',
+    ])
+    ->toUseTrait('App\Models\Concerns\AppendOnly');
