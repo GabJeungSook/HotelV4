@@ -80,7 +80,7 @@ No screens in this phase. Everything is driven by tests.
 - [ ] `CashMath` (TRD §4.5) and `RoomRotation` (TRD §4.8) with unit tests
 - [ ] `CurrentShift`, `RoomStatusService` (transitions in APP_FLOW §5.2, with log rows)
 - [ ] `Auth/VerifyPin`, `Auth/ApproveByPin` (approver ≠ requester, role check, lockout)
-- [ ] PIN attempts and locks with the approvals (TRD §4.12): every try writes `pin_attempts` for the computer; ten wrong tries in a row write `pin_locks`; a locked computer refuses every PIN; a supervisor or admin unlocks it with their own password (`approvals.action = 'unlock_pin'`)
+- [ ] PIN attempts and locks with the approvals (TRD §4.12): every try writes `pin_attempts` for the computer; ten wrong tries in a row write `pin_locks`; a locked computer refuses every PIN; a supervisor or admin unlocks it with their own password, recorded on `pin_locks.unlocked_at` / `unlocked_by` and in `audit_logs`, not in `approvals`
 - [ ] Shift actions needed by the rest: `OpenShift`, `JoinShift`
 - [ ] Stay actions: `CheckInGuest`, `AddCharges`, `TakePayment`, `ExtendStay`, `TransferRoom`, `VoidLine`, `CancelStay`, `CheckOutGuest` (DATABASE_SCHEMA §8.1–8.9); every money row records `created_by` as well as the shift
 - [ ] `StayQuery` (folio, balance due, deposit held, in-house)

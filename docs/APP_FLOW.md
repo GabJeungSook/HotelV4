@@ -356,7 +356,7 @@ Sheet 3 · `AuthController@switch` · [TRD](TRD.md) §4.12
 4. Correct: the session's user becomes that member. Nothing else changes: the shift, the drawer and the page stay as they were. Rows written from now on carry this person as `created_by`.
 5. Wrong: the sheet shows the tries left. After 3 wrong PINs the session ends and the browser goes to `/login`. The shift stays open.
 
-**PIN entry locked.** The same `pin_attempts` log is written by the approval sheet (14, `context = approval`) and by the handover (25, `context = handover`). Ten wrong tries in a row on one computer, across all three, write a `pin_locks` row for its `device_key`. While that row has no `unlocked_at`, every PIN pad on that computer is refused: switch user, approvals and the handover. A supervisor or admin unlocks it by typing their own username and password; this writes `pin_locks.unlocked_at` and `unlocked_by` and an `approvals` row (`action = unlock_pin`). Signing in with a password is never blocked by a PIN lock.
+**PIN entry locked.** The same `pin_attempts` log is written by the approval sheet (14, `context = approval`) and by the handover (25, `context = handover`). Ten wrong tries in a row on one computer, across all three, write a `pin_locks` row for its `device_key`. While that row has no `unlocked_at`, every PIN pad on that computer is refused: switch user, approvals and the handover. A supervisor or admin unlocks it by typing their own username and password; this writes `pin_locks.unlocked_at` and `unlocked_by` and an `audit_logs` row; no `approvals` row is written (TRD §4.12). Signing in with a password is never blocked by a PIN lock.
 
 ### 4.5 Walk-in check-in
 
@@ -868,7 +868,7 @@ stateDiagram-v2
 | 57 | A module is switched off for the branch | Its menu items are gone; its routes show 51 | Checked on every request from the `branches` flags. |
 | 58 | The board finds no match for a search | "No room or guest matches …" with "Clear search" (4c) | The search covers room numbers and names of checked-in guests only. |
 | 59 | A shift is 4 hours past its end time | The bar (54) says payments are stopped until the shift is closed; Save on a payment or charge is refused (10, 11, 19) | The shift is `shift_stale_block_minutes` (240) past its defined end. Payments and charges are refused; closing (22–25) and force close (49) still work. Nothing is moved to another shift. |
-| 60 | Ten wrong PINs in a row on one computer | Every PIN pad on that computer (3, 14, 25) shows that PIN entry is locked and asks for a supervisor or admin | A `pin_locks` row for the `device_key`. A supervisor or admin unlocks it with their own password (`approvals`, `unlock_pin`). Password sign-in still works. |
+| 60 | Ten wrong PINs in a row on one computer | Every PIN pad on that computer (3, 14, 25) shows that PIN entry is locked and asks for a supervisor or admin | A `pin_locks` row for the `device_key`. A supervisor or admin unlocks it with their own password (`pin_locks.unlocked_by`, `audit_logs`). Password sign-in still works. |
 | 61 | Someone tries to export a preview | Export is disabled on the page; a direct request is refused (37b) | The shift has no `z_no`; no file is produced and no `print_logs` row is written. |
 | 62 | Close the day while a shift of that date is open | "Close the day" is disabled and the line says which shift is still open (38b) | `CloseDay` refuses; nothing is written. |
 | 63 | Close the day while an earlier day is not closed | The line names the earlier day (38b) | `CloseDay` refuses; days close in date order. |
@@ -1000,7 +1000,7 @@ Each is built only from shared components in [DESIGN_SYSTEM §5](DESIGN_SYSTEM.m
 | Reservation detail | "Open" on 57 | Side sheet of screen 5 | `CancelReservation`, `RefundNoShow` with screen 14 |
 | Force-close count | "Force close" on 49 | Count table of screen 23, then screen 14 | `ForceCloseShift` |
 | Release hold | "Release room" on 5 and 7 | ConfirmDialog (Building blocks) | `ReleaseKioskHold` |
-| PIN entry locked | Any PIN pad (3, 14, 25) on a locked computer | Sign-in card of screen 1, for the supervisor's or admin's own username and password | writes `pin_locks`, `approvals` (`unlock_pin`) |
+| PIN entry locked | Any PIN pad (3, 14, 25) on a locked computer | Sign-in card of screen 1, for the supervisor's or admin's own username and password | writes `pin_locks` (`unlocked_at`, `unlocked_by`), `audit_logs` |
 | Reason lists | Branch settings (46) | Transfer reasons and expense categories on 46, with two switches per row: needs a note, needs a supervisor | writes `reasons`, `transfer_reasons`, `expense_categories`, `audit_logs` |
 | VAT settings | Branch settings (46) | A settings group of 46: on or off, rate, TIN, registered name | writes `branches`, `audit_logs` |
 | Day paper | After "Close the day" on 38b | Z-report paper of 37b with the day number | read only; print and export logged |
