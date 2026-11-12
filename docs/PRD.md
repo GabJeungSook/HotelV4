@@ -570,7 +570,7 @@ Development and staging are seeded with one made-up branch, "Hotel Dalisay GenSa
 
 | Phase | Name | What is delivered | Features |
 |---|---|---|---|
-| 0 | Setup | Laravel 12 project, Nuxt UI v4, @vueuse/core, date-fns, dompdf, toolchain, CI commands, empty layouts | — |
+| 0 | Setup | Laravel 13 project, Nuxt UI v4, @vueuse/core, date-fns, dompdf, toolchain, CI commands, empty layouts | — |
 | 1 | Design system and components | Nuxt UI themed with the Homi tokens, our own components, the chart kit, gallery at `/dev/components` | — |
 | 2 | Data layer | All 31 migrations (including the version 1.1 tables, 000026–000031), models, enums, seeders | — |
 | 3 | Core logic with tests | Pricing, cash maths, every Action, report service, invariants, PIN attempts and locks with the approvals, with the tests in [TRD](TRD.md) §10 | Logic of F1 (PINs), F2–F12, F15 |

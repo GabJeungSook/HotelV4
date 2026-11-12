@@ -18,7 +18,7 @@ There is no app code yet. Phase 0 creates the Laravel project **in this folder**
 
 ## 2. One-time setup on your machine
 
-1. Install PHP 8.3, Composer, Node 22 and MySQL 8.0 (Laragon or Herd covers all of it on Windows).
+1. Install PHP 8.3 or newer, Composer, Node 22 or newer and MySQL 8.0 (Laragon or Herd covers all of it on Windows).
 2. Create two empty databases:
 
 ```sql
@@ -38,7 +38,7 @@ Run them in order, one per session. Start a fresh session for each phase so the 
 **Phase 0 — Setup**
 
 ```
-Do Phase 0 of docs/ROADMAP.md. Read CLAUDE.md and docs/TRD.md §1–3 and §11 first. Create the Laravel 12 project in this folder without removing docs/, CLAUDE.md or START_HERE.md. Install and configure Nuxt UI v4 for Vue + Vite + Inertia, @vueuse/core, date-fns and barryvdh/laravel-dompdf exactly as listed in TRD §2; do not add any chart, table or date-picker library. Run the full check. Stop when the Phase 0 checklist and its "Done when" line are met, and tell me exactly what passed.
+Do Phase 0 of docs/ROADMAP.md. Read CLAUDE.md and docs/TRD.md §1–3 and §11 first. Create the Laravel 13 project in this folder without removing docs/, CLAUDE.md or START_HERE.md. Install and configure Nuxt UI v4 for Vue + Vite + Inertia, @vueuse/core, date-fns and barryvdh/laravel-dompdf exactly as listed in TRD §2; do not add any chart, table or date-picker library. Run the full check. Stop when the Phase 0 checklist and its "Done when" line are met, and tell me exactly what passed.
 ```
 
 **Phase 1 — Design system and components**

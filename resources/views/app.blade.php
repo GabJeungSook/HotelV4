@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title inertia>{{ config('hotel.name') }}</title>
+        <title data-inertia>{{ config('hotel.name') }}</title>
         @routes
         @vite(['resources/css/app.css', 'resources/js/app.ts'])
         @inertiaHead

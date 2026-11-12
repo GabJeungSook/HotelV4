@@ -25,12 +25,12 @@ Build one phase at a time, in order. A phase is done only when every box is tick
 
 ## Phase 0 — Setup
 
-- [x] Create the Laravel 12 project in this folder (keep `docs/`, `CLAUDE.md`, `START_HERE.md`)
-- [x] Install Inertia 2 + Vue 3 + Vite, Tailwind 4, Ziggy, qrcode
+- [x] Create the Laravel 13 project in this folder (keep `docs/`, `CLAUDE.md`, `START_HERE.md`)
+- [x] Install Inertia 3 + Vue 3 + Vite 8, Tailwind 4, Ziggy, qrcode
 - [x] Install and configure Nuxt UI v4 (`@nuxt/ui` ^4) for Vue + Vite + Inertia: Vite plugin, CSS import, `UApp` at the root of every layout; Lucide icons come with it
 - [x] Install `@vueuse/core` and `date-fns`
 - [x] Install `barryvdh/laravel-dompdf`; a test renders a one-line Blade view to a PDF response
-- [x] Install Pest 3, Pint, Larastan (level 6), Vitest + Vue Test Utils
+- [x] Install Pest 4, Pint, Larastan (level 6), Vitest 5 + Vue Test Utils
 - [x] `.env.example` for MySQL `hotelv4` and `hotelv4_test`; `phpunit.xml` pointing tests at `hotelv4_test`
 - [x] Queue, cache and session on the database driver
 - [x] `config/hotel.php` with the constants in TRD §3.9

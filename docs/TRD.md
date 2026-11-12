@@ -12,8 +12,8 @@
 | Item | Requirement |
 |---|---|
 | PHP | 8.3 |
-| Framework | Laravel 12 |
-| Frontend | Inertia.js 2 + Vue 3 (`<script setup>`, Composition API), Vite 6 |
+| Framework | Laravel 13 |
+| Frontend | Inertia.js 3 + Vue 3 (`<script setup>`, Composition API), Vite 8 |
 | Styling | Tailwind CSS 4 and **Nuxt UI v4**, themed with the tokens in [DESIGN_SYSTEM](DESIGN_SYSTEM.md). The reference for the level of finish is the owner's Euphoria system (`v2-pos` branch). |
 | Database | MySQL 8.0, InnoDB, `utf8mb4_unicode_ci`. Tests run on MySQL too (generated columns and CHECK constraints must be exercised), never SQLite. |
 | Queue / scheduler | `database` queue driver; Laravel scheduler via one cron entry |
@@ -28,8 +28,8 @@
 
 | Package | Purpose |
 |---|---|
-| `laravel/framework` ^12 | Backend |
-| `inertiajs/inertia-laravel` ^2, `@inertiajs/vue3` ^2 | Server-driven Vue pages |
+| `laravel/framework` ^13 | Backend |
+| `inertiajs/inertia-laravel` ^3, `@inertiajs/vue3` ^3 | Server-driven Vue pages |
 | `vue` ^3.5 | UI |
 | `tailwindcss` ^4, `@tailwindcss/vite` | Styling |
 | `tightenco/ziggy` ^2 | Route names in Vue |
@@ -39,11 +39,11 @@
 | `barryvdh/laravel-dompdf` | PDF export of the Z-report and other reports |
 | `qrcode` (npm) | QR on kiosk hold screen (30) |
 | IBM Plex Sans, IBM Plex Mono and Newsreader font files (one-time source: `@fontsource/ibm-plex-sans`, `@fontsource/ibm-plex-mono`, `@fontsource/newsreader`) | The woff2 files are copied into `resources/fonts/` and committed (ASSETS §1); the packages are not kept in `package.json` |
-| `pestphp/pest` ^3, `pestphp/pest-plugin-laravel` | Tests |
+| `pestphp/pest` ^4, `pestphp/pest-plugin-laravel` ^4 | Tests |
 | `laravel/pint` | Code style |
-| `larastan/larastan` ^3 | Static analysis, level 6 |
-| `vitest`, `@vue/test-utils` | Component tests for shared components |
-| `@vitejs/plugin-vue`, `laravel-vite-plugin`, `concurrently`, `typescript`, `happy-dom` (dev only) | Build and test tooling: Vue SFCs in Vite, Laravel's Vite integration, `composer run dev`, `<script setup lang="ts">` type checking, the DOM Vitest runs in |
+| `larastan/larastan` ^3.15 | Static analysis, level 6 |
+| `vitest` ^5, `@vue/test-utils` | Component tests for shared components |
+| `@vitejs/plugin-vue`, `laravel-vite-plugin`, `concurrently`, `typescript` ^6, `happy-dom` (dev only) | Build and test tooling: Vue SFCs in Vite, Laravel's Vite integration, `composer run dev`, `<script setup lang="ts">` type checking, the DOM Vitest runs in. TypeScript stays on 6: Vue's SFC compiler cannot use TypeScript 7 to resolve imported prop types. |
 
 **Not allowed:** any chart, table or date-picker library (charts are our own small components in `Components/Charts`), Livewire, Jetstream, Fortify, Filament, WireUI, Pusher or any websocket service, `spatie/laravel-permission`, `spatie/laravel-db-snapshots`, Debugbar in production, any paid API or SaaS, any package that edits ledger rows. Adding a dependency needs a line in this table first.
 

@@ -19,11 +19,11 @@ Homi is a hotel management system for small Philippine hotels, inns and pension 
 
 ## Stack
 
-- PHP 8.3, Laravel 12, MySQL 8.0 (tests on MySQL too, never SQLite)
-- Inertia 2 + Vue 3 (`<script setup>`), Vite 6, Tailwind CSS 4
+- PHP 8.3, Laravel 13, MySQL 8.0 (tests on MySQL too, never SQLite)
+- Inertia 3 + Vue 3 (`<script setup>`), Vite 8, Tailwind CSS 4
 - Nuxt UI v4 (component library, Lucide icons included), `@vueuse/core`, `date-fns`
 - `barryvdh/laravel-dompdf` for PDF exports
-- Pest 3, Pint, Larastan level 6, Vitest
+- Pest 4, Pint, Larastan level 6, Vitest 5
 - Database driver for queue, cache and sessions; polling for live updates
 
 **Not allowed:** Livewire, Jetstream, Fortify, Filament, WireUI, websockets or Pusher, spatie/laravel-permission, any chart, table or date-picker library, any paid service, any new package not listed in TRD §2.

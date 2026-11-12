@@ -4,7 +4,7 @@
 |---|---|
 | Version | 1.1 · 11 November 2026 (Nuxt UI, dashboards, Z-report, shift safeguards) |
 | Status | Approved with mockup v3 |
-| Stack | Laravel 12 · Inertia 2 · Vue 3 · Tailwind CSS 4 · Nuxt UI v4 · MySQL 8.0 |
+| Stack | Laravel 13 · Inertia 3 · Vue 3 · Tailwind CSS 4 · Nuxt UI v4 · MySQL 8.0 |
 | Wins on conflict | No. Table, column and enum names: [DATABASE_SCHEMA](DATABASE_SCHEMA.md). Technical rules, formulas, budgets: [TRD](TRD.md). Screen numbers and look: [mockup](mockup/hotel-mockup.html). |
 | Related | [PRD](PRD.md) · [TRD](TRD.md) · [DATABASE_SCHEMA](DATABASE_SCHEMA.md) · [APP_FLOW](APP_FLOW.md) · [DESIGN_SYSTEM](DESIGN_SYSTEM.md) · [ASSETS](ASSETS.md) · [ROADMAP](ROADMAP.md) · [mockup](mockup/hotel-mockup.html) |
 
@@ -39,7 +39,7 @@ flowchart LR
     end
 
     subgraph Server["One Linux server"]
-        APP["Laravel 12 app<br/>Inertia 2 + Vue 3 + Nuxt UI pages"]
+        APP["Laravel 13 app<br/>Inertia 3 + Vue 3 + Nuxt UI pages"]
         PDF["dompdf<br/>inside the app, no outside service"]
         DB[("MySQL 8.0<br/>ledgers, summary tables,<br/>sessions, cache, jobs")]
         SCH["Scheduler (one cron entry)<br/>and database queue worker"]

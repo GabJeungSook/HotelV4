@@ -15,8 +15,8 @@ it('renders the blank Inertia page at /', function (): void {
 it('serves the first visit through the app Blade root with Ziggy routes', function (): void {
     $this->get('/')
         ->assertOk()
-        ->assertSee('<title inertia>Homi</title>', false)
-        ->assertSee('data-page=', false)
+        ->assertSee('<title data-inertia>Homi</title>', false)
+        ->assertSee('<script data-page="app" type="application/json">', false)
         ->assertSee('Ziggy.routes', false)
         ->assertSee('"welcome":{"uri":"\/"', false);
 });
