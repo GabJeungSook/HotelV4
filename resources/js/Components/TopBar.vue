@@ -35,9 +35,9 @@ function search(): void {
 
 <template>
     <header data-shell class="flex h-14 shrink-0 items-center gap-2.5 border-b border-default bg-default px-7 max-md:px-4">
-        <UButton class="md:hidden" color="neutral" variant="ghost" icon="i-lucide-menu" aria-label="Open menu" @click="emit('menu')" />
+        <UButton class="md:hidden" color="neutral" variant="ghost" icon="i-solar-hamburger-menu-linear" aria-label="Open menu" @click="emit('menu')" />
         <nav aria-label="Breadcrumb" class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden text-[12.5px] whitespace-nowrap text-muted">
-            <UIcon name="i-lucide-house" class="size-[15px] shrink-0 text-faint" aria-hidden="true" />
+            <UIcon name="i-solar-home-2-bold-duotone" class="size-[15px] shrink-0 text-faint" aria-hidden="true" />
             <template v-for="(c, i) in crumbs" :key="`${c}-${i}`">
                 <span class="text-(--hm-line-strong)" aria-hidden="true">/</span>
                 <span v-if="i === crumbs.length - 1" class="truncate font-medium text-primary" aria-current="page">{{ c }}</span>
@@ -48,7 +48,7 @@ function search(): void {
             <UInput
                 ref="box"
                 v-model="q"
-                icon="i-lucide-search"
+                icon="i-solar-magnifer-linear"
                 placeholder="Search rooms or guests"
                 aria-label="Search rooms or guests"
                 size="md"
@@ -67,7 +67,7 @@ function search(): void {
             class="hm-focus grid size-[34px] shrink-0 place-items-center rounded-lg border border-default bg-default text-muted hover:bg-elevated"
             aria-label="Notifications"
         >
-            <UIcon name="i-lucide-bell" class="size-4" aria-hidden="true" />
+            <UIcon name="i-solar-bell-bold-duotone" class="size-4" aria-hidden="true" />
         </Link>
     </header>
 </template>

@@ -113,9 +113,9 @@ function times(row: Row): string {
 
 function menu(row: Row): DropdownMenuItem[] {
     return [
-        { label: 'Shift report', icon: 'i-lucide-file-text', onSelect: () => router.visit(route('reports.shift', row.id)) },
-        { label: row.status === 'closed' ? 'Z-report' : 'Z-report preview', icon: 'i-lucide-list', onSelect: () => router.visit(route('reports.z', row.id)) },
-        { label: 'Rooms by floor', icon: 'i-lucide-bed', onSelect: () => router.visit(route('reports.z', { shift: row.id, tab: 'rooms' })) },
+        { label: 'Shift report', icon: 'i-solar-document-text-bold-duotone', onSelect: () => router.visit(route('reports.shift', row.id)) },
+        { label: row.status === 'closed' ? 'Z-report' : 'Z-report preview', icon: 'i-solar-list-bold-duotone', onSelect: () => router.visit(route('reports.z', row.id)) },
+        { label: 'Rooms by floor', icon: 'i-solar-bed-bold-duotone', onSelect: () => router.visit(route('reports.z', { shift: row.id, tab: 'rooms' })) },
     ];
 }
 
@@ -143,9 +143,9 @@ const filtered = computed(() => !!(props.filters.period || props.filters.desk ||
                 <DateRangeChip :from="filters.from" :to="filters.to" placeholder="Any date" @change="(r) => visit({ from: r.from, to: r.to })" />
             </template>
             <div v-else class="flex h-8 items-center gap-1 rounded-control border border-default bg-default px-1 text-[12.5px] font-semibold whitespace-nowrap text-highlighted shadow-xs">
-                <UButton color="neutral" variant="ghost" size="xs" icon="i-lucide-chevron-left" aria-label="Previous week" @click="visit({ week: calendar?.previous ?? null })" />
+                <UButton color="neutral" variant="ghost" size="xs" icon="i-solar-alt-arrow-left-linear" aria-label="Previous week" @click="visit({ week: calendar?.previous ?? null })" />
                 <span class="px-1">{{ weekLabel }}</span>
-                <UButton color="neutral" variant="ghost" size="xs" icon="i-lucide-chevron-right" aria-label="Next week" @click="visit({ week: calendar?.next ?? null })" />
+                <UButton color="neutral" variant="ghost" size="xs" icon="i-solar-alt-arrow-right-linear" aria-label="Next week" @click="visit({ week: calendar?.next ?? null })" />
             </div>
         </FilterBar>
 
@@ -187,7 +187,7 @@ const filtered = computed(() => !!(props.filters.period || props.filters.desk ||
                             <td><StatusLabel v-bind="state(row)" /></td>
                             <td class="text-right" @click.stop>
                                 <UDropdownMenu :items="menu(row)" :content="{ align: 'end' }">
-                                    <UButton color="neutral" variant="ghost" size="xs" icon="i-lucide-ellipsis" :aria-label="`More for ${z(row.z_no)} ${row.period_name} ${day(row.business_date)}`" />
+                                    <UButton color="neutral" variant="ghost" size="xs" icon="i-solar-menu-dots-linear" :aria-label="`More for ${z(row.z_no)} ${row.period_name} ${day(row.business_date)}`" />
                                 </UDropdownMenu>
                             </td>
                         </tr>

@@ -12,7 +12,7 @@ import StatusLabel from '@/Components/StatusLabel.vue';
 
 <template>
     <div class="flex flex-1 flex-col items-center justify-center" role="alert" data-test="kiosk-offline">
-        <EmptyState size="kiosk" tone="bad" icon="i-lucide-wifi-off" title="The kiosk is offline" text="Please check in at the front desk. We are sorry for the trouble." />
+        <EmptyState size="kiosk" tone="bad" icon="i-solar-wi-fi-router-bold-duotone" title="The kiosk is offline" text="Please check in at the front desk. We are sorry for the trouble." />
         <StatusLabel size="lg" label="Trying to reconnect…" />
     </div>
 </template>

@@ -178,9 +178,9 @@ function approve(payload: { approver_id: number; pin: string }): void {
 <template>
     <FrontDeskLayout current="reservations" title="Reservations">
         <PageHeader>
-            <UButton icon="i-lucide-plus" label="New reservation" @click="router.visit(route('reservations.create'))" />
+            <UButton icon="i-solar-add-square-linear" label="New reservation" @click="router.visit(route('reservations.create'))" />
         </PageHeader>
-        <UAlert v-if="flash.error && !approving" color="error" variant="subtle" icon="i-lucide-triangle-alert" class="mb-3" :description="flash.error.message" />
+        <UAlert v-if="flash.error && !approving" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" class="mb-3" :description="flash.error.message" />
 
         <div class="mb-3 flex flex-wrap items-center gap-3">
             <div role="tablist" aria-label="Reservations" class="flex gap-1 rounded-md bg-grey-50 p-1">

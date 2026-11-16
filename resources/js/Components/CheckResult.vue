@@ -27,20 +27,20 @@ const value = (figure: string, n: number) => (isCount(figure) ? String(n) : form
 </script>
 
 <template>
-    <UAlert v-if="problems.length" class="mt-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" title="This report does not add up. Do not sign it; report it to the admin.">
+    <UAlert v-if="problems.length" class="mt-4" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" title="This report does not add up. Do not sign it; report it to the admin.">
         <template #description>
             <ul class="mt-1 list-disc ps-4 text-sm">
                 <li v-for="(p, i) in problems" :key="i">{{ p }}</li>
             </ul>
         </template>
     </UAlert>
-    <UAlert v-if="differences.length" class="mt-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :title="`The check found ${differences.length} figure(s) that differ from the ledger.`">
+    <UAlert v-if="differences.length" class="mt-4" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :title="`The check found ${differences.length} figure(s) that differ from the ledger.`">
         <template #description>
             <ul class="mt-1 list-disc ps-4 text-sm">
                 <li v-for="(d, i) in differences.slice(0, 12)" :key="i">{{ d.label }} · {{ d.figure }}: frozen {{ value(d.figure, d.stored) }}, ledger {{ value(d.figure, d.recomputed) }}</li>
             </ul>
         </template>
     </UAlert>
-    <UAlert v-else-if="checked && passText && !problems.length" class="mt-4" color="success" variant="subtle" icon="i-lucide-check" :description="passText" />
-    <UAlert v-else-if="!checked && idleText" class="mt-4" color="neutral" variant="subtle" icon="i-lucide-info" :description="idleText" />
+    <UAlert v-else-if="checked && passText && !problems.length" class="mt-4" color="success" variant="subtle" icon="i-solar-check-circle-linear" :description="passText" />
+    <UAlert v-else-if="!checked && idleText" class="mt-4" color="neutral" variant="subtle" icon="i-solar-info-circle-bold-duotone" :description="idleText" />
 </template>

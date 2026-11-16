@@ -178,8 +178,8 @@ function submit(approval?: { approver_id: number; pin: string }): void {
 <template>
     <FrontDeskLayout current="stock" title="Stock">
         <PageHeader>
-            <UButton color="neutral" variant="outline" icon="i-lucide-trash-2" label="Record wastage" @click="start('wastage')" />
-            <UButton icon="i-lucide-plus" label="Receive stock" @click="start('receive')" />
+            <UButton color="neutral" variant="outline" icon="i-solar-trash-bin-trash-bold-duotone" label="Record wastage" @click="start('wastage')" />
+            <UButton icon="i-solar-add-square-linear" label="Receive stock" @click="start('receive')" />
         </PageHeader>
 
         <section class="overflow-hidden rounded-card border border-default bg-default">
@@ -214,7 +214,7 @@ function submit(approval?: { approver_id: number; pin: string }): void {
                     </tr>
                 </tbody>
             </table>
-            <EmptyState v-else icon="i-lucide-package" title="No products keep stock" text="Products are added on the admin Products page." />
+            <EmptyState v-else icon="i-solar-box-bold-duotone" title="No products keep stock" text="Products are added on the admin Products page." />
         </section>
         <p class="mt-3 text-[13px] text-muted">
             Opening is the count when the {{ period_name }} shift opened ({{ formatDateTime(opened_at, 'time') }}). Each number opens the list of movements behind it.
@@ -250,7 +250,7 @@ function submit(approval?: { approver_id: number; pin: string }): void {
         <UModal v-model:open="open" :title="form.kind === 'receive' ? 'Receive stock' : 'Record wastage'" :ui="{ content: 'max-w-[420px]' }">
             <template #body>
                 <form id="stock-form" class="flex flex-col gap-4" @submit.prevent="save">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
                     <UFormField label="Product" name="product_id" :error="form.errors.product_id">
                         <USelectMenu v-model="form.product_id" :items="productItems" value-key="value" placeholder="Pick a product" class="w-full" />
                     </UFormField>
@@ -272,7 +272,7 @@ function submit(approval?: { approver_id: number; pin: string }): void {
                         v-if="form.kind === 'wastage' && reason?.needs_manager"
                         color="warning"
                         variant="subtle"
-                        icon="i-lucide-lock"
+                        icon="i-solar-lock-bold-duotone"
                         :description="`${reason.name} needs a supervisor PIN before it is saved.`"
                     />
                 </form>
@@ -282,7 +282,7 @@ function submit(approval?: { approver_id: number; pin: string }): void {
                     <UButton color="neutral" variant="ghost" label="Cancel" @click="open = false" />
                     <UButton
                         :label="form.kind === 'receive' ? 'Save delivery' : 'Save wastage'"
-                        :icon="form.kind === 'wastage' && reason?.needs_manager ? 'i-lucide-lock' : undefined"
+                        :icon="form.kind === 'wastage' && reason?.needs_manager ? 'i-solar-lock-bold-duotone' : undefined"
                         :disabled="!canSave"
                         :loading="form.processing"
                         type="submit"

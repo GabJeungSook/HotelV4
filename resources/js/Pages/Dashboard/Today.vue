@@ -117,8 +117,8 @@ const stayText = (kind: string, q: number | null) => (q === null ? '' : formatSt
 <template>
     <FrontDeskLayout current="today" title="Today">
         <PageHeader>
-            <UButton :to="route('board')" color="neutral" variant="outline" icon="i-lucide-bed" label="Room board" />
-            <UButton :to="route('board', { tab: 'vacant' })" icon="i-lucide-plus" label="Walk-in check-in" />
+            <UButton :to="route('board')" color="neutral" variant="outline" icon="i-solar-bed-bold-duotone" label="Room board" />
+            <UButton :to="route('board', { tab: 'vacant' })" icon="i-solar-add-square-linear" label="Walk-in check-in" />
         </PageHeader>
         <StatCards :items="cards" />
         <div class="mt-4 grid grid-cols-1 items-start gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_300px]">

@@ -132,7 +132,7 @@ const tableRows = [
 ];
 
 function saveToast(): void {
-    toast.add({ title: 'Payment saved. Change ₱85.00', color: 'success', icon: 'i-lucide-check' });
+    toast.add({ title: 'Payment saved. Change ₱85.00', color: 'success', icon: 'i-solar-check-circle-linear' });
 }
 
 const reportDate = ref('2026-11-11');
@@ -155,8 +155,8 @@ const reportDate = ref('2026-11-11');
             </div>
             <div class="mt-3 flex flex-wrap gap-2">
                 <UButton label="Saving…" loading />
-                <UButton icon="i-lucide-lock" label="Needs approval" />
-                <UButton color="neutral" variant="outline" icon="i-lucide-plus" label="Add" />
+                <UButton icon="i-solar-lock-bold-duotone" label="Needs approval" />
+                <UButton color="neutral" variant="outline" icon="i-solar-add-square-linear" label="Add" />
             </div>
             <div class="mt-3 flex flex-wrap items-center gap-2">
                 <UButton size="sm" label="sm 28" color="neutral" variant="outline" />
@@ -192,7 +192,7 @@ const reportDate = ref('2026-11-11');
                     <MoneyInput :model-value="45000" disabled />
                 </UFormField>
                 <UFormField label="Search" name="g-search">
-                    <UInput icon="i-lucide-search" placeholder="Room or guest" class="w-full" />
+                    <UInput icon="i-solar-magnifer-linear" placeholder="Room or guest" class="w-full" />
                 </UFormField>
             </div>
             <p class="mt-2 text-xs text-muted">Values: {{ formatMoney(focusedAmount) }} · {{ formatMoney(cash) }} (integer centavos {{ cash }})</p>
@@ -225,10 +225,10 @@ const reportDate = ref('2026-11-11');
                 <StatusLabel tone="warn" size="lg" label="6:42 left" />
             </div>
             <div class="mt-3 flex flex-col gap-2">
-                <UAlert color="success" icon="i-lucide-check" title="Success" />
-                <UAlert color="warning" icon="i-lucide-triangle-alert" title="Warning, can continue" />
-                <UAlert color="error" icon="i-lucide-triangle-alert" title="Error, cannot continue" role="alert" />
-                <UAlert color="info" icon="i-lucide-clock" title="Note: check-out is at 12:00 NN" />
+                <UAlert color="success" icon="i-solar-check-circle-linear" title="Success" />
+                <UAlert color="warning" icon="i-solar-danger-triangle-bold-duotone" title="Warning, can continue" />
+                <UAlert color="error" icon="i-solar-danger-triangle-bold-duotone" title="Error, cannot continue" role="alert" />
+                <UAlert color="info" icon="i-solar-clock-circle-bold-duotone" title="Note: check-out is at 12:00 NN" />
             </div>
         </Block>
 
@@ -291,7 +291,7 @@ const reportDate = ref('2026-11-11');
             />
             <div class="mt-3 flex flex-wrap gap-2">
                 <UButton color="neutral" variant="outline" label="Open dialog" @click="openConfirm(false)" />
-                <UButton color="neutral" variant="outline" icon="i-lucide-lock" label="Open with reasons" @click="openConfirm(true)" />
+                <UButton color="neutral" variant="outline" icon="i-solar-lock-bold-duotone" label="Open with reasons" @click="openConfirm(true)" />
             </div>
             <p v-if="lastResult" class="mt-2 text-xs break-all text-muted" role="status">{{ lastResult }}</p>
         </Block>
@@ -324,12 +324,12 @@ const reportDate = ref('2026-11-11');
         </Block>
 
         <Block title="Empty and loading — EmptyState, USkeleton">
-            <EmptyState title="No expenses yet this shift" text="Expenses you record appear here." icon="i-lucide-list" />
-            <EmptyState title="All rooms are clean" icon="i-lucide-check" tone="ok" action-label="Check again" />
+            <EmptyState title="No expenses yet this shift" text="Expenses you record appear here." icon="i-solar-list-bold-duotone" />
+            <EmptyState title="All rooms are clean" icon="i-solar-check-circle-linear" tone="ok" action-label="Check again" />
             <EmptyState compact title="No sales in this period" />
             <USkeleton class="mt-2 h-3.5 w-full" />
             <USkeleton class="mt-1.5 h-3.5 w-[70%]" />
-            <EmptyState v-if="kiosk" title="All rooms are taken" text="Please ask at the front desk." icon="i-lucide-bed" size="kiosk" />
+            <EmptyState v-if="kiosk" title="All rooms are taken" text="Please ask at the front desk." icon="i-solar-bed-bold-duotone" size="kiosk" />
         </Block>
 
         <Block title="Slip — 80 mm thermal (preview)">

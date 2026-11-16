@@ -108,7 +108,7 @@ function print(): void {
                 @pdf="r.download(route('reports.z.pdf', shift.id))"
                 @csv="r.download(route('reports.z.csv', shift.id))"
             />
-            <UButton color="neutral" variant="outline" icon="i-lucide-printer" label="Print" :disabled="paper.preview" :loading="r.log.printing.value" @click="print" />
+            <UButton color="neutral" variant="outline" icon="i-solar-printer-2-bold-duotone" label="Print" :disabled="paper.preview" :loading="r.log.printing.value" @click="print" />
         </PageHeader>
 
         <div class="no-print mb-4">
@@ -123,7 +123,7 @@ function print(): void {
             </template>
 
             <template v-else-if="tab === 'rooms' && rooms">
-                <div class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+                <div class="overflow-x-auto rounded-card border border-default bg-default p-4">
                     <table class="dtable">
                         <thead>
                             <tr>
@@ -157,7 +157,7 @@ function print(): void {
 
                 <section v-for="chart in rooms.charts" :key="chart.floor" class="mt-5">
                     <h5 class="mb-2 font-semibold text-highlighted">{{ chart.floor }} · room chart</h5>
-                    <div class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+                    <div class="overflow-x-auto rounded-card border border-default bg-default p-4">
                         <table class="dtable zchart">
                             <thead>
                                 <tr>
@@ -205,7 +205,7 @@ function print(): void {
                 <p class="mt-2 text-[13px] text-muted">Red rows are forwarded guests: their room charge was a sale of the shift that checked them in, so it shows 0 here.</p>
             </template>
 
-            <div v-else-if="tab === 'cleaning' && cleaning" class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+            <div v-else-if="tab === 'cleaning' && cleaning" class="overflow-x-auto rounded-card border border-default bg-default p-4">
                 <p v-if="cleaning.length === 0" class="px-3 py-6 text-sm text-muted">No room was queued or cleaned during this shift.</p>
                 <table v-else class="dtable">
                     <thead>
@@ -238,7 +238,7 @@ function print(): void {
             </div>
 
             <template v-else-if="tab === 'housekeeping' && housekeeping">
-                <div class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+                <div class="overflow-x-auto rounded-card border border-default bg-default p-4">
                     <p v-if="housekeeping.people.length === 0" class="px-3 py-6 text-sm text-muted">No room was cleaned during this shift.</p>
                     <table v-else class="dtable">
                         <thead>
@@ -263,7 +263,7 @@ function print(): void {
                 </div>
             </template>
 
-            <div v-else-if="tab === 'stocks' && stocks" class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+            <div v-else-if="tab === 'stocks' && stocks" class="overflow-x-auto rounded-card border border-default bg-default p-4">
                 <table class="dtable">
                     <thead>
                         <tr>
@@ -288,7 +288,7 @@ function print(): void {
                 </table>
             </div>
 
-            <div v-else-if="tab === 'expenses' && expenses" class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+            <div v-else-if="tab === 'expenses' && expenses" class="overflow-x-auto rounded-card border border-default bg-default p-4">
                 <p v-if="expenses.length === 0" class="px-3 py-6 text-sm text-muted">No cash entries on this shift.</p>
                 <table v-else class="dtable">
                     <thead>

@@ -55,8 +55,8 @@ function next(): void {
 <template>
     <KioskLayout title="Choose a room">
         <StepBar :steps="['Room', 'Your name', 'Pay at desk']" :current="1" size="kiosk" />
-        <UAlert v-if="flash.error" class="mt-6 text-xl" color="warning" variant="subtle" icon="i-lucide-info" :description="flash.error.message" data-test="kiosk-taken" />
-        <UAlert v-else-if="notice" class="mt-6 text-xl" color="warning" variant="subtle" icon="i-lucide-info" :description="notice" data-test="kiosk-taken" />
+        <UAlert v-if="flash.error" class="mt-6 text-xl" color="warning" variant="subtle" icon="i-solar-info-circle-bold-duotone" :description="flash.error.message" data-test="kiosk-taken" />
+        <UAlert v-else-if="notice" class="mt-6 text-xl" color="warning" variant="subtle" icon="i-solar-info-circle-bold-duotone" :description="notice" data-test="kiosk-taken" />
 
         <h1 class="mt-8 text-[40px] leading-[48px] font-semibold text-highlighted">Choose a room type</h1>
         <div class="mt-6 flex flex-col gap-4">

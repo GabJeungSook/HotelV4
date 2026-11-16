@@ -29,7 +29,7 @@ export function useFlashToast(): void {
                 title: t.title ?? t.message,
                 description: t.title ? t.message : undefined,
                 color: t.type === 'error' ? 'error' : t.type === 'info' ? 'info' : 'success',
-                icon: t.type === 'error' ? 'i-lucide-triangle-alert' : t.type === 'info' ? 'i-lucide-info' : 'i-lucide-check',
+                icon: t.type === 'error' ? 'i-solar-danger-triangle-bold-duotone' : t.type === 'info' ? 'i-solar-info-circle-bold-duotone' : 'i-solar-check-circle-linear',
             });
         },
         { immediate: true },

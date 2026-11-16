@@ -112,7 +112,7 @@ const valid = computed(() => form.name.trim() !== '' && form.category.trim() !==
     <AdminLayout current="products" :title="`Products · ${total}`">
         <Head title="Products" />
         <PageHeader>
-            <UButton icon="i-lucide-plus" label="Add product" @click="edit(null)" />
+            <UButton icon="i-solar-add-square-linear" label="Add product" @click="edit(null)" />
         </PageHeader>
 
         <div class="mb-4">
@@ -127,8 +127,8 @@ const valid = computed(() => form.name.trim() !== '' && form.category.trim() !==
             />
         </div>
 
-        <section class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
-            <EmptyState v-if="products.length === 0" icon="i-lucide-package" title="No products of this kind yet" text="Add the first one." />
+        <section class="overflow-x-auto rounded-card border border-default bg-default p-4">
+            <EmptyState v-if="products.length === 0" icon="i-solar-box-bold-duotone" title="No products of this kind yet" text="Add the first one." />
             <table v-else class="dtable w-full">
                 <thead>
                     <tr>
@@ -158,7 +158,7 @@ const valid = computed(() => form.name.trim() !== '' && form.category.trim() !==
         <UModal v-model:open="open" :title="editing ? editing.name : 'Add product'" :ui="{ content: 'max-w-[460px]' }">
             <template #body>
                 <div class="flex flex-col gap-4">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
                     <UFormField label="Name" :error="form.errors.name"><UInput v-model="form.name" maxlength="60" class="w-full" autofocus /></UFormField>
                     <div class="grid grid-cols-2 gap-3">
                         <UFormField label="Kind" :error="form.errors.kind">

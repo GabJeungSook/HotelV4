@@ -4,6 +4,7 @@ import { router } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import AttentionList, { type AttentionRow } from '@/Components/AttentionList.vue';
 import StackedBars from '@/Components/Charts/StackedBars.vue';
+import DateRange from '@/Components/DateRange.vue';
 import FilterSelect from '@/Components/FilterSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import PeriodSegments from '@/Components/PeriodSegments.vue';
@@ -26,6 +27,7 @@ import BackOfficeLayout from '@/Layouts/BackOfficeLayout.vue';
  */
 const props = defineProps<{
     period: string;
+    range: { from: string; to: string };
     overviewPeriod: string;
     filters: { week: string | null; desk: number | null; band: string | null };
     branch: { id: number; name: string; status: string };
@@ -57,13 +59,26 @@ const { failed, refresh, updatedText } = useDashboard(groups, props.polling, at)
 
 /** Every control writes the query string, so Back steps through them; only the affected cards reload. */
 function visit(changes: Record<string, unknown>, only?: string[]): void {
-    const query = { period: props.period === 'today' ? null : props.period, overview: props.overviewPeriod === 'week' ? null : props.overviewPeriod, ...props.filters, ...changes };
+    const custom = props.period === 'custom';
+    const query = {
+        period: custom || props.period === 'today' ? null : props.period,
+        overview: props.overviewPeriod === 'week' ? null : props.overviewPeriod,
+        ...props.filters,
+        ...(custom ? { from: props.range.from, to: props.range.to } : {}),
+        ...changes,
+    };
     const clean = Object.fromEntries(Object.entries(query).filter(([, v]) => v !== null && v !== undefined && v !== '' && v !== 'all'));
     router.get(route('dashboard'), clean as never, { preserveScroll: true, preserveState: true, only });
 }
 
 const period = ref(props.period);
-watch(period, (p) => visit({ period: p === 'today' ? null : p }));
+watch(period, (p) => p !== 'custom' && visit({ period: p === 'today' ? null : p, from: null, to: null }));
+
+/** A specific from–to range (cleared when a preset is picked). */
+function applyRange(from: string, to: string): void {
+    period.value = 'custom';
+    visit({ period: null, from, to });
+}
 const periods = [
     { value: 'today', label: 'Today' },
     { value: 'yesterday', label: 'Yesterday' },
@@ -125,9 +140,10 @@ const weekLabel = computed(() => (props.calendar ? formatDateRange(`${props.cale
         <PageHeader>
             <span v-if="failed" class="flex items-center gap-2 text-xs text-default" role="status">
                 Could not refresh.
-                <UButton color="primary" variant="link" size="sm" icon="i-lucide-refresh-cw" label="Retry" class="px-0" @click="refresh" />
+                <UButton color="primary" variant="link" size="sm" icon="i-solar-refresh-linear" label="Retry" class="px-0" @click="refresh" />
             </span>
             <PeriodSegments v-model="period" :items="periods" />
+            <DateRange :from="range.from" :to="range.to" @apply="applyRange" />
         </PageHeader>
 
         <div class="grid grid-cols-1 items-start gap-4 min-[1180px]:grid-cols-[minmax(0,1fr)_384px]">
@@ -209,9 +225,9 @@ const weekLabel = computed(() => (props.calendar ? formatDateRange(`${props.cale
                     </div>
                     <template v-if="calendar">
                         <div class="flex h-8 items-center justify-between rounded-control border border-default bg-default px-1 text-[12.5px] font-semibold text-highlighted">
-                            <UButton color="neutral" variant="ghost" size="xs" icon="i-lucide-chevron-left" aria-label="Previous week" @click="visit({ week: calendar.previous }, ['calendar', 'filters'])" />
+                            <UButton color="neutral" variant="ghost" size="xs" icon="i-solar-alt-arrow-left-linear" aria-label="Previous week" @click="visit({ week: calendar.previous }, ['calendar', 'filters'])" />
                             <span>{{ weekLabel }}</span>
-                            <UButton color="neutral" variant="ghost" size="xs" icon="i-lucide-chevron-right" aria-label="Next week" @click="visit({ week: calendar.next }, ['calendar', 'filters'])" />
+                            <UButton color="neutral" variant="ghost" size="xs" icon="i-solar-alt-arrow-right-linear" aria-label="Next week" @click="visit({ week: calendar.next }, ['calendar', 'filters'])" />
                         </div>
                         <div class="my-2.5 flex flex-wrap items-center justify-between gap-2">
                             <FilterSelect v-model="desk" :items="deskItems" label="Front desk" />

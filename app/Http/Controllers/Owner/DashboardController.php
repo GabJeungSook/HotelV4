@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\User;
 use App\Services\AttentionList;
+use App\Services\Dashboard\Period;
 use App\Services\DashboardService;
 use App\Support\Clock;
 use Illuminate\Http\Request;
@@ -30,24 +31,34 @@ final class DashboardController extends Controller
         $all = Branch::query()->withoutGlobalScopes()->orderBy('name')->get(['id', 'name', 'status', 'payment_methods']);
         $chosen = $request->filled('branch') && $request->query('branch') !== 'all' ? $all->firstWhere('id', $request->integer('branch')) : null;
         $ids = $chosen === null ? $all->pluck('id')->map(fn ($id): int => (int) $id)->all() : [$chosen->id];
-        $period = in_array($request->query('period'), self::PERIODS, true) ? (string) $request->query('period') : 'today';
+        // A specific from–to range overrides the named period when both dates are valid.
+        $from = $request->query('from');
+        $to = $request->query('to');
+        $custom = is_string($from) && is_string($to)
+            && preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) === 1 && preg_match('/^\d{4}-\d{2}-\d{2}$/', $to) === 1;
+        $period = $custom ? 'custom' : (in_array($request->query('period'), self::PERIODS, true) ? (string) $request->query('period') : 'today');
+        $periods = fn (): array => $custom ? $dash->customPeriods($ids, (string) $from, (string) $to) : $dash->periods($ids, $period);
+        $range = $custom
+            ? ['from' => (string) $from, 'to' => (string) $to]
+            : (fn (Period $p): array => ['from' => $p->from, 'to' => $p->to])(Period::of($period, $clock->localDate()));
         $methods = collect($chosen === null ? $all : [$chosen])->flatMap(fn (Branch $b): array => $b->payment_methods->map(fn (PaymentMethod $m): string => $m->value)->all())->unique()->values()->all();
 
         return Inertia::render('Dashboard/Owner', [
             'period' => $period,
+            'range' => $range,
             'branch' => $chosen === null ? 'all' : $chosen->id,
             'branches' => $all->map(fn (Branch $b): array => ['id' => $b->id, 'name' => $b->name])->values()->all(),
             'polling' => (int) config('hotel.polling.dashboard', 30),
             'kpis' => Inertia::defer(fn (): array => [
-                'totals' => $dash->totals($dash->periods($ids, $period)),
+                'totals' => $dash->totals($periods()),
                 'rooms' => $dash->roomsNow($ids),
                 'branches' => count($ids),
                 'at' => $clock->now()->toIso8601String(),
             ], 'kpis'),
             'charts' => Inertia::defer(fn (): array => [
                 'branches' => $dash->salesByBranch($ids),
-                'methods' => $dash->paymentsByMethod($dash->periods($ids, $period), $methods),
-                'overview' => $dash->salesOverview($dash->periods($ids, $period), $methods),
+                'methods' => $dash->paymentsByMethod($periods(), $methods),
+                'overview' => $dash->salesOverview($periods(), $methods),
             ], 'charts'),
             'now' => Inertia::defer(fn (): array => ['branches' => $dash->branchesNow($ids)], 'now'),
             'attention' => Inertia::defer(fn (): array => [

@@ -95,14 +95,14 @@ const labels = ['29', '30', '31', '1', '2', '3', '4', '5', '6', '7', '8', '9', '
         <Block title="Page header — PageHeader" wide>
             <p class="mb-3 text-xs text-muted">The shell draws the ink icon tile, the title and the sub-line above every page. A page adds its actions, a status after the title and its own sub-line:</p>
             <div class="flex items-center gap-3.5 rounded-[10px] border border-dashed border-accented p-4">
-                <span class="grid size-11 shrink-0 place-items-center rounded-[11px] bg-tile text-on-tile" aria-hidden="true"><UIcon name="i-lucide-banknote" class="size-[21px]" /></span>
+                <span class="grid size-11 shrink-0 place-items-center rounded-[11px] bg-tile text-on-tile" aria-hidden="true"><UIcon name="i-solar-banknote-2-bold-duotone" class="size-[21px]" /></span>
                 <div class="min-w-0 flex-1">
                     <p class="flex items-center gap-2 text-[21px] leading-[1.2] font-semibold tracking-[-0.018em] text-highlighted">Shift report <StatusLabel tone="ok" label="Closed" /></p>
                     <small class="mt-[3px] block text-[12.5px] text-muted">Hotel Dalisay GenSan · AM shift, Wed 11 Nov</small>
                 </div>
                 <div class="flex gap-2">
-                    <UButton color="neutral" variant="outline" icon="i-lucide-download" label="Export PDF" />
-                    <UButton icon="i-lucide-printer" label="Print slip" />
+                    <UButton color="neutral" variant="outline" icon="i-solar-download-minimalistic-bold-duotone" label="Export PDF" />
+                    <UButton icon="i-solar-printer-2-bold-duotone" label="Print slip" />
                 </div>
             </div>
             <PageHeader title="In-page title (wizard steps)">

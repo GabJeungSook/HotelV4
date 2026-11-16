@@ -69,14 +69,14 @@ const branchLabel = computed(() => (props.branch?.name ?? '').replace(/^Hotel\s+
 
 const userItems = computed<DropdownMenuItem[][]>(() => [
     [{ label: props.user?.role ?? '', type: 'label' }],
-    ...(props.canSwitch ? [[{ label: 'Switch user', icon: 'i-lucide-users', onSelect: () => emit('switchUser') }]] : []),
+    ...(props.canSwitch ? [[{ label: 'Switch user', icon: 'i-solar-users-group-rounded-bold-duotone', onSelect: () => emit('switchUser') }]] : []),
     [
         { label: 'Appearance', type: 'label' },
-        { label: 'Light', icon: 'i-lucide-sun', type: 'checkbox', checked: mode.value === 'light', onSelect: () => (mode.value = 'light') },
-        { label: 'Dark', icon: 'i-lucide-moon', type: 'checkbox', checked: mode.value === 'dark', onSelect: () => (mode.value = 'dark') },
-        { label: 'System', icon: 'i-lucide-monitor', type: 'checkbox', checked: mode.value === 'auto', onSelect: () => (mode.value = 'auto') },
+        { label: 'Light', icon: 'i-solar-sun-2-bold-duotone', type: 'checkbox', checked: mode.value === 'light', onSelect: () => (mode.value = 'light') },
+        { label: 'Dark', icon: 'i-solar-moon-bold-duotone', type: 'checkbox', checked: mode.value === 'dark', onSelect: () => (mode.value = 'dark') },
+        { label: 'System', icon: 'i-solar-monitor-bold-duotone', type: 'checkbox', checked: mode.value === 'auto', onSelect: () => (mode.value = 'auto') },
     ],
-    [{ label: 'Sign out', icon: 'i-lucide-log-out', onSelect: () => emit('signOut') }],
+    [{ label: 'Sign out', icon: 'i-solar-logout-2-bold-duotone', onSelect: () => emit('signOut') }],
 ]);
 
 const linkBase =
@@ -95,7 +95,7 @@ const linkBase =
                     :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
                     @click="emit('toggle')"
                 >
-                    <UIcon name="i-lucide-panel-left" class="size-3.5" aria-hidden="true" />
+                    <UIcon name="i-solar-sidebar-minimalistic-linear" class="size-3.5" aria-hidden="true" />
                 </button>
             </UTooltip>
         </div>
@@ -108,7 +108,7 @@ const linkBase =
                         <b class="block truncate text-[13px] leading-tight font-semibold">{{ branchLabel }}</b>
                         <small v-if="branch.sub" class="block truncate text-[11.5px] leading-tight text-muted">{{ branch.sub }}</small>
                     </span>
-                    <UIcon name="i-lucide-chevrons-up-down" class="ms-auto size-3.5 shrink-0 text-faint" aria-hidden="true" />
+                    <UIcon name="i-solar-sort-vertical-linear" class="ms-auto size-3.5 shrink-0 text-faint" aria-hidden="true" />
                 </button>
             </UDropdownMenu>
             <div v-else class="flex items-center gap-2.5 rounded-[10px] border border-default px-2.5 py-2 shadow-xs" data-branch-switcher>
@@ -134,7 +134,7 @@ const linkBase =
                         >
                             <UIcon :name="item.icon" class="size-[17px] shrink-0" :class="hasCurrentChild(item) ? 'text-primary' : 'text-muted'" aria-hidden="true" />
                             <span class="truncate">{{ item.label }}</span>
-                            <UIcon :name="open[item.key] ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'" class="ms-auto size-3.5 text-faint" aria-hidden="true" />
+                            <UIcon :name="open[item.key] ? 'i-solar-alt-arrow-up-linear' : 'i-solar-alt-arrow-down-linear'" class="ms-auto size-3.5 text-faint" aria-hidden="true" />
                         </button>
                         <ul v-if="open[item.key]" class="mt-0.5 mb-1 ms-4 flex flex-col gap-0.5 border-l border-default ps-3">
                             <li v-for="child in item.children" :key="child.key">
@@ -179,7 +179,7 @@ const linkBase =
                     :aria-label="collapsed ? 'Notifications' : undefined"
                     @click="emit('navigate')"
                 >
-                    <UIcon name="i-lucide-bell" class="size-[17px] shrink-0 text-muted" aria-hidden="true" />
+                    <UIcon name="i-solar-bell-bold-duotone" class="size-[17px] shrink-0 text-muted" aria-hidden="true" />
                     <span v-if="!collapsed">Notifications</span>
                     <span v-if="notifications.count && !collapsed" class="ms-auto rounded-full bg-bad px-1.5 text-[10.5px] leading-[17px] font-semibold text-on-primary">{{ notifications.count }}</span>
                 </Link>
@@ -191,7 +191,7 @@ const linkBase =
                     :aria-label="collapsed ? 'Help' : undefined"
                     @click="emit('help')"
                 >
-                    <UIcon name="i-lucide-circle-help" class="size-[17px] shrink-0 text-muted" aria-hidden="true" />
+                    <UIcon name="i-solar-question-circle-bold-duotone" class="size-[17px] shrink-0 text-muted" aria-hidden="true" />
                     <span v-if="!collapsed">Help</span>
                 </button>
             </UTooltip>
@@ -209,7 +209,7 @@ const linkBase =
                         <b class="block truncate text-[13px] leading-tight font-semibold">{{ user.name }}</b>
                         <small class="block truncate text-[11.5px] text-muted">{{ user.role }}</small>
                     </span>
-                    <UIcon v-if="!collapsed" name="i-lucide-ellipsis-vertical" class="ms-auto size-4 shrink-0 text-faint" aria-hidden="true" />
+                    <UIcon v-if="!collapsed" name="i-solar-menu-dots-linear" class="ms-auto size-4 shrink-0 text-faint" aria-hidden="true" />
                 </button>
             </UDropdownMenu>
         </div>

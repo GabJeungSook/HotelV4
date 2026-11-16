@@ -63,7 +63,7 @@ const where = computed<{ item?: NavItem; parent?: NavItem; heading?: string }>((
 });
 
 const pageTitle = computed(() => props.title ?? where.value.item?.label ?? '');
-const icon = computed(() => where.value.parent?.icon ?? where.value.item?.icon ?? 'i-lucide-list');
+const icon = computed(() => where.value.parent?.icon ?? where.value.item?.icon ?? 'i-solar-list-bold-duotone');
 // The nav item's sub-line belongs to the page of that name only, not to pages below it (37 under 37a).
 const sub = computed(() => state.sub ?? props.subtitle ?? (pageTitle.value === where.value.item?.label ? where.value.item?.subtitle : null) ?? props.branch?.name ?? '');
 const crumbs = computed(() => {
@@ -132,7 +132,7 @@ const keys = [
             </TopBar>
             <slot name="bars" />
             <div v-if="header && pageTitle" class="no-print flex items-center gap-3.5 px-7 pt-6 max-md:px-4" data-page-header>
-                <span class="grid size-11 shrink-0 place-items-center rounded-[11px] bg-tile text-on-tile" aria-hidden="true">
+                <span class="grid size-11 shrink-0 place-items-center rounded-[11px] bg-primary text-inverted" aria-hidden="true">
                     <UIcon :name="icon" class="size-[21px]" />
                 </span>
                 <div class="min-w-0 flex-1">

@@ -57,10 +57,10 @@ const subtitle = computed(() => {
                     </tr>
                 </tbody>
             </table>
-            <EmptyState v-else icon="i-lucide-brush-cleaning" title="No rooms cleaned yet today" text="Finished rooms show up here." />
+            <EmptyState v-else icon="i-solar-broom-bold-duotone" title="No rooms cleaned yet today" text="Finished rooms show up here." />
         </section>
         <p v-if="late_note" class="text-[13px] text-muted">{{ late_note }}</p>
         <!-- Not in the mockup: the phone needs a way out at the end of the day (the header keeps its two links). -->
-        <UButton class="mt-4 h-12 justify-center" size="xl" color="neutral" variant="ghost" block icon="i-lucide-log-out" label="Sign out" @click="router.post(route('logout'))" />
+        <UButton class="mt-4 h-12 justify-center" size="xl" color="neutral" variant="ghost" block icon="i-solar-logout-2-bold-duotone" label="Sign out" @click="router.post(route('logout'))" />
     </PhoneLayout>
 </template>

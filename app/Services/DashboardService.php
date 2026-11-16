@@ -60,6 +60,20 @@ final class DashboardService
         return $out;
     }
 
+    /**
+     * A chosen "from–to" range: the same calendar dates for every branch (TRD §4.11, dashboard
+     * date range). Read the same way as the named periods, compared with the window just before.
+     *
+     * @param  list<int>  $branchIds
+     * @return array<int, Period>
+     */
+    public function customPeriods(array $branchIds, string $from, string $to): array
+    {
+        $period = Period::ofRange($from, $to);
+
+        return array_fill_keys($branchIds, $period);
+    }
+
     /* ------------------------------------------------------------------ KPIs */
 
     /**

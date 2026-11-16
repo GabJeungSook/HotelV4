@@ -77,11 +77,11 @@ onMounted(() => setTimeout(printSlip, 300));
 
 <template>
     <FrontDeskLayout current="board" title="Room board">
-        <UAlert class="no-print mb-4" color="success" variant="subtle" icon="i-lucide-check" :title="`${stay.guest_name} is checked in to Room ${stay.room}.`" :description="giveText" />
+        <UAlert class="no-print mb-4" color="success" variant="subtle" icon="i-solar-check-circle-linear" :title="`${stay.guest_name} is checked in to Room ${stay.room}.`" :description="giveText" />
         <div class="grid grid-cols-[minmax(0,340px)_220px] gap-6 max-[700px]:grid-cols-1">
             <Slip :header="slip.header" title="CHECK-IN SLIP" :sections="sections" :footer="footer" :reprint="log.reprint.value" />
             <div class="no-print flex flex-col gap-2">
-                <UButton block icon="i-lucide-printer" label="Print again" :loading="log.printing.value" @click="printSlip" />
+                <UButton block icon="i-solar-printer-2-bold-duotone" label="Print again" :loading="log.printing.value" @click="printSlip" />
                 <UAlert v-if="log.error.value" color="error" variant="subtle" :description="log.error.value" />
                 <UButton block color="neutral" variant="outline" label="Open guest folio" @click="router.visit(route('stays.show', stay.id))" />
                 <UButton block color="neutral" variant="ghost" label="Back to room board" @click="router.visit(route('board'))" />

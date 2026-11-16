@@ -73,7 +73,7 @@ function openCell(col: Column, rowKey: string, label: string): void {
     <BackOfficeLayout current="daily" :title="`Daily sales · ${heading}`">
         <Head title="Daily sales" />
         <PageHeader>
-            <UButton v-if="can_close && report.range === 'day'" color="neutral" variant="outline" label="Close the day" icon="i-lucide-lock" :to="route('reports.daily.close', { date: report.date })" />
+            <UButton v-if="can_close && report.range === 'day'" color="neutral" variant="outline" label="Close the day" icon="i-solar-lock-bold-duotone" :to="route('reports.daily.close', { date: report.date })" />
             <ExportMenu csv :print="false" @csv="r.download(route('reports.daily', { date: report.date, range: report.range, export: 'csv' }))" />
         </PageHeader>
 
@@ -91,7 +91,7 @@ function openCell(col: Column, rowKey: string, label: string): void {
         </div>
 
         <div class="print-a4">
-            <div class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+            <div class="overflow-x-auto rounded-card border border-default bg-default p-4">
                 <p v-if="report.columns.length === 0" class="px-3 py-6 text-sm text-muted">No shifts on this {{ report.range === 'day' ? 'date' : report.range }}.</p>
                 <table v-else class="dtable">
                     <thead>

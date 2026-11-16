@@ -38,13 +38,13 @@ const error = computed(() => (flash.value.error && !['pin_invalid', 'pin_locked'
         :title="step === 4 && handover ? `Hand over to ${handover.next_period} shift` : `Close ${period.period_name} shift · ${formatDateTime(`${period.business_date}T12:00:00+08:00`, 'shiftDate')}`"
     >
         <StepBar class="mb-4" :steps="['Check', 'Count cash', 'Result', 'Handover']" :current="step" />
-        <UAlert v-if="error" class="mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="error" data-close-error />
+        <UAlert v-if="error" class="mb-4" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="error" data-close-error />
         <UAlert
             v-if="step > 1 && closing_by"
             class="mb-4"
             color="info"
             variant="subtle"
-            icon="i-lucide-lock"
+            icon="i-solar-lock-bold-duotone"
             :description="`${closing_by} started the close. Payments, charges and cash entries of the ${period.period_name} shift are paused.`"
         />
 

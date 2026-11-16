@@ -41,11 +41,11 @@ void props;
         <PeriodSegments v-if="views && view !== undefined" v-model="view" :items="views" label="View" />
         <slot />
         <span class="flex-1" />
-        <UIcon v-if="loading" name="i-lucide-loader-circle" class="size-4 animate-spin text-muted" aria-label="Loading" />
+        <UIcon v-if="loading" name="i-solar-restart-linear" class="size-4 animate-spin text-muted" aria-label="Loading" />
         <UInput
             v-if="searchable"
             v-model="typed"
-            icon="i-lucide-search"
+            icon="i-solar-magnifer-linear"
             :placeholder="searchPlaceholder"
             :aria-label="searchPlaceholder"
             size="md"

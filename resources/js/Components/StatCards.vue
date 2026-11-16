@@ -2,11 +2,13 @@
 import { computed } from 'vue';
 import StatCard, { type StatCardProps } from './StatCard.vue';
 
-/** The KPI row (DESIGN_SYSTEM §0, §5.2): 3, 4 or 5 equal columns by item count, 2 under 768 px, 16 px gap. */
+/** The KPI row (DESIGN_SYSTEM §0, §5.2): 3–6 equal columns by item count, 2 under 768 px, 16 px gap. */
 const props = withDefaults(defineProps<{ items?: StatCardProps[]; loading?: boolean; count?: number }>(), { items: () => [], loading: false, count: 4 });
 
 const n = computed(() => (props.loading ? props.count : props.items.length));
-const columns = computed(() => (n.value >= 5 ? 'md:grid-cols-5 hm-k5' : n.value === 3 ? 'md:grid-cols-3' : 'md:grid-cols-4'));
+const columns = computed(() =>
+    n.value >= 6 ? 'md:grid-cols-3 lg:grid-cols-6 hm-k5' : n.value === 5 ? 'md:grid-cols-5 hm-k5' : n.value === 3 ? 'md:grid-cols-3' : 'md:grid-cols-4',
+);
 </script>
 
 <template>

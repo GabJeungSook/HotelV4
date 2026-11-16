@@ -60,10 +60,10 @@ function submit(): void {
     <OwnerLayout current="branches" title="Add branch">
         <Head title="Add branch" />
         <PageHeader>
-            <UButton color="neutral" variant="ghost" icon="i-lucide-arrow-left" label="Branches" :to="route('owner.branches.index')" />
+            <UButton color="neutral" variant="ghost" icon="i-solar-arrow-left-linear" label="Branches" :to="route('owner.branches.index')" />
         </PageHeader>
 
-        <UAlert v-if="flash.error" color="error" variant="subtle" icon="i-lucide-triangle-alert" class="mb-4" :description="flash.error.message" />
+        <UAlert v-if="flash.error" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" class="mb-4" :description="flash.error.message" />
 
         <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="submit">
             <section class="rounded-card border border-default bg-default p-5">

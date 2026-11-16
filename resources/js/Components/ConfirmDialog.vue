@@ -101,7 +101,7 @@ function confirm(): void {
         <div class="flex w-full flex-col gap-2">
             <div class="flex justify-end gap-2">
                 <UButton color="neutral" variant="ghost" :label="cancelLabel" data-action="cancel" @click="cancel" />
-                <UButton :color="confirmColor" variant="solid" :label="confirmLabel" :icon="approval ? 'i-lucide-lock' : undefined" data-action="confirm" @click="confirm" />
+                <UButton :color="confirmColor" variant="solid" :label="confirmLabel" :icon="approval ? 'i-solar-lock-bold-duotone' : undefined" data-action="confirm" @click="confirm" />
             </div>
             <p v-if="loggedAs" class="text-right text-xs text-muted">Recorded as {{ loggedAs }}</p>
         </div>

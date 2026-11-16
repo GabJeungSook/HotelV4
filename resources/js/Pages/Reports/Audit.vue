@@ -65,7 +65,7 @@ const chip: Record<string, string> = { voids: 'Void', transfers: 'Transfer', can
             <USelect v-model="person" :items="people" value-key="value" class="w-52" aria-label="Done by" />
         </div>
 
-        <div class="print-a4 overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+        <div class="print-a4 overflow-x-auto rounded-card border border-default bg-default p-4">
             <EmptyState v-if="report.rows.length === 0" title="Nothing to show" text="No void, cancel, transfer or shift action matches these filters." />
             <table v-else class="dtable">
                 <thead>

@@ -46,53 +46,53 @@ final class Navigation
     {
         return [
             ['layout' => 'frontdesk', 'heading' => 'Front desk', 'items' => [
-                ['key' => 'today', 'label' => 'Today', 'route' => 'today', 'icon' => 'i-lucide-clock', 'roles' => self::FRONT, 'subtitle' => 'What needs doing in the next half hour'],
-                ['key' => 'board', 'label' => 'Room board', 'route' => 'board', 'icon' => 'i-lucide-bed', 'roles' => self::FRONT],
-                ['key' => 'reservations', 'label' => 'Reservations', 'route' => 'reservations.index', 'icon' => 'i-lucide-calendar', 'roles' => self::FRONT, 'module' => 'reservations_enabled', 'subtitle' => 'Bookings and their arrival times'],
-                ['key' => 'pos', 'label' => 'Point of sale', 'route' => 'pos.index', 'icon' => 'i-lucide-shopping-cart', 'roles' => self::FRONT, 'module' => 'pos_enabled', 'subtitle' => 'Sell to a room or for cash'],
-                ['key' => 'stock', 'label' => 'Stock', 'route' => 'stock.index', 'icon' => 'i-lucide-package', 'roles' => self::FRONT, 'module' => 'pos_enabled', 'subtitle' => 'Counts, deliveries and adjustments'],
+                ['key' => 'today', 'label' => 'Today', 'route' => 'today', 'icon' => 'i-solar-clock-circle-bold-duotone', 'roles' => self::FRONT, 'subtitle' => 'What needs doing in the next half hour'],
+                ['key' => 'board', 'label' => 'Room board', 'route' => 'board', 'icon' => 'i-solar-bed-bold-duotone', 'roles' => self::FRONT],
+                ['key' => 'reservations', 'label' => 'Reservations', 'route' => 'reservations.index', 'icon' => 'i-solar-calendar-bold-duotone', 'roles' => self::FRONT, 'module' => 'reservations_enabled', 'subtitle' => 'Bookings and their arrival times'],
+                ['key' => 'pos', 'label' => 'Point of sale', 'route' => 'pos.index', 'icon' => 'i-solar-cart-large-bold-duotone', 'roles' => self::FRONT, 'module' => 'pos_enabled', 'subtitle' => 'Sell to a room or for cash'],
+                ['key' => 'stock', 'label' => 'Stock', 'route' => 'stock.index', 'icon' => 'i-solar-box-bold-duotone', 'roles' => self::FRONT, 'module' => 'pos_enabled', 'subtitle' => 'Counts, deliveries and adjustments'],
             ]],
             ['layout' => 'frontdesk', 'heading' => 'Shift', 'items' => [
-                ['key' => 'shift', 'label' => 'Shift cash', 'route' => 'shift.show', 'icon' => 'i-lucide-banknote', 'roles' => self::FRONT],
+                ['key' => 'shift', 'label' => 'Shift cash', 'route' => 'shift.show', 'icon' => 'i-solar-banknote-2-bold-duotone', 'roles' => self::FRONT],
             ]],
             ['layout' => 'owner', 'heading' => 'Overview', 'items' => [
-                ['key' => 'owner', 'label' => 'Dashboard', 'route' => 'owner.dashboard', 'icon' => 'i-lucide-chart-column', 'roles' => [Role::Owner]],
-                ['key' => 'branches', 'label' => 'Branches', 'route' => 'owner.branches.index', 'icon' => 'i-lucide-building-2', 'roles' => [Role::Owner]],
-                ['key' => 'summary', 'label' => 'Owner summary', 'route' => 'owner.summary', 'icon' => 'i-lucide-list', 'roles' => [Role::Owner]],
+                ['key' => 'owner', 'label' => 'Dashboard', 'route' => 'owner.dashboard', 'icon' => 'i-solar-chart-2-bold-duotone', 'roles' => [Role::Owner]],
+                ['key' => 'branches', 'label' => 'Branches', 'route' => 'owner.branches.index', 'icon' => 'i-solar-buildings-2-bold-duotone', 'roles' => [Role::Owner]],
+                ['key' => 'summary', 'label' => 'Owner summary', 'route' => 'owner.summary', 'icon' => 'i-solar-list-bold-duotone', 'roles' => [Role::Owner]],
             ]],
             ['layout' => 'backoffice', 'heading' => 'Overview', 'items' => [
-                ['key' => 'dashboard', 'label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'i-lucide-chart-column', 'roles' => [Role::Admin, Role::Backoffice, Role::Supervisor, Role::Owner]],
-                ['key' => 'attention', 'label' => 'Attention', 'route' => 'admin.exceptions', 'icon' => 'i-lucide-triangle-alert', 'roles' => [Role::Admin, Role::Supervisor, Role::Owner]],
+                ['key' => 'dashboard', 'label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'i-solar-chart-2-bold-duotone', 'roles' => [Role::Admin, Role::Backoffice, Role::Supervisor, Role::Owner]],
+                ['key' => 'attention', 'label' => 'Attention', 'route' => 'admin.exceptions', 'icon' => 'i-solar-danger-triangle-bold-duotone', 'roles' => [Role::Admin, Role::Supervisor, Role::Owner]],
             ]],
             ['layout' => 'admin', 'heading' => 'Setup', 'items' => [
-                ['key' => 'rooms', 'label' => 'Rooms', 'route' => 'admin.rooms', 'icon' => 'i-lucide-bed', 'roles' => [Role::Admin, Role::Owner]],
-                ['key' => 'rates', 'label' => 'Rates', 'route' => 'admin.rates', 'icon' => 'i-lucide-banknote', 'roles' => [Role::Admin, Role::Owner]],
-                ['key' => 'products', 'label' => 'Products', 'route' => 'admin.products', 'icon' => 'i-lucide-package', 'roles' => [Role::Admin, Role::Owner]],
-                ['key' => 'users', 'label' => 'Users', 'route' => 'admin.users', 'icon' => 'i-lucide-user', 'roles' => [Role::Admin, Role::Owner]],
-                ['key' => 'settings', 'label' => 'Settings', 'route' => 'admin.settings', 'icon' => 'i-lucide-settings', 'roles' => [Role::Admin, Role::Owner]],
+                ['key' => 'rooms', 'label' => 'Rooms', 'route' => 'admin.rooms', 'icon' => 'i-solar-bed-bold-duotone', 'roles' => [Role::Admin, Role::Owner]],
+                ['key' => 'rates', 'label' => 'Rates', 'route' => 'admin.rates', 'icon' => 'i-solar-banknote-2-bold-duotone', 'roles' => [Role::Admin, Role::Owner]],
+                ['key' => 'products', 'label' => 'Products', 'route' => 'admin.products', 'icon' => 'i-solar-box-bold-duotone', 'roles' => [Role::Admin, Role::Owner]],
+                ['key' => 'users', 'label' => 'Users', 'route' => 'admin.users', 'icon' => 'i-solar-user-bold-duotone', 'roles' => [Role::Admin, Role::Owner]],
+                ['key' => 'settings', 'label' => 'Settings', 'route' => 'admin.settings', 'icon' => 'i-solar-settings-bold-duotone', 'roles' => [Role::Admin, Role::Owner]],
             ]],
             ['layout' => 'backoffice', 'heading' => 'Reports', 'items' => [
-                ['key' => 'reports', 'label' => 'Report hub', 'route' => 'reports.index', 'icon' => 'i-lucide-list', 'roles' => self::BACK, 'parent' => 'reports-menu'],
-                ['key' => 'shift-reports', 'label' => 'Shift reports', 'route' => 'reports.shifts', 'icon' => 'i-lucide-banknote', 'roles' => self::REPORTS_SHORT, 'parent' => 'reports-menu', 'subtitle' => 'Closed shifts are read from their frozen totals'],
-                ['key' => 'z-report', 'label' => 'Z-report', 'route' => 'reports.z.latest', 'icon' => 'i-lucide-list', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
-                ['key' => 'daily', 'label' => 'Daily sales', 'route' => 'reports.daily', 'icon' => 'i-lucide-chart-column', 'roles' => self::REPORTS_SHORT, 'parent' => 'reports-menu'],
-                ['key' => 'occupancy', 'label' => 'Occupancy', 'route' => 'reports.occupancy', 'icon' => 'i-lucide-bed', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
-                ['key' => 'housekeeping-report', 'label' => 'Housekeeping', 'route' => 'reports.housekeeping', 'icon' => 'i-lucide-brush', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
-                ['key' => 'inventory', 'label' => 'Inventory', 'route' => 'reports.inventory', 'icon' => 'i-lucide-package', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
-                ['key' => 'audit', 'label' => 'Audit trail', 'route' => 'reports.audit', 'icon' => 'i-lucide-lock', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
-                ['key' => 'stats', 'label' => 'Stats', 'route' => 'stats', 'icon' => 'i-lucide-trending-up', 'roles' => [Role::Admin, Role::Owner], 'subtitle' => 'Totals and trends for any period'],
+                ['key' => 'reports', 'label' => 'Report hub', 'route' => 'reports.index', 'icon' => 'i-solar-list-bold-duotone', 'roles' => self::BACK, 'parent' => 'reports-menu'],
+                ['key' => 'shift-reports', 'label' => 'Shift reports', 'route' => 'reports.shifts', 'icon' => 'i-solar-banknote-2-bold-duotone', 'roles' => self::REPORTS_SHORT, 'parent' => 'reports-menu', 'subtitle' => 'Closed shifts are read from their frozen totals'],
+                ['key' => 'z-report', 'label' => 'Z-report', 'route' => 'reports.z.latest', 'icon' => 'i-solar-list-bold-duotone', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
+                ['key' => 'daily', 'label' => 'Daily sales', 'route' => 'reports.daily', 'icon' => 'i-solar-chart-2-bold-duotone', 'roles' => self::REPORTS_SHORT, 'parent' => 'reports-menu'],
+                ['key' => 'occupancy', 'label' => 'Occupancy', 'route' => 'reports.occupancy', 'icon' => 'i-solar-bed-bold-duotone', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
+                ['key' => 'housekeeping-report', 'label' => 'Housekeeping', 'route' => 'reports.housekeeping', 'icon' => 'i-solar-broom-bold-duotone', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
+                ['key' => 'inventory', 'label' => 'Inventory', 'route' => 'reports.inventory', 'icon' => 'i-solar-box-bold-duotone', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
+                ['key' => 'audit', 'label' => 'Audit trail', 'route' => 'reports.audit', 'icon' => 'i-solar-lock-bold-duotone', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
+                ['key' => 'stats', 'label' => 'Stats', 'route' => 'stats', 'icon' => 'i-solar-graph-up-bold-duotone', 'roles' => [Role::Admin, Role::Owner], 'subtitle' => 'Totals and trends for any period'],
             ]],
             ['layout' => 'backoffice', 'heading' => 'Analytics', 'items' => [
-                ['key' => 'stats', 'label' => 'Stats', 'route' => 'stats', 'icon' => 'i-lucide-trending-up', 'roles' => self::REPORTS_FULL, 'subtitle' => 'Totals and trends for any period'],
+                ['key' => 'stats', 'label' => 'Stats', 'route' => 'stats', 'icon' => 'i-solar-graph-up-bold-duotone', 'roles' => self::REPORTS_FULL, 'subtitle' => 'Totals and trends for any period'],
             ]],
             ['layout' => 'owner', 'heading' => 'People', 'items' => [
-                ['key' => 'owners', 'label' => 'Owner accounts', 'route' => 'owner.accounts', 'icon' => 'i-lucide-user', 'roles' => [Role::Owner]],
+                ['key' => 'owners', 'label' => 'Owner accounts', 'route' => 'owner.accounts', 'icon' => 'i-solar-user-bold-duotone', 'roles' => [Role::Owner]],
             ]],
             ['layout' => 'housekeeping', 'heading' => 'Housekeeping', 'items' => [
-                ['key' => 'housekeeping', 'label' => 'Queue', 'route' => 'housekeeping.index', 'icon' => 'i-lucide-brush', 'roles' => [Role::Housekeeper], 'module' => 'housekeeping_enabled'],
+                ['key' => 'housekeeping', 'label' => 'Queue', 'route' => 'housekeeping.index', 'icon' => 'i-solar-broom-bold-duotone', 'roles' => [Role::Housekeeper], 'module' => 'housekeeping_enabled'],
             ]],
             ['layout' => 'kiosk', 'heading' => 'Kiosk', 'items' => [
-                ['key' => 'kiosk', 'label' => 'Kiosk', 'route' => 'kiosk.index', 'icon' => 'i-lucide-monitor', 'roles' => [Role::Kiosk], 'module' => 'kiosk_enabled'],
+                ['key' => 'kiosk', 'label' => 'Kiosk', 'route' => 'kiosk.index', 'icon' => 'i-solar-monitor-bold-duotone', 'roles' => [Role::Kiosk], 'module' => 'kiosk_enabled'],
             ]],
         ];
     }
@@ -137,7 +137,7 @@ final class Navigation
 
                 if (! isset($parents[$parent])) {
                     $parents[$parent] = count($items);
-                    $items[] = ['key' => $parent, 'label' => 'Reports', 'route' => $entry['route'], 'icon' => 'i-lucide-list', 'subtitle' => null, 'children' => []];
+                    $items[] = ['key' => $parent, 'label' => 'Reports', 'route' => $entry['route'], 'icon' => 'i-solar-list-bold-duotone', 'subtitle' => null, 'children' => []];
                 }
 
                 $items[$parents[$parent]]['children'][] = $entry;

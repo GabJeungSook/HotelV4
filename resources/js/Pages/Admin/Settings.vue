@@ -286,7 +286,7 @@ function saveReason(): void {
             <section v-for="g in CARD_GROUPS" :key="g" class="rounded-card border border-default bg-default px-[18px] py-4" :data-group="g">
                 <div class="mb-2 flex items-center">
                     <h3 class="text-[15px] font-semibold text-highlighted">{{ GROUP_TITLE[g] }}</h3>
-                    <UButton class="ms-auto" color="neutral" variant="ghost" size="sm" icon="i-lucide-pencil" label="Edit" @click="edit(g)" />
+                    <UButton class="ms-auto" color="neutral" variant="ghost" size="sm" icon="i-solar-pen-bold-duotone" label="Edit" @click="edit(g)" />
                 </div>
                 <dl class="flex flex-col">
                     <div v-for="[k, v] in summary[g]" :key="k" class="flex items-baseline justify-between gap-3 border-b border-default py-1.5 text-[13px] last:border-b-0">
@@ -299,7 +299,7 @@ function saveReason(): void {
             <section class="rounded-card border border-default bg-default px-[18px] py-4" data-group="shifts">
                 <div class="mb-2 flex items-center">
                     <h3 class="text-[15px] font-semibold text-highlighted">Shifts</h3>
-                    <UButton class="ms-auto" color="neutral" variant="ghost" size="sm" icon="i-lucide-pencil" label="Edit" @click="edit('shifts')" />
+                    <UButton class="ms-auto" color="neutral" variant="ghost" size="sm" icon="i-solar-pen-bold-duotone" label="Edit" @click="edit('shifts')" />
                 </div>
                 <dl class="flex flex-col">
                     <div v-for="s in shifts" :key="s.id" class="flex items-center justify-between gap-3 border-b border-default py-1.5 text-[13px]">
@@ -309,7 +309,7 @@ function saveReason(): void {
                         </dt>
                         <dd class="flex items-center gap-1 font-semibold text-highlighted">
                             {{ clock(s.starts_at) }} – {{ clock(s.ends_at) }}
-                            <UButton color="neutral" variant="ghost" size="xs" icon="i-lucide-pencil" :aria-label="`Edit the ${s.name} shift`" @click="openShift(s)" />
+                            <UButton color="neutral" variant="ghost" size="xs" icon="i-solar-pen-bold-duotone" :aria-label="`Edit the ${s.name} shift`" @click="openShift(s)" />
                         </dd>
                     </div>
                     <div class="flex items-baseline justify-between gap-3 border-b border-default py-1.5 text-[13px]">
@@ -325,7 +325,7 @@ function saveReason(): void {
                         <dd class="font-semibold text-highlighted">{{ minutes(branch.shift_stale_block_minutes) }} past its end</dd>
                     </div>
                 </dl>
-                <UButton class="mt-2" color="neutral" variant="outline" size="sm" icon="i-lucide-plus" label="Add shift" @click="openShift(null)" />
+                <UButton class="mt-2" color="neutral" variant="outline" size="sm" icon="i-solar-add-square-linear" label="Add shift" @click="openShift(null)" />
             </section>
         </div>
 
@@ -342,7 +342,7 @@ function saveReason(): void {
         <UModal v-model:open="groupOpen" :title="group ? GROUP_TITLE[group] : ''" :ui="{ content: 'max-w-[520px]' }">
             <template #body>
                 <div class="flex flex-col gap-4">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
 
                     <template v-if="group === 'stays'">
                         <USwitch v-model="form.hourly_enabled" label="Hourly stays (6, 12, 18, 24 hours)" description="Off removes the hourly options from check-in, the kiosk and the rate table." />
@@ -466,7 +466,7 @@ function saveReason(): void {
         <UModal v-model:open="shiftOpen" :title="shiftEditing ? `${shiftEditing.name} shift` : 'Add shift'" :ui="{ content: 'max-w-[400px]' }">
             <template #body>
                 <div class="flex flex-col gap-4">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
                     <UFormField label="Name" :error="shiftForm.errors.name"><UInput v-model="shiftForm.name" maxlength="20" class="w-full" placeholder="Night" /></UFormField>
                     <div class="grid grid-cols-2 gap-3">
                         <UFormField label="Starts" :error="shiftForm.errors.starts_at"><UInput v-model="shiftForm.starts_at" type="time" class="w-full" /></UFormField>
@@ -510,14 +510,14 @@ function saveReason(): void {
                 </table>
             </template>
             <template #footer>
-                <UButton icon="i-lucide-plus" label="Add reason" @click="openReason(null)" />
+                <UButton icon="i-solar-add-square-linear" label="Add reason" @click="openReason(null)" />
             </template>
         </USlideover>
 
         <UModal v-model:open="reasonOpen" :title="reasonEditing ? reasonEditing.name : `Add to ${list?.label.toLowerCase() ?? 'the list'}`" :ui="{ content: 'max-w-[420px]' }">
             <template #body>
                 <div class="flex flex-col gap-4">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
                     <UFormField label="Reason" :error="reasonForm.errors.name"><UInput v-model="reasonForm.name" maxlength="60" class="w-full" /></UFormField>
                     <USwitch v-model="reasonForm.needs_note" label="Needs a note" />
                     <USwitch v-model="reasonForm.needs_manager" label="Needs a supervisor PIN" />

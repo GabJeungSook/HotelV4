@@ -124,14 +124,14 @@ async function release(): Promise<void> {
             v-if="expired"
             color="error"
             variant="subtle"
-            icon="i-lucide-triangle-alert"
+            icon="i-solar-danger-triangle-bold-duotone"
             class="mb-4"
             title="This hold has expired"
             description="The room is back on sale. If it is still free you can check the guest in as a walk-in from the board."
             data-test="hold-expired"
         />
-        <UAlert v-else-if="error" color="error" variant="subtle" icon="i-lucide-triangle-alert" class="mb-4" :description="error" />
-        <UAlert v-if="missing" color="error" variant="subtle" icon="i-lucide-triangle-alert" class="mb-4" :title="missing" description="Ask the admin to add the rate. The app will not check in a guest without a price." />
+        <UAlert v-else-if="error" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" class="mb-4" :description="error" />
+        <UAlert v-if="missing" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" class="mb-4" :title="missing" description="Ask the admin to add the rate. The app will not check in a guest without a price." />
 
         <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="submit">
             <section class="rounded-card border border-default bg-default p-5">
@@ -143,7 +143,7 @@ async function release(): Promise<void> {
                     <MoneyRow label="Discount" :text="hold.discount" />
                     <MoneyRow label="Hold code" :text="hold.code" />
                 </div>
-                <UAlert class="mt-4" color="info" variant="subtle" icon="i-lucide-clock" :description="`The ${hold.stay.replace(' hrs', ' hours')} start when you press Check in, not when the guest tapped the kiosk.`" />
+                <UAlert class="mt-4" color="info" variant="subtle" icon="i-solar-clock-circle-bold-duotone" :description="`The ${hold.stay.replace(' hrs', ' hours')} start when you press Check in, not when the guest tapped the kiosk.`" />
             </section>
 
             <section class="rounded-card border border-default bg-default p-5">

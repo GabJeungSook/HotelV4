@@ -66,16 +66,16 @@ function print(): void {
                 <StatusLabel v-if="s.closed_at" tone="neutral" :label="`Closed ${formatDateTime(s.closed_at, 'time')}`" />
                 <StatusLabel v-else tone="warn" label="Open · preview" />
             </template>
-            <UButton color="neutral" variant="outline" label="Z-report" icon="i-lucide-list" :to="route('reports.z', s.id)" />
+            <UButton color="neutral" variant="outline" label="Z-report" icon="i-solar-list-bold-duotone" :to="route('reports.z', s.id)" />
             <ExportMenu csv :disabled="report.preview" @print="print" @csv="r.download(route('reports.shift', { shift: s.id, export: 'csv' }))" />
         </PageHeader>
 
         <div class="print-a4">
             <p class="mb-3 text-[13px] text-muted">{{ people }}<template v-if="s.is_force_closed"> · force closed</template></p>
-            <UAlert v-if="report.preview" class="no-print mb-4" color="warning" variant="subtle" icon="i-lucide-eye" title="Preview. Do not sign." description="The shift is still open, so these figures are read live from the ledger and will change." />
+            <UAlert v-if="report.preview" class="no-print mb-4" color="warning" variant="subtle" icon="i-solar-eye-bold-duotone" title="Preview. Do not sign." description="The shift is still open, so these figures are read live from the ledger and will change." />
 
             <div class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1">
-                <div class="rounded-card border border-default bg-default px-2 py-1">
+                <div class="rounded-card border border-default bg-default p-4">
                     <table class="dtable">
                         <thead>
                             <tr>

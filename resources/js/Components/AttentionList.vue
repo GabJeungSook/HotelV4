@@ -41,7 +41,7 @@ const cut = computed(() => props.rows.length > shown.value.length);
             </div>
         </div>
         <div v-else-if="rows.length === 0" class="flex items-center gap-2 py-3 text-sm">
-            <UIcon name="i-lucide-check" class="size-4 text-ok" aria-hidden="true" />
+            <UIcon name="i-solar-check-circle-linear" class="size-4 text-ok" aria-hidden="true" />
             <span class="font-semibold text-highlighted">All good.</span>
         </div>
         <ul v-else class="mt-1">

@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
 
         if (app()->environment('local')) {
             $this->call(DemoShiftSeeder::class);
+            $this->call(SecondBranchSeeder::class);
         }
     }
 }

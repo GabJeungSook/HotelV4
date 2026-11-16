@@ -94,7 +94,7 @@ function print(): void {
         </PageHeader>
 
         <div class="no-print mb-4"><DateNav v-model="date" /></div>
-        <UAlert v-if="error" class="no-print mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="error" />
+        <UAlert v-if="error" class="no-print mb-4" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="error" />
 
         <div class="print-a4 grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4 max-[900px]:grid-cols-1" :class="day.closed ? 'no-print' : ''">
             <div class="overflow-x-auto rounded-card border border-default bg-default px-1 py-1">
@@ -133,9 +133,9 @@ function print(): void {
                 <div class="flex justify-between py-1"><span class="text-muted">Grand total before</span><b class="num">{{ m(day.grand_total_before) }}</b></div>
                 <div class="flex justify-between py-1"><span class="text-muted">Net sales of the day</span><b class="num">{{ m(day.total.net_sales) }}</b></div>
                 <div class="mt-1 flex justify-between border-t border-(--hm-ink) pt-1.5 text-[13.5px] font-bold text-highlighted"><span>Grand total after</span><b class="num">{{ m(day.grand_total_after) }}</b></div>
-                <UAlert v-if="day.closed" class="mt-3" color="success" variant="subtle" icon="i-lucide-lock" :description="`Closed as ${day.day_z} by ${day.closed.closed_by}, ${formatDateTime(day.closed.closed_at, 'dayTime')}.`" />
-                <UAlert v-else-if="day.reason === null" class="mt-3" color="success" variant="subtle" icon="i-lucide-check" description="Every shift is closed and the day agrees with the ledger." />
-                <UAlert v-else class="mt-3" color="warning" variant="subtle" icon="i-lucide-triangle-alert" :description="day.reason" />
+                <UAlert v-if="day.closed" class="mt-3" color="success" variant="subtle" icon="i-solar-lock-bold-duotone" :description="`Closed as ${day.day_z} by ${day.closed.closed_by}, ${formatDateTime(day.closed.closed_at, 'dayTime')}.`" />
+                <UAlert v-else-if="day.reason === null" class="mt-3" color="success" variant="subtle" icon="i-solar-check-circle-linear" description="Every shift is closed and the day agrees with the ledger." />
+                <UAlert v-else class="mt-3" color="warning" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="day.reason" />
             </div>
         </div>
         <p class="no-print mt-3 text-[13px] text-muted">

@@ -33,13 +33,13 @@ const ordinal = computed(() => ['first', 'second', 'third', 'fourth', 'fifth'][p
                     <MoneyRow label="Opened" :text="`${formatDateTime(shift.opened_at, 'time')} by ${shortName(shift.opened_by ?? '')}`" />
                     <MoneyRow label="On shift now" :text="`${frontdesks} of ${max_frontdesks}`" />
                 </div>
-                <UAlert v-if="flash.error" class="mt-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="flash.error.message" />
+                <UAlert v-if="flash.error" class="mt-4" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="flash.error.message" />
                 <UAlert
                     v-else-if="full"
                     class="mt-4"
                     color="warning"
                     variant="subtle"
-                    icon="i-lucide-users"
+                    icon="i-solar-users-group-rounded-bold-duotone"
                     :description="`This shift already has ${max_frontdesks} front desks.`"
                 />
                 <UButton class="mt-5" size="xl" block :label="`Join as ${ordinal} front desk`" :disabled="full" :loading="form.processing" @click="form.post(route('shift.join'))" />

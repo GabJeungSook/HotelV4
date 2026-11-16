@@ -72,10 +72,10 @@ const lowest = computed(() => {
 });
 
 const facts = computed(() => [
-    { icon: 'i-lucide-clock', title: 'Open 24 hours', text: 'Walk in any time' },
-    ...(lowest.value ? [{ icon: 'i-lucide-bed', title: `From ${formatMoney(lowest.value.price.amount, 'tile')}`, text: `${hoursLabel(lowest.value.price.hours)}, ${lowest.value.name} room` }] : []),
-    { icon: 'i-lucide-banknote', title: payWords.value, text: 'Pay at the front desk' },
-    ...(props.branch?.deposit ? [{ icon: 'i-lucide-key', title: `${formatMoney(props.branch.deposit.amount, 'tile')} ${props.branch.deposit.name.toLowerCase()} deposit`, text: 'Returned when you leave' }] : []),
+    { icon: 'i-solar-clock-circle-bold-duotone', title: 'Open 24 hours', text: 'Walk in any time' },
+    ...(lowest.value ? [{ icon: 'i-solar-bed-bold-duotone', title: `From ${formatMoney(lowest.value.price.amount, 'tile')}`, text: `${hoursLabel(lowest.value.price.hours)}, ${lowest.value.name} room` }] : []),
+    { icon: 'i-solar-banknote-2-bold-duotone', title: payWords.value, text: 'Pay at the front desk' },
+    ...(props.branch?.deposit ? [{ icon: 'i-solar-key-bold-duotone', title: `${formatMoney(props.branch.deposit.amount, 'tile')} ${props.branch.deposit.name.toLowerCase()} deposit`, text: 'Returned when you leave' }] : []),
 ]);
 
 /** Three amenity tags from the type's line ("Double bed, air-conditioning, TV."). */
@@ -90,9 +90,9 @@ function tags(line: string | null): string[] {
 }
 
 const steps = [
-    { icon: 'i-lucide-bed', title: 'Choose your room', text: 'Pick a room type and how many hours, at the kiosk or the desk.' },
-    { icon: 'i-lucide-banknote', title: 'Pay at the desk', text: 'Cash or GCash. Your slip carries your stay code.' },
-    { icon: 'i-lucide-key', title: 'Extend or check out', text: 'Add hours any time. Return the key and remote to get your deposit back.' },
+    { icon: 'i-solar-bed-bold-duotone', title: 'Choose your room', text: 'Pick a room type and how many hours, at the kiosk or the desk.' },
+    { icon: 'i-solar-banknote-2-bold-duotone', title: 'Pay at the desk', text: 'Cash or GCash. Your slip carries your stay code.' },
+    { icon: 'i-solar-key-bold-duotone', title: 'Extend or check out', text: 'Add hours any time. Return the key and remote to get your deposit back.' },
 ];
 
 const branchItems = computed(() => props.branches.map((b) => ({ label: b.name, value: b.id })));
@@ -121,7 +121,7 @@ function hoursLabel(h: number): string {
                     :as="Link"
                     :href="homeUrl"
                     label="Dashboard"
-                    icon="i-lucide-layout-dashboard"
+                    icon="i-solar-widget-5-bold-duotone"
                     variant="outline"
                     class="on-photo-outline rounded-[9px] max-[900px]:ms-auto"
                     data-test="welcome-dashboard"
@@ -131,7 +131,7 @@ function hoursLabel(h: number): string {
                     :as="Link"
                     :href="route('login')"
                     label="Staff sign in"
-                    icon="i-lucide-user"
+                    icon="i-solar-user-bold-duotone"
                     variant="outline"
                     class="on-photo-outline rounded-[9px] max-[900px]:ms-auto"
                     data-test="welcome-sign-in"
@@ -140,7 +140,7 @@ function hoursLabel(h: number): string {
 
             <div class="relative z-[4] max-w-[640px] px-10 pt-16 text-(--hm-card) max-[600px]:px-5 max-[600px]:pt-10">
                 <span class="on-photo-pill hm-rise inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12.5px] font-medium">
-                    <UIcon name="i-lucide-clock" class="size-3.5" aria-hidden="true" />{{ eyebrow }}
+                    <UIcon name="i-solar-clock-circle-bold-duotone" class="size-3.5" aria-hidden="true" />{{ eyebrow }}
                 </span>
                 <h1 class="mt-5 mb-4 text-[56px] leading-[1.02] font-semibold tracking-[-0.04em] max-[600px]:text-[38px]" :aria-label="headline">
                     <template v-for="(w, i) in words" :key="`${w}-${i}`"
@@ -159,7 +159,7 @@ function hoursLabel(h: number): string {
                     @update:model-value="pickBranch($event as number)"
                 />
                 <div class="hm-rise flex flex-wrap gap-2.5" style="--hm-step: 6">
-                    <UButton href="#rooms" size="xl" label="See rooms and rates" trailing-icon="i-lucide-chevron-right" class="on-photo h-11 rounded-[10px]" />
+                    <UButton href="#rooms" size="xl" label="See rooms and rates" trailing-icon="i-solar-alt-arrow-right-linear" class="on-photo h-11 rounded-[10px]" />
                     <UButton href="#how" size="xl" variant="outline" label="How a stay works" class="on-photo-outline h-11 rounded-[10px]" />
                 </div>
             </div>
@@ -257,21 +257,21 @@ function hoursLabel(h: number): string {
                 <div class="rounded-2xl border border-default p-6">
                     <h2 id="find-heading" class="mb-2 text-2xl leading-[1.15] font-semibold tracking-[-0.03em] text-highlighted">Find us</h2>
                     <div class="flex gap-3 border-b border-muted py-3">
-                        <UIcon name="i-lucide-house" class="mt-0.5 size-[18px] shrink-0 text-muted" aria-hidden="true" />
+                        <UIcon name="i-solar-home-2-bold-duotone" class="mt-0.5 size-[18px] shrink-0 text-muted" aria-hidden="true" />
                         <div>
                             <b class="block text-[13.5px] font-semibold">{{ branch?.name ?? shared.app.name }}</b>
                             <span class="text-[13px] text-muted">{{ branch?.address ?? '' }}</span>
                         </div>
                     </div>
                     <div class="flex gap-3 border-b border-muted py-3">
-                        <UIcon name="i-lucide-clock" class="mt-0.5 size-[18px] shrink-0 text-muted" aria-hidden="true" />
+                        <UIcon name="i-solar-clock-circle-bold-duotone" class="mt-0.5 size-[18px] shrink-0 text-muted" aria-hidden="true" />
                         <div>
                             <b class="block text-[13.5px] font-semibold">Open 24 hours, every day</b>
                             <span class="text-[13px] text-muted">The front desk is always staffed</span>
                         </div>
                     </div>
                     <div class="flex gap-3 py-3">
-                        <UIcon name="i-lucide-banknote" class="mt-0.5 size-[18px] shrink-0 text-muted" aria-hidden="true" />
+                        <UIcon name="i-solar-banknote-2-bold-duotone" class="mt-0.5 size-[18px] shrink-0 text-muted" aria-hidden="true" />
                         <div>
                             <b class="block text-[13.5px] font-semibold">{{ payWords }}</b>
                             <span class="text-[13px] text-muted">Paid at the front desk; no online payment</span>

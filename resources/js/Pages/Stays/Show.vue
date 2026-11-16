@@ -189,7 +189,7 @@ function approve(payload: { approver_id: number; pin: string }): void {
 }
 
 function lineMenu(line: Line) {
-    return [[{ label: 'Void this line', icon: 'i-lucide-undo-2', color: 'error' as const, onSelect: () => voidLine(line) }]];
+    return [[{ label: 'Void this line', icon: 'i-solar-undo-left-round-linear', color: 'error' as const, onSelect: () => voidLine(line) }]];
 }
 </script>
 
@@ -227,7 +227,7 @@ function lineMenu(line: Line) {
                             <td class="text-right"><StatusLabel :tone="statusTone[line.status]" :label="statusText[line.status]" /></td>
                             <td class="text-right">
                                 <UDropdownMenu v-if="line.voidable && inHouse" :items="lineMenu(line)" :content="{ align: 'end' }">
-                                    <UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-ellipsis" :aria-label="`Actions for ${line.description}`" />
+                                    <UButton size="xs" color="neutral" variant="ghost" icon="i-solar-menu-dots-linear" :aria-label="`Actions for ${line.description}`" />
                                 </UDropdownMenu>
                             </td>
                         </tr>
@@ -254,7 +254,7 @@ function lineMenu(line: Line) {
                 </section>
                 <template v-if="inHouse">
                     <UButton block label="Take payment" :disabled="summary.balance <= 0" @click="openPayment" />
-                    <UButton block color="neutral" variant="outline" icon="i-lucide-plus" label="Add charge" @click="adding = true" />
+                    <UButton block color="neutral" variant="outline" icon="i-solar-add-square-linear" label="Add charge" @click="adding = true" />
                     <div class="grid grid-cols-2 gap-2">
                         <UButton block color="neutral" variant="outline" label="Extend" @click="router.visit(route('stays.extend', stay.id))" />
                         <UButton block color="neutral" variant="outline" label="Transfer" @click="router.visit(route('stays.transfer', stay.id))" />

@@ -90,7 +90,7 @@ function submit(): void {
 <template>
     <KioskLayout title="Your name">
         <StepBar :steps="['Room', 'Your name', 'Pay at desk']" :current="2" size="kiosk" />
-        <UAlert v-if="error" class="mt-6 text-xl" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="error" />
+        <UAlert v-if="error" class="mt-6 text-xl" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="error" />
 
         <form class="mt-8 flex flex-col gap-6" @submit.prevent="submit">
             <UFormField label="Your name" name="guest_name" :error="form.errors.guest_name" :ui="{ label: 'text-2xl leading-9', error: 'text-xl' }">

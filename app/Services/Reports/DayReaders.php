@@ -235,10 +235,23 @@ trait DayReaders
             $inHouse = $shifts->groupBy(fn (ShiftSession $s): string => $s->business_date->toDateString())
                 ->sum(fn (Collection $day): int => Totals::int($day->last()->totals ?? [], 'guests.forwarded_out'));
 
+            // Sales split: extras are POS (food, drink, amenities); rooms is everything else so
+            // rooms + extras always equals sales. Net is sales after this shift-set's expenses.
+            $salesTotal = Totals::int($sum, 'sales.total');
+            $extras = Totals::int($sum, 'sales.food_drink') + Totals::int($sum, 'sales.amenity');
+            $expenses = Totals::int($sum, 'cash.expenses');
+
             $rows[] = [
                 'branch_id' => $branch->id,
                 'name' => $branch->name,
-                'sales' => Totals::int($sum, 'sales.total'),
+                'sales' => $salesTotal,
+                'rooms' => $salesTotal - $extras,
+                'extras' => $extras,
+                'cash' => Totals::int($sum, 'collected.cash'),
+                'gcash' => Totals::int($sum, 'collected.gcash'),
+                'card' => Totals::int($sum, 'collected.card'),
+                'expenses' => $expenses,
+                'net' => $salesTotal - $expenses,
                 'checkins' => Totals::int($sum, 'guests.checked_in'),
                 'room_days' => $rooms * $days,
                 'occupied' => (int) $inHouse,
@@ -249,11 +262,62 @@ trait DayReaders
         }
 
         $total = ['name' => 'All'];
-        foreach (['sales', 'checkins', 'room_days', 'occupied', 'short', 'over', 'shifts'] as $k) {
+        foreach (['sales', 'rooms', 'extras', 'cash', 'gcash', 'card', 'expenses', 'net', 'checkins', 'room_days', 'occupied', 'short', 'over', 'shifts'] as $k) {
             $total[$k] = array_sum(array_column($rows, $k));
         }
 
         return ['from' => $from, 'to' => $to, 'rows' => $rows, 'total' => $total];
+    }
+
+    /**
+     * What makes up the Rooms and Extras figures of the owner summary (39): read from the same
+     * closed shifts, so the parts add up to those figures. Rooms is room and extension charges
+     * grouped by room type, then the other room-side kinds (transfers, damage, forfeited, discounts);
+     * Extras is food, drink and amenities grouped by item.
+     *
+     * @param  list<int>  $branchIds
+     * @return array{rooms: list<array{name: string, amount: int}>, extras: list<array{name: string, amount: int}>}
+     */
+    public function salesBreakdown(array $branchIds, string $from, string $to): array
+    {
+        $shiftIds = ShiftSession::query()->withoutGlobalScopes()
+            ->whereIn('branch_id', $branchIds)->where('status', ShiftStatus::Closed)
+            ->whereBetween('business_date', [$from, $to])->pluck('id');
+
+        $lines = FolioLine::query()->withoutGlobalScopes()
+            ->whereIn('shift_session_id', $shiftIds)
+            ->whereNull('reversal_of_id')->whereDoesntHave('reversal')
+            ->get(['id', 'kind', 'stay_id', 'description', 'amount']);
+
+        $sum = fn (Collection $rows): int => (int) $rows->sum(fn (FolioLine $l): int => $l->amount?->centavos() ?? 0);
+
+        $roomLines = $lines->whereIn('kind', [LineKind::Room, LineKind::Extension]);
+        $typeName = RoomType::query()->withoutGlobalScopes()->whereIn('branch_id', $branchIds)->pluck('name', 'id');
+        $stayType = Stay::query()->withoutGlobalScopes()
+            ->whereIn('id', $roomLines->pluck('stay_id')->filter()->unique()->all())->pluck('room_type_id', 'id');
+
+        $rooms = $roomLines
+            ->groupBy(function (FolioLine $l) use ($typeName, $stayType): string {
+                $typeId = $l->stay_id === null ? null : ($stayType[$l->stay_id] ?? null);
+
+                return $typeId === null ? 'Room' : ($typeName[$typeId] ?? 'Room');
+            })
+            ->map(fn (Collection $g, string $name): array => ['name' => $name, 'amount' => $sum($g)])
+            ->sortByDesc('amount')->values();
+
+        foreach ([[LineKind::TransferDifference, 'Transfers'], [LineKind::Damage, 'Damage charges'], [LineKind::ForfeitedDeposit, 'Forfeited deposits'], [LineKind::Discount, 'Discounts']] as [$kind, $label]) {
+            $amount = $sum($lines->where('kind', $kind));
+            if ($amount !== 0) {
+                $rooms->push(['name' => $label, 'amount' => $amount]);
+            }
+        }
+
+        $extras = $lines->whereIn('kind', [LineKind::FoodDrink, LineKind::Amenity])
+            ->groupBy('description')
+            ->map(fn (Collection $g, string $name): array => ['name' => $name, 'amount' => $sum($g)])
+            ->sortByDesc('amount')->values();
+
+        return ['rooms' => $rooms->values()->all(), 'extras' => $extras->all()];
     }
 
     /**

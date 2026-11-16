@@ -3,6 +3,7 @@
 import { computed, ref, watch } from 'vue';
 import AttentionList, { type AttentionRow } from '@/Components/AttentionList.vue';
 import StackedBars from '@/Components/Charts/StackedBars.vue';
+import DateRange from '@/Components/DateRange.vue';
 import FilterSelect from '@/Components/FilterSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import PeriodSegments from '@/Components/PeriodSegments.vue';
@@ -24,6 +25,7 @@ import OwnerLayout from '@/Layouts/OwnerLayout.vue';
  */
 const props = defineProps<{
     period: string;
+    range: { from: string; to: string };
     branch: number | 'all';
     branches: { id: number; name: string }[];
     polling: number;
@@ -49,7 +51,23 @@ const { failed, refresh, updatedText, go } = useDashboard(['kpis', 'charts', 'no
 
 const period = ref(props.period);
 const branch = ref<string>(String(props.branch));
-watch([period, branch], ([p, b]) => go('owner.dashboard', { period: p === 'today' ? null : p, branch: b === 'all' ? null : b }));
+
+/** A custom range passes from+to and clears the named period; a preset does the opposite. */
+function navigate(from: string | null, to: string | null): void {
+    go('owner.dashboard', {
+        branch: branch.value === 'all' ? null : branch.value,
+        period: from && to ? null : period.value === 'today' ? null : period.value,
+        from,
+        to,
+    });
+}
+watch(branch, () => navigate(period.value === 'custom' ? props.range.from : null, period.value === 'custom' ? props.range.to : null));
+watch(period, (p) => p !== 'custom' && navigate(null, null));
+
+function applyRange(from: string, to: string): void {
+    period.value = 'custom';
+    navigate(from, to);
+}
 
 const periods = [
     { value: 'today', label: 'Today' },
@@ -97,10 +115,11 @@ const sub = computed(() => `${props.branch === 'all' ? 'All branches' : (props.b
         <PageHeader>
             <span v-if="failed" class="flex items-center gap-2 text-xs text-default" role="status">
                 Could not refresh.
-                <UButton color="primary" variant="link" size="sm" icon="i-lucide-refresh-cw" label="Retry" class="px-0" @click="refresh" />
+                <UButton color="primary" variant="link" size="sm" icon="i-solar-refresh-linear" label="Retry" class="px-0" @click="refresh" />
             </span>
             <FilterSelect v-if="branches.length > 1" v-model="branch" :items="branchItems" label="Branch" />
             <PeriodSegments v-model="period" :items="periods" />
+            <DateRange :from="range.from" :to="range.to" @apply="applyRange" />
         </PageHeader>
 
         <div class="grid grid-cols-1 items-start gap-4 min-[1180px]:grid-cols-[minmax(0,1fr)_384px]">

@@ -107,20 +107,20 @@ function signOut(): void {
 <template>
     <FrontDeskLayout current="shift" guide title="Shift report">
         <PageHeader>
-            <UButton v-if="shared.auth" color="neutral" variant="outline" icon="i-lucide-log-out" label="Sign out" @click="signOut" />
-            <UButton icon="i-lucide-printer" label="Print" :loading="printing" data-print @click="print" />
+            <UButton v-if="shared.auth" color="neutral" variant="outline" icon="i-solar-logout-2-bold-duotone" label="Sign out" @click="signOut" />
+            <UButton icon="i-solar-printer-2-bold-duotone" label="Print" :loading="printing" data-print @click="print" />
         </PageHeader>
         <div class="no-print mb-4">
             <UAlert
                 class="max-w-[560px]"
                 color="success"
                 variant="subtle"
-                icon="i-lucide-check"
+                icon="i-solar-check-circle-linear"
                 :title="`The ${closed.period_name} shift is closed${zNo ? ` as ${zNo}` : ''}.`"
                 :description="handover?.received_by ? `${handover.received_by} received the drawer. Print the slip, then sign out.` : 'Nobody received the drawer. The next front desk uses Open shift.'"
             />
         </div>
-        <UAlert v-if="printError" class="no-print mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="printError" />
+        <UAlert v-if="printError" class="no-print mb-4" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="printError" />
         <Slip :header="header" :title="title" :number="zNo" :sections="sections" :footer="footer" :reprint="reprint" preview />
     </FrontDeskLayout>
 </template>

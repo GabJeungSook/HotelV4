@@ -10,7 +10,7 @@ withDefaults(
         compact?: boolean;
         size?: 'md' | 'kiosk';
     }>(),
-    { text: undefined, icon: 'i-lucide-list', tone: 'default', actionLabel: undefined, compact: false, size: 'md' },
+    { text: undefined, icon: 'i-solar-list-bold-duotone', tone: 'default', actionLabel: undefined, compact: false, size: 'md' },
 );
 
 defineEmits<{ action: [] }>();

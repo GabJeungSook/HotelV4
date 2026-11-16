@@ -18,7 +18,8 @@ export interface Overview {
     methods: { method: string; amount: number; count: number }[];
 }
 
-const props = withDefaults(defineProps<{ overview?: Overview; title?: string; showRange?: boolean }>(), { overview: undefined, title: 'Sales overview', showRange: true });
+const props = withDefaults(defineProps<{ overview?: Overview; title?: string; showRange?: boolean; clickable?: boolean }>(), { overview: undefined, title: 'Sales overview', showRange: true, clickable: false });
+const emit = defineEmits<{ drill: ['rooms' | 'extras'] }>();
 
 const names: Record<string, string> = { cash: 'Cash', gcash: 'GCash', card: 'Card', deposit: 'From deposit' };
 const fills = ['var(--hm-primary)', 'var(--hm-select-line)', 'var(--hm-primary-line)', 'var(--hm-bar-3)'];
@@ -42,17 +43,29 @@ const range = computed(() => (props.overview ? formatDateRange(`${props.overview
         <template v-if="overview">
             <span class="text-xs text-muted">Total sales<template v-if="showRange"> · {{ range }}</template></span>
             <div class="text-[26px] leading-[1.15] font-semibold tracking-[-0.025em] text-highlighted tabular">{{ formatMoney(overview.sales, 'whole') }}</div>
-            <div class="my-3.5 grid grid-cols-2 rounded-[10px] border border-default">
-                <div class="px-3.5 py-3 text-center">
-                    <UIcon name="i-lucide-bed" class="size-[18px] text-muted" aria-hidden="true" />
-                    <span class="mt-1 block text-[11.5px] text-muted">Rooms</span>
+            <div class="my-3.5 grid grid-cols-2 overflow-hidden rounded-[10px] border border-default">
+                <component
+                    :is="clickable ? 'button' : 'div'"
+                    :type="clickable ? 'button' : undefined"
+                    class="group flex flex-col items-center px-3.5 py-3 text-center"
+                    :class="clickable ? 'hm-focus cursor-pointer transition-colors hover:bg-elevated' : ''"
+                    @click="clickable ? emit('drill', 'rooms') : undefined"
+                >
+                    <UIcon name="i-solar-bed-bold-duotone" class="size-[18px] text-muted" aria-hidden="true" />
+                    <span class="mt-1 inline-flex items-center gap-0.5 text-[11.5px] text-muted">Rooms<UIcon v-if="clickable" name="i-solar-alt-arrow-right-linear" class="size-3 opacity-60 transition-transform group-hover:translate-x-0.5" aria-hidden="true" /></span>
                     <b class="block text-[17px] font-semibold tracking-[-0.01em] tabular">{{ formatMoney(overview.rooms, 'whole') }}</b>
-                </div>
-                <div class="border-l border-default px-3.5 py-3 text-center">
-                    <UIcon name="i-lucide-shopping-cart" class="size-[18px] text-muted" aria-hidden="true" />
-                    <span class="mt-1 block text-[11.5px] text-muted">Extras</span>
+                </component>
+                <component
+                    :is="clickable ? 'button' : 'div'"
+                    :type="clickable ? 'button' : undefined"
+                    class="group flex flex-col items-center border-l border-default px-3.5 py-3 text-center"
+                    :class="clickable ? 'hm-focus cursor-pointer transition-colors hover:bg-elevated' : ''"
+                    @click="clickable ? emit('drill', 'extras') : undefined"
+                >
+                    <UIcon name="i-solar-cart-large-bold-duotone" class="size-[18px] text-muted" aria-hidden="true" />
+                    <span class="mt-1 inline-flex items-center gap-0.5 text-[11.5px] text-muted">Extras<UIcon v-if="clickable" name="i-solar-alt-arrow-right-linear" class="size-3 opacity-60 transition-transform group-hover:translate-x-0.5" aria-hidden="true" /></span>
                     <b class="block text-[17px] font-semibold tracking-[-0.01em] tabular">{{ formatMoney(overview.extras, 'whole') }}</b>
-                </div>
+                </component>
             </div>
             <ul>
                 <li v-for="r in rows" :key="r.key" class="grid grid-cols-[90px_minmax(0,1fr)_46px] items-center gap-3 py-1.5 text-[12.5px]" :title="r.text">

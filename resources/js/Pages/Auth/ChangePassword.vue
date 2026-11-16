@@ -20,7 +20,7 @@ function submit(): void {
     <div class="hm-light grid min-h-dvh place-items-center bg-muted p-4">
         <div class="w-full max-w-[460px] overflow-hidden rounded-card border border-default">
             <SignInPanel heading="Change your password" line="You signed in with a temporary password. Choose your own before you go on.">
-                <UAlert v-if="flash.error" color="error" variant="subtle" class="mb-4" :description="flash.error.message" icon="i-lucide-triangle-alert" />
+                <UAlert v-if="flash.error" color="error" variant="subtle" class="mb-4" :description="flash.error.message" icon="i-solar-danger-triangle-bold-duotone" />
                 <form class="flex flex-col gap-4" @submit.prevent="submit">
                     <UFormField label="New password" :hint="`At least ${min} characters`" :error="form.errors.password">
                         <UInput v-model="form.password" type="password" autocomplete="new-password" class="w-full" autofocus />

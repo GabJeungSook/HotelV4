@@ -52,19 +52,19 @@ function step(id: number, by: 1 | -1): void {
             </thead>
             <tbody>
                 <tr>
-                    <td><span class="inline-flex items-center gap-1.5"><UIcon name="i-lucide-key-round" class="size-4 text-muted" aria-hidden="true" />Room key</span></td>
+                    <td><span class="inline-flex items-center gap-1.5"><UIcon name="i-solar-key-bold-duotone" class="size-4 text-muted" aria-hidden="true" />Room key</span></td>
                     <td class="w-52"><OptionTiles v-model="keyTile" :options="yesNo" :columns="2" label="Room key returned" /></td>
                     <td class="num text-right">{{ formatMoney(lost.key) }}</td>
                 </tr>
                 <tr>
-                    <td><span class="inline-flex items-center gap-1.5"><UIcon name="i-lucide-tv" class="size-4 text-muted" aria-hidden="true" />TV remote</span></td>
+                    <td><span class="inline-flex items-center gap-1.5"><UIcon name="i-solar-tv-bold-duotone" class="size-4 text-muted" aria-hidden="true" />TV remote</span></td>
                     <td class="w-52"><OptionTiles v-model="remoteTile" :options="yesNo" :columns="2" label="TV remote returned" /></td>
                     <td class="num text-right">{{ formatMoney(lost.remote) }}</td>
                 </tr>
             </tbody>
         </table>
         <div class="mt-4 flex items-center gap-3">
-            <UButton color="neutral" variant="outline" icon="i-lucide-plus" label="Add damage charge" @click="showDamages = !showDamages" />
+            <UButton color="neutral" variant="outline" icon="i-solar-add-square-linear" label="Add damage charge" @click="showDamages = !showDamages" />
             <span class="text-[13px] text-muted">for broken or missing room items</span>
         </div>
         <table v-if="showDamages" class="dtable mt-3 w-full">
@@ -74,9 +74,9 @@ function step(id: number, by: 1 | -1): void {
                     <td class="num text-right">{{ formatMoney(p.price, 'column') }}</td>
                     <td class="w-28 text-right">
                         <div class="inline-flex items-center gap-1">
-                            <UButton v-if="damages[String(p.id)]" size="xs" color="neutral" variant="outline" icon="i-lucide-minus" :aria-label="`One less ${p.name}`" @click="step(p.id, -1)" />
+                            <UButton v-if="damages[String(p.id)]" size="xs" color="neutral" variant="outline" icon="i-solar-minus-circle-linear" :aria-label="`One less ${p.name}`" @click="step(p.id, -1)" />
                             <span v-if="damages[String(p.id)]" class="w-6 text-center tabular">{{ damages[String(p.id)] }}</span>
-                            <UButton size="xs" color="neutral" variant="outline" icon="i-lucide-plus" :aria-label="`Add ${p.name}`" @click="step(p.id, 1)" />
+                            <UButton size="xs" color="neutral" variant="outline" icon="i-solar-add-square-linear" :aria-label="`Add ${p.name}`" @click="step(p.id, 1)" />
                         </div>
                     </td>
                 </tr>

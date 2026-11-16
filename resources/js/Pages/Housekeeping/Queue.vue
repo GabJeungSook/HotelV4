@@ -52,7 +52,7 @@ function start(task: Task): void {
 
 <template>
     <PhoneLayout :title="`To clean · ${floors}`" :subtitle="subtitle" current="queue">
-        <UAlert v-if="error" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="error" />
+        <UAlert v-if="error" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="error" />
 
         <article v-if="current" class="rounded-[10px] border border-default bg-violet-50 p-3" data-current-task>
             <b class="text-xl leading-7 font-semibold text-highlighted tabular">Cleaning Room {{ current.room }}</b>
@@ -77,7 +77,7 @@ function start(task: Task): void {
         <EmptyState
             v-if="!tasks.length && !current"
             class="mt-16"
-            icon="i-lucide-brush-cleaning"
+            icon="i-solar-broom-bold-duotone"
             title="All rooms are clean"
             text="New rooms show up here as soon as a guest checks out."
         />

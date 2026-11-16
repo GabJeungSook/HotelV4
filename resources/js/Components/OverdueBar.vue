@@ -33,7 +33,7 @@ const text = computed(() =>
         :data-blocked="blocked ? 'true' : 'false'"
     >
         <span class="flex items-center gap-2">
-            <UIcon name="i-lucide-triangle-alert" class="size-4 shrink-0" />
+            <UIcon name="i-solar-danger-triangle-bold-duotone" class="size-4 shrink-0" />
             {{ text }}
         </span>
         <UButton v-if="closable" size="xs" color="neutral" variant="outline" label="Close shift" @click="$emit('close')" />

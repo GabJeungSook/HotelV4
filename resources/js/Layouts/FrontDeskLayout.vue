@@ -127,7 +127,7 @@ function signOut(): void {
             />
             <slot name="bars" />
         </template>
-        <UAlert v-if="closingNotice" class="no-print mb-4" color="warning" variant="subtle" icon="i-lucide-lock" :description="closingNotice" data-closing-notice />
+        <UAlert v-if="closingNotice" class="no-print mb-4" color="warning" variant="subtle" icon="i-solar-lock-bold-duotone" :description="closingNotice" data-closing-notice />
         <slot />
         <PinSwitch v-if="shared.auth" v-model:open="switching" :members="members" :locked="shared.pinLocked" />
     </AppShell>

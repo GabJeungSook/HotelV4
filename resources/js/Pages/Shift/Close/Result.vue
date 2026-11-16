@@ -47,7 +47,7 @@ function next(): void {
                 v-if="result.variance < 0"
                 color="error"
                 variant="subtle"
-                icon="i-lucide-triangle-alert"
+                icon="i-solar-danger-triangle-bold-duotone"
                 :title="`Short by ${formatMoney(-result.variance)}.`"
                 :description="`This will be recorded against the ${period} shift.`"
                 data-variance="short"
@@ -56,12 +56,12 @@ function next(): void {
                 v-else-if="result.variance > 0"
                 color="warning"
                 variant="subtle"
-                icon="i-lucide-triangle-alert"
+                icon="i-solar-danger-triangle-bold-duotone"
                 :title="`Over by ${formatMoney(result.variance)}.`"
                 :description="`This will be recorded against the ${period} shift.`"
                 data-variance="over"
             />
-            <UAlert v-else color="success" variant="subtle" icon="i-lucide-check" title="The count matches the expected cash." data-variance="zero" />
+            <UAlert v-else color="success" variant="subtle" icon="i-solar-check-circle-linear" title="The count matches the expected cash." data-variance="zero" />
             <template v-if="off">
                 <UFormField label="Reason" name="reason_id" :error="form.errors.reason_id">
                     <USelect v-model="form.reason_id" :items="reasonItems" placeholder="Pick a reason" class="w-full" />

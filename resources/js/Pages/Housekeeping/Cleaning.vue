@@ -34,7 +34,7 @@ function finish(result: 'ready' | 'problem'): void {
 
 <template>
     <PhoneLayout :title="`Cleaning Room ${task.room}`" :subtitle="task.started_at ? `Started ${formatDateTime(task.started_at, 'time')}` : undefined" tone="violet" current="queue">
-        <UAlert v-if="error" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="error" data-finish-error />
+        <UAlert v-if="error" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="error" data-finish-error />
 
         <div class="px-1">
             <CleanTimer v-if="task.started_at" :started-at="task.started_at" :target-minutes="target_minutes" />

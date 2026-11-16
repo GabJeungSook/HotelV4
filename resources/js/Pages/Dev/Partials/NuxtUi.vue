@@ -33,19 +33,19 @@ const rangeLabel = computed(() =>
 
 const exportItems: DropdownMenuItem[][] = [
     [
-        { label: 'Print', icon: 'i-lucide-printer', onSelect: () => toast.add({ title: 'Print recorded', color: 'neutral' }) },
-        { label: 'PDF', icon: 'i-lucide-file-text', onSelect: () => toast.add({ title: 'PDF is being made', color: 'info' }) },
-        { label: 'CSV', icon: 'i-lucide-sheet', onSelect: () => toast.add({ title: 'CSV downloaded', color: 'success', icon: 'i-lucide-check' }) },
+        { label: 'Print', icon: 'i-solar-printer-2-bold-duotone', onSelect: () => toast.add({ title: 'Print recorded', color: 'neutral' }) },
+        { label: 'PDF', icon: 'i-solar-document-text-bold-duotone', onSelect: () => toast.add({ title: 'PDF is being made', color: 'info' }) },
+        { label: 'CSV', icon: 'i-solar-document-bold-duotone', onSelect: () => toast.add({ title: 'CSV downloaded', color: 'success', icon: 'i-solar-check-circle-linear' }) },
     ],
 ];
-const rowItems: DropdownMenuItem[][] = [[{ label: 'Extend', icon: 'i-lucide-clock' }, { label: 'Transfer', icon: 'i-lucide-arrow-left-right' }], [{ label: 'Void line', icon: 'i-lucide-x', color: 'error' }]];
+const rowItems: DropdownMenuItem[][] = [[{ label: 'Extend', icon: 'i-solar-clock-circle-bold-duotone' }, { label: 'Transfer', icon: 'i-solar-transfer-horizontal-linear' }], [{ label: 'Void line', icon: 'i-solar-close-circle-linear', color: 'error' }]];
 
 function save(): void {
     saving.value = true;
     setTimeout(() => {
         saving.value = false;
         modalOpen.value = false;
-        toast.add({ title: 'Payment saved. Change ₱85.00', color: 'success', icon: 'i-lucide-check' });
+        toast.add({ title: 'Payment saved. Change ₱85.00', color: 'success', icon: 'i-solar-check-circle-linear' });
     }, 1200);
 }
 </script>
@@ -90,13 +90,13 @@ function save(): void {
         <Block title="UDropdownMenu — ExportMenu, row menu">
             <div class="flex flex-wrap items-center gap-2">
                 <UDropdownMenu :items="exportItems">
-                    <UButton color="neutral" variant="outline" label="Export" trailing-icon="i-lucide-chevron-down" />
+                    <UButton color="neutral" variant="outline" label="Export" trailing-icon="i-solar-alt-arrow-down-linear" />
                 </UDropdownMenu>
                 <UDropdownMenu :items="rowItems">
                     <UButton color="neutral" variant="ghost" size="sm" label="⋯" aria-label="Row actions" />
                 </UDropdownMenu>
                 <UTooltip text="Close the shift first">
-                    <span><UButton color="neutral" variant="outline" label="Export" trailing-icon="i-lucide-chevron-down" disabled /></span>
+                    <span><UButton color="neutral" variant="outline" label="Export" trailing-icon="i-solar-alt-arrow-down-linear" disabled /></span>
                 </UTooltip>
             </div>
         </Block>
@@ -152,19 +152,19 @@ function save(): void {
                 <span class="inline-flex items-center gap-2 text-sm">Attention <UBadge label="3" color="neutral" variant="subtle" /></span>
                 <UBadge label="+ 20 more" color="neutral" variant="subtle" />
                 <UTooltip text="Print again">
-                    <UButton color="neutral" variant="outline" icon="i-lucide-printer" aria-label="Print again" />
+                    <UButton color="neutral" variant="outline" icon="i-solar-printer-2-bold-duotone" aria-label="Print again" />
                 </UTooltip>
             </div>
             <div class="mt-3 flex flex-wrap gap-2">
-                <UButton color="neutral" variant="outline" label="Success toast" @click="toast.add({ title: 'Check-in saved. Slip printed.', color: 'success', icon: 'i-lucide-check' })" />
-                <UButton color="neutral" variant="outline" label="Error toast" @click="toast.add({ title: 'Nothing was saved. Try again.', color: 'error', icon: 'i-lucide-triangle-alert', duration: 8000 })" />
+                <UButton color="neutral" variant="outline" label="Success toast" @click="toast.add({ title: 'Check-in saved. Slip printed.', color: 'success', icon: 'i-solar-check-circle-linear' })" />
+                <UButton color="neutral" variant="outline" label="Error toast" @click="toast.add({ title: 'Nothing was saved. Try again.', color: 'error', icon: 'i-solar-danger-triangle-bold-duotone', duration: 8000 })" />
                 <UButton color="neutral" variant="outline" label="Info toast" @click="toast.add({ title: 'Room 117 is now To clean.', color: 'neutral' })" />
             </div>
         </Block>
 
         <Block title="UCalendar in UPopover — date range">
             <UPopover>
-                <UButton color="neutral" variant="outline" leading-icon="i-lucide-chevron-left" trailing-icon="i-lucide-chevron-right" :label="rangeLabel" />
+                <UButton color="neutral" variant="outline" leading-icon="i-solar-alt-arrow-left-linear" trailing-icon="i-solar-alt-arrow-right-linear" :label="rangeLabel" />
                 <template #content>
                     <UCalendar v-model="range" range :week-starts-on="1" class="p-2" />
                 </template>

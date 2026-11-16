@@ -24,7 +24,7 @@ withDefaults(defineProps<{ steps: string[]; current: number; size?: 'md' | 'kios
             :aria-current="i + 1 === current ? 'step' : undefined"
             :data-state="i + 1 < current ? 'done' : i + 1 === current ? 'current' : 'next'"
         >
-            <UIcon v-if="i + 1 < current" name="i-lucide-check" class="size-3.5" aria-hidden="true" />
+            <UIcon v-if="i + 1 < current" name="i-solar-check-circle-linear" class="size-3.5" aria-hidden="true" />
             {{ i + 1 }} {{ step }}
         </li>
     </ol>

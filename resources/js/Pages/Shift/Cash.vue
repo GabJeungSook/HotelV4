@@ -232,19 +232,19 @@ function details(m: Movement): string {
 }
 
 function actions(m: Movement) {
-    return [[{ label: 'Void this entry', icon: 'i-lucide-undo-2', color: 'error' as const, onSelect: () => voidEntry(m) }]];
+    return [[{ label: 'Void this entry', icon: 'i-solar-undo-left-round-linear', color: 'error' as const, onSelect: () => voidEntry(m) }]];
 }
 </script>
 
 <template>
     <FrontDeskLayout current="shift" :title="`${period.period_name} shift · ${formatDateTime(`${period.business_date}T12:00:00+08:00`, 'shiftDate')}`">
         <PageHeader>
-            <UButton color="neutral" variant="outline" icon="i-lucide-plus" label="Expense" :disabled="period.status !== 'open'" @click="start('expense')" />
-            <UButton color="neutral" variant="outline" icon="i-lucide-plus" label="Remittance" :disabled="period.status !== 'open'" @click="start('remittance')" />
-            <UButton color="neutral" variant="outline" icon="i-lucide-plus" label="Shortage payment" :disabled="period.status !== 'open' || !short_shifts.length" @click="start('shortage_payment')" />
+            <UButton color="neutral" variant="outline" icon="i-solar-add-square-linear" label="Expense" :disabled="period.status !== 'open'" @click="start('expense')" />
+            <UButton color="neutral" variant="outline" icon="i-solar-add-square-linear" label="Remittance" :disabled="period.status !== 'open'" @click="start('remittance')" />
+            <UButton color="neutral" variant="outline" icon="i-solar-add-square-linear" label="Shortage payment" :disabled="period.status !== 'open' || !short_shifts.length" @click="start('shortage_payment')" />
         </PageHeader>
 
-        <UAlert v-if="pageError" class="mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="pageError" />
+        <UAlert v-if="pageError" class="mb-4" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="pageError" />
 
         <div class="grid grid-cols-3 gap-3 max-[700px]:grid-cols-1">
             <StatCard label="Opening cash" :value="formatMoney(stats.opening)" />
@@ -281,7 +281,7 @@ function actions(m: Movement) {
                         </td>
                         <td class="text-right">
                             <UDropdownMenu v-if="can_void && !m.voided" :items="actions(m)" :content="{ align: 'end' }">
-                                <UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-ellipsis" :aria-label="`Actions for ${m.note}`" />
+                                <UButton size="xs" color="neutral" variant="ghost" icon="i-solar-menu-dots-linear" :aria-label="`Actions for ${m.note}`" />
                             </UDropdownMenu>
                         </td>
                     </tr>
@@ -294,7 +294,7 @@ function actions(m: Movement) {
         <UModal v-model:open="open" :title="title" :ui="{ content: 'max-w-[420px]' }">
             <template #body>
                 <form id="cash-movement-form" class="flex flex-col gap-4" @submit.prevent="save">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
                     <UFormField v-if="form.kind === 'expense'" label="Category" name="expense_category_id" :error="form.errors.expense_category_id">
                         <USelect v-model="form.expense_category_id" :items="categoryItems" placeholder="Pick a category" class="w-full" />
                     </UFormField>
@@ -311,7 +311,7 @@ function actions(m: Movement) {
                         v-if="category?.needs_manager"
                         color="warning"
                         variant="subtle"
-                        icon="i-lucide-lock"
+                        icon="i-solar-lock-bold-duotone"
                         :description="`${category.name} needs a supervisor PIN before it is saved.`"
                     />
                     <p class="text-xs text-muted">Recorded on the {{ period.period_name }} shift by {{ shared.auth ? firstName(shared.auth.user.name) : '' }}.</p>
@@ -320,7 +320,7 @@ function actions(m: Movement) {
             <template #footer>
                 <div class="flex w-full justify-end gap-2">
                     <UButton color="neutral" variant="ghost" label="Cancel" @click="open = false" />
-                    <UButton :label="`Save ${kindLabel[form.kind].toLowerCase()}`" :icon="category?.needs_manager ? 'i-lucide-lock' : undefined" :disabled="!canSave" :loading="form.processing" type="submit" form="cash-movement-form" />
+                    <UButton :label="`Save ${kindLabel[form.kind].toLowerCase()}`" :icon="category?.needs_manager ? 'i-solar-lock-bold-duotone' : undefined" :disabled="!canSave" :loading="form.processing" type="submit" form="cash-movement-form" />
                 </div>
             </template>
         </UModal>

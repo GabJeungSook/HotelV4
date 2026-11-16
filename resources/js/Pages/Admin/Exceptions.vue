@@ -104,9 +104,9 @@ const tone = (row: Row) => (row.severity === 'high' ? 'bad' : 'warn');
             <template #status><StatusLabel :label="formatDateTime(at, 'dayTime')" /></template>
         </PageHeader>
 
-        <EmptyState v-if="rows.length === 0" icon="i-lucide-check" title="All good." text="Nothing needs attention right now." />
+        <EmptyState v-if="rows.length === 0" icon="i-solar-check-circle-linear" title="All good." text="Nothing needs attention right now." />
 
-        <section v-else class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+        <section v-else class="overflow-x-auto rounded-card border border-default bg-default p-4">
             <table class="dtable" data-attention>
                 <thead>
                     <tr>

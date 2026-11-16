@@ -38,12 +38,19 @@ final class SummaryController extends Controller
             $days[] = ['date' => $d->toDateString(), 'sales' => (int) $reports->summary($ids, $d->toDateString(), $d->toDateString())['total']['sales']];
         }
 
+        // The matching window just before this one, so the cards can show the change.
+        $length = (int) $from->diffInDays($to) + 1;
+        $prevTo = $from->subDay();
+        $prevFrom = $prevTo->subDays($length - 1);
+
         return Inertia::render('Owner/Summary', [
             'range' => $range,
             'date' => $date->toDateString(),
             'branch' => $chosen === null ? 'all' : $chosen->id,
             'branches' => $all->map(fn (Branch $b): array => ['id' => $b->id, 'name' => $b->name])->values()->all(),
             'summary' => $reports->summary($ids, $from->toDateString(), $to->toDateString()),
+            'compare' => $reports->summary($ids, $prevFrom->toDateString(), $prevTo->toDateString())['total'],
+            'breakdown' => $reports->salesBreakdown($ids, $from->toDateString(), $to->toDateString()),
             'days' => $days,
         ]);
     }

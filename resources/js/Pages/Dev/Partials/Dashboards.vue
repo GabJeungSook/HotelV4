@@ -201,7 +201,7 @@ const twoSeries = [
                 />
                 <span class="flex items-center gap-2 text-xs text-default" role="status">
                     Could not refresh.
-                    <UButton color="primary" variant="link" size="sm" icon="i-lucide-refresh-cw" label="Retry" class="px-0" />
+                    <UButton color="primary" variant="link" size="sm" icon="i-solar-refresh-linear" label="Retry" class="px-0" />
                 </span>
             </div>
             <StatCards :items="branchKpis" :loading="loading" />
@@ -330,7 +330,7 @@ const twoSeries = [
         <div>
             <h3 class="mb-2 text-sm font-semibold text-highlighted">63 · Stats</h3>
             <div class="mb-4 flex flex-wrap items-center gap-3">
-                <UButton color="neutral" variant="outline" leading-icon="i-lucide-chevron-left" trailing-icon="i-lucide-chevron-right" label="1 – 10 Nov 2026" />
+                <UButton color="neutral" variant="outline" leading-icon="i-solar-alt-arrow-left-linear" trailing-icon="i-solar-alt-arrow-right-linear" label="1 – 10 Nov 2026" />
                 <PeriodSegments
                     v-model="statsPeriod"
                     :items="[
@@ -339,7 +339,7 @@ const twoSeries = [
                         { value: 'last', label: 'Last month' },
                     ]"
                 />
-                <UButton class="ms-auto" color="neutral" variant="outline" label="Export" trailing-icon="i-lucide-chevron-down" />
+                <UButton class="ms-auto" color="neutral" variant="outline" label="Export" trailing-icon="i-solar-alt-arrow-down-linear" />
             </div>
             <StatCards :items="statsKpis" :loading="loading" />
             <div class="mt-4 grid grid-cols-1 items-start gap-4 lg:grid-cols-2">

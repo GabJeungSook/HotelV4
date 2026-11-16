@@ -58,7 +58,7 @@ function approve(): void {
     <UModal v-model:open="open" :ui="{ content: 'max-w-[360px]' }">
         <template #header>
             <div class="flex items-center gap-2">
-                <UIcon name="i-lucide-lock" class="size-[18px] text-muted" aria-hidden="true" />
+                <UIcon name="i-solar-lock-bold-duotone" class="size-[18px] text-muted" aria-hidden="true" />
                 <h2 class="text-base font-semibold text-highlighted">Supervisor approval</h2>
             </div>
         </template>

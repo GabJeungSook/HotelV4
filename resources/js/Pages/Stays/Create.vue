@@ -227,7 +227,7 @@ function submit(): void {
                 @update:model-value="(v) => pickRoom(Number(v))"
             />
         </div>
-        <UAlert v-if="error" color="error" variant="subtle" icon="i-lucide-triangle-alert" class="mb-4" :description="error.message" />
+        <UAlert v-if="error" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" class="mb-4" :description="error.message" />
         <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="submit">
             <section class="rounded-card border border-default bg-default p-5">
                 <h2 class="mb-3 text-base font-semibold text-highlighted">Stay</h2>
@@ -239,7 +239,7 @@ function submit(): void {
                     class="mt-3"
                     color="error"
                     variant="subtle"
-                    icon="i-lucide-triangle-alert"
+                    icon="i-solar-danger-triangle-bold-duotone"
                     :title="m"
                     description="Pick another length of stay, or ask the admin to add the rate. The app will not check in a guest without a price."
                     data-test="missing-rate"

@@ -99,15 +99,15 @@ function submit(): void {
         </PhotoHero>
         <SignInPanel>
             <form class="flex flex-col" @submit.prevent="submit">
-                <UAlert v-if="flash.error" class="mb-4" color="error" variant="soft" :description="flash.error.message" icon="i-lucide-triangle-alert" />
+                <UAlert v-if="flash.error" class="mb-4" color="error" variant="soft" :description="flash.error.message" icon="i-solar-danger-triangle-bold-duotone" />
                 <UFormField label="Username" name="username" :error="form.errors.username" class="hm-rise mb-4" style="--hm-step: 3">
-                    <UInput v-model="form.username" size="xl" icon="i-lucide-user" autocomplete="username" autofocus class="w-full" />
+                    <UInput v-model="form.username" size="xl" icon="i-solar-user-bold-duotone" autocomplete="username" autofocus class="w-full" />
                 </UFormField>
                 <UFormField label="Password" name="password" :error="form.errors.password" class="hm-rise mb-4" style="--hm-step: 4">
                     <UInput
                         v-model="form.password"
                         size="xl"
-                        icon="i-lucide-lock"
+                        icon="i-solar-lock-bold-duotone"
                         :type="show ? 'text' : 'password'"
                         autocomplete="current-password"
                         class="w-full"
@@ -121,7 +121,7 @@ function submit(): void {
                 <div class="hm-rise mt-2" style="--hm-step: 5">
                     <UButton type="submit" size="xl" block :loading="form.processing" class="group">
                         Sign in
-                        <UIcon v-if="!form.processing" name="i-lucide-chevron-right" class="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden="true" />
+                        <UIcon v-if="!form.processing" name="i-solar-alt-arrow-right-linear" class="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden="true" />
                     </UButton>
                 </div>
                 <p class="hm-rise mt-[18px] text-center text-[12.5px] text-muted" style="--hm-step: 6">Forgot your password? Ask your branch admin.</p>
@@ -130,7 +130,7 @@ function submit(): void {
                 <span>© {{ year }} Homi</span>
                 <span class="inline-flex items-center gap-2" role="status">
                     <i v-if="online" class="hm-pulse" aria-hidden="true" />
-                    <UIcon v-else name="i-lucide-wifi-off" class="size-3.5 text-bad" aria-hidden="true" />
+                    <UIcon v-else name="i-solar-wi-fi-router-bold-duotone" class="size-3.5 text-bad" aria-hidden="true" />
                     {{ online ? 'Connected' : 'No connection' }}<template v-if="facts"> · this computer is set to {{ facts.branch.replace(/^Hotel\s+/i, '') }}</template>
                 </span>
             </template>

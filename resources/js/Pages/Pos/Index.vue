@@ -186,13 +186,13 @@ function approve(payload: { approver_id: number; pin: string }): void {
 }
 
 function actions(s: Sale) {
-    return [[{ label: 'Void this sale', icon: 'i-lucide-undo-2', color: 'error' as const, onSelect: () => voidSale(s) }]];
+    return [[{ label: 'Void this sale', icon: 'i-solar-undo-left-round-linear', color: 'error' as const, onSelect: () => voidSale(s) }]];
 }
 </script>
 
 <template>
     <FrontDeskLayout current="pos" title="Point of sale">
-        <UAlert v-if="pageError" class="mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="pageError" />
+        <UAlert v-if="pageError" class="mb-4" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="pageError" />
 
         <div class="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-4 max-[900px]:grid-cols-1">
             <section>
@@ -247,14 +247,14 @@ function actions(s: Sale) {
                     </button>
                 </div>
 
-                <UAlert v-if="saleError" class="mt-3" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="saleError" data-sale-error />
+                <UAlert v-if="saleError" class="mt-3" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="saleError" data-sale-error />
 
                 <table v-if="cart.length" class="dtable mt-3 w-full">
                     <tbody>
                         <tr v-for="p in cart" :key="p.id">
                             <td class="text-highlighted">{{ p.name }} × {{ qty[p.id] }}</td>
                             <td class="w-16 text-right">
-                                <UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-minus" :aria-label="`One less ${p.name}`" @click="add(p, -1)" />
+                                <UButton size="xs" color="neutral" variant="ghost" icon="i-solar-minus-circle-linear" :aria-label="`One less ${p.name}`" @click="add(p, -1)" />
                             </td>
                             <td class="num text-right">{{ formatMoney(p.price * (qty[p.id] ?? 0), 'column') }}</td>
                         </tr>
@@ -308,7 +308,7 @@ function actions(s: Sale) {
                             <td class="num text-right" :class="s.voided ? 'text-muted line-through' : 'text-highlighted'">{{ formatMoney(s.amount, 'column') }}</td>
                             <td class="text-right">
                                 <UDropdownMenu v-if="!s.voided && !s.room_checked_out" :items="actions(s)" :content="{ align: 'end' }">
-                                    <UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-ellipsis" :aria-label="`Actions for ${s.order_no}`" />
+                                    <UButton size="xs" color="neutral" variant="ghost" icon="i-solar-menu-dots-linear" :aria-label="`Actions for ${s.order_no}`" />
                                 </UDropdownMenu>
                             </td>
                         </tr>

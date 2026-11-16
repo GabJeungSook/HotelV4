@@ -142,7 +142,7 @@ const flashMessage = computed(() => flash.value.error?.message);
 
         <section class="rounded-card border border-default bg-default p-5" data-incoming>
             <h2 class="mb-2 text-sm font-semibold text-highlighted">Incoming front desk</h2>
-            <UAlert v-if="flashMessage && !pinError" class="mb-3" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="flashMessage" />
+            <UAlert v-if="flashMessage && !pinError" class="mb-3" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="flashMessage" />
             <UFormField label="Name" name="receiver_id" :error="form.errors.receiver_id">
                 <USelect v-model="form.receiver_id" :items="receiverItems" class="w-full" placeholder="Pick your name" />
             </UFormField>
@@ -162,7 +162,7 @@ const flashMessage = computed(() => flash.value.error?.message);
                     class="mt-4"
                     color="warning"
                     variant="subtle"
-                    icon="i-lucide-triangle-alert"
+                    icon="i-solar-danger-triangle-bold-duotone"
                     :description="`You counted ${formatMoney(form.received_cash)}; the closing count is ${formatMoney(handover.counted)}. Say what you found. The difference is kept on the handover for the supervisor.`"
                 />
                 <UFormField label="What is different (required)" name="difference_note" class="mt-3">
@@ -178,7 +178,7 @@ const flashMessage = computed(() => flash.value.error?.message);
         </section>
     </div>
     <div class="mt-4 flex justify-end">
-        <UButton color="neutral" variant="ghost" icon="i-lucide-lock" label="Close without handover" @click="approving = true" />
+        <UButton color="neutral" variant="ghost" icon="i-solar-lock-bold-duotone" label="Close without handover" @click="approving = true" />
     </div>
     <ApprovalPin
         v-model:open="approving"

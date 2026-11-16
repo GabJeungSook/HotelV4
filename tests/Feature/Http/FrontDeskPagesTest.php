@@ -222,14 +222,14 @@ it('builds the navigation on the server from the role and the pages that exist',
 
     expect($nav)->toBe([
         ['heading' => 'Front desk', 'items' => [
-            ['key' => 'today', 'label' => 'Today', 'route' => '/today', 'icon' => 'i-lucide-clock', 'subtitle' => 'What needs doing in the next half hour'],
-            ['key' => 'board', 'label' => 'Room board', 'route' => '/board', 'icon' => 'i-lucide-bed', 'subtitle' => null],
-            ['key' => 'reservations', 'label' => 'Reservations', 'route' => '/reservations', 'icon' => 'i-lucide-calendar', 'subtitle' => 'Bookings and their arrival times'],
-            ['key' => 'pos', 'label' => 'Point of sale', 'route' => '/pos', 'icon' => 'i-lucide-shopping-cart', 'subtitle' => 'Sell to a room or for cash'],
-            ['key' => 'stock', 'label' => 'Stock', 'route' => '/stock', 'icon' => 'i-lucide-package', 'subtitle' => 'Counts, deliveries and adjustments'],
+            ['key' => 'today', 'label' => 'Today', 'route' => '/today', 'icon' => 'i-solar-clock-circle-bold-duotone', 'subtitle' => 'What needs doing in the next half hour'],
+            ['key' => 'board', 'label' => 'Room board', 'route' => '/board', 'icon' => 'i-solar-bed-bold-duotone', 'subtitle' => null],
+            ['key' => 'reservations', 'label' => 'Reservations', 'route' => '/reservations', 'icon' => 'i-solar-calendar-bold-duotone', 'subtitle' => 'Bookings and their arrival times'],
+            ['key' => 'pos', 'label' => 'Point of sale', 'route' => '/pos', 'icon' => 'i-solar-cart-large-bold-duotone', 'subtitle' => 'Sell to a room or for cash'],
+            ['key' => 'stock', 'label' => 'Stock', 'route' => '/stock', 'icon' => 'i-solar-box-bold-duotone', 'subtitle' => 'Counts, deliveries and adjustments'],
         ]],
         ['heading' => 'Shift', 'items' => [
-            ['key' => 'shift', 'label' => 'Shift cash', 'route' => '/shift', 'icon' => 'i-lucide-banknote', 'subtitle' => null],
+            ['key' => 'shift', 'label' => 'Shift cash', 'route' => '/shift', 'icon' => 'i-solar-banknote-2-bold-duotone', 'subtitle' => null],
         ]],
     ]);
 

@@ -98,7 +98,7 @@ function open(room: BoardRoom): void {
 
 <template>
     <FrontDeskLayout current="board" title="Room board" :subtitle="boardSub">
-        <UAlert v-if="flash.error" color="error" variant="subtle" icon="i-lucide-triangle-alert" class="mb-3" :description="flash.error.message" />
+        <UAlert v-if="flash.error" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" class="mb-3" :description="flash.error.message" />
         <Deferred data="board">
             <template #fallback><Skeleton /></template>
 
@@ -118,19 +118,19 @@ function open(room: BoardRoom): void {
             </div>
 
             <div class="mb-3 flex flex-wrap items-center gap-2">
-                <UInput v-model="q" icon="i-lucide-search" placeholder="Room or guest" class="w-52" aria-label="Search rooms and guests" />
+                <UInput v-model="q" icon="i-solar-magnifer-linear" placeholder="Room or guest" class="w-52" aria-label="Search rooms and guests" />
                 <USelect v-model="floor" :items="floorItems" class="w-36" aria-label="Floor" @update:model-value="visit" />
                 <USelect v-model="sort" :items="sortItems" class="w-56" aria-label="Sort" />
                 <span class="flex-1" />
-                <UButton v-if="kiosk" color="neutral" variant="outline" icon="i-lucide-monitor" data-test="holds-button" @click="holdsOpen = true">
+                <UButton v-if="kiosk" color="neutral" variant="outline" icon="i-solar-monitor-bold-duotone" data-test="holds-button" @click="holdsOpen = true">
                     Kiosk holds<span class="rounded-label bg-primary-50 px-1.5 text-xs text-primary-ink tabular">{{ liveHolds }}</span>
                 </UButton>
-                <UButton icon="i-lucide-plus" label="Walk-in check-in" @click="tab = 'vacant'" />
+                <UButton icon="i-solar-add-square-linear" label="Walk-in check-in" @click="tab = 'vacant'" />
             </div>
 
             <div v-if="board && board.floors.length === 0 && filters.q" class="rounded-card border border-default bg-default">
                 <EmptyState
-                    icon="i-lucide-bed"
+                    icon="i-solar-bed-bold-duotone"
                     :title="emptyTitle"
                     :text="`Check the spelling, or clear the search to see all ${board.total} rooms.`"
                     action-label="Clear search"

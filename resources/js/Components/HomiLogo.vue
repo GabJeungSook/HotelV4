@@ -17,7 +17,7 @@ const failed = ref(false);
 <template>
     <span v-if="failed" class="inline-flex items-center gap-2" :style="{ height: `${height}px` }" data-logo-fallback>
         <span class="grid aspect-square h-full place-items-center rounded-lg" :class="variant === 'white' ? 'bg-default' : 'bg-primary'">
-            <UIcon name="i-lucide-bed" class="size-1/2" :class="variant === 'white' ? 'text-primary' : 'text-on-primary'" aria-hidden="true" />
+            <UIcon name="i-solar-bed-bold-duotone" class="size-1/2" :class="variant === 'white' ? 'text-primary' : 'text-on-primary'" aria-hidden="true" />
         </span>
         <span class="text-lg font-semibold" :class="variant === 'white' ? 'text-(--hm-card)' : 'text-highlighted'">{{ name }}</span>
     </span>

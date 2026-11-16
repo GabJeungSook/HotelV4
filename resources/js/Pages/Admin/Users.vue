@@ -142,10 +142,10 @@ const isMe = computed(() => editing.value !== null && editing.value.id === me.va
     <AdminLayout current="users" :title="`Users · ${activeCount}`">
         <Head title="Users" />
         <PageHeader>
-            <UButton icon="i-lucide-plus" label="Add user" @click="edit(null)" />
+            <UButton icon="i-solar-add-square-linear" label="Add user" @click="edit(null)" />
         </PageHeader>
 
-        <section class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+        <section class="overflow-x-auto rounded-card border border-default bg-default p-4">
             <table class="dtable w-full">
                 <thead>
                     <tr>
@@ -176,7 +176,7 @@ const isMe = computed(() => editing.value !== null && editing.value.id === me.va
         <UModal v-model:open="open" :title="editing ? editing.name : 'Add user'" :ui="{ content: 'max-w-[460px]' }">
             <template #body>
                 <div class="flex flex-col gap-4">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
                     <UFormField label="Name" :error="form.errors.name"><UInput v-model="form.name" maxlength="80" class="w-full" autofocus /></UFormField>
                     <div class="grid grid-cols-2 gap-3">
                         <UFormField label="Username" :error="form.errors.username"><UInput v-model="form.username" maxlength="40" class="w-full" placeholder="first.last" /></UFormField>
@@ -187,11 +187,11 @@ const isMe = computed(() => editing.value !== null && editing.value.id === me.va
                     <UFormField v-if="form.role === 'housekeeper'" label="Floors" :error="form.errors.floor_ids" help="The floors whose rooms this housekeeper cleans.">
                         <USelectMenu v-model="form.floor_ids" :items="floors" value-key="value" multiple placeholder="Pick floors" class="w-full" />
                     </UFormField>
-                    <UAlert v-if="!editing" color="info" variant="subtle" icon="i-lucide-info" description="A temporary password is shown once after saving. Give it to the person; they set their PIN at first sign-in." />
+                    <UAlert v-if="!editing" color="info" variant="subtle" icon="i-solar-info-circle-bold-duotone" description="A temporary password is shown once after saving. Give it to the person; they set their PIN at first sign-in." />
 
                     <div v-if="editing" class="flex flex-wrap gap-2 border-t border-default pt-4">
-                        <UButton v-if="editing.pin !== null" color="neutral" variant="outline" size="sm" icon="i-lucide-lock" label="Reset PIN" @click="resetPin(editing)" />
-                        <UButton color="neutral" variant="outline" size="sm" icon="i-lucide-lock" label="Reset password" @click="resetPassword(editing)" />
+                        <UButton v-if="editing.pin !== null" color="neutral" variant="outline" size="sm" icon="i-solar-lock-bold-duotone" label="Reset PIN" @click="resetPin(editing)" />
+                        <UButton color="neutral" variant="outline" size="sm" icon="i-solar-lock-bold-duotone" label="Reset password" @click="resetPassword(editing)" />
                         <UButton
                             v-if="!isMe"
                             :color="editing.is_active ? 'error' : 'primary'"

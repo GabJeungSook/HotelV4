@@ -19,17 +19,17 @@ const props = withDefaults(defineProps<{ print?: boolean; pdf?: boolean; csv?: b
 const emit = defineEmits<{ print: []; pdf: []; csv: [] }>();
 
 const items = computed<DropdownMenuItem[]>(() => [
-    ...(props.print ? [{ label: 'Print', icon: 'i-lucide-printer', onSelect: () => emit('print') }] : []),
-    ...(props.pdf ? [{ label: 'PDF', icon: 'i-lucide-file-text', onSelect: () => emit('pdf') }] : []),
-    ...(props.csv ? [{ label: 'CSV', icon: 'i-lucide-sheet', onSelect: () => emit('csv') }] : []),
+    ...(props.print ? [{ label: 'Print', icon: 'i-solar-printer-2-bold-duotone', onSelect: () => emit('print') }] : []),
+    ...(props.pdf ? [{ label: 'PDF', icon: 'i-solar-document-text-bold-duotone', onSelect: () => emit('pdf') }] : []),
+    ...(props.csv ? [{ label: 'CSV', icon: 'i-solar-document-bold-duotone', onSelect: () => emit('csv') }] : []),
 ]);
 </script>
 
 <template>
     <UTooltip v-if="disabled" :text="disabledReason">
-        <span tabindex="0"><UButton color="neutral" variant="outline" label="Export" trailing-icon="i-lucide-chevron-down" disabled /></span>
+        <span tabindex="0"><UButton color="neutral" variant="outline" label="Export" trailing-icon="i-solar-alt-arrow-down-linear" disabled /></span>
     </UTooltip>
     <UDropdownMenu v-else :items="items" :content="{ align: 'end' }">
-        <UButton color="neutral" variant="outline" label="Export" trailing-icon="i-lucide-chevron-down" :loading="loading" />
+        <UButton color="neutral" variant="outline" label="Export" trailing-icon="i-solar-alt-arrow-down-linear" :loading="loading" />
     </UDropdownMenu>
 </template>

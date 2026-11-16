@@ -46,7 +46,7 @@ const claimTile = computed({ get: () => (claimed.value === null ? null : claimed
                 <MoneyRow label="Already paid" :amount="settle.paid" />
             </div>
             <TotalRow label="Balance due" :amount="settle.balance" :tone="settle.balance > 0 ? 'bad' : 'ok'" />
-            <UAlert v-if="settle.balance <= 0" class="mt-3" color="success" variant="subtle" icon="i-lucide-check" description="Nothing left to collect." />
+            <UAlert v-if="settle.balance <= 0" class="mt-3" color="success" variant="subtle" icon="i-solar-check-circle-linear" description="Nothing left to collect." />
             <PaymentFields v-else v-model="pay" class="mt-4" :methods="methods" :due="settle.balance" :allow-keep-change="false" />
         </section>
         <section class="rounded-card border border-default bg-default p-5">

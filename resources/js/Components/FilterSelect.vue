@@ -17,7 +17,7 @@ const model = defineModel<string | number | undefined>();
         :aria-label="label"
         :leading-icon="icon"
         size="md"
-        trailing-icon="i-lucide-chevron-down"
+        trailing-icon="i-solar-alt-arrow-down-linear"
         :ui="{
             base: 'h-8 rounded-control ring-default text-[12.5px] font-medium text-default shadow-xs ps-3',
             trailingIcon: 'size-3.5 text-faint',

@@ -118,7 +118,7 @@ const draftText = computed(() => ({ idle: 'The pieces are saved as you type.', s
             </table>
         </section>
         <div class="flex flex-col gap-4">
-            <UAlert color="info" variant="subtle" icon="i-lucide-banknote" description="Count what is in the drawer and type the pieces. You will see the expected amount after you confirm." />
+            <UAlert color="info" variant="subtle" icon="i-solar-banknote-2-bold-duotone" description="Count what is in the drawer and type the pieces. You will see the expected amount after you confirm." />
             <section class="rounded-card border border-default bg-default p-5">
                 <MoneyRow label="Counted by" :text="form.counted_by" />
                 <UFormField label="Witness" name="witness_id" class="mt-2">

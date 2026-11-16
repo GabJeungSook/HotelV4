@@ -46,7 +46,7 @@ function restart(): void {
     <div class="hm-light grid min-h-dvh place-items-center bg-muted p-4">
         <div class="w-full max-w-[460px] overflow-hidden rounded-card border border-default">
             <SignInPanel heading="Set your PIN" line="You will use it to switch user on a shared computer and to approve. Never share it.">
-                <UAlert v-if="flash.error" color="error" variant="subtle" class="mb-4" :description="flash.error.message" icon="i-lucide-triangle-alert" />
+                <UAlert v-if="flash.error" color="error" variant="subtle" class="mb-4" :description="flash.error.message" icon="i-solar-danger-triangle-bold-duotone" />
                 <p class="mb-4 text-center text-sm font-medium text-highlighted">{{ step === 1 ? `Type a ${length}-digit PIN` : 'Type it again' }}</p>
                 <PinPad :key="attempt" :length="length" :error="form.errors.pin" :disabled="form.processing" @complete="entered" />
                 <template #footer>

@@ -73,7 +73,7 @@ function checkOut(): void {
 <template>
     <FrontDeskLayout current="board" :title="`Check out — Room ${screen.stay.room ?? ''} · ${screen.stay.guest_name}`">
         <StepBar class="no-print mb-4" :steps="['Items returned', 'Settle', 'Done']" :current="current" />
-        <UAlert v-if="error && current !== 3" class="mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="error" />
+        <UAlert v-if="error && current !== 3" class="mb-4" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="error" />
 
         <template v-if="screen.done">
             <Done :stay-id="screen.stay.id" :room="screen.stay.room" :guest="screen.stay.guest_name" :code="screen.stay.code" :done="screen.done" />

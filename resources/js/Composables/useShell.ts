@@ -32,11 +32,14 @@ export function useShell(overrides: { branch?: () => string | undefined; user?: 
             sub = `${owned.length} ${owned.length === 1 ? 'branch' : 'branches'} · ${rooms} rooms`;
         }
 
+        // Regular items (not type:'checkbox', which toggles instead of firing onSelect and keeps
+        // the menu open): a click opens/closes the branch and the chip then shows the choice. The
+        // current one carries a check.
         const items: DropdownMenuItem[] | undefined =
             isOwner.value && owned.length > 0
                 ? [
-                      { label: 'All branches', icon: 'i-lucide-building-2', type: 'checkbox', checked: !b, onSelect: () => router.post(route('owner.branches.close')) },
-                      ...owned.map((o) => ({ label: o.name, type: 'checkbox' as const, checked: b?.name === o.name, onSelect: () => router.post(route('owner.branches.open', o.id)) })),
+                      { label: 'All branches', icon: b ? 'i-solar-buildings-2-bold-duotone' : 'i-solar-check-circle-linear', onSelect: () => router.post(route('owner.branches.close')) },
+                      ...owned.map((o) => ({ label: o.name, icon: b?.name === o.name ? 'i-solar-check-circle-linear' : 'i-solar-buildings-bold-duotone', onSelect: () => router.post(route('owner.branches.open', o.id)) })),
                   ]
                 : undefined;
 

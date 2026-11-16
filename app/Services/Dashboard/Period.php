@@ -43,6 +43,21 @@ final readonly class Period
         return new self($key, $from->toDateString(), $to->toDateString(), $from->subDays($days)->toDateString(), $from->subDay()->toDateString());
     }
 
+    /** A chosen "from–to" range (same calendar dates for every branch), compared with the window before it. */
+    public static function ofRange(string $from, string $to): self
+    {
+        $f = CarbonImmutable::parse($from);
+        $t = CarbonImmutable::parse($to);
+
+        if ($t->lessThan($f)) {
+            [$f, $t] = [$t, $f];
+        }
+
+        $days = (int) $f->diffInDays($t) + 1;
+
+        return new self('custom', $f->toDateString(), $t->toDateString(), $f->subDays($days)->toDateString(), $f->subDay()->toDateString());
+    }
+
     /** "today", "yesterday", "this week", … for card labels ("Sales today", "Short · this week"). */
     public function words(): string
     {
@@ -51,6 +66,7 @@ final readonly class Period
             'week' => 'this week',
             'month' => 'this month',
             'year' => 'this year',
+            'custom' => 'in this range',
             default => 'today',
         };
     }

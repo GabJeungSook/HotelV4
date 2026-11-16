@@ -49,7 +49,7 @@ const exportUrl = computed(() => route('reports.housekeeping', { ...(props.repor
         </div>
 
         <div class="print-a4">
-            <div class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+            <div class="overflow-x-auto rounded-card border border-default bg-default p-4">
                 <p v-if="report.people.length === 0" class="px-3 py-6 text-sm text-muted">No room was cleaned in this period.</p>
                 <table v-else class="dtable">
                     <thead>
@@ -83,7 +83,7 @@ const exportUrl = computed(() => route('reports.housekeeping', { ...(props.repor
             </div>
 
             <h5 class="mt-5 mb-2 font-semibold text-highlighted">Late rooms</h5>
-            <div class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+            <div class="overflow-x-auto rounded-card border border-default bg-default p-4">
                 <p v-if="report.late.length === 0" class="px-3 py-6 text-sm text-muted">Every room was ready before its deadline.</p>
                 <table v-else class="dtable">
                     <thead>

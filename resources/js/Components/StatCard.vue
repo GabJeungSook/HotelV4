@@ -35,7 +35,7 @@ const trendClass = computed(() => (props.trend === 'up' ? 'text-ok' : props.tren
         <span class="block truncate text-[12.5px] leading-[18px] font-medium text-muted">{{ label }}</span>
         <b class="mt-1.5 flex items-center gap-2 text-[28px] leading-[1.1] font-semibold tracking-[-0.025em] tabular stat-value" :class="valueClass">
             <span class="truncate">{{ value }}</span>
-            <UIcon v-if="trend" :name="trend === 'up' ? 'i-lucide-arrow-up-right' : 'i-lucide-arrow-down-right'" class="size-[18px] shrink-0" :class="trendClass" :aria-label="trend === 'up' ? 'up' : 'down'" />
+            <UIcon v-if="trend" :name="trend === 'up' ? 'i-solar-arrow-right-up-linear' : 'i-solar-arrow-right-down-linear'" class="size-[18px] shrink-0" :class="trendClass" :aria-label="trend === 'up' ? 'up' : 'down'" />
         </b>
         <small v-if="sub || change" class="mt-2.5 flex flex-wrap items-center gap-x-1.5 text-[11.5px] leading-[1.4] text-muted">
             <span v-if="sub">{{ sub }}</span>

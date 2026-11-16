@@ -132,7 +132,7 @@ function approve(payload: { approver_id: number; pin: string }): void {
 
 <template>
     <FrontDeskLayout current="board" :title="`Transfer room — ${stay.guest_name}, Room ${stay.room ?? ''}`">
-        <UAlert v-if="error" class="mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="error" />
+        <UAlert v-if="error" class="mb-4" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="error" />
         <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="ready && ((pinError = undefined), (approving = true))">
             <section class="rounded-card border border-default bg-default p-5">
                 <h2 class="mb-3 text-base font-semibold text-highlighted">Move to</h2>
@@ -150,7 +150,7 @@ function approve(payload: { approver_id: number; pin: string }): void {
                     </label>
                 </div>
                 <p v-else class="text-sm text-muted">No room is free right now.</p>
-                <UAlert v-for="m in missing" :key="m" class="mt-3" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="m" data-test="missing-rate" />
+                <UAlert v-for="m in missing" :key="m" class="mt-3" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="m" data-test="missing-rate" />
                 <UFormField label="Reason" name="reason_id" class="mt-4" :error="form.errors.reason_id">
                     <USelect v-model="form.reason_id" :items="reasonItems" placeholder="Choose a reason" class="w-full" />
                 </UFormField>
@@ -172,7 +172,7 @@ function approve(payload: { approver_id: number; pin: string }): void {
                     The check-out time stays {{ formatDateTime(stay.expected_checkout_at, 'auto', stay.now) }}. Moving to a cheaper room adds the difference to the guest's deposit instead.
                 </p>
                 <PaymentFields v-if="difference > 0" v-model="pay" class="mt-3" :methods="methods" :due="difference" :allow-keep-change="false" :errors="form.errors" />
-                <UButton class="mt-5" size="xl" block icon="i-lucide-lock" label="Transfer — needs approval" :disabled="!ready" type="submit" />
+                <UButton class="mt-5" size="xl" block icon="i-solar-lock-bold-duotone" label="Transfer — needs approval" :disabled="!ready" type="submit" />
                 <UButton class="mt-2" block color="neutral" variant="ghost" label="Back to folio" @click="router.visit(route('stays.show', stay.id))" />
             </section>
         </form>

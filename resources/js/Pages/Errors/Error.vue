@@ -29,11 +29,11 @@ const shell = computed(() => {
 const copy = computed(() => {
     switch (props.status) {
         case 404:
-            return { title: 'This page does not exist', text: 'The link may be old, or the record was moved. Nothing was changed.', icon: 'i-lucide-map-pin-off' };
+            return { title: 'This page does not exist', text: 'The link may be old, or the record was moved. Nothing was changed.', icon: 'i-solar-map-point-remove-bold-duotone' };
         case 503:
-            return { title: 'Homi is being updated', text: 'It will be back in a few minutes. Nothing you saved before is lost.', icon: 'i-lucide-wrench' };
+            return { title: 'Homi is being updated', text: 'It will be back in a few minutes. Nothing you saved before is lost.', icon: 'i-solar-wrench-bold-duotone' };
         default:
-            return { title: 'Something went wrong', text: 'Nothing was saved. Try again; if it happens again, tell your admin the request id below.', icon: 'i-lucide-triangle-alert' };
+            return { title: 'Something went wrong', text: 'Nothing was saved. Try again; if it happens again, tell your admin the request id below.', icon: 'i-solar-danger-triangle-bold-duotone' };
     }
 });
 </script>

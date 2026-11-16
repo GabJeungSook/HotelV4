@@ -24,13 +24,13 @@ watch(picked, (d) => d && (model.value = d.toString()));
 
 <template>
     <div class="inline-flex items-center gap-1" role="group" aria-label="Business date">
-        <UButton color="neutral" variant="ghost" icon="i-lucide-chevron-left" aria-label="Earlier" @click="model = shift(model, -step)" />
+        <UButton color="neutral" variant="ghost" icon="i-solar-alt-arrow-left-linear" aria-label="Earlier" @click="model = shift(model, -step)" />
         <UPopover>
-            <UButton color="neutral" variant="outline" icon="i-lucide-calendar" :label="text" />
+            <UButton color="neutral" variant="outline" icon="i-solar-calendar-bold-duotone" :label="text" />
             <template #content>
                 <UCalendar v-model="picked" :week-starts-on="1" class="p-2" />
             </template>
         </UPopover>
-        <UButton color="neutral" variant="ghost" icon="i-lucide-chevron-right" aria-label="Later" @click="model = shift(model, step)" />
+        <UButton color="neutral" variant="ghost" icon="i-solar-alt-arrow-right-linear" aria-label="Later" @click="model = shift(model, step)" />
     </div>
 </template>

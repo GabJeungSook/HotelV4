@@ -52,9 +52,9 @@ function clear(): void {
             class="hm-focus inline-flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-control border border-default bg-default ps-3 pe-2.5 text-[12.5px] font-medium whitespace-nowrap text-default shadow-xs hover:bg-elevated"
             data-date-range
         >
-            <UIcon name="i-lucide-calendar" class="size-3.5 text-faint" aria-hidden="true" />
+            <UIcon name="i-solar-calendar-bold-duotone" class="size-3.5 text-faint" aria-hidden="true" />
             {{ label }}
-            <UIcon name="i-lucide-chevron-down" class="size-3.5 text-faint" aria-hidden="true" />
+            <UIcon name="i-solar-alt-arrow-down-linear" class="size-3.5 text-faint" aria-hidden="true" />
         </button>
         <template #content>
             <form class="flex w-64 flex-col gap-3 p-3" @submit.prevent="apply">

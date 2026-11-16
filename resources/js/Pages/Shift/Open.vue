@@ -93,7 +93,7 @@ function submit(approval?: { approver_id: number; pin: string }): void {
 
 <template>
     <FrontDeskLayout :title="`Open the ${picked?.name ?? ''} shift`">
-        <UAlert v-if="error" color="error" variant="subtle" icon="i-lucide-triangle-alert" class="mb-4" :description="error" />
+        <UAlert v-if="error" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" class="mb-4" :description="error" />
         <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="save">
             <section class="rounded-card border border-default bg-default p-5">
                 <h2 class="mb-3 text-base font-semibold text-highlighted">Shift</h2>
@@ -103,13 +103,13 @@ function submit(approval?: { approver_id: number; pin: string }): void {
                     <MoneyRow label="Branch" :text="shared.branch?.name ?? ''" />
                     <MoneyRow label="Opened by" :text="user" />
                 </div>
-                <UAlert class="mt-4" color="info" variant="subtle" icon="i-lucide-clock" :description="why" />
+                <UAlert class="mt-4" color="info" variant="subtle" icon="i-solar-clock-circle-bold-duotone" :description="why" />
                 <UAlert
                     v-if="needsApproval"
                     class="mt-3"
                     color="warning"
                     variant="subtle"
-                    icon="i-lucide-lock"
+                    icon="i-solar-lock-bold-duotone"
                     description="This is not the proposed period. A supervisor approves the change with their PIN."
                 />
             </section>
@@ -127,7 +127,7 @@ function submit(approval?: { approver_id: number; pin: string }): void {
                     class="mt-3"
                     color="success"
                     variant="subtle"
-                    icon="i-lucide-check"
+                    icon="i-solar-check-circle-linear"
                     description="Matches the handover amount."
                 />
                 <template v-if="differs">
@@ -135,14 +135,14 @@ function submit(approval?: { approver_id: number; pin: string }): void {
                         class="mt-3"
                         color="warning"
                         variant="subtle"
-                        icon="i-lucide-triangle-alert"
+                        icon="i-solar-danger-triangle-bold-duotone"
                         :description="`This is ${formatMoney(Math.abs(form.opening_cash - (last_counted ?? 0)))} ${form.opening_cash > (last_counted ?? 0) ? 'more' : 'less'} than the last count. Write what you found; it is recorded with the handover.`"
                     />
                     <UFormField label="Note (required)" name="note" class="mt-3" :error="form.errors.note">
                         <UTextarea v-model="form.note" :rows="2" class="w-full" />
                     </UFormField>
                 </template>
-                <UButton class="mt-5" size="xl" block :icon="needsApproval ? 'i-lucide-lock' : undefined" label="Open shift" :disabled="!canSave" :loading="form.processing" type="submit" />
+                <UButton class="mt-5" size="xl" block :icon="needsApproval ? 'i-solar-lock-bold-duotone' : undefined" label="Open shift" :disabled="!canSave" :loading="form.processing" type="submit" />
             </section>
         </form>
         <ApprovalPin

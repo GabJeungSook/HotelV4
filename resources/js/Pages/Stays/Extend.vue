@@ -76,7 +76,7 @@ function save(payNow: boolean): void {
 
 <template>
     <FrontDeskLayout current="board" :title="`Extend stay — Room ${stay.room ?? ''} · ${stay.guest_name}`">
-        <UAlert v-if="errorText" class="mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="errorText" />
+        <UAlert v-if="errorText" class="mb-4" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="errorText" />
         <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="option && !option.disabled && pay.amount > 0 && save(true)">
             <section class="rounded-card border border-default bg-default p-5">
                 <h2 class="mb-3 text-base font-semibold text-highlighted">Add hours</h2>
@@ -87,12 +87,12 @@ function save(payNow: boolean): void {
                     class="mt-3"
                     color="error"
                     variant="subtle"
-                    icon="i-lucide-triangle-alert"
+                    icon="i-solar-danger-triangle-bold-duotone"
                     :title="m"
                     description="Pick another length, or ask the admin to add the rate. Nothing is ever charged at ₱0."
                     data-test="missing-rate"
                 />
-                <UAlert v-if="!none" class="mt-3" color="info" variant="subtle" icon="i-lucide-clock" :description="explain" />
+                <UAlert v-if="!none" class="mt-3" color="info" variant="subtle" icon="i-solar-clock-circle-bold-duotone" :description="explain" />
                 <div class="mt-4 flex flex-col gap-1.5">
                     <MoneyRow label="Expected check-out now" :text="formatDateTime(stay.expected_checkout_at, 'auto', stay.now)" />
                     <MoneyRow label="After extending" :text="option?.new_checkout_at ? formatDateTime(option.new_checkout_at, 'auto', stay.now) : '—'" tone="primary" />

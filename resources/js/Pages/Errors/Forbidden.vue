@@ -23,7 +23,7 @@ const shell = computed(() => {
     <component :is="shell" title="No access" :header="false">
         <div class="mt-12">
             <EmptyState
-                icon="i-lucide-lock"
+                icon="i-solar-lock-bold-duotone"
                 title="You do not have access to this page"
                 :text="`This page is not open to your account. You are signed in as ${props.account.name} (${props.account.role}).`"
                 :action-label="homeLabel"

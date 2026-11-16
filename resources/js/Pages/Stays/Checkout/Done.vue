@@ -53,7 +53,7 @@ function print(): void {
 <template>
     <div>
         <section class="no-print flex flex-col items-center rounded-card border border-default bg-default px-6 py-12 text-center">
-            <UIcon name="i-lucide-circle-check" class="mb-3 size-10 text-ok" aria-hidden="true" />
+            <UIcon name="i-solar-check-circle-bold-duotone" class="mb-3 size-10 text-ok" aria-hidden="true" />
             <p class="text-[15px] font-semibold text-highlighted">Room {{ room }} is checked out</p>
             <p class="mt-1 text-sm text-muted">Stayed {{ formatDuration(done.stayed_minutes) }} · left {{ formatDateTime(done.left_at, 'auto') }} · {{ depositText }}</p>
             <p class="mt-1 text-[13px] text-muted">
@@ -63,7 +63,7 @@ function print(): void {
             </p>
             <div class="mt-5 flex justify-center gap-2">
                 <UButton label="Back to room board" @click="router.visit(route('board'))" />
-                <UButton color="neutral" variant="outline" icon="i-lucide-printer" label="Print receipt" :loading="log.printing.value" @click="print" />
+                <UButton color="neutral" variant="outline" icon="i-solar-printer-2-bold-duotone" label="Print receipt" :loading="log.printing.value" @click="print" />
             </div>
             <UAlert v-if="log.error.value" class="mt-4 max-w-[420px]" color="error" variant="subtle" :description="log.error.value" />
         </section>

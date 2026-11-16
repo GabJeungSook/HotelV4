@@ -69,7 +69,7 @@ const groups = computed(() => {
         <div v-if="loading" class="flex flex-col gap-3 p-4" aria-hidden="true" data-skeleton>
             <USkeleton v-for="i in 10" :key="i" class="h-5" :class="i % 3 === 0 ? 'w-4/5' : 'w-full'" />
         </div>
-        <EmptyState v-else-if="groups.length === 0" icon="i-lucide-bed" title="No rooms to show" text="No room matches this filter." />
+        <EmptyState v-else-if="groups.length === 0" icon="i-solar-bed-bold-duotone" title="No rooms to show" text="No room matches this filter." />
         <div v-else class="relative overflow-x-auto">
             <table class="w-full border-collapse">
                 <thead>

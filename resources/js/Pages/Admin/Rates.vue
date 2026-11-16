@@ -165,14 +165,14 @@ const hourItems = Array.from({ length: 24 }, (_, i) => ({ label: `${i + 1} hrs`,
     <AdminLayout current="rates" title="Rates">
         <Head title="Rates" />
 
-        <section class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+        <section class="overflow-x-auto rounded-card border border-default bg-default p-4">
             <EmptyState
                 v-if="columns.length === 0"
-                icon="i-lucide-banknote"
+                icon="i-solar-banknote-2-bold-duotone"
                 title="No hourly or overnight stays are sold"
                 text="Switch on hourly or overnight stays in Settings to set their rates. A long stay is priced from the 24-hour rate."
             />
-            <EmptyState v-else-if="rows.length === 0" icon="i-lucide-bed" title="No room types yet" text="Add room types on the Rooms page, then set their rates here." />
+            <EmptyState v-else-if="rows.length === 0" icon="i-solar-bed-bold-duotone" title="No room types yet" text="Add room types on the Rooms page, then set their rates here." />
             <table v-else class="dtable w-full">
                 <thead>
                     <tr>
@@ -216,7 +216,7 @@ const hourItems = Array.from({ length: 24 }, (_, i) => ({ label: `${i + 1} hrs`,
                 <span class="font-semibold text-highlighted">{{ e.hours }} hrs</span>
                 <small class="num text-muted">{{ formatMoney(e.amount, 'tile') }}</small>
             </UButton>
-            <UButton color="neutral" variant="outline" class="border-dashed" icon="i-lucide-plus" label="Add" @click="openExtension(null)" />
+            <UButton color="neutral" variant="outline" class="border-dashed" icon="i-solar-add-square-linear" label="Add" @click="openExtension(null)" />
         </div>
 
         <h3 class="mt-6 mb-2 text-[15px] font-semibold text-highlighted">Discounts</h3>
@@ -234,7 +234,7 @@ const hourItems = Array.from({ length: 24 }, (_, i) => ({ label: `${i + 1} hrs`,
                 <span class="font-semibold text-highlighted">{{ d.name }}</span>
                 <small class="num text-muted">{{ discountValue(d) }}{{ d.is_active ? '' : ' · off' }}</small>
             </UButton>
-            <UButton color="neutral" variant="outline" class="border-dashed" icon="i-lucide-plus" label="Add" @click="openDiscount(null)" />
+            <UButton color="neutral" variant="outline" class="border-dashed" icon="i-solar-add-square-linear" label="Add" @click="openDiscount(null)" />
         </div>
 
         <p class="mt-4 text-[13px] text-muted">A blank rate means that option is not offered. Changing a rate affects new check-ins only; open stays keep the price they were quoted.</p>
@@ -243,7 +243,7 @@ const hourItems = Array.from({ length: 24 }, (_, i) => ({ label: `${i + 1} hrs`,
         <UModal v-model:open="cellOpen" :title="cell ? `${cell.row.name} · ${cell.column.label}` : ''" :ui="{ content: 'max-w-[380px]' }">
             <template #body>
                 <div class="flex flex-col gap-4">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
                     <UFormField label="Rate" name="amount" :error="rateForm.errors.amount" help="Leave it blank to stop selling this option. It is never ₱0.">
                         <MoneyInput v-model="rateForm.amount" autofocus />
                     </UFormField>
@@ -264,7 +264,7 @@ const hourItems = Array.from({ length: 24 }, (_, i) => ({ label: `${i + 1} hrs`,
         <UModal v-model:open="extOpen" :title="extEditing ? `Extension · ${extForm.hours} hrs` : 'Add extension block'" :ui="{ content: 'max-w-[380px]' }">
             <template #body>
                 <div class="flex flex-col gap-4">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
                     <UFormField label="Hours" name="hours" :error="extForm.errors.hours">
                         <USelect v-model="extForm.hours" :items="hourItems" :disabled="extEditing" class="w-32" />
                     </UFormField>
@@ -288,7 +288,7 @@ const hourItems = Array.from({ length: 24 }, (_, i) => ({ label: `${i + 1} hrs`,
         <UModal v-model:open="discOpen" :title="discEditing ? discEditing.name : 'Add discount'" :ui="{ content: 'max-w-[480px]' }">
             <template #body>
                 <div class="flex flex-col gap-4">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
                     <UFormField label="Name" name="name" :error="discForm.errors.name">
                         <UInput v-model="discForm.name" class="w-full" maxlength="40" placeholder="Senior citizen" />
                     </UFormField>

@@ -180,14 +180,14 @@ const Layout = computed(() => (isOwner.value ? OwnerLayout : BackOfficeLayout));
     <component :is="Layout" current="stats" title="Stats">
         <div class="mb-4 flex flex-wrap items-center gap-3">
             <div class="inline-flex items-center gap-1" role="group" aria-label="Date range">
-                <UButton color="neutral" variant="ghost" icon="i-lucide-chevron-left" aria-label="Earlier" @click="step(-1)" />
+                <UButton color="neutral" variant="ghost" icon="i-solar-alt-arrow-left-linear" aria-label="Earlier" @click="step(-1)" />
                 <UPopover>
-                    <UButton color="neutral" variant="outline" icon="i-lucide-calendar" :label="rangeText" data-range />
+                    <UButton color="neutral" variant="outline" icon="i-solar-calendar-bold-duotone" :label="rangeText" data-range />
                     <template #content>
                         <UCalendar v-model="picked" range :week-starts-on="1" class="p-2" />
                     </template>
                 </UPopover>
-                <UButton color="neutral" variant="ghost" icon="i-lucide-chevron-right" aria-label="Later" @click="step(1)" />
+                <UButton color="neutral" variant="ghost" icon="i-solar-alt-arrow-right-linear" aria-label="Later" @click="step(1)" />
             </div>
             <PeriodSegments
                 v-model="quickModel"

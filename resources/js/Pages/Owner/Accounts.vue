@@ -71,18 +71,18 @@ function save(): void {
     <OwnerLayout current="owners" :title="`Owner accounts · ${accounts.length}`">
         <Head title="Owner accounts" />
         <PageHeader>
-            <UButton icon="i-lucide-plus" label="Add owner" @click="add" />
+            <UButton icon="i-solar-add-square-linear" label="Add owner" @click="add" />
         </PageHeader>
 
-        <UAlert v-if="created" color="success" variant="subtle" icon="i-lucide-circle-check" class="mb-4" :title="created.kind === 'reset' ? 'Password reset' : `${created.name} is added`" data-test="owner-created">
+        <UAlert v-if="created" color="success" variant="subtle" icon="i-solar-check-circle-bold-duotone" class="mb-4" :title="created.kind === 'reset' ? 'Password reset' : `${created.name} is added`" data-test="owner-created">
             <template #description>
                 Temporary password for <b>{{ created.username }}</b>:
                 <span class="font-mono font-semibold text-highlighted select-all">{{ created.password }}</span>. It is shown only once.
             </template>
         </UAlert>
-        <UAlert v-if="flash.error" color="error" variant="subtle" icon="i-lucide-triangle-alert" class="mb-4" :description="flash.error.message" />
+        <UAlert v-if="flash.error" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" class="mb-4" :description="flash.error.message" />
 
-        <div class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+        <div class="overflow-x-auto rounded-card border border-default bg-default p-4">
             <table class="dtable">
                 <thead>
                     <tr>

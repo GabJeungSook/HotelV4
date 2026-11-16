@@ -65,7 +65,7 @@ function save(): void {
     <UModal v-model:open="open" title="Take payment" :description="`Room ${room} · ${lines.length + (charge ? 1 : 0)} unpaid ${lines.length + (charge ? 1 : 0) === 1 ? 'line' : 'lines'}`" :ui="{ content: 'max-w-md' }">
         <template #body>
             <form id="take-payment-form" @submit.prevent="save">
-            <UAlert v-if="error" class="mb-3" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="error" />
+            <UAlert v-if="error" class="mb-3" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="error" />
             <div class="flex flex-col gap-1.5">
                 <MoneyRow v-for="(l, i) in lines" :key="i" :label="l.description" :amount="l.due" />
                 <MoneyRow v-if="charge" label="New charges" :amount="charge.total" />

@@ -86,11 +86,11 @@ async function setStatus(b: BranchRow, status: 'active' | 'inactive'): Promise<v
 
 function menu(b: BranchRow) {
     if (b.status === 'active') {
-        return [[{ label: 'Deactivate', icon: 'i-lucide-ban', color: 'error' as const, onSelect: () => setStatus(b, 'inactive') }]];
+        return [[{ label: 'Deactivate', icon: 'i-solar-forbidden-circle-bold-duotone', color: 'error' as const, onSelect: () => setStatus(b, 'inactive') }]];
     }
 
     if (b.status === 'inactive') {
-        return [[{ label: 'Set back to active', icon: 'i-lucide-rotate-ccw', onSelect: () => setStatus(b, 'active') }]];
+        return [[{ label: 'Set back to active', icon: 'i-solar-restart-linear', onSelect: () => setStatus(b, 'active') }]];
     }
 
     return [];
@@ -101,14 +101,14 @@ function menu(b: BranchRow) {
     <OwnerLayout current="branches" :title="`Branches · ${branches.length}`">
         <Head title="Branches" />
         <PageHeader>
-            <UButton icon="i-lucide-plus" label="Add branch" :to="route('owner.branches.create')" />
+            <UButton icon="i-solar-add-square-linear" label="Add branch" :to="route('owner.branches.create')" />
         </PageHeader>
 
         <UAlert
             v-if="created && created.kind === 'branch'"
             color="success"
             variant="subtle"
-            icon="i-lucide-circle-check"
+            icon="i-solar-check-circle-bold-duotone"
             class="mb-4"
             :title="`${created.branch} is added`"
             data-test="branch-created"
@@ -124,7 +124,7 @@ function menu(b: BranchRow) {
             <UButton class="ms-auto" color="neutral" variant="outline" size="sm" label="Back to all branches" @click="router.post(route('owner.branches.close'))" />
         </div>
 
-        <div class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+        <div class="overflow-x-auto rounded-card border border-default bg-default p-4">
             <EmptyState v-if="branches.length === 0" title="No branches yet" text="Add the first branch to start." action-label="Add branch" @action="router.visit(route('owner.branches.create'))" />
             <table v-else class="dtable">
                 <thead>
@@ -153,7 +153,7 @@ function menu(b: BranchRow) {
                             <div class="flex items-center justify-end gap-1">
                                 <UButton color="neutral" variant="outline" size="sm" :label="b.id === opened_id ? 'Opened' : 'Open'" :disabled="b.id === opened_id" @click="open(b)" />
                                 <UDropdownMenu v-if="menu(b).length" :items="menu(b)" :content="{ align: 'end' }">
-                                    <UButton color="neutral" variant="ghost" size="sm" icon="i-lucide-ellipsis" :aria-label="`More for ${b.name}`" />
+                                    <UButton color="neutral" variant="ghost" size="sm" icon="i-solar-menu-dots-linear" :aria-label="`More for ${b.name}`" />
                                 </UDropdownMenu>
                             </div>
                         </td>

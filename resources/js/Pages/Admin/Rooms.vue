@@ -198,7 +198,7 @@ const canAddRoom = computed(() => props.floors.length > 0 && props.types.some((t
     <AdminLayout current="rooms" :title="title">
         <Head title="Rooms" />
         <PageHeader>
-            <UButton icon="i-lucide-plus" :label="addLabel" :disabled="tab === 'rooms' && !canAddRoom" @click="add" />
+            <UButton icon="i-solar-add-square-linear" :label="addLabel" :disabled="tab === 'rooms' && !canAddRoom" @click="add" />
         </PageHeader>
 
         <div class="mb-4 flex flex-wrap items-center gap-3">
@@ -218,16 +218,16 @@ const canAddRoom = computed(() => props.floors.length > 0 && props.types.some((t
             class="mb-4"
             color="info"
             variant="subtle"
-            icon="i-lucide-info"
+            icon="i-solar-info-circle-bold-duotone"
             description="This branch is being set up. It becomes active when its first room is saved."
         />
 
         <!-- Rooms -->
         <template v-if="tab === 'rooms'">
-            <section class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+            <section class="overflow-x-auto rounded-card border border-default bg-default p-4">
                 <EmptyState
                     v-if="rooms.length === 0"
-                    icon="i-lucide-bed"
+                    icon="i-solar-bed-bold-duotone"
                     title="No rooms yet"
                     :text="canAddRoom ? 'Add the first room of this branch.' : 'Add a floor and a room type first, then the rooms.'"
                 />
@@ -263,14 +263,14 @@ const canAddRoom = computed(() => props.floors.length > 0 && props.types.some((t
                 class="mt-4"
                 color="info"
                 variant="subtle"
-                icon="i-lucide-lock"
+                icon="i-solar-lock-bold-duotone"
                 description="Status can be changed here only between Available and Maintenance. A room with a guest in it cannot be set to Available."
             />
         </template>
 
         <!-- Floors -->
-        <section v-else-if="tab === 'floors'" class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
-            <EmptyState v-if="floors.length === 0" icon="i-lucide-list" title="No floors yet" text="Add the floors of this branch, then its rooms." />
+        <section v-else-if="tab === 'floors'" class="overflow-x-auto rounded-card border border-default bg-default p-4">
+            <EmptyState v-if="floors.length === 0" icon="i-solar-list-bold-duotone" title="No floors yet" text="Add the floors of this branch, then its rooms." />
             <table v-else class="dtable w-full">
                 <thead>
                     <tr>
@@ -292,8 +292,8 @@ const canAddRoom = computed(() => props.floors.length > 0 && props.types.some((t
         </section>
 
         <!-- Room types -->
-        <section v-else class="overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
-            <EmptyState v-if="types.length === 0" icon="i-lucide-list" title="No room types yet" text="Add the room types this branch sells, then set their rates." />
+        <section v-else class="overflow-x-auto rounded-card border border-default bg-default p-4">
+            <EmptyState v-if="types.length === 0" icon="i-solar-list-bold-duotone" title="No room types yet" text="Add the room types this branch sells, then set their rates." />
             <table v-else class="dtable w-full">
                 <thead>
                     <tr>
@@ -320,7 +320,7 @@ const canAddRoom = computed(() => props.floors.length > 0 && props.types.some((t
         <UModal v-model:open="roomOpen" :title="editingRoom ? `Room ${editingRoom.number}` : 'Add room'" :ui="{ content: 'max-w-[460px]' }">
             <template #body>
                 <div class="flex flex-col gap-4">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
                     <div class="grid grid-cols-2 gap-3">
                         <UFormField label="Room number" name="number" :error="roomForm.errors.number" help="Letters allowed, such as 3A">
                             <UInput v-model="roomForm.number" class="w-full" autofocus maxlength="8" />
@@ -366,7 +366,7 @@ const canAddRoom = computed(() => props.floors.length > 0 && props.types.some((t
         <UModal v-model:open="floorOpen" :title="editingFloor ? `Floor ${editingFloor.label}` : 'Add floor'" :ui="{ content: 'max-w-[380px]' }">
             <template #body>
                 <div class="flex flex-col gap-4">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
                     <div class="grid grid-cols-2 gap-3">
                         <UFormField label="Floor number" name="number" :error="floorForm.errors.number">
                             <UInput v-model.number="floorForm.number" type="number" inputmode="numeric" class="w-full" />
@@ -389,7 +389,7 @@ const canAddRoom = computed(() => props.floors.length > 0 && props.types.some((t
         <UModal v-model:open="typeOpen" :title="editingType ? editingType.name : 'Add room type'" :ui="{ content: 'max-w-[420px]' }">
             <template #body>
                 <div class="flex flex-col gap-4">
-                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
+                    <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
                     <UFormField label="Name" name="name" :error="typeForm.errors.name">
                         <UInput v-model="typeForm.name" class="w-full" maxlength="40" placeholder="Deluxe" />
                     </UFormField>

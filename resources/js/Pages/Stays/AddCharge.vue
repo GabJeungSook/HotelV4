@@ -84,7 +84,7 @@ function payNow(): void {
 <template>
     <USlideover v-model:open="open" title="Add charge" :ui="{ content: 'max-w-[420px]' }">
         <template #body>
-            <UAlert v-if="error" class="mb-3" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="error" />
+            <UAlert v-if="error" class="mb-3" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="error" />
             <div role="tablist" class="flex gap-1 rounded-md bg-grey-50 p-1">
                 <button
                     v-for="t in tabs"
@@ -99,7 +99,7 @@ function payNow(): void {
                     {{ t.label }}
                 </button>
             </div>
-            <UInput v-model="search" icon="i-lucide-search" placeholder="Search item" class="mt-3 w-full" />
+            <UInput v-model="search" icon="i-solar-magnifer-linear" placeholder="Search item" class="mt-3 w-full" />
             <table class="dtable mt-3 w-full">
                 <tbody>
                     <tr v-for="p in shown" :key="p.id">
@@ -111,9 +111,9 @@ function payNow(): void {
                         <td class="num text-right" :class="out(p) ? 'text-muted' : ''">{{ formatMoney(p.price, 'column') }}</td>
                         <td class="w-28 text-right">
                             <div class="inline-flex items-center gap-1">
-                                <UButton v-if="(qty[p.id] ?? 0) > 0" size="xs" color="neutral" variant="outline" icon="i-lucide-minus" :aria-label="`One less ${p.name}`" @click="change(p, -1)" />
+                                <UButton v-if="(qty[p.id] ?? 0) > 0" size="xs" color="neutral" variant="outline" icon="i-solar-minus-circle-linear" :aria-label="`One less ${p.name}`" @click="change(p, -1)" />
                                 <span v-if="(qty[p.id] ?? 0) > 0" class="w-6 text-center tabular">{{ qty[p.id] }}</span>
-                                <UButton size="xs" color="neutral" variant="outline" icon="i-lucide-plus" :disabled="out(p) || (p.stock !== null && (qty[p.id] ?? 0) >= p.stock)" :aria-label="`Add ${p.name}`" @click="change(p, 1)" />
+                                <UButton size="xs" color="neutral" variant="outline" icon="i-solar-add-square-linear" :disabled="out(p) || (p.stock !== null && (qty[p.id] ?? 0) >= p.stock)" :aria-label="`Add ${p.name}`" @click="change(p, 1)" />
                             </div>
                         </td>
                     </tr>

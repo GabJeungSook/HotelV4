@@ -37,8 +37,14 @@ final class DashboardController extends Controller
         /** @var User $user */
         $user = $request->user();
         $branch = $branches->branch() ?? abort(403);
-        $period = in_array($request->query('period'), self::PERIODS, true) ? (string) $request->query('period') : 'today';
-        $periods = fn (): array => $dash->periods([$branch->id], $period);
+        // A specific from–to range overrides the named period when both dates are valid.
+        $from = $request->query('from');
+        $to = $request->query('to');
+        $custom = is_string($from) && is_string($to)
+            && preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) === 1 && preg_match('/^\d{4}-\d{2}-\d{2}$/', $to) === 1;
+        $period = $custom ? 'custom' : (in_array($request->query('period'), self::PERIODS, true) ? (string) $request->query('period') : 'today');
+        $periods = fn (): array => $custom ? $dash->customPeriods([$branch->id], (string) $from, (string) $to) : $dash->periods([$branch->id], $period);
+        $range = (fn (Period $p): array => ['from' => $p->from, 'to' => $p->to])($periods()[$branch->id]);
         $overview = in_array($request->query('overview'), self::OVERVIEW, true) ? (string) $request->query('overview') : 'week';
         $methods = $branch->payment_methods->map(fn (PaymentMethod $m): string => $m->value)->all();
         $desk = $request->filled('desk') ? $request->integer('desk') : null;
@@ -46,6 +52,7 @@ final class DashboardController extends Controller
 
         return Inertia::render('Dashboard/Branch', [
             'period' => $period,
+            'range' => $range,
             'overviewPeriod' => $overview,
             'filters' => ['week' => $request->query('week'), 'desk' => $desk, 'band' => $band],
             'branch' => ['id' => $branch->id, 'name' => $branch->name, 'status' => $branch->status->value],
@@ -58,7 +65,7 @@ final class DashboardController extends Controller
             ], 'kpis'),
             'charts' => Inertia::defer(fn (): array => [
                 'nights' => $dash->occupancyNights($branch->id),
-                'period' => Period::of($period, $periods()[$branch->id]->to)->words(),
+                'period' => $periods()[$branch->id]->words(),
             ], 'charts'),
             'overview' => Inertia::defer(fn (): array => $dash->salesOverview($dash->periods([$branch->id], $overview), $methods), 'overview'),
             'recent' => Inertia::defer(fn (): array => ['rows' => $dash->recentCheckins($branch->id)], 'recent'),

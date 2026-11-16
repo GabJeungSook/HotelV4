@@ -13,7 +13,7 @@ defineEmits<{ check: [] }>();
     <div class="flex flex-1 flex-col items-center justify-center" data-test="kiosk-no-rooms">
         <EmptyState
             size="kiosk"
-            icon="i-lucide-bed"
+            icon="i-solar-bed-bold-duotone"
             title="All rooms are taken right now"
             text="Rooms open up as guests leave and cleaning finishes. Please ask the front desk for the next available room."
             action-label="Check again"

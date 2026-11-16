@@ -134,7 +134,7 @@ function submit(): void {
 
 <template>
     <FrontDeskLayout current="reservations" title="New reservation">
-        <UAlert v-if="flash.error" color="error" variant="subtle" icon="i-lucide-triangle-alert" class="mb-4" :description="flash.error.message" data-test="reserve-error" />
+        <UAlert v-if="flash.error" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" class="mb-4" :description="flash.error.message" data-test="reserve-error" />
         <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="submit">
             <section class="rounded-card border border-default bg-default p-5">
                 <h2 class="mb-3 text-base font-semibold text-highlighted">Guest and stay</h2>
@@ -148,7 +148,7 @@ function submit(): void {
                     <UFormField label="Arrival" name="arrival_date" :error="form.errors.arrival_date">
                         <div class="flex gap-2">
                             <UPopover>
-                                <UButton color="neutral" variant="outline" icon="i-lucide-calendar" class="flex-1" :label="formatDateTime(`${form.arrival_date}T12:00:00+08:00`, 'shiftDate')" />
+                                <UButton color="neutral" variant="outline" icon="i-solar-calendar-bold-duotone" class="flex-1" :label="formatDateTime(`${form.arrival_date}T12:00:00+08:00`, 'shiftDate')" />
                                 <template #content>
                                     <UCalendar v-model="calendar" :week-starts-on="1" class="p-2" />
                                 </template>
@@ -173,7 +173,7 @@ function submit(): void {
                     class="mt-4"
                     :color="quote.ok ? 'success' : 'error'"
                     variant="subtle"
-                    :icon="quote.ok ? 'i-lucide-check' : 'i-lucide-triangle-alert'"
+                    :icon="quote.ok ? 'i-solar-check-circle-linear' : 'i-solar-danger-triangle-bold-duotone'"
                     :description="quote.message"
                     data-test="availability"
                 />

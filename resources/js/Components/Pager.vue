@@ -43,7 +43,7 @@ function go(p: number): void {
 
 <template>
     <nav v-if="pages > 1" aria-label="Pages" class="flex items-center gap-1.5 border-t border-default px-5 py-3 text-[12.5px] text-muted" data-pager>
-        <UButton color="neutral" variant="outline" size="sm" icon="i-lucide-chevron-left" label="Previous" :disabled="page <= 1" @click="go(page - 1)" />
+        <UButton color="neutral" variant="outline" size="sm" icon="i-solar-alt-arrow-left-linear" label="Previous" :disabled="page <= 1" @click="go(page - 1)" />
         <ol class="mx-auto flex gap-0.5">
             <li v-for="(n, i) in numbers" :key="`${n}-${i}`">
                 <span v-if="n === '…'" class="grid h-[30px] min-w-[30px] place-items-center" aria-hidden="true">…</span>
@@ -60,6 +60,6 @@ function go(p: number): void {
                 </button>
             </li>
         </ol>
-        <UButton color="neutral" variant="outline" size="sm" trailing-icon="i-lucide-chevron-right" label="Next" :disabled="page >= pages" @click="go(page + 1)" />
+        <UButton color="neutral" variant="outline" size="sm" trailing-icon="i-solar-alt-arrow-right-linear" label="Next" :disabled="page >= pages" @click="go(page + 1)" />
     </nav>
 </template>

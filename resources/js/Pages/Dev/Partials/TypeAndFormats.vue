@@ -92,7 +92,7 @@ const timeRows: [string, string][] = [
             <p class="hm-light mt-2 text-[30px] leading-[1.15] font-semibold tracking-[-0.03em] text-highlighted">Three ways to stay</p>
             <ul class="mt-3 flex flex-col gap-1 text-xs" data-font-checks>
                 <li v-for="check in fontChecks" :key="check.face" class="flex items-center gap-1.5">
-                    <UIcon :name="check.ok ? 'i-lucide-check' : 'i-lucide-triangle-alert'" class="size-3.5" :class="check.ok ? 'text-ok' : 'text-bad'" aria-hidden="true" />
+                    <UIcon :name="check.ok ? 'i-solar-check-circle-linear' : 'i-solar-danger-triangle-bold-duotone'" class="size-3.5" :class="check.ok ? 'text-ok' : 'text-bad'" aria-hidden="true" />
                     <span :data-font-ok="check.ok">{{ check.face }} {{ check.ok ? 'loaded' : 'not loaded' }}</span>
                 </li>
             </ul>

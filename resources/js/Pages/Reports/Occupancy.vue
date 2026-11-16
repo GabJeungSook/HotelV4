@@ -75,7 +75,7 @@ const cards = computed(() => [
                 </button>
             </div>
 
-            <div class="mt-4 overflow-x-auto rounded-card border border-default bg-default px-2 py-1">
+            <div class="mt-4 overflow-x-auto rounded-card border border-default bg-default p-4">
                 <table class="dtable">
                     <thead>
                         <tr>
