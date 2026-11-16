@@ -225,7 +225,7 @@ it('builds the navigation on the server from the role and the pages that exist',
             ['key' => 'today', 'label' => 'Today', 'route' => '/today', 'icon' => 'i-lucide-clock', 'subtitle' => 'What needs doing in the next half hour'],
             ['key' => 'board', 'label' => 'Room board', 'route' => '/board', 'icon' => 'i-lucide-bed', 'subtitle' => null],
             ['key' => 'reservations', 'label' => 'Reservations', 'route' => '/reservations', 'icon' => 'i-lucide-calendar', 'subtitle' => 'Bookings and their arrival times'],
-            ['key' => 'pos', 'label' => 'POS', 'route' => '/pos', 'icon' => 'i-lucide-shopping-cart', 'subtitle' => 'Sell to a room or for cash'],
+            ['key' => 'pos', 'label' => 'Point of sale', 'route' => '/pos', 'icon' => 'i-lucide-shopping-cart', 'subtitle' => 'Sell to a room or for cash'],
             ['key' => 'stock', 'label' => 'Stock', 'route' => '/stock', 'icon' => 'i-lucide-package', 'subtitle' => 'Counts, deliveries and adjustments'],
         ]],
         ['heading' => 'Shift', 'items' => [

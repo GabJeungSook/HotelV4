@@ -8,6 +8,7 @@ import MoneyInput from '@/Components/MoneyInput.vue';
 import StatCard from '@/Components/StatCard.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import PersonPill from '@/Components/PersonPill.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { useIdempotencyKey } from '@/Composables/useIdempotencyKey';
@@ -236,15 +237,12 @@ function actions(m: Movement) {
 </script>
 
 <template>
-    <FrontDeskLayout current="shift" title="Shift cash">
-        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 class="text-base font-semibold text-highlighted">{{ period.period_name }} shift · {{ formatDateTime(`${period.business_date}T12:00:00+08:00`, 'shiftDate') }}</h2>
-            <div class="flex flex-wrap gap-2">
-                <UButton color="neutral" variant="outline" icon="i-lucide-plus" label="Expense" :disabled="period.status !== 'open'" @click="start('expense')" />
-                <UButton color="neutral" variant="outline" icon="i-lucide-plus" label="Remittance" :disabled="period.status !== 'open'" @click="start('remittance')" />
-                <UButton color="neutral" variant="outline" icon="i-lucide-plus" label="Shortage payment" :disabled="period.status !== 'open' || !short_shifts.length" @click="start('shortage_payment')" />
-            </div>
-        </div>
+    <FrontDeskLayout current="shift" :title="`${period.period_name} shift · ${formatDateTime(`${period.business_date}T12:00:00+08:00`, 'shiftDate')}`">
+        <PageHeader>
+            <UButton color="neutral" variant="outline" icon="i-lucide-plus" label="Expense" :disabled="period.status !== 'open'" @click="start('expense')" />
+            <UButton color="neutral" variant="outline" icon="i-lucide-plus" label="Remittance" :disabled="period.status !== 'open'" @click="start('remittance')" />
+            <UButton color="neutral" variant="outline" icon="i-lucide-plus" label="Shortage payment" :disabled="period.status !== 'open' || !short_shifts.length" @click="start('shortage_payment')" />
+        </PageHeader>
 
         <UAlert v-if="pageError" class="mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="pageError" />
 

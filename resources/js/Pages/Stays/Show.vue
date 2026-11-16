@@ -8,6 +8,7 @@ import MoneyRow from '@/Components/MoneyRow.vue';
 import type { PaymentMethodOption } from '@/Components/PaymentFields.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import TotalRow from '@/Components/TotalRow.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { formatDateTime, formatDuration } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
@@ -194,10 +195,10 @@ function lineMenu(line: Line) {
 
 <template>
     <FrontDeskLayout current="board" :title="`Room ${stay.room ?? ''} · ${stay.guest_name}`">
-        <div class="mb-1 flex flex-wrap items-center gap-2">
-            <StatusLabel :tone="stateLabel.tone" :label="stateLabel.label" />
+        <PageHeader>
+            <template #status><StatusLabel :tone="stateLabel.tone" :label="stateLabel.label" /></template>
             <StatusLabel v-if="timeChip" :tone="timeChip.tone" :label="timeChip.label" />
-        </div>
+        </PageHeader>
         <p class="mb-4 text-[13px] text-muted">
             {{ stay.type }} · in {{ formatDateTime(stay.checked_in_at, 'auto', stay.now) }} ·
             <template v-if="stay.checked_out_at">left {{ formatDateTime(stay.checked_out_at, 'auto', stay.now) }}</template>

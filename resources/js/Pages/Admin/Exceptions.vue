@@ -6,6 +6,7 @@ import ApprovalPin, { type Approver } from '@/Components/ApprovalPin.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import MoneyInput from '@/Components/MoneyInput.vue';
 import MoneyRow from '@/Components/MoneyRow.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { formatDateTime } from '@/Composables/useDateTime';
@@ -98,11 +99,10 @@ const tone = (row: Row) => (row.severity === 'high' ? 'bad' : 'warn');
 
 <template>
     <Head title="Needs attention" />
-    <BackOfficeLayout current="attention" title="Needs attention">
-        <div class="mb-3 flex flex-wrap items-center gap-3">
-            <h1 class="text-xl font-semibold text-highlighted">Needs attention · {{ rows.length }}</h1>
-            <StatusLabel :label="formatDateTime(at, 'dayTime')" />
-        </div>
+    <BackOfficeLayout current="attention" :title="`Needs attention · ${rows.length}`">
+        <PageHeader>
+            <template #status><StatusLabel :label="formatDateTime(at, 'dayTime')" /></template>
+        </PageHeader>
 
         <EmptyState v-if="rows.length === 0" icon="i-lucide-check" title="All good." text="Nothing needs attention right now." />
 

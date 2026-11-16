@@ -62,8 +62,10 @@ function print(): void {
     <BackOfficeLayout current="shift-reports" :title="title">
         <Head :title="title" />
         <PageHeader>
-            <StatusLabel v-if="s.closed_at" tone="neutral" :label="`Closed ${formatDateTime(s.closed_at, 'time')}`" />
-            <StatusLabel v-else tone="warn" label="Open · preview" />
+            <template #status>
+                <StatusLabel v-if="s.closed_at" tone="neutral" :label="`Closed ${formatDateTime(s.closed_at, 'time')}`" />
+                <StatusLabel v-else tone="warn" label="Open · preview" />
+            </template>
             <UButton color="neutral" variant="outline" label="Z-report" icon="i-lucide-list" :to="route('reports.z', s.id)" />
             <ExportMenu csv :disabled="report.preview" @print="print" @csv="r.download(route('reports.shift', { shift: s.id, export: 'csv' }))" />
         </PageHeader>

@@ -35,6 +35,13 @@ const liveHolds = computed(() => props.holds.filter((h) => !h.expired).length);
 const kiosk = computed(() => !!shared.value.branch?.modules?.kiosk_enabled || props.holds.length > 0);
 usePolling(['board'], props.poll);
 
+/** "46 rooms on 2 floors · updates every 15 s" (mockup v6). */
+const boardSub = computed(() => {
+    const b = props.board;
+
+    return b ? `${b.total} rooms on ${b.floorOptions.length} ${b.floorOptions.length === 1 ? 'floor' : 'floors'} · updates every ${props.poll} s` : undefined;
+});
+
 const initialTab = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search).get('tab');
 const tab = ref<RoomFilter>((['all', 'vacant', 'occupied', 'due_out', 'overdue', 'housekeeping', 'held'] as RoomFilter[]).includes(initialTab as RoomFilter) ? (initialTab as RoomFilter) : 'all');
 const sort = ref<'number' | 'attention'>('number');
@@ -90,7 +97,7 @@ function open(room: BoardRoom): void {
 </script>
 
 <template>
-    <FrontDeskLayout current="board" title="Room board">
+    <FrontDeskLayout current="board" title="Room board" :subtitle="boardSub">
         <UAlert v-if="flash.error" color="error" variant="subtle" icon="i-lucide-triangle-alert" class="mb-3" :description="flash.error.message" />
         <Deferred data="board">
             <template #fallback><Skeleton /></template>

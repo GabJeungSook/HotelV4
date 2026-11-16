@@ -49,7 +49,7 @@ final class Navigation
                 ['key' => 'today', 'label' => 'Today', 'route' => 'today', 'icon' => 'i-lucide-clock', 'roles' => self::FRONT, 'subtitle' => 'What needs doing in the next half hour'],
                 ['key' => 'board', 'label' => 'Room board', 'route' => 'board', 'icon' => 'i-lucide-bed', 'roles' => self::FRONT],
                 ['key' => 'reservations', 'label' => 'Reservations', 'route' => 'reservations.index', 'icon' => 'i-lucide-calendar', 'roles' => self::FRONT, 'module' => 'reservations_enabled', 'subtitle' => 'Bookings and their arrival times'],
-                ['key' => 'pos', 'label' => 'POS', 'route' => 'pos.index', 'icon' => 'i-lucide-shopping-cart', 'roles' => self::FRONT, 'module' => 'pos_enabled', 'subtitle' => 'Sell to a room or for cash'],
+                ['key' => 'pos', 'label' => 'Point of sale', 'route' => 'pos.index', 'icon' => 'i-lucide-shopping-cart', 'roles' => self::FRONT, 'module' => 'pos_enabled', 'subtitle' => 'Sell to a room or for cash'],
                 ['key' => 'stock', 'label' => 'Stock', 'route' => 'stock.index', 'icon' => 'i-lucide-package', 'roles' => self::FRONT, 'module' => 'pos_enabled', 'subtitle' => 'Counts, deliveries and adjustments'],
             ]],
             ['layout' => 'frontdesk', 'heading' => 'Shift', 'items' => [

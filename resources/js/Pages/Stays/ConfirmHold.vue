@@ -8,6 +8,7 @@ import MoneyRow from '@/Components/MoneyRow.vue';
 import OptionTiles from '@/Components/OptionTiles.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import TotalRow from '@/Components/TotalRow.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { formatDuration } from '@/Composables/useDateTime';
 import { useIdempotencyKey } from '@/Composables/useIdempotencyKey';
@@ -112,11 +113,13 @@ async function release(): Promise<void> {
 
 <template>
     <FrontDeskLayout current="board" :title="`Confirm kiosk check-in — Room ${hold.room}`">
-        <div class="mb-4 flex items-center gap-2">
-            <StatusLabel :label="`${hold.type} · ${hold.floor}`" />
-            <StatusLabel v-if="!expired" tone="warn" :label="`Hold ends in ${formatDuration(secondsLeft, 'countdown')}`" data-test="hold-countdown" />
-            <StatusLabel v-else tone="bad" label="Hold expired" />
-        </div>
+        <PageHeader>
+            <template #status>
+                <StatusLabel v-if="!expired" tone="warn" :label="`Hold ends in ${formatDuration(secondsLeft, 'countdown')}`" data-test="hold-countdown" />
+                <StatusLabel v-else tone="bad" label="Hold expired" />
+            </template>
+        </PageHeader>
+        <p class="mb-4 text-[13px] text-muted">{{ hold.type }} · {{ hold.floor }}</p>
         <UAlert
             v-if="expired"
             color="error"

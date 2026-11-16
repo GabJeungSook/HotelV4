@@ -64,7 +64,8 @@ const where = computed<{ item?: NavItem; parent?: NavItem; heading?: string }>((
 
 const pageTitle = computed(() => props.title ?? where.value.item?.label ?? '');
 const icon = computed(() => where.value.parent?.icon ?? where.value.item?.icon ?? 'i-lucide-list');
-const sub = computed(() => state.sub ?? props.subtitle ?? where.value.item?.subtitle ?? props.branch?.name ?? '');
+// The nav item's sub-line belongs to the page of that name only, not to pages below it (37 under 37a).
+const sub = computed(() => state.sub ?? props.subtitle ?? (pageTitle.value === where.value.item?.label ? where.value.item?.subtitle : null) ?? props.branch?.name ?? '');
 const crumbs = computed(() => {
     const w = where.value;
     const short = pageTitle.value.split(' · ')[0].split(' — ')[0];
@@ -143,6 +144,7 @@ const keys = [
                 </div>
                 <div id="page-actions" class="flex shrink-0 flex-wrap items-center justify-end gap-2 empty:hidden" />
             </div>
+            <h1 v-if="!header && pageTitle" class="sr-only">{{ pageTitle }}</h1>
             <main class="min-w-0 flex-1 px-7 pt-5 pb-7 max-md:px-4" :class="online ? '' : 'opacity-50'">
                 <!-- While the connection bar shows, every control on the page is disabled (50). -->
                 <fieldset :disabled="!online" class="contents"><slot /></fieldset>

@@ -20,7 +20,7 @@ const shell = computed(() => {
 </script>
 
 <template>
-    <component :is="shell" title="No access">
+    <component :is="shell" title="No access" :header="false">
         <div class="mt-12">
             <EmptyState
                 icon="i-lucide-lock"

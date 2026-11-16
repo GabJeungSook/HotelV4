@@ -76,7 +76,7 @@ onMounted(() => setTimeout(printSlip, 300));
 </script>
 
 <template>
-    <FrontDeskLayout current="board" title="Checked in">
+    <FrontDeskLayout current="board" title="Room board">
         <UAlert class="no-print mb-4" color="success" variant="subtle" icon="i-lucide-check" :title="`${stay.guest_name} is checked in to Room ${stay.room}.`" :description="giveText" />
         <div class="grid grid-cols-[minmax(0,340px)_220px] gap-6 max-[700px]:grid-cols-1">
             <Slip :header="slip.header" title="CHECK-IN SLIP" :sections="sections" :footer="footer" :reprint="log.reprint.value" />

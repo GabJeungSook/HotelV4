@@ -282,7 +282,7 @@ The board header counts use the same words and tones, in this order: Vacant `ok`
 | `--hm-ink` | `#0f1728` | `#f5f6f8` |
 | `--hm-text` | `#344054` | `#cdd1d8` |
 | `--hm-muted` | `#667085` | `#959cab` |
-| `--hm-faint` | `#98a2b3` | `#737b8d` |
+| `--hm-faint` | `#98a2b3` | `#8a92a4` |
 | `--hm-line` | `#e4e7ec` | `#262c38` |
 | `--hm-line-strong` | `#d0d5dd` | `#363e4d` |
 | `--hm-row` | `#eef0f3` | `#1f2430` |
@@ -306,7 +306,7 @@ The board header counts use the same words and tones, in this order: Vacant `ok`
 | `--hm-grey` / `-50` / `-line` | `#475467` / `#f2f4f7` / `#e4e7ec` | `#aeb4c0` / `#1e2431` / `#2c3340` |
 | `--hm-av-1…7` (fill / ink)` | `soft tints, e.g. `#dbeafe` / `#1e40af` | `deep tints, e.g. `#1c2c4f` / `#a8c4fb` |
 | `--hm-bar-1` / `-2` / `-3` / `-now` | `#3b93cf` / `#a9d3ef` / `#e4e7ec` / `#005f9e` | `#3f8fc8` / `#24496a` / `#2c3340` / `#8cc4ec` |
-| `--hm-disabled` / `-ink` | `#e4e7ec` / `#98a2b3` | `#222834` / `#737b8d` |
+| `--hm-disabled` / `-ink` | `#e4e7ec` / `#98a2b3` | `#222834` / `#8a92a4` |
 | `--hm-overlay` | `rgba(15,23,40,.5)` | `rgba(0,0,0,.6)` |
 | `--hm-shadow-xs` | `0 1px 2px rgba(16,24,40,.05)` | `0 1px 2px rgba(0,0,0,.3)` |
 | `--hm-shadow-modal` | `0 14px 34px rgba(15,23,40,.18)` | `0 14px 34px rgba(0,0,0,.5)` |

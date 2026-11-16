@@ -23,7 +23,7 @@ const ordinal = computed(() => ['first', 'second', 'third', 'fourth', 'fifth'][p
 </script>
 
 <template>
-    <FrontDeskLayout :title="`Join the ${shift.period_name} shift`">
+    <FrontDeskLayout :title="`Join the ${shift.period_name} shift`" :header="false">
         <div class="grid place-items-center pt-6">
             <section class="w-full max-w-[400px] rounded-card border border-default bg-default p-6">
                 <h2 class="text-lg font-semibold text-highlighted">Join the {{ shift.period_name }} shift</h2>

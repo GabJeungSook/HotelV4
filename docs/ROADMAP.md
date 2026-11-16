@@ -211,7 +211,7 @@ No screens in this phase. Everything is driven by tests.
 ## Phase 10 — Polish, printing and release
 
 - [x] Welcome page (59) at `/`: logo, "Staff sign in" (or "Dashboard" when signed in), headline, room types with their lowest hourly and overnight prices from the rate table, three steps, branch picker with more than one branch; no availability and no booking
-- [ ] Walk every screen against the mockup; fix spacing, wording and states (done by the last box of Phase 11, against the v6 frames)
+- [x] Walk every screen against the mockup; fix spacing, wording and states (done by the last box of Phase 11, against the v6 frames)
 - [x] Dark mode check: every page, chart and Nuxt UI component is readable in both colour modes; slips and reports always print light
 - [x] Keyboard pass on the front desk: Enter submits, Esc closes, focus order
 - [ ] Print test on a real 80 mm thermal printer: slips 8, 18, 26; A4 test of the Z-report PDF (37b) and the day Z (38b) — **deferred by the owner on 16 Nov 2026: no printer yet**; do it before going live
@@ -237,7 +237,7 @@ The owner approved mockup v6 on 16 Nov 2026 (DESIGN_SYSTEM §0). No business rul
 - [x] Screen 37a: `/reports/shifts` list with filters, search, pages and the Calendar tab (APP_FLOW)
 - [x] Every table that lists people uses `PersonPill`; housekeeping phone headers white (32–35)
 - [x] Sign-in (1) and welcome (59) rebuilt to the v6 frames with their motion; all motion off under reduced motion
-- [ ] Full check, then compare all 71 frames with the app in light and dark mode
+- [x] Full check, then compare all 71 frames with the app in light and dark mode
 
 **Done when:** every page shows the v6 shell and page header, 60/61/62/37a/1/59 match their frames side by side, no page contains IBM Plex or Newsreader, and the full check passes.
 

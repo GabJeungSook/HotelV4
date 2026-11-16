@@ -11,7 +11,7 @@ export const frontDeskNav: NavGroup[] = [
             { key: 'today', label: 'Today', route: '/today', icon: 'i-lucide-clock' },
             { key: 'board', label: 'Room board', route: '/board', icon: 'i-lucide-bed' },
             { key: 'reservations', label: 'Reservations', route: '/reservations', icon: 'i-lucide-calendar' },
-            { key: 'pos', label: 'POS', route: '/pos', icon: 'i-lucide-shopping-cart' },
+            { key: 'pos', label: 'Point of sale', route: '/pos', icon: 'i-lucide-shopping-cart' },
             { key: 'stock', label: 'Stock', route: '/stock', icon: 'i-lucide-package' },
         ],
     },

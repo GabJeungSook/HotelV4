@@ -8,6 +8,7 @@ import MoneyRow from '@/Components/MoneyRow.vue';
 import OptionTiles from '@/Components/OptionTiles.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import TotalRow from '@/Components/TotalRow.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { useIdempotencyKey } from '@/Composables/useIdempotencyKey';
 import { formatMoney } from '@/Composables/useMoney';
@@ -210,9 +211,13 @@ function submit(): void {
 
 <template>
     <FrontDeskLayout current="board" :title="`Check in — Room ${room.number}`">
-        <div class="mb-4 flex flex-wrap items-center gap-2">
-            <StatusLabel :label="`${room.type} · ${room.floor}`" />
-            <StatusLabel v-if="reservation" tone="info" :label="`Reservation ${reservation.code}`" data-test="from-reservation" />
+        <PageHeader>
+            <template #status>
+                <StatusLabel :label="`${room.type} · ${room.floor}`" />
+                <StatusLabel v-if="reservation" tone="info" :label="`Reservation ${reservation.code}`" data-test="from-reservation" />
+            </template>
+        </PageHeader>
+        <div v-if="reservation?.any_room && rooms?.length" class="mb-4 flex flex-wrap items-center gap-2">
             <USelect
                 v-if="reservation?.any_room && rooms?.length"
                 :model-value="room.id"

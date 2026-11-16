@@ -29,8 +29,10 @@ const props = withDefaults(
         canSwitch?: boolean;
         /** The close guide (22–25) itself: no Close shift button and no closing notice. */
         guide?: boolean;
+        /** Pages that are one centred card (join 2b) draw no page header (mockup v6). */
+        header?: boolean;
     }>(),
-    { current: undefined, title: undefined, branch: undefined, shift: undefined, user: undefined, canSwitch: undefined, guide: false },
+    { current: undefined, title: undefined, branch: undefined, shift: undefined, user: undefined, canSwitch: undefined, guide: false, header: true },
 );
 
 const { props: shared } = useShared();
@@ -104,6 +106,7 @@ function signOut(): void {
         :notifications="shell.notifications.value"
         :search-route="shell.searchRoute.value"
         :can-switch="switchable"
+        :header="header"
         @sign-out="signOut"
         @switch-user="switching = true"
     >

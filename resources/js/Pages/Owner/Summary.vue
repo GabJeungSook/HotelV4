@@ -7,6 +7,7 @@ import DateNav from '@/Components/DateNav.vue';
 import PeriodSegments from '@/Components/PeriodSegments.vue';
 import type { StatCardProps } from '@/Components/StatCard.vue';
 import StatCards from '@/Components/StatCards.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { formatDateRange, formatDateTime } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
 import OwnerLayout from '@/Layouts/OwnerLayout.vue';
@@ -61,11 +62,10 @@ const short = (c: number) => (c === 0 ? formatMoney(0, 'wholeColumn') : formatMo
 
 <template>
     <Head title="Owner summary" />
-    <OwnerLayout current="summary" title="Owner summary">
-        <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <h1 class="text-xl font-semibold text-highlighted">Owner summary · {{ heading }}</h1>
+    <OwnerLayout current="summary" :title="`Owner summary · ${heading}`">
+        <PageHeader>
             <PeriodSegments v-model="branch" label="Branch" :items="picker" />
-        </div>
+        </PageHeader>
         <div class="mb-4 flex flex-wrap items-center gap-3">
             <PeriodSegments
                 v-model="range"

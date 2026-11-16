@@ -3,6 +3,7 @@
 import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import Slip from '@/Components/Slip.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
 import { shortName, useShared } from '@/Composables/useShared';
@@ -105,7 +106,11 @@ function signOut(): void {
 
 <template>
     <FrontDeskLayout current="shift" guide title="Shift report">
-        <div class="no-print mb-4 flex flex-wrap items-center justify-between gap-3">
+        <PageHeader>
+            <UButton v-if="shared.auth" color="neutral" variant="outline" icon="i-lucide-log-out" label="Sign out" @click="signOut" />
+            <UButton icon="i-lucide-printer" label="Print" :loading="printing" data-print @click="print" />
+        </PageHeader>
+        <div class="no-print mb-4">
             <UAlert
                 class="max-w-[560px]"
                 color="success"
@@ -114,10 +119,6 @@ function signOut(): void {
                 :title="`The ${closed.period_name} shift is closed${zNo ? ` as ${zNo}` : ''}.`"
                 :description="handover?.received_by ? `${handover.received_by} received the drawer. Print the slip, then sign out.` : 'Nobody received the drawer. The next front desk uses Open shift.'"
             />
-            <div class="flex gap-2">
-                <UButton icon="i-lucide-printer" label="Print" :loading="printing" data-print @click="print" />
-                <UButton v-if="shared.auth" color="neutral" variant="outline" icon="i-lucide-log-out" label="Sign out" @click="signOut" />
-            </div>
         </div>
         <UAlert v-if="printError" class="no-print mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="printError" />
         <Slip :header="header" :title="title" :number="zNo" :sections="sections" :footer="footer" :reprint="reprint" preview />

@@ -11,7 +11,8 @@ import AppShell from './AppShell.vue';
 import { backOfficeNav } from './nav';
 
 /** Back office shell (DESIGN_SYSTEM §6.1), fed by the shared props; the props override them in the gallery. */
-const props = withDefaults(defineProps<{ current?: string; title?: string; branch?: string; user?: { name: string; role: string } }>(), {
+const props = withDefaults(defineProps<{ current?: string; title?: string; branch?: string; user?: { name: string; role: string }; header?: boolean }>(), {
+    header: true,
     current: undefined,
     title: undefined,
     branch: undefined,
@@ -36,6 +37,7 @@ const shell = useShell({ branch: () => props.branch, user: () => props.user });
         :user="shell.user.value"
         :branch="shell.branch.value"
         :notifications="shell.notifications.value"
+        :header="header"
         @sign-out="router.post(route('logout'))"
     >
         <template #status><BranchPicker v-if="isOwner && onReport" /></template>

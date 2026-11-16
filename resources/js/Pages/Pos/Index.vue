@@ -191,7 +191,7 @@ function actions(s: Sale) {
 </script>
 
 <template>
-    <FrontDeskLayout current="pos" title="POS">
+    <FrontDeskLayout current="pos" title="Point of sale">
         <UAlert v-if="pageError" class="mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="pageError" />
 
         <div class="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-4 max-[900px]:grid-cols-1">
