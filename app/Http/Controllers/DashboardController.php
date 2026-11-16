@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\PaymentMethod;
 use App\Enums\Role;
 use App\Models\Branch;
 use App\Models\ShiftDefinition;
 use App\Models\User;
+use App\Queries\ShiftCalendarQuery;
 use App\Services\AttentionList;
 use App\Services\CurrentBranch;
 use App\Services\Dashboard\Period;
@@ -27,16 +29,25 @@ final class DashboardController extends Controller
 {
     public const PERIODS = ['today', 'yesterday', 'week', 'month'];
 
-    public function index(Request $request, CurrentBranch $branches, DashboardService $dash, AttentionList $attention, Clock $clock): Response
+    /** The period of the Sales overview card, chosen on the card itself (mockup v6). */
+    public const OVERVIEW = ['today', 'week', 'month'];
+
+    public function index(Request $request, CurrentBranch $branches, DashboardService $dash, AttentionList $attention, Clock $clock, ShiftCalendarQuery $calendar): Response
     {
         /** @var User $user */
         $user = $request->user();
         $branch = $branches->branch() ?? abort(403);
         $period = in_array($request->query('period'), self::PERIODS, true) ? (string) $request->query('period') : 'today';
         $periods = fn (): array => $dash->periods([$branch->id], $period);
+        $overview = in_array($request->query('overview'), self::OVERVIEW, true) ? (string) $request->query('overview') : 'week';
+        $methods = $branch->payment_methods->map(fn (PaymentMethod $m): string => $m->value)->all();
+        $desk = $request->filled('desk') ? $request->integer('desk') : null;
+        $band = $request->filled('band') ? (string) $request->query('band') : null;
 
         return Inertia::render('Dashboard/Branch', [
             'period' => $period,
+            'overviewPeriod' => $overview,
+            'filters' => ['week' => $request->query('week'), 'desk' => $desk, 'band' => $band],
             'branch' => ['id' => $branch->id, 'name' => $branch->name, 'status' => $branch->status->value],
             'polling' => (int) config('hotel.polling.dashboard', 30),
             'kpis' => Inertia::defer(fn (): array => [
@@ -46,14 +57,12 @@ final class DashboardController extends Controller
                 'at' => $clock->now()->toIso8601String(),
             ], 'kpis'),
             'charts' => Inertia::defer(fn (): array => [
-                'rooms' => $dash->roomsNow([$branch->id]),
-                'hours' => $dash->salesByHour($periods(), self::startHour($branch)),
+                'nights' => $dash->occupancyNights($branch->id),
                 'period' => Period::of($period, $periods()[$branch->id]->to)->words(),
             ], 'charts'),
-            'shift' => Inertia::defer(fn (): array => [
-                'shift' => $dash->openShift($branch->id, $user),
-                'housekeeping' => $branch->housekeeping_enabled ? $dash->housekeeping($branch->id, $dash->periods([$branch->id], 'today')) : null,
-            ], 'shift'),
+            'overview' => Inertia::defer(fn (): array => $dash->salesOverview($dash->periods([$branch->id], $overview), $methods), 'overview'),
+            'recent' => Inertia::defer(fn (): array => ['rows' => $dash->recentCheckins($branch->id)], 'recent'),
+            'calendar' => Inertia::defer(fn (): array => $calendar->week($branch->id, $request->query('week') === null ? null : (string) $request->query('week'), $desk, $band), 'calendar'),
             'attention' => Inertia::defer(fn (): array => [
                 // One more than shown, so the card knows to offer "View all" (49).
                 'rows' => array_slice($attention->rows([$branch->id], $user), 0, 6),

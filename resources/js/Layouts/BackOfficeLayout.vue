@@ -3,10 +3,10 @@ import { router } from '@inertiajs/vue3';
 import { computed, onMounted } from 'vue';
 import BranchPicker from '@/Components/BranchPicker.vue';
 import ConnectionBar from '@/Components/ConnectionBar.vue';
-import StatusLabel from '@/Components/StatusLabel.vue';
 import { useConnection } from '@/Composables/useConnection';
 import { useFlashToast } from '@/Composables/useFlashToast';
 import { useShared } from '@/Composables/useShared';
+import { useShell } from '@/Composables/useShell';
 import AppShell from './AppShell.vue';
 import { backOfficeNav } from './nav';
 
@@ -23,17 +23,22 @@ useFlashToast();
 onMounted(() => useConnection().start(shared.value.app?.heartbeat ?? 5));
 
 const nav = computed(() => (shared.value.nav?.length ? shared.value.nav : backOfficeNav));
-const branchName = computed(() => props.branch ?? shared.value.branch?.name);
+const onReport = computed(() => typeof window !== 'undefined' && route().current('reports.*'));
 const isOwner = computed(() => shared.value.auth?.role === 'owner' && (shared.value.ownerBranches?.length ?? 0) > 0);
-const me = computed(() => props.user ?? (shared.value.auth ? { name: shared.value.auth.user.name, role: shared.value.auth.roleLabel } : undefined));
+const shell = useShell({ branch: () => props.branch, user: () => props.user });
 </script>
 
 <template>
-    <AppShell :nav="nav" :current="current" :title="title" :user="me" @sign-out="router.post(route('logout'))">
-        <template #status>
-            <BranchPicker v-if="isOwner" />
-            <StatusLabel v-else-if="branchName" tone="primary" :label="branchName" />
-        </template>
+    <AppShell
+        :nav="nav"
+        :current="current"
+        :title="title"
+        :user="shell.user.value"
+        :branch="shell.branch.value"
+        :notifications="shell.notifications.value"
+        @sign-out="router.post(route('logout'))"
+    >
+        <template #status><BranchPicker v-if="isOwner && onReport" /></template>
         <template #bars><ConnectionBar /></template>
         <slot />
     </AppShell>

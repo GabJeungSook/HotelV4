@@ -15,235 +15,305 @@
 | Pages never contain a hex value; everything below is the one place colours live.
 */
 
-/* 1. Fonts: woff2 copied once from @fontsource (SIL OFL 1.1, licences beside the files).
-      IBM Plex Sans ships latin + latin-ext (latin-ext carries the peso sign U+20B1). */
+/* 1. Fonts: Geist and Geist Mono, woff2 copied once from @fontsource (SIL OFL 1.1, OFL-Geist.txt beside
+      the files). Geist ships latin + latin-ext (latin-ext carries the peso sign U+20B1); Geist Mono latin only. */
 @font-face {
-    font-family: 'IBM Plex Sans';
+    font-family: 'Geist';
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('../fonts/ibm-plex-sans-latin-ext-400-normal.woff2') format('woff2');
+    src: url('../fonts/geist-sans-latin-ext-400-normal.woff2') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
-    font-family: 'IBM Plex Sans';
+    font-family: 'Geist';
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('../fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2');
+    src: url('../fonts/geist-sans-latin-400-normal.woff2') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-    font-family: 'IBM Plex Sans';
+    font-family: 'Geist';
     font-style: normal;
     font-weight: 500;
     font-display: swap;
-    src: url('../fonts/ibm-plex-sans-latin-ext-500-normal.woff2') format('woff2');
+    src: url('../fonts/geist-sans-latin-ext-500-normal.woff2') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
-    font-family: 'IBM Plex Sans';
+    font-family: 'Geist';
     font-style: normal;
     font-weight: 500;
     font-display: swap;
-    src: url('../fonts/ibm-plex-sans-latin-500-normal.woff2') format('woff2');
+    src: url('../fonts/geist-sans-latin-500-normal.woff2') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-    font-family: 'IBM Plex Sans';
+    font-family: 'Geist';
     font-style: normal;
     font-weight: 600;
     font-display: swap;
-    src: url('../fonts/ibm-plex-sans-latin-ext-600-normal.woff2') format('woff2');
+    src: url('../fonts/geist-sans-latin-ext-600-normal.woff2') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
-    font-family: 'IBM Plex Sans';
+    font-family: 'Geist';
     font-style: normal;
     font-weight: 600;
     font-display: swap;
-    src: url('../fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2');
+    src: url('../fonts/geist-sans-latin-600-normal.woff2') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-    font-family: 'IBM Plex Mono';
+    font-family: 'Geist Mono';
     font-style: normal;
     font-weight: 500;
     font-display: swap;
-    src: url('../fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2');
+    src: url('../fonts/geist-mono-latin-500-normal.woff2') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-    font-family: 'IBM Plex Mono';
+    font-family: 'Geist Mono';
     font-style: normal;
     font-weight: 600;
     font-display: swap;
-    src: url('../fonts/ibm-plex-mono-latin-600-normal.woff2') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-    font-family: 'Newsreader';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('../fonts/newsreader-latin-400-normal.woff2') format('woff2');
+    src: url('../fonts/geist-mono-latin-600-normal.woff2') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* 2. The primary scale Nuxt UI needs, built around #0077c2. The logo blue #009ef5 is not part of it. */
+/* 2. The primary scale Nuxt UI needs, built around #0077c2 (v6 values at 50–300, 600, 700).
+      The logo blue #009ef5 is not part of it. */
 @theme static {
-    --color-homi-50: #eaf2f8;
-    --color-homi-100: #d4e6f3;
-    --color-homi-200: #a9cde8;
-    --color-homi-300: #5aa9e0;
-    --color-homi-400: #2b8dd0;
-    --color-homi-500: #0f82c9;
+    --color-homi-50: #eaf4fb;
+    --color-homi-100: #cfe6f6;
+    --color-homi-200: #a9d3ef;
+    --color-homi-300: #6fb5e3;
+    --color-homi-400: #3b93cf;
+    --color-homi-500: #1784c8;
     --color-homi-600: #0077c2;
-    --color-homi-700: #0b5f96;
+    --color-homi-700: #005f9e;
     --color-homi-800: #0d4b73;
     --color-homi-900: #0f3a57;
     --color-homi-950: #0b2638;
-    --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
-    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-    --font-serif: 'Newsreader', Georgia, serif;
+    --font-sans: 'Geist', system-ui, sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, monospace;
 }
 
-/* 3. The Homi layer, light (DESIGN_SYSTEM §2.1). .hm-light re-declares it for light-only surfaces. */
+/* 3. The Homi layer, light: mockup v6 (DESIGN_SYSTEM §0, §2.1). .hm-light re-declares it for
+      light-only surfaces (sign-in, welcome, kiosk, print). */
 :root,
 .hm-light {
     color-scheme: light;
-    --hm-ink: #1d2329;
-    --hm-text: #3d434a;
-    --hm-muted: #6b7178;
-    --hm-line: #e6e3dd;
-    --hm-line-strong: #d9d6cf;
-    --hm-row: #f0f0f0;
-    --hm-bg: #f5f4f1;
+    --hm-ink: #0f1728;
+    --hm-text: #344054;
+    --hm-muted: #667085;
+    --hm-faint: #98a2b3;
+    --hm-line: #e4e7ec;
+    --hm-line-strong: #d0d5dd;
+    --hm-row: #eef0f3;
+    --hm-bg: #f7f8fa;
     --hm-card: #ffffff;
-    --hm-sidebar: #fbfaf8;
-    --hm-nav-active: #ecebe6;
-    --hm-hover: #f7f6f3;
+    --hm-sidebar: #ffffff;
+    --hm-nav-active: #f2f4f7;
+    --hm-hover: #f2f4f7;
+    --hm-thead: #f9fafb;
+    --hm-group-row: #fcfcfd;
     --hm-blocked: #f7f6f3;
-    --hm-track: #e9e9ec;
-    --hm-step: #eeedea;
+    --hm-track: #f2f4f7;
+    --hm-step: #ffffff;
+    --hm-tile: #0f1728;
+    --hm-on-tile: #ffffff;
 
     --hm-brand: #009ef5;
     --hm-primary: #0077c2;
     --hm-on-primary: #ffffff;
-    --hm-primary-ink: #0b5f96;
-    --hm-primary-50: #eaf2f8;
-    --hm-select: #eef4f9;
-    --hm-select-line: #9fc3de;
-    --hm-focus: #e2edf6;
+    --hm-primary-ink: #005f9e;
+    --hm-primary-50: #eaf4fb;
+    --hm-primary-line: #cfe6f6;
+    --hm-select: #eaf4fb;
+    --hm-select-line: #6fb5e3;
+    --hm-focus: #eaf4fb;
     --hm-accent: #b7791f;
     --hm-accent-50: #fbf1dc;
 
-    --hm-ok: #2f6b47;
-    --hm-ok-50: #e8f1eb;
-    --hm-warn: #8a5a12;
-    --hm-warn-50: #f6eedd;
-    --hm-warn-line: #e6d6b2;
-    --hm-bad: #9b3328;
-    --hm-bad-50: #f7e8e5;
-    --hm-bad-line: #e6c2bc;
-    --hm-info: #3b5373;
-    --hm-info-50: #ecf0f5;
-    --hm-held-line: #95bcd9;
-    --hm-violet: #5a4f80;
-    --hm-violet-50: #efedf5;
-    --hm-clay: #7a5236;
-    --hm-clay-50: #f3ece5;
-    --hm-grey: #5f646b;
-    --hm-grey-50: #eeeeeb;
+    --hm-ok: #067647;
+    --hm-ok-50: #ecfdf3;
+    --hm-ok-line: #abefc6;
+    --hm-warn: #b54708;
+    --hm-warn-50: #fffaeb;
+    --hm-warn-line: #fedf89;
+    --hm-bad: #b42318;
+    --hm-bad-50: #fef3f2;
+    --hm-bad-line: #fecdca;
+    --hm-info: #3538cd;
+    --hm-info-50: #eef4ff;
+    --hm-info-line: #c7d7fe;
+    --hm-held-line: #6fb5e3;
+    --hm-violet: #5925dc;
+    --hm-violet-50: #f4f3ff;
+    --hm-violet-line: #d9d6fe;
+    --hm-clay: #93370d;
+    --hm-clay-50: #fef6ee;
+    --hm-clay-line: #f9dbaf;
+    --hm-grey: #475467;
+    --hm-grey-50: #f2f4f7;
+    --hm-grey-line: #e4e7ec;
+    --hm-live: #12b76a;
+
+    /* People: seven soft avatar colours, picked from the name (PersonPill). */
+    --hm-av-1: #dbeafe;
+    --hm-av-1-ink: #1e40af;
+    --hm-av-2: #fce7f3;
+    --hm-av-2-ink: #9d174d;
+    --hm-av-3: #dcfce7;
+    --hm-av-3-ink: #166534;
+    --hm-av-4: #fef3c7;
+    --hm-av-4-ink: #92400e;
+    --hm-av-5: #ede9fe;
+    --hm-av-5-ink: #5b21b6;
+    --hm-av-6: #e0f2fe;
+    --hm-av-6-ink: #075985;
+    --hm-av-7: #fee2e2;
+    --hm-av-7-ink: #991b1b;
+
+    /* Chart series (StackedBars): main, second, third, and the current bar. */
+    --hm-bar-1: #3b93cf;
+    --hm-bar-2: #a9d3ef;
+    --hm-bar-3: #e4e7ec;
+    --hm-bar-now: #005f9e;
 
     --hm-control-dash: #cfd5df;
-    --hm-disabled: #d7dce4;
-    --hm-disabled-ink: #8b93a2;
-    --hm-void: #9aa3b2;
+    --hm-disabled: #e4e7ec;
+    --hm-disabled-ink: #98a2b3;
+    --hm-void: #98a2b3;
     --hm-empty-icon: #b3bac6;
-    --hm-bar-soft: #d6e2eb;
+    --hm-bar-soft: #a9d3ef;
     --hm-promo-line: #eccf8f;
     --hm-slip-line: #b9c0cc;
-    --hm-row-hover: #faf9f7;
-    --hm-row-line: #efede8;
-    --hm-row-selected: #f2f7fb;
-    --hm-overlay: rgba(18, 24, 34, 0.5);
-    --hm-shadow-modal: 0 14px 34px rgba(29, 35, 41, 0.18);
-    --hm-shadow-segment: 0 1px 2px rgba(0, 0, 0, 0.08);
-    --hm-shadow-sheet: -14px 0 40px rgba(0, 0, 0, 0.2);
+    --hm-row-hover: #f9fafb;
+    --hm-row-line: #eef0f3;
+    --hm-row-selected: #f5faff;
+    --hm-overlay: rgba(15, 23, 40, 0.5);
+    --hm-shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+    --hm-shadow-modal: 0 14px 34px rgba(15, 23, 40, 0.18);
+    --hm-shadow-segment: 0 1px 2px rgba(16, 24, 40, 0.08);
+    --hm-shadow-sheet: -14px 0 40px rgba(15, 23, 40, 0.2);
+    --hm-shadow-float: 0 12px 32px rgba(15, 23, 40, 0.22);
+    --hm-shadow-lift: 0 18px 36px rgba(15, 23, 40, 0.12);
     --hm-radius: 6px;
 
     /* Photo layer: light only, never themed. */
-    --hm-photo-fallback: #5b554d;
-    --hm-scrim: rgba(22, 24, 27, 0.4);
+    --hm-photo-fallback: #3a3f45;
+    --hm-scrim: rgba(15, 23, 40, 0.42);
+    --hm-scrim-signin: rgba(15, 23, 40, 0.34);
     --hm-scrim-kiosk: rgba(20, 22, 25, 0.52);
     --hm-on-photo-soft: rgba(255, 255, 255, 0.85);
     --hm-on-photo-body: rgba(255, 255, 255, 0.92);
     --hm-on-photo-line: rgba(255, 255, 255, 0.4);
     --hm-on-photo-divider: rgba(255, 255, 255, 0.28);
-    --hm-slide-off: rgba(255, 255, 255, 0.45);
-    --hm-on-photo-strong: rgba(255, 255, 255, 0.7);
+    --hm-on-photo-pill: rgba(15, 23, 40, 0.42);
+    --hm-on-photo-pill-line: rgba(255, 255, 255, 0.18);
+    --hm-slide-off: rgba(255, 255, 255, 0.35);
+    --hm-on-photo-strong: rgba(255, 255, 255, 0.55);
     --hm-on-photo-hover: rgba(255, 255, 255, 0.12);
 }
 
-/* Dark values (DESIGN_SYSTEM §2.4). `.dark .hm-light` keeps light-only surfaces light. */
+/* Dark values, derived from the v6 light layer: cool near-black page, slightly lighter cards,
+   thin cool borders, status hues lifted so their text stays readable on the tinted fills.
+   `.dark .hm-light` keeps light-only surfaces light. */
 .dark:not(.hm-light) {
     color-scheme: dark;
-    --hm-ink: #f2f0ec;
-    --hm-text: #d9d6d0;
-    --hm-muted: #a39f98;
-    --hm-line: #34322e;
-    --hm-line-strong: #45423d;
-    --hm-row: #2b2926;
-    --hm-bg: #161513;
-    --hm-card: #1e1d1b;
-    --hm-sidebar: #1a1917;
-    --hm-nav-active: #2c2a27;
-    --hm-hover: #262422;
-    --hm-blocked: #242320;
-    --hm-track: #2c2a27;
-    --hm-step: #2c2a27;
+    --hm-ink: #f5f6f8;
+    --hm-text: #cdd1d8;
+    --hm-muted: #959cab;
+    --hm-faint: #737b8d;
+    --hm-line: #262c38;
+    --hm-line-strong: #363e4d;
+    --hm-row: #1f2430;
+    --hm-bg: #0c111b;
+    --hm-card: #141924;
+    --hm-sidebar: #141924;
+    --hm-nav-active: #1e2431;
+    --hm-hover: #1b212d;
+    --hm-thead: #171c27;
+    --hm-group-row: #161b26;
+    --hm-blocked: #1a1f2a;
+    --hm-track: #1e2431;
+    --hm-step: #141924;
+    --hm-tile: #f5f6f8;
+    --hm-on-tile: #0c111b;
 
     --hm-primary: #5aa9e0;
-    --hm-on-primary: #121416;
+    --hm-on-primary: #0c111b;
     --hm-primary-ink: #8cc4ec;
-    --hm-primary-50: #1a2a36;
-    --hm-select: #1a2a36;
-    --hm-select-line: #3f6b8c;
-    --hm-focus: #1f3445;
+    --hm-primary-50: #10263a;
+    --hm-primary-line: #1d4566;
+    --hm-select: #10263a;
+    --hm-select-line: #2f6390;
+    --hm-focus: #143049;
     --hm-accent: #e0a94a;
-    --hm-accent-50: #33290f;
+    --hm-accent-50: #2e2410;
 
-    --hm-ok: #8cc7a1;
-    --hm-ok-50: #1f2e25;
-    --hm-warn: #e0b56a;
-    --hm-warn-50: #33291a;
-    --hm-warn-line: #5a4a2c;
-    --hm-bad: #eb9a8f;
-    --hm-bad-50: #3a2320;
-    --hm-bad-line: #5e3a34;
-    --hm-info: #a4b8d4;
-    --hm-info-50: #232a35;
-    --hm-held-line: #3f6b8c;
-    --hm-violet: #b8aee0;
-    --hm-violet-50: #2a2735;
-    --hm-clay: #d6a98a;
-    --hm-clay-50: #342a22;
-    --hm-grey: #b0b3b8;
-    --hm-grey-50: #2a2a28;
+    --hm-ok: #6ad39b;
+    --hm-ok-50: #0f2a1e;
+    --hm-ok-line: #1c4a34;
+    --hm-warn: #f5b54a;
+    --hm-warn-50: #2c2110;
+    --hm-warn-line: #574117;
+    --hm-bad: #f4837a;
+    --hm-bad-50: #321719;
+    --hm-bad-line: #5a2a2b;
+    --hm-info: #a4b9fc;
+    --hm-info-50: #181f40;
+    --hm-info-line: #2d3a75;
+    --hm-held-line: #2f6390;
+    --hm-violet: #bcb2fd;
+    --hm-violet-50: #211c3c;
+    --hm-violet-line: #3d3370;
+    --hm-clay: #f2ac78;
+    --hm-clay-50: #2c1c12;
+    --hm-clay-line: #573821;
+    --hm-grey: #aeb4c0;
+    --hm-grey-50: #1e2431;
+    --hm-grey-line: #2c3340;
+    --hm-live: #32d583;
 
-    --hm-control-dash: #45423d;
-    --hm-disabled: #2c2a27;
-    --hm-disabled-ink: #8a867f;
-    --hm-void: #6f6b65;
-    --hm-empty-icon: #57534d;
-    --hm-bar-soft: #2f3f4b;
+    --hm-av-1: #1c2c4f;
+    --hm-av-1-ink: #a8c4fb;
+    --hm-av-2: #3a1a2c;
+    --hm-av-2-ink: #f5a8cf;
+    --hm-av-3: #12301e;
+    --hm-av-3-ink: #8fdfaa;
+    --hm-av-4: #33280f;
+    --hm-av-4-ink: #f3cf7c;
+    --hm-av-5: #261f45;
+    --hm-av-5-ink: #c4b5fd;
+    --hm-av-6: #102a3d;
+    --hm-av-6-ink: #8ed0f6;
+    --hm-av-7: #3a1a1c;
+    --hm-av-7-ink: #f7a9a9;
+
+    --hm-bar-1: #3f8fc8;
+    --hm-bar-2: #24496a;
+    --hm-bar-3: #2c3340;
+    --hm-bar-now: #8cc4ec;
+
+    --hm-control-dash: #363e4d;
+    --hm-disabled: #222834;
+    --hm-disabled-ink: #737b8d;
+    --hm-void: #737b8d;
+    --hm-empty-icon: #4a5263;
+    --hm-bar-soft: #24496a;
     --hm-promo-line: #6b5726;
-    --hm-row-hover: #232220;
-    --hm-row-line: #2b2926;
-    --hm-row-selected: #1a2a36;
+    --hm-row-hover: #181d28;
+    --hm-row-line: #1f2430;
+    --hm-row-selected: #10263a;
     --hm-overlay: rgba(0, 0, 0, 0.6);
-    --hm-shadow-modal: 0 14px 34px rgba(0, 0, 0, 0.45);
+    --hm-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --hm-shadow-modal: 0 14px 34px rgba(0, 0, 0, 0.5);
+    --hm-shadow-segment: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --hm-shadow-sheet: -14px 0 40px rgba(0, 0, 0, 0.45);
 }
 
 /* 4. Nuxt UI's variables point at the Homi layer, on the same selectors so a light-only
@@ -283,7 +353,15 @@
     --color-primary-ink: var(--hm-primary-ink);
     --color-accent: var(--hm-accent);
     --color-accent-50: var(--hm-accent-50);
+    --color-faint: var(--hm-faint);
+    --color-thead: var(--hm-thead);
+    --color-group-row: var(--hm-group-row);
+    --color-tile: var(--hm-tile);
+    --color-on-tile: var(--hm-on-tile);
+    --color-primary-line: var(--hm-primary-line);
+    --color-live: var(--hm-live);
     --color-ok: var(--hm-ok);
+    --color-ok-line: var(--hm-ok-line);
     --color-ok-50: var(--hm-ok-50);
     --color-warn: var(--hm-warn);
     --color-warn-50: var(--hm-warn-50);
@@ -293,13 +371,17 @@
     --color-bad-line: var(--hm-bad-line);
     --color-info: var(--hm-info);
     --color-info-50: var(--hm-info-50);
+    --color-info-line: var(--hm-info-line);
     --color-held-line: var(--hm-held-line);
     --color-violet: var(--hm-violet);
     --color-violet-50: var(--hm-violet-50);
+    --color-violet-line: var(--hm-violet-line);
     --color-clay: var(--hm-clay);
     --color-clay-50: var(--hm-clay-50);
+    --color-clay-line: var(--hm-clay-line);
     --color-grey: var(--hm-grey);
     --color-grey-50: var(--hm-grey-50);
+    --color-grey-line: var(--hm-grey-line);
     --color-sidebar: var(--hm-sidebar);
     --color-nav-active: var(--hm-nav-active);
     --color-blocked: var(--hm-blocked);
@@ -314,21 +396,27 @@
     --color-void: var(--hm-void);
     --color-slip-line: var(--hm-slip-line);
     --color-on-primary: var(--hm-on-primary);
-    --radius-label: 4px;
-    --radius-card: 10px;
+    --radius-label: 99px;
+    --radius-card: 12px;
+    --radius-control: 8px;
+    --shadow-xs: var(--hm-shadow-xs);
 }
 
-/* 6. Base type: 14 px / 20 px body in IBM Plex Sans; bold is 600 in ink (DESIGN_SYSTEM §3). */
+/* 6. Base type: 13 px body in Geist with tabular figures (mockup v6 draws at app size);
+      bold is 600 in ink (DESIGN_SYSTEM §0, §3). */
 @layer base {
     html {
         font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     body {
-        font-size: 14px;
-        line-height: 20px;
+        font-size: 13px;
+        line-height: 1.5;
         color: var(--hm-text);
         background: var(--hm-bg);
+        font-variant-numeric: tabular-nums;
     }
 
     b,
@@ -336,6 +424,20 @@
         font-weight: 600;
         color: var(--hm-ink);
     }
+
+    ::selection {
+        background: var(--hm-primary-line);
+    }
+}
+
+/* Every card: white, 1 px line, 12 px radius, the hairline shadow (DESIGN_SYSTEM §0). */
+.rounded-card.border {
+    box-shadow: var(--hm-shadow-xs);
+}
+
+/* Five KPIs in a row (Today 62) set the number 24 px. */
+.hm-k5 .stat-value {
+    font-size: 24px;
 }
 
 /* 7. Shared styles used by our components. */
@@ -351,39 +453,47 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* The one table style (DESIGN_SYSTEM §5.2 DataTable). */
+/* The one table style (DESIGN_SYSTEM §5.2 DataTable, mockup v6 `.t`). Inside a padded card the
+   header is plain and the edge columns sit on the card padding; `.flush` is the list pattern:
+   a table card with no padding, a #f9fafb header row and 20 px edges. */
 .dtable {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
-    line-height: 20px;
+    font-size: 12.5px;
+    line-height: 1.5;
 
     & th {
         text-align: left;
-        font-size: 13px;
+        font-size: 12px;
         line-height: 18px;
         font-weight: 500;
         color: var(--hm-muted);
-        padding: 10px 14px;
+        padding: 0 12px 10px;
         border-bottom: 1px solid var(--hm-line);
         white-space: nowrap;
         background: transparent;
     }
 
     & td {
-        padding: 11px 14px;
+        padding: 10px 12px;
         border-bottom: 1px solid var(--hm-row);
-        vertical-align: top;
+        vertical-align: middle;
         color: var(--hm-text);
-    }
-
-    & tbody tr:last-child td {
-        border-bottom: 0;
     }
 
     & td:first-child,
     & th:first-child {
+        padding-left: 0;
         white-space: nowrap;
+    }
+
+    & td:last-child,
+    & th:last-child {
+        padding-right: 0;
+    }
+
+    & tbody tr:last-child td {
+        border-bottom: 0;
     }
 
     & .r,
@@ -395,6 +505,18 @@
         font-weight: 600;
         font-variant-numeric: tabular-nums;
         color: var(--hm-ink);
+        white-space: nowrap;
+    }
+
+    & td.b {
+        font-weight: 600;
+        color: var(--hm-ink);
+    }
+
+    & td.mn,
+    & td.r.mn {
+        color: var(--hm-muted);
+        font-weight: 400;
     }
 
     & td.code {
@@ -424,12 +546,38 @@
         color: var(--hm-bad);
     }
 
+    & tr.sel td {
+        background: var(--hm-row-selected);
+    }
+
     & tbody tr.link {
         cursor: pointer;
     }
 
     & tbody tr.link:hover td {
-        background: var(--hm-hover);
+        background: var(--hm-row-hover);
+    }
+
+    &.flush {
+        & th {
+            background: var(--hm-thead);
+            padding: 11px 12px;
+            border-top: 1px solid var(--hm-line);
+        }
+
+        & td:first-child,
+        & th:first-child {
+            padding-left: 20px;
+        }
+
+        & td:last-child,
+        & th:last-child {
+            padding-right: 20px;
+        }
+
+        & thead:first-child th {
+            border-top: 0;
+        }
     }
 
     &.dense {
@@ -440,18 +588,24 @@
         & td {
             padding: 6px 10px;
         }
+
+        & th:first-child,
+        & td:first-child {
+            padding-left: 0;
+        }
     }
 }
 
-/* The static "on duty" dot (60, 61): not a status label, it does not blink. */
+/* The "on duty" dot (60, 61): static, not a status label. */
 .live {
     display: inline-block;
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     border-radius: 999px;
     background: var(--hm-ok);
-    margin-right: 6px;
-    vertical-align: 2px;
+    box-shadow: 0 0 0 3px var(--hm-ok-50);
+    margin-right: 8px;
+    vertical-align: 1px;
 }
 
 .sr-table {
@@ -469,7 +623,8 @@
     outline-offset: 2px;
 }
 
-/* 8. Motion for the photo pages, sign-in and kiosk welcome (DESIGN_SYSTEM §4.5). */
+/* 8. Motion for the photo pages: sign-in (1), welcome (59) and kiosk welcome (27)
+      (DESIGN_SYSTEM §0, §4.5). Only transform, opacity and the word blur are animated. */
 @keyframes hm-drift {
     from {
         transform: scale(1.03);
@@ -486,6 +641,55 @@
     to {
         opacity: 1;
         transform: none;
+    }
+}
+@keyframes hm-rise {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+@keyframes hm-word {
+    from {
+        opacity: 0;
+        transform: translateY(0.45em);
+        filter: blur(6px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+        filter: none;
+    }
+}
+@keyframes hm-draw {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+@keyframes hm-pulse {
+    0% {
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--hm-live) 50%, transparent);
+    }
+    70% {
+        box-shadow: 0 0 0 7px transparent;
+    }
+    100% {
+        box-shadow: 0 0 0 0 transparent;
+    }
+}
+@keyframes hm-prog {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
     }
 }
 @keyframes hm-xfade {
@@ -507,16 +711,113 @@
 .hm-up {
     animation: hm-up 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-/* Welcome hero (59): three stacked photos on a 21 s cycle, each showing for 7 s. */
+/* Rise in once, 80 ms apart (sign-in fields, welcome text and cards). */
+.hm-rise {
+    animation: hm-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--hm-step, 0) * 80ms);
+}
+/* Headline word by word, 60 ms apart (59). */
+.hm-word {
+    display: inline-block;
+    animation: hm-word 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(100ms + var(--hm-step, 0) * 60ms);
+}
+/* The live pulse dot: the one looping element besides the photos. */
+.hm-pulse {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    flex: none;
+    border-radius: 999px;
+    background: var(--hm-live);
+    animation: hm-pulse 2.4s infinite;
+}
+/* A line that draws itself once ("How a stay works" on 59). */
+.hm-draw {
+    transform-origin: left;
+    animation: hm-draw 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+/* Three stacked photos on a 21 s cycle, each showing for 7 s (1, 59). */
 .hm-slides > * {
     opacity: 0;
     animation: hm-xfade 21s linear infinite;
 }
+/* Everything starts 1.05 s (5%) into the cycle, so the page opens on the first photo already
+   showing, never on the fallback colour; the progress bars run on the same clock. */
+.hm-slides > :first-child {
+    animation-delay: -1.05s;
+}
 .hm-slides > :nth-child(2) {
-    animation-delay: 7s;
+    animation-delay: 5.95s;
 }
 .hm-slides > :nth-child(3) {
-    animation-delay: 14s;
+    animation-delay: 12.95s;
+}
+/* One progress bar per hero photo, filling while that photo shows (59). */
+.hm-prog > * {
+    position: relative;
+    overflow: hidden;
+}
+.hm-prog > *::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--hm-card);
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: hm-prog 21s linear infinite;
+    animation-delay: -1.05s;
+}
+.hm-prog > :nth-child(1)::after {
+    animation-name: hm-prog-1;
+}
+.hm-prog > :nth-child(2)::after {
+    animation-name: hm-prog-2;
+}
+.hm-prog > :nth-child(3)::after {
+    animation-name: hm-prog-3;
+}
+@keyframes hm-prog-1 {
+    0% {
+        transform: scaleX(0);
+    }
+    33.3% {
+        transform: scaleX(1);
+    }
+    33.4%,
+    100% {
+        transform: scaleX(0);
+    }
+}
+@keyframes hm-prog-2 {
+    0%,
+    33.3% {
+        transform: scaleX(0);
+    }
+    66.6% {
+        transform: scaleX(1);
+    }
+    66.7%,
+    100% {
+        transform: scaleX(0);
+    }
+}
+@keyframes hm-prog-3 {
+    0%,
+    66.6% {
+        transform: scaleX(0);
+    }
+    99.9% {
+        transform: scaleX(1);
+    }
+    100% {
+        transform: scaleX(0);
+    }
+}
+/* The hero pauses while the pointer or keyboard focus is inside it (59). */
+.hm-pausable:hover *,
+.hm-pausable:focus-within * {
+    animation-play-state: paused;
 }
 
 /* Buttons on a photo (59, 27; DESIGN_SYSTEM §5.1): white fill, or a white outline. */
@@ -535,10 +836,20 @@
 .on-photo-outline:hover {
     background: var(--hm-on-photo-hover);
 }
+/* A pill on a photo: "AM shift open since 7:58 AM", "General Santos City · open 24 hours". */
+.on-photo-pill {
+    background: var(--hm-on-photo-pill);
+    box-shadow: inset 0 0 0 1px var(--hm-on-photo-pill-line);
+}
 @media (prefers-reduced-motion: reduce) {
     .hm-drift,
     .hm-up,
-    .hm-slides > * {
+    .hm-rise,
+    .hm-word,
+    .hm-draw,
+    .hm-pulse,
+    .hm-slides > *,
+    .hm-prog > *::after {
         animation: none !important;
     }
     .hm-slides > :first-child {
@@ -614,6 +925,17 @@
             background: none !important;
             color: inherit !important;
             padding: 0 !important;
+            border: 0 !important;
+        }
+
+        & [data-person] {
+            border: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+        }
+
+        & [data-avatar] {
+            display: none !important;
         }
     }
 

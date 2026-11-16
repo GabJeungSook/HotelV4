@@ -31,28 +31,34 @@ final class Navigation
     /** Every report in the menu (DESIGN_SYSTEM §6.1): back office; admin and owner reach them from the hub (36). */
     private const REPORTS_FULL = [Role::Backoffice, Role::Supervisor];
 
+    /** Reports every back-office role finds under the folding Reports parent (mockup v6). */
+    private const REPORTS_SHORT = [Role::Admin, Role::Backoffice, Role::Supervisor, Role::Owner];
+
     /**
      * Every page in the menus, grouped per layout. `home` marks the role homes in order.
      *
-     * @return list<array{layout: string, heading: string, items: list<array{key: string, label: string, route: string, icon: string, roles: list<Role>, module?: string, subtitle?: string}>}>
+     * Items with `parent` fold under one parent link in the sidebar (mockup v6: Reports → Report hub,
+     * Shift reports, …).
+     *
+     * @return list<array{layout: string, heading: string, items: list<array{key: string, label: string, route: string, icon: string, roles: list<Role>, module?: string, subtitle?: string, parent?: string}>}>
      */
     private static function pages(): array
     {
         return [
             ['layout' => 'frontdesk', 'heading' => 'Front desk', 'items' => [
-                ['key' => 'today', 'label' => 'Today', 'route' => 'today', 'icon' => 'i-lucide-clock', 'roles' => self::FRONT],
+                ['key' => 'today', 'label' => 'Today', 'route' => 'today', 'icon' => 'i-lucide-clock', 'roles' => self::FRONT, 'subtitle' => 'What needs doing in the next half hour'],
                 ['key' => 'board', 'label' => 'Room board', 'route' => 'board', 'icon' => 'i-lucide-bed', 'roles' => self::FRONT],
-                ['key' => 'reservations', 'label' => 'Reservations', 'route' => 'reservations.index', 'icon' => 'i-lucide-list', 'roles' => self::FRONT, 'module' => 'reservations_enabled'],
-                ['key' => 'pos', 'label' => 'POS', 'route' => 'pos.index', 'icon' => 'i-lucide-shopping-cart', 'roles' => self::FRONT, 'module' => 'pos_enabled'],
-                ['key' => 'stock', 'label' => 'Stock', 'route' => 'stock.index', 'icon' => 'i-lucide-package', 'roles' => self::FRONT, 'module' => 'pos_enabled'],
+                ['key' => 'reservations', 'label' => 'Reservations', 'route' => 'reservations.index', 'icon' => 'i-lucide-calendar', 'roles' => self::FRONT, 'module' => 'reservations_enabled', 'subtitle' => 'Bookings and their arrival times'],
+                ['key' => 'pos', 'label' => 'POS', 'route' => 'pos.index', 'icon' => 'i-lucide-shopping-cart', 'roles' => self::FRONT, 'module' => 'pos_enabled', 'subtitle' => 'Sell to a room or for cash'],
+                ['key' => 'stock', 'label' => 'Stock', 'route' => 'stock.index', 'icon' => 'i-lucide-package', 'roles' => self::FRONT, 'module' => 'pos_enabled', 'subtitle' => 'Counts, deliveries and adjustments'],
             ]],
             ['layout' => 'frontdesk', 'heading' => 'Shift', 'items' => [
                 ['key' => 'shift', 'label' => 'Shift cash', 'route' => 'shift.show', 'icon' => 'i-lucide-banknote', 'roles' => self::FRONT],
             ]],
             ['layout' => 'owner', 'heading' => 'Overview', 'items' => [
                 ['key' => 'owner', 'label' => 'Dashboard', 'route' => 'owner.dashboard', 'icon' => 'i-lucide-chart-column', 'roles' => [Role::Owner]],
-                ['key' => 'branches', 'label' => 'Branches', 'route' => 'owner.branches.index', 'icon' => 'i-lucide-list', 'roles' => [Role::Owner]],
-                ['key' => 'summary', 'label' => 'Owner summary', 'route' => 'owner.summary', 'icon' => 'i-lucide-chart-column', 'roles' => [Role::Owner]],
+                ['key' => 'branches', 'label' => 'Branches', 'route' => 'owner.branches.index', 'icon' => 'i-lucide-building-2', 'roles' => [Role::Owner]],
+                ['key' => 'summary', 'label' => 'Owner summary', 'route' => 'owner.summary', 'icon' => 'i-lucide-list', 'roles' => [Role::Owner]],
             ]],
             ['layout' => 'backoffice', 'heading' => 'Overview', 'items' => [
                 ['key' => 'dashboard', 'label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'i-lucide-chart-column', 'roles' => [Role::Admin, Role::Backoffice, Role::Supervisor, Role::Owner]],
@@ -66,15 +72,18 @@ final class Navigation
                 ['key' => 'settings', 'label' => 'Settings', 'route' => 'admin.settings', 'icon' => 'i-lucide-settings', 'roles' => [Role::Admin, Role::Owner]],
             ]],
             ['layout' => 'backoffice', 'heading' => 'Reports', 'items' => [
-                ['key' => 'reports', 'label' => 'Reports', 'route' => 'reports.index', 'icon' => 'i-lucide-list', 'roles' => self::BACK],
-                ['key' => 'shift-reports', 'label' => 'Shift reports', 'route' => 'reports.shifts', 'icon' => 'i-lucide-banknote', 'roles' => self::REPORTS_FULL],
-                ['key' => 'z-report', 'label' => 'Z-report', 'route' => 'reports.z.latest', 'icon' => 'i-lucide-list', 'roles' => self::REPORTS_FULL],
-                ['key' => 'daily', 'label' => 'Daily sales', 'route' => 'reports.daily', 'icon' => 'i-lucide-chart-column', 'roles' => self::REPORTS_FULL],
-                ['key' => 'occupancy', 'label' => 'Occupancy', 'route' => 'reports.occupancy', 'icon' => 'i-lucide-bed', 'roles' => self::REPORTS_FULL],
-                ['key' => 'housekeeping-report', 'label' => 'Housekeeping', 'route' => 'reports.housekeeping', 'icon' => 'i-lucide-brush', 'roles' => self::REPORTS_FULL],
-                ['key' => 'inventory', 'label' => 'Inventory', 'route' => 'reports.inventory', 'icon' => 'i-lucide-package', 'roles' => self::REPORTS_FULL],
-                ['key' => 'audit', 'label' => 'Audit trail', 'route' => 'reports.audit', 'icon' => 'i-lucide-lock', 'roles' => self::REPORTS_FULL],
-                ['key' => 'stats', 'label' => 'Stats', 'route' => 'stats', 'icon' => 'i-lucide-chart-column', 'roles' => self::BACK],
+                ['key' => 'reports', 'label' => 'Report hub', 'route' => 'reports.index', 'icon' => 'i-lucide-list', 'roles' => self::BACK, 'parent' => 'reports-menu'],
+                ['key' => 'shift-reports', 'label' => 'Shift reports', 'route' => 'reports.shifts', 'icon' => 'i-lucide-banknote', 'roles' => self::REPORTS_SHORT, 'parent' => 'reports-menu', 'subtitle' => 'Closed shifts are read from their frozen totals'],
+                ['key' => 'z-report', 'label' => 'Z-report', 'route' => 'reports.z.latest', 'icon' => 'i-lucide-list', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
+                ['key' => 'daily', 'label' => 'Daily sales', 'route' => 'reports.daily', 'icon' => 'i-lucide-chart-column', 'roles' => self::REPORTS_SHORT, 'parent' => 'reports-menu'],
+                ['key' => 'occupancy', 'label' => 'Occupancy', 'route' => 'reports.occupancy', 'icon' => 'i-lucide-bed', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
+                ['key' => 'housekeeping-report', 'label' => 'Housekeeping', 'route' => 'reports.housekeeping', 'icon' => 'i-lucide-brush', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
+                ['key' => 'inventory', 'label' => 'Inventory', 'route' => 'reports.inventory', 'icon' => 'i-lucide-package', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
+                ['key' => 'audit', 'label' => 'Audit trail', 'route' => 'reports.audit', 'icon' => 'i-lucide-lock', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
+                ['key' => 'stats', 'label' => 'Stats', 'route' => 'stats', 'icon' => 'i-lucide-trending-up', 'roles' => [Role::Admin, Role::Owner], 'subtitle' => 'Totals and trends for any period'],
+            ]],
+            ['layout' => 'backoffice', 'heading' => 'Analytics', 'items' => [
+                ['key' => 'stats', 'label' => 'Stats', 'route' => 'stats', 'icon' => 'i-lucide-trending-up', 'roles' => self::REPORTS_FULL, 'subtitle' => 'Totals and trends for any period'],
             ]],
             ['layout' => 'owner', 'heading' => 'People', 'items' => [
                 ['key' => 'owners', 'label' => 'Owner accounts', 'route' => 'owner.accounts', 'icon' => 'i-lucide-user', 'roles' => [Role::Owner]],
@@ -93,7 +102,10 @@ final class Navigation
      * Front desk roles see the front desk menu only; a supervisor also gets the dashboard and
      * reports groups (APP_FLOW §1.4).
      *
-     * @return list<array{heading: string, items: list<array{key: string, label: string, route: string, icon: string, subtitle: string|null}>}>
+     * Items that share a `parent` become the `children` of one folding parent link, placed where the
+     * first of them was.
+     *
+     * @return list<array{heading: string, items: list<array<string, mixed>>}>
      */
     public static function for(User $user, ?Branch $branch): array
     {
@@ -101,19 +113,34 @@ final class Navigation
 
         foreach (self::pages() as $group) {
             $items = [];
+            $parents = [];
 
             foreach ($group['items'] as $item) {
                 if (! self::visible($item, $user, $branch)) {
                     continue;
                 }
 
-                $items[] = [
+                $entry = [
                     'key' => $item['key'],
                     'label' => $user->role === Role::Owner && $item['key'] === 'dashboard' ? 'Branch dashboard' : $item['label'],
                     'route' => route($item['route'], absolute: false),
                     'icon' => $item['icon'],
                     'subtitle' => $item['subtitle'] ?? null,
                 ];
+                $parent = $item['parent'] ?? null;
+
+                if ($parent === null) {
+                    $items[] = $entry;
+
+                    continue;
+                }
+
+                if (! isset($parents[$parent])) {
+                    $parents[$parent] = count($items);
+                    $items[] = ['key' => $parent, 'label' => 'Reports', 'route' => $entry['route'], 'icon' => 'i-lucide-list', 'subtitle' => null, 'children' => []];
+                }
+
+                $items[$parents[$parent]]['children'][] = $entry;
             }
 
             if ($items !== []) {

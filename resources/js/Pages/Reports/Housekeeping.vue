@@ -5,6 +5,7 @@ import { computed, ref, watch } from 'vue';
 import DateNav from '@/Components/DateNav.vue';
 import ExportMenu from '@/Components/ExportMenu.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import PersonPill from '@/Components/PersonPill.vue';
 import { formatDateTime, formatDuration } from '@/Composables/useDateTime';
 import { useReport } from '@/Composables/useReport';
 import BackOfficeLayout from '@/Layouts/BackOfficeLayout.vue';
@@ -62,7 +63,7 @@ const exportUrl = computed(() => route('reports.housekeeping', { ...(props.repor
                     </thead>
                     <tbody>
                         <tr v-for="p in report.people" :key="p.user_id">
-                            <td>{{ p.name }}</td>
+                            <td><PersonPill :name="p.name" /></td>
                             <td>{{ p.floors }}</td>
                             <td class="r">{{ p.cleans }}</td>
                             <td class="r">{{ p.average_minutes }} min</td>
@@ -102,7 +103,7 @@ const exportUrl = computed(() => route('reports.housekeeping', { ...(props.repor
                             <td>{{ formatDateTime(l.deadline, 'time') }}</td>
                             <td>{{ formatDateTime(l.ready, 'time') }}</td>
                             <td class="r">{{ l.late_minutes < 60 ? `${l.late_minutes} m` : formatDuration(l.late_minutes) }}</td>
-                            <td>{{ l.by }}</td>
+                            <td><PersonPill v-if="l.by" :name="l.by" /><span v-else class="text-muted">—</span></td>
                         </tr>
                     </tbody>
                 </table>

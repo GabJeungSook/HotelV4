@@ -214,14 +214,14 @@ No screens in this phase. Everything is driven by tests.
 - [ ] Walk every screen against the mockup; fix spacing, wording and states (done by the last box of Phase 11, against the v6 frames)
 - [x] Dark mode check: every page, chart and Nuxt UI component is readable in both colour modes; slips and reports always print light
 - [x] Keyboard pass on the front desk: Enter submits, Esc closes, focus order
-- [ ] Print test on a real 80 mm thermal printer: slips 8, 18, 26; A4 test of the Z-report PDF (37b) and the day Z (38b)
+- [ ] Print test on a real 80 mm thermal printer: slips 8, 18, 26; A4 test of the Z-report PDF (37b) and the day Z (38b) — **deferred by the owner on 16 Nov 2026: no printer yet**; do it before going live
 - [x] Performance budgets in TRD §7 measured and met, including the dashboard, `RebuildSummaries` and Stats budgets and the 350 kB bundle
 - [x] Empty database first-run: owner account command, first branch wizard path through 55/56/44/45
 - [x] Error pages and the "nothing was saved" message with request id
 - [x] Backup cron and restore test (START_HERE)
-- [ ] Staging deployment with HTTPS; smoke test of the full journey on staging
+- [ ] Staging deployment with HTTPS; smoke test of the full journey on staging — **deferred by the owner on 16 Nov 2026: not deploying yet**; do it before going live
 - [x] One-page quick guide per role (front desk, housekeeper, back office)
-- [ ] Tag `v1.0.0`
+- [ ] Tag `v1.0.0` — after Phase 11; the two deferred boxes above must be done before the first live deployment
 
 **Done when:** a visitor sees the welcome page with the real prices and reaches the sign-in from it; a new person can follow the front desk quick guide to open a shift, check in three guests, sell a drink, check one out, close the shift and hand over, on staging, without help; the numbers on the shift report and the Z-report are right; and back office can close that day.
 
@@ -229,14 +229,14 @@ No screens in this phase. Everything is driven by tests.
 
 The owner approved mockup v6 on 16 Nov 2026 (DESIGN_SYSTEM §0). No business rule, route or table changes except the new list screen 37a. Do this before the open Phase 10 boxes (mockup walk, print test, staging, tag), so the walk and the tag cover the new look.
 
-- [ ] Fonts: replace IBM Plex Sans, IBM Plex Mono and Newsreader with Geist and Geist Mono in `resources/fonts/` and `resources/css/app.css` (ASSETS §1.1); delete the old files and licences; peso-sign check in the gallery
-- [ ] Tokens: the v6 values of DESIGN_SYSTEM §2.1 in the `--hm-*` layer, the new `*-line` tokens and `--hm-shadow-xs`; Nuxt UI mapping and dark-mode values derived from them
-- [ ] Shell: `SidebarNav` (branch switcher, group labels, folding parents, Notifications, Help, user card), `TopBar` (breadcrumbs, search, shift label, bell) and the new `PageHeader` on every page
-- [ ] New components: `FilterBar`, `PersonPill`, `Pager`, `StackedBars`, `ShiftCalendar`, `StaysTimeline`; status label as a bordered pill; `StepBar` strip; all in `/dev/components`
-- [ ] Dashboards 60 and 61 and Today 62 rebuilt to the v6 frames (Today still shows no money)
-- [ ] Screen 37a: `/reports/shifts` list with filters, search, pages and the Calendar tab (APP_FLOW)
-- [ ] Every table that lists people uses `PersonPill`; housekeeping phone headers white (32–35)
-- [ ] Sign-in (1) and welcome (59) rebuilt to the v6 frames with their motion; all motion off under reduced motion
+- [x] Fonts: replace IBM Plex Sans, IBM Plex Mono and Newsreader with Geist and Geist Mono in `resources/fonts/` and `resources/css/app.css` (ASSETS §1.1); delete the old files and licences; peso-sign check in the gallery
+- [x] Tokens: the v6 values of DESIGN_SYSTEM §2.1 in the `--hm-*` layer, the new `*-line` tokens and `--hm-shadow-xs`; Nuxt UI mapping and dark-mode values derived from them
+- [x] Shell: `SidebarNav` (branch switcher, group labels, folding parents, Notifications, Help, user card), `TopBar` (breadcrumbs, search, shift label, bell) and the new `PageHeader` on every page
+- [x] New components: `FilterBar`, `PersonPill`, `Pager`, `StackedBars`, `ShiftCalendar`, `StaysTimeline`; status label as a bordered pill; `StepBar` strip; all in `/dev/components`
+- [x] Dashboards 60 and 61 and Today 62 rebuilt to the v6 frames (Today still shows no money)
+- [x] Screen 37a: `/reports/shifts` list with filters, search, pages and the Calendar tab (APP_FLOW)
+- [x] Every table that lists people uses `PersonPill`; housekeeping phone headers white (32–35)
+- [x] Sign-in (1) and welcome (59) rebuilt to the v6 frames with their motion; all motion off under reduced motion
 - [ ] Full check, then compare all 71 frames with the app in light and dark mode
 
 **Done when:** every page shows the v6 shell and page header, 60/61/62/37a/1/59 match their frames side by side, no page contains IBM Plex or Newsreader, and the full check passes.

@@ -11,6 +11,7 @@ import ExportMenu from '@/Components/ExportMenu.vue';
 import PeriodSegments from '@/Components/PeriodSegments.vue';
 import type { StatCardProps } from '@/Components/StatCard.vue';
 import StatCards from '@/Components/StatCards.vue';
+import PersonPill from '@/Components/PersonPill.vue';
 import { changeCard, useDashboard } from '@/Composables/useDashboard';
 import { formatAxisHour, formatDateRange, formatDateTime, formatHour } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
@@ -257,7 +258,7 @@ const Layout = computed(() => (isOwner.value ? OwnerLayout : BackOfficeLayout));
                     </thead>
                     <tbody>
                         <tr v-for="p in front_desk" :key="p.user_id">
-                            <td>{{ p.name }}</td>
+                            <td><PersonPill :name="p.name" /></td>
                             <td class="r">{{ p.count }}</td>
                             <td class="r">{{ formatMoney(p.amount, 'column') }}</td>
                             <td class="r">{{ formatMoney(p.refunds, 'column') }}</td>

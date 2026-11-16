@@ -8,7 +8,7 @@
 withDefaults(
     defineProps<{
         photos: { src: string; srcset?: string }[];
-        scrim?: 'default' | 'kiosk';
+        scrim?: 'default' | 'kiosk' | 'signin';
         drift?: boolean;
         slides?: boolean;
         sizes?: string;
@@ -34,7 +34,7 @@ withDefaults(
                     />
                 </div>
             </div>
-            <div class="absolute inset-0" :class="scrim === 'kiosk' ? 'bg-(--hm-scrim-kiosk)' : 'bg-(--hm-scrim)'" />
+            <div class="absolute inset-0" :class="scrim === 'kiosk' ? 'bg-(--hm-scrim-kiosk)' : scrim === 'signin' ? 'bg-(--hm-scrim-signin)' : 'bg-(--hm-scrim)'" />
         </div>
         <slot />
     </div>

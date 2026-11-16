@@ -4,6 +4,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
+import PersonPill from '@/Components/PersonPill.vue';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { useShared } from '@/Composables/useShared';
 import OwnerLayout from '@/Layouts/OwnerLayout.vue';
@@ -96,8 +97,8 @@ function save(): void {
                 <tbody>
                     <tr v-for="a in accounts" :key="a.id">
                         <td>
-                            {{ a.name }}
-                            <span v-if="a.is_me" class="text-xs text-muted">(you)</span>
+                            <PersonPill :name="a.name" />
+                            <span v-if="a.is_me" class="ms-2 text-xs text-muted">(you)</span>
                         </td>
                         <td>{{ a.username }}</td>
                         <td><StatusLabel tone="primary" label="Owner" /></td>

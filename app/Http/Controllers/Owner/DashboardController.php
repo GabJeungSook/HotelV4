@@ -45,8 +45,9 @@ final class DashboardController extends Controller
                 'at' => $clock->now()->toIso8601String(),
             ], 'kpis'),
             'charts' => Inertia::defer(fn (): array => [
-                'week' => $dash->lastSevenDays($dash->periods($ids, 'today')),
+                'branches' => $dash->salesByBranch($ids),
                 'methods' => $dash->paymentsByMethod($dash->periods($ids, $period), $methods),
+                'overview' => $dash->salesOverview($dash->periods($ids, $period), $methods),
             ], 'charts'),
             'now' => Inertia::defer(fn (): array => ['branches' => $dash->branchesNow($ids)], 'now'),
             'attention' => Inertia::defer(fn (): array => [

@@ -9,6 +9,7 @@ import { useConnection } from '@/Composables/useConnection';
 import { formatDateTime, formatDuration } from '@/Composables/useDateTime';
 import { useFlashToast } from '@/Composables/useFlashToast';
 import { useShared } from '@/Composables/useShared';
+import { useShell } from '@/Composables/useShell';
 import type { Tone } from '@/types/ui';
 import AppShell from './AppShell.vue';
 import { frontDeskNav } from './nav';
@@ -39,8 +40,7 @@ useFlashToast();
 onMounted(() => useConnection().start(shared.value.app?.heartbeat ?? 5));
 
 const nav = computed(() => (shared.value.nav?.length ? shared.value.nav : frontDeskNav));
-const branchName = computed(() => props.branch ?? shared.value.branch?.name);
-const me = computed(() => props.user ?? (shared.value.auth ? { name: shared.value.auth.user.name, role: shared.value.auth.roleLabel } : undefined));
+const shell = useShell({ branch: () => props.branch, user: () => props.user });
 const members = computed(() => (shared.value.shift?.members ?? []).filter((m) => m.id !== shared.value.auth?.user.id));
 const switchable = computed(() => props.canSwitch ?? members.value.length > 0);
 
@@ -95,9 +95,19 @@ function signOut(): void {
 </script>
 
 <template>
-    <AppShell :nav="nav" :current="current" :title="title" :user="me" :can-switch="switchable" @sign-out="signOut" @switch-user="switching = true">
+    <AppShell
+        :nav="nav"
+        :current="current"
+        :title="title"
+        :user="shell.user.value"
+        :branch="shell.branch.value"
+        :notifications="shell.notifications.value"
+        :search-route="shell.searchRoute.value"
+        :can-switch="switchable"
+        @sign-out="signOut"
+        @switch-user="switching = true"
+    >
         <template #status>
-            <StatusLabel v-if="branchName" tone="primary" :label="branchName" />
             <StatusLabel v-if="shiftChip" :tone="shiftChip.tone" :label="shiftChip.label" />
             <UButton v-if="props.shift ? props.shift.closable : canClose" color="neutral" variant="outline" size="sm" label="Close shift" data-close-shift @click="closeShift" />
         </template>

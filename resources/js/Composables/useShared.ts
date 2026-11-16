@@ -21,11 +21,12 @@ export interface SharedProps {
     app: { name: string; heartbeat: number };
     auth: { user: { id: number; name: string; username: string }; role: string; roleLabel: string } | null;
     branch: { id: number; name: string; status: string; modules: Record<string, boolean> } | null;
+    branchCard?: { name: string; rooms: number; place: string } | null;
     shift: SharedShift | null;
     nav: NavGroup[];
     home: string | null;
     pinLocked: boolean;
-    ownerBranches: { id: number; name: string }[];
+    ownerBranches: { id: number; name: string; rooms?: number }[];
     errors: Record<string, string>;
     [key: string]: unknown;
 }

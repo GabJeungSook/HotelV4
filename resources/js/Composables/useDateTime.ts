@@ -226,3 +226,30 @@ export function formatStayLength(count: number, unit: 'hour' | 'night' | 'day'):
 export function useDateTime() {
     return { formatDateTime, formatDateRange, formatDuration, formatStayLength, formatAxisHour, formatHour };
 }
+
+/** "just now", "8 min ago", "2 h ago", "5 d ago", then the date (Recent check-ins on 61). */
+export function formatAgo(value: DateInput | null | undefined, now: DateInput = Date.now()): string {
+    if (value === null || value === undefined || value === '') {
+        return '—';
+    }
+
+    const minutes = Math.floor((new Date(now as string | number | Date).getTime() - new Date(value as string | number | Date).getTime()) / 60000);
+
+    if (minutes < 1) {
+        return 'just now';
+    }
+
+    if (minutes < 60) {
+        return `${minutes} min ago`;
+    }
+
+    if (minutes < 24 * 60) {
+        return `${Math.floor(minutes / 60)} h ago`;
+    }
+
+    if (minutes < 7 * 24 * 60) {
+        return `${Math.floor(minutes / (24 * 60))} d ago`;
+    }
+
+    return formatDateTime(value, 'date', now);
+}

@@ -7,6 +7,7 @@ import type { ConfirmReason } from '@/Components/ConfirmDialog.vue';
 import MoneyInput from '@/Components/MoneyInput.vue';
 import StatCard from '@/Components/StatCard.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
+import PersonPill from '@/Components/PersonPill.vue';
 import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { useIdempotencyKey } from '@/Composables/useIdempotencyKey';
@@ -276,7 +277,7 @@ function actions(m: Movement) {
                             <span :class="m.voided ? 'line-through' : ''">{{ details(m) }}</span>
                             <span v-if="m.voided" class="text-muted"> — voided: {{ m.void_reason }}</span>
                         </td>
-                        <td>{{ firstName(m.by) }}</td>
+                        <td><PersonPill v-if="m.by" :name="firstName(m.by)" /></td>
                         <td class="num text-right" :class="m.voided ? 'text-muted line-through' : 'text-highlighted'">
                             {{ m.kind === 'shortage_payment' ? '+' : '−' }}{{ formatMoney(m.amount, 'column') }}
                         </td>

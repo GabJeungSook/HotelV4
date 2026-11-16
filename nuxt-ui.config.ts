@@ -16,18 +16,24 @@ export const nuxtUiOptions = {
         colors: { primary: 'homi', neutral: 'neutral' },
         icons: { loading: 'i-lucide-loader-circle' },
 
-        // One solid primary; every other button white with a 1 px inset ring; nothing lifted.
+        // Mockup v6 `.btn`: one solid primary; every other button white with a 1 px line-strong ring;
+        // 8 px radius, weight 600, the hairline shadow on solid and outline buttons.
         button: {
-            slots: { base: 'cursor-pointer font-medium shadow-none justify-center transition-colors duration-120 ease-out' },
+            slots: { base: 'cursor-pointer font-semibold rounded-control shadow-none justify-center whitespace-nowrap transition-colors duration-120 ease-out' },
             variants: {
                 size: {
-                    sm: { base: 'h-7 px-2.5 text-xs gap-1.5', leadingIcon: 'size-4', trailingIcon: 'size-4' },
-                    md: { base: 'h-8 px-3 text-sm gap-1.5', leadingIcon: 'size-4', trailingIcon: 'size-4' },
-                    lg: { base: 'h-9 px-3.5 text-sm gap-2', leadingIcon: 'size-4', trailingIcon: 'size-4' },
-                    xl: { base: 'h-10 px-5 text-base gap-2 rounded-[7px]', leadingIcon: 'size-4', trailingIcon: 'size-4' },
+                    xs: { base: 'h-7 px-2 text-xs gap-1', leadingIcon: 'size-3.5', trailingIcon: 'size-3.5' },
+                    sm: { base: 'h-[30px] px-2.5 text-xs gap-1.5', leadingIcon: 'size-[15px]', trailingIcon: 'size-[15px]' },
+                    md: { base: 'h-[34px] px-3 text-[12.5px] gap-1.5', leadingIcon: 'size-[15px]', trailingIcon: 'size-[15px]' },
+                    lg: { base: 'h-9 px-3.5 text-[12.5px] gap-1.5', leadingIcon: 'size-[15px]', trailingIcon: 'size-[15px]' },
+                    xl: { base: 'h-[46px] px-5 text-sm gap-2 rounded-[10px]', leadingIcon: 'size-4', trailingIcon: 'size-4' },
                 },
             },
             compoundVariants: [
+                {
+                    variant: ['solid', 'outline', 'subtle'],
+                    class: 'shadow-xs',
+                },
                 {
                     color: 'primary',
                     variant: 'solid',
@@ -46,7 +52,7 @@ export const nuxtUiOptions = {
                 {
                     color: 'neutral',
                     variant: ['outline', 'subtle'],
-                    class: 'bg-default text-highlighted ring ring-inset ring-accented hover:bg-elevated active:bg-elevated disabled:text-muted/60 disabled:opacity-100 disabled:hover:bg-default',
+                    class: 'bg-default text-default ring ring-inset ring-accented hover:bg-elevated active:bg-elevated disabled:text-muted/60 disabled:opacity-100 disabled:hover:bg-default',
                 },
                 {
                     color: 'error',
@@ -62,40 +68,43 @@ export const nuxtUiOptions = {
 
         // 36 px fields; focus = 1 px primary border + 3 px halo; error = bad border + 3 px bad-50 halo.
         input: {
-            slots: { base: 'transition-[box-shadow,color] duration-120 ease-out' },
+            slots: { base: 'rounded-control shadow-xs transition-[box-shadow,color] duration-120 ease-out' },
             variants: {
                 size: {
-                    lg: { base: 'h-9 px-3 text-sm gap-2' },
-                    xl: { base: 'h-11 px-3.5 text-base gap-2' },
+                    md: { base: 'h-8 px-2.5 text-[12.5px] gap-2' },
+                    lg: { base: 'h-9 px-3 text-[13px] gap-2' },
+                    xl: { base: 'h-11 px-3 text-[13.5px] gap-2.5 rounded-[10px]' },
                 },
             },
             compoundVariants: [
                 {
                     color: 'primary',
                     variant: ['outline', 'subtle'],
-                    class: 'focus-visible:outline-0 focus-visible:ring-1 focus-visible:ring-primary focus-visible:shadow-[0_0_0_3px_var(--hm-focus)]',
+                    class: 'focus-visible:outline-0 focus-visible:ring-1 focus-visible:ring-(--hm-select-line) focus-visible:shadow-[0_0_0_4px_var(--hm-focus)]',
                 },
                 { color: 'error', highlight: true, class: 'ring-1 ring-error shadow-[0_0_0_3px_var(--hm-bad-50)]' },
             ],
             defaultVariants: { size: 'lg', variant: 'outline' },
         },
         select: {
+            slots: { base: 'rounded-control shadow-xs' },
             compoundVariants: [
                 {
                     color: 'primary',
                     variant: ['outline', 'subtle'],
-                    class: 'focus-visible:outline-0 focus-visible:ring-1 focus-visible:ring-primary focus-visible:shadow-[0_0_0_3px_var(--hm-focus)]',
+                    class: 'focus-visible:outline-0 focus-visible:ring-1 focus-visible:ring-(--hm-select-line) focus-visible:shadow-[0_0_0_4px_var(--hm-focus)]',
                 },
                 { color: 'error', highlight: true, class: 'ring-1 ring-error shadow-[0_0_0_3px_var(--hm-bad-50)]' },
             ],
             defaultVariants: { size: 'lg', variant: 'outline' },
         },
         textarea: {
+            slots: { base: 'rounded-control shadow-xs' },
             compoundVariants: [
                 {
                     color: 'primary',
                     variant: ['outline', 'subtle'],
-                    class: 'focus-visible:outline-0 focus-visible:ring-1 focus-visible:ring-primary focus-visible:shadow-[0_0_0_3px_var(--hm-focus)]',
+                    class: 'focus-visible:outline-0 focus-visible:ring-1 focus-visible:ring-(--hm-select-line) focus-visible:shadow-[0_0_0_4px_var(--hm-focus)]',
                 },
                 { color: 'error', highlight: true, class: 'ring-1 ring-error shadow-[0_0_0_3px_var(--hm-bad-50)]' },
             ],
@@ -103,7 +112,7 @@ export const nuxtUiOptions = {
         },
         formField: {
             slots: {
-                label: 'text-[13px] leading-[18px] font-medium text-default',
+                label: 'text-[12.5px] leading-[18px] font-medium text-default',
                 error: 'mt-1 text-xs font-semibold text-error',
                 help: 'mt-1 text-xs text-muted',
                 hint: 'text-xs text-muted',
@@ -155,6 +164,8 @@ export const nuxtUiOptions = {
         },
         skeleton: { base: 'animate-pulse rounded-md bg-elevated' },
         tooltip: { slots: { content: 'shadow-none ring ring-default' } },
+        selectMenu: { slots: { base: 'rounded-control shadow-xs' } },
+        dropdownMenu: { slots: { content: 'rounded-[10px] shadow-(--hm-shadow-modal) ring-default' } },
         separator: { slots: { border: 'border-default' } },
     },
 };

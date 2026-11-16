@@ -65,6 +65,8 @@ final class WelcomeQuery
                 'deposit' => $branch->deposit_enabled && $branch->deposit_amount !== null && $branch->deposit_amount->isPositive()
                     ? ['name' => $branch->deposit_name, 'amount' => $branch->deposit_amount->centavos()]
                     : null,
+                // "Cash or GCash" in the facts strip and Find us (59, mockup v6); a card number is never shown.
+                'methods' => $branch->payment_methods->map(fn ($m): string => $m->value)->values()->all(),
             ],
             'types' => $types,
             'credits' => collect(array_unique($photos))

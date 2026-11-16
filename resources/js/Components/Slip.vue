@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * The 80 mm thermal slip (DESIGN_SYSTEM §5.2, §6.10): check-in slip (8), receipt (18),
- * shift report (26). IBM Plex Mono only; always light; amounts without ₱, ASCII hyphen.
+ * shift report (26). Geist Mono only; always light; amounts without ₱, ASCII hyphen.
  * Values arrive already formatted (formatMoney(…, 'slip'), formatDateTime(…, 'slip')).
  */
 export interface SlipRow {

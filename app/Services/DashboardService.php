@@ -66,7 +66,7 @@ final class DashboardService
      * Sales of the period with the change figure, check-ins and check-outs, short and over.
      *
      * @param  array<int, Period>  $periods
-     * @return array{period: string, compared_with: string, sales: int, change: int|null, checkins: int, checkouts: int, short: int, over: int, from_last_night: int|null}
+     * @return array{period: string, compared_with: string, sales: int, previous: int|null, change: int|null, checkins: int, checkouts: int, short: int, over: int, from_last_night: int|null}
      */
     public function totals(array $periods): array
     {
@@ -80,6 +80,7 @@ final class DashboardService
             'period' => $first->words(),
             'compared_with' => $first->comparedWith(),
             'sales' => $now['sales'],
+            'previous' => $previous,
             'change' => self::change($now['sales'], $previous),
             'checkins' => $now['checkins'],
             'checkouts' => $now['checkouts'],
@@ -204,6 +205,110 @@ final class DashboardService
         }
 
         return ['start_hour' => $startHour, 'hours' => $hours, 'sales' => $sales];
+    }
+
+    /**
+     * Rooms in use at the end of each business day over the last `days` days (61, mockup v6
+     * Occupancy chart), from daily_summaries.stays_in_house_end; today's bar is the rooms occupied
+     * now. Per-night "to clean" and "blocked" counts are not kept in the summaries.
+     *
+     * @return array{total: int, days: list<array{date: string, occupied: int}>}
+     */
+    public function occupancyNights(int $branchId, int $days = 14): array
+    {
+        $today = $this->days->currentDate($branchId);
+        $from = CarbonImmutable::parse($today)->subDays($days - 1)->toDateString();
+        $rows = $this->db->table('daily_summaries')->where('branch_id', $branchId)->whereBetween('business_date', [$from, $today])
+            ->get(['business_date', 'stays_in_house_end'])
+            ->mapWithKeys(fn (object $r): array => [substr((string) $r->business_date, 0, 10) => (int) $r->stays_in_house_end]);
+        $live = Room::query()->withoutGlobalScopes()->where('branch_id', $branchId)->where('is_active', true)
+            ->selectRaw('COUNT(*) AS total, COALESCE(SUM(status = ?), 0) AS occupied', [RoomStatus::Occupied->value])->first();
+        $live = ['total' => (int) ($live?->getAttribute('total') ?? 0), 'occupied' => (int) ($live?->getAttribute('occupied') ?? 0)];
+
+        $out = [];
+        for ($d = CarbonImmutable::parse($from); $d->toDateString() <= $today; $d = $d->addDay()) {
+            $date = $d->toDateString();
+            $out[] = ['date' => $date, 'occupied' => $date === $today ? $live['occupied'] : (int) ($rows[$date] ?? 0)];
+        }
+
+        return ['total' => $live['total'], 'days' => $out];
+    }
+
+    /**
+     * Net sales per business date per branch over the last `days` days (60, Sales by branch).
+     *
+     * @param  list<int>  $branchIds
+     * @return array{dates: list<string>, branches: list<array{id: int, name: string, sales: list<int>}>}
+     */
+    public function salesByBranch(array $branchIds, int $days = 14): array
+    {
+        $today = $this->clock->localDate();
+        $from = CarbonImmutable::parse($today)->subDays($days - 1)->toDateString();
+        $rows = $this->db->table('daily_summaries')->whereIn('branch_id', $branchIds)->whereBetween('business_date', [$from, $today])
+            ->get(['branch_id', 'business_date', 'net_sales_amount']);
+        $names = Branch::query()->withoutGlobalScopes()->whereIn('id', $branchIds)->orderBy('name')->pluck('name', 'id');
+
+        $dates = [];
+        for ($d = CarbonImmutable::parse($from); $d->toDateString() <= $today; $d = $d->addDay()) {
+            $dates[] = $d->toDateString();
+        }
+
+        $by = [];
+        foreach ($rows as $r) {
+            $by[(int) $r->branch_id][substr((string) $r->business_date, 0, 10)] = (int) $r->net_sales_amount;
+        }
+
+        $branches = [];
+        foreach ($names as $id => $name) {
+            $branches[] = ['id' => (int) $id, 'name' => (string) $name, 'sales' => array_map(fn (string $d): int => $by[(int) $id][$d] ?? 0, $dates)];
+        }
+
+        return ['dates' => $dates, 'branches' => $branches];
+    }
+
+    /**
+     * Sales overview (61, 60 "How guests paid"): total net sales of the period, rooms and extras,
+     * and the share of each payment method, from daily_summaries and daily_payment_summaries.
+     *
+     * @param  array<int, Period>  $periods
+     * @param  list<string>  $methods
+     * @return array{period: string, from: string, to: string, sales: int, rooms: int, extras: int, methods: list<array{method: string, amount: int, count: int}>}
+     */
+    public function salesOverview(array $periods, array $methods): array
+    {
+        $first = reset($periods) ?: Period::of('today', $this->clock->localDate());
+        $sum = $this->sum('daily_summaries', $periods, 'from', 'to', ['sales' => 'net_sales_amount', 'rooms' => 'room_sales_amount', 'extras' => 'other_sales_amount']);
+
+        return [
+            'period' => $first->words(),
+            'from' => $first->from,
+            'to' => $first->to,
+            'sales' => $sum['sales'],
+            'rooms' => $sum['rooms'],
+            'extras' => $sum['extras'],
+            'methods' => $this->paymentsByMethod($periods, $methods),
+        ];
+    }
+
+    /**
+     * The last check-ins at the branch (61, live state bounded to the newest rows): room, guest and
+     * when. No amounts.
+     *
+     * @return list<array{stay_id: int, room: string, guest: string, at: string}>
+     */
+    public function recentCheckins(int $branchId, int $limit = 5): array
+    {
+        return Stay::query()->withoutGlobalScopes()
+            ->join('rooms', 'rooms.id', '=', 'stays.room_id')
+            ->where('stays.branch_id', $branchId)->whereNotNull('stays.checked_in_at')
+            ->orderByDesc('stays.checked_in_at')->limit($limit)
+            ->get(['stays.id', 'stays.guest_name', 'stays.checked_in_at', 'rooms.number as room_number'])
+            ->map(fn (Stay $s): array => [
+                'stay_id' => $s->id,
+                'room' => (string) $s->getAttribute('room_number'),
+                'guest' => $s->guest_name,
+                'at' => $s->checked_in_at?->toIso8601String() ?? '',
+            ])->values()->all();
     }
 
     /* ------------------------------------------------------------ live state */

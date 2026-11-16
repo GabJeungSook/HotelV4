@@ -233,6 +233,6 @@ it('keeps a branch admin to their own branch; the owner may pick any', function 
 
 it('puts the reports in the back office menu', function (): void {
     $this->actingAs($this->backoffice)->get('/reports')->assertInertia(fn (Assert $page) => $page
-        ->where('nav', fn ($nav) => collect($nav)->firstWhere('heading', 'Reports')['items'] !== null
-            && collect(collect($nav)->firstWhere('heading', 'Reports')['items'])->pluck('label')->all() === ['Reports', 'Shift reports', 'Z-report', 'Daily sales', 'Occupancy', 'Housekeeping', 'Inventory', 'Audit trail', 'Stats']));
+        ->where('nav', fn ($nav) => collect(collect($nav)->firstWhere('heading', 'Reports')['items'][0]['children'])->pluck('label')->all() === ['Report hub', 'Shift reports', 'Z-report', 'Daily sales', 'Occupancy', 'Housekeeping', 'Inventory', 'Audit trail']
+            && collect(collect($nav)->firstWhere('heading', 'Analytics')['items'])->pluck('key')->all() === ['stats']));
 });

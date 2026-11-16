@@ -1,16 +1,28 @@
 /** Status tones (DESIGN_SYSTEM §2.3). One mapping for the whole app. */
 export type Tone = 'neutral' | 'ok' | 'warn' | 'bad' | 'info' | 'primary' | 'violet' | 'clay';
 
-/** Text-on-fill classes per tone, used by StatusLabel. */
+/** Text-on-fill-with-edge classes per tone, used by StatusLabel (v6 pill with a 1 px border). */
 export const toneClasses: Record<Tone, string> = {
-    neutral: 'bg-grey-50 text-grey',
-    ok: 'bg-ok-50 text-ok',
-    warn: 'bg-warn-50 text-warn',
-    bad: 'bg-bad-50 text-bad',
-    info: 'bg-info-50 text-info',
-    primary: 'bg-primary-50 text-primary-ink',
-    violet: 'bg-violet-50 text-violet',
-    clay: 'bg-clay-50 text-clay',
+    neutral: 'bg-grey-50 text-grey border-grey-line',
+    ok: 'bg-ok-50 text-ok border-ok-line',
+    warn: 'bg-warn-50 text-warn border-warn-line',
+    bad: 'bg-bad-50 text-bad border-bad-line',
+    info: 'bg-info-50 text-info border-info-line',
+    primary: 'bg-primary-50 text-primary-ink border-primary-line',
+    violet: 'bg-violet-50 text-violet border-violet-line',
+    clay: 'bg-clay-50 text-clay border-clay-line',
+};
+
+/** Soft block fill + edge per tone: calendar and timeline blocks (ShiftCalendar, StaysTimeline). */
+export const toneBlock: Record<Tone, string> = {
+    neutral: 'bg-grey-50 border-grey-line',
+    ok: 'bg-ok-50 border-ok-line',
+    warn: 'bg-warn-50 border-warn-line',
+    bad: 'bg-bad-50 border-bad-line',
+    info: 'bg-info-50 border-info-line',
+    primary: 'bg-primary-50 border-primary-line',
+    violet: 'bg-violet-50 border-violet-line',
+    clay: 'bg-clay-50 border-clay-line',
 };
 
 /** Solid fill per tone for chart shapes (shares bars, legend swatches). */
@@ -45,8 +57,10 @@ export interface NavItem {
     label: string;
     route: string;
     icon: string;
-    subtitle?: string;
+    subtitle?: string | null;
     count?: number;
+    /** Child links of a folding parent (Reports → Report hub, Shift reports, …). */
+    children?: NavItem[];
 }
 
 export interface NavGroup {

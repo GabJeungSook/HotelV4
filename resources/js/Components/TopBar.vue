@@ -1,25 +1,73 @@
 <script setup lang="ts">
-import UserMenu from './UserMenu.vue';
+import { Link, router } from '@inertiajs/vue3';
+import { onKeyStroke } from '@vueuse/core';
+import { ref } from 'vue';
 
-/** 56 px white bar: the page's only <h1>, the teleported page actions, status labels, the user menu (DESIGN_SYSTEM §5.2). */
-withDefaults(defineProps<{ title: string; subtitle?: string; user?: { name: string; role: string }; canSwitch?: boolean }>(), {
-    subtitle: undefined,
-    user: undefined,
-    canSwitch: false,
-});
+/**
+ * The 56 px top bar (DESIGN_SYSTEM §0, §6.1; mockup v6 `.tb`): breadcrumbs with the page in
+ * primary, the search box ("Ctrl K" focuses it; Enter searches the room board) where the user can
+ * search rooms, the status slot (shift label and Close shift on the front desk) and the bell.
+ */
+const props = withDefaults(defineProps<{ crumbs: string[]; searchRoute?: string; notifications?: string }>(), { searchRoute: undefined, notifications: undefined });
 
-const emit = defineEmits<{ menu: []; switchUser: [] }>();
+const emit = defineEmits<{ menu: [] }>();
+
+const q = ref('');
+const box = ref<{ inputRef?: HTMLInputElement } | null>(null);
+
+onKeyStroke(
+    (e) => (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k',
+    (e) => {
+        if (!props.searchRoute) {
+            return;
+        }
+        e.preventDefault();
+        box.value?.inputRef?.focus();
+    },
+);
+
+function search(): void {
+    if (props.searchRoute && q.value.trim() !== '') {
+        router.get(props.searchRoute, { q: q.value.trim() });
+    }
+}
 </script>
 
 <template>
-    <header data-shell class="flex h-14 shrink-0 items-center gap-3 border-b border-default bg-default px-6 max-md:px-4">
+    <header data-shell class="flex h-14 shrink-0 items-center gap-2.5 border-b border-default bg-default px-7 max-md:px-4">
         <UButton class="md:hidden" color="neutral" variant="ghost" icon="i-lucide-menu" aria-label="Open menu" @click="emit('menu')" />
-        <h1 class="truncate text-[19px] leading-6 font-semibold tracking-[-0.01em] whitespace-nowrap text-highlighted">{{ title }}</h1>
-        <span v-if="subtitle" class="truncate text-sm text-muted max-lg:hidden">{{ subtitle }}</span>
-        <div id="page-actions" class="flex items-center gap-2" />
-        <div class="ms-auto flex items-center gap-2">
-            <div class="flex items-center gap-2 max-md:hidden"><slot name="status" /></div>
-            <UserMenu v-if="user" :user="user" :can-switch="canSwitch" @switch-user="emit('switchUser')" />
-        </div>
+        <nav aria-label="Breadcrumb" class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden text-[12.5px] whitespace-nowrap text-muted">
+            <UIcon name="i-lucide-house" class="size-[15px] shrink-0 text-faint" aria-hidden="true" />
+            <template v-for="(c, i) in crumbs" :key="`${c}-${i}`">
+                <span class="text-(--hm-line-strong)" aria-hidden="true">/</span>
+                <span v-if="i === crumbs.length - 1" class="truncate font-medium text-primary" aria-current="page">{{ c }}</span>
+                <span v-else class="shrink-0">{{ c }}</span>
+            </template>
+        </nav>
+        <form v-if="searchRoute" class="max-lg:hidden" role="search" @submit.prevent="search">
+            <UInput
+                ref="box"
+                v-model="q"
+                icon="i-lucide-search"
+                placeholder="Search rooms or guests"
+                aria-label="Search rooms or guests"
+                size="md"
+                class="w-[200px]"
+                :ui="{ base: 'h-[34px] ring-default text-[12.5px] pe-14', leadingIcon: 'size-[15px] text-faint', trailing: 'pe-1.5' }"
+            >
+                <template #trailing>
+                    <kbd class="rounded-[5px] border border-default bg-muted px-1.5 text-[10.5px] leading-[18px] font-medium text-muted">Ctrl K</kbd>
+                </template>
+            </UInput>
+        </form>
+        <div class="flex shrink-0 items-center gap-2 max-md:hidden"><slot name="status" /></div>
+        <Link
+            v-if="notifications"
+            :href="notifications"
+            class="hm-focus grid size-[34px] shrink-0 place-items-center rounded-lg border border-default bg-default text-muted hover:bg-elevated"
+            aria-label="Notifications"
+        >
+            <UIcon name="i-lucide-bell" class="size-4" aria-hidden="true" />
+        </Link>
     </header>
 </template>

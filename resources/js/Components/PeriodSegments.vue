@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 
-/** A small fixed set of periods on one track; the active one is a white pill (DESIGN_SYSTEM §5.2). */
+/** A small fixed set on one track (periods, List/Calendar, floors); the active one is a white pill (DESIGN_SYSTEM §5.2, mockup v6 `.segp`). */
 const props = withDefaults(defineProps<{ items: { value: string; label: string; disabled?: boolean }[]; label?: string }>(), { label: 'Period' });
 
 const model = defineModel<string>({ required: true });
@@ -27,7 +27,7 @@ function onKey(event: KeyboardEvent, index: number): void {
 </script>
 
 <template>
-    <div role="radiogroup" :aria-label="label" class="inline-flex max-w-full gap-0.5 overflow-x-auto rounded-lg bg-track p-0.5">
+    <div role="radiogroup" :aria-label="label" class="inline-flex max-w-full shrink-0 gap-0.5 overflow-x-auto rounded-[9px] border border-default bg-track p-0.5">
         <button
             v-for="(item, i) in items"
             :key="item.value"
@@ -37,8 +37,8 @@ function onKey(event: KeyboardEvent, index: number): void {
             :aria-checked="model === item.value"
             :disabled="item.disabled"
             :tabindex="model === item.value ? 0 : -1"
-            class="hm-focus cursor-pointer rounded-md px-3 py-1 text-[13px] leading-[18px] whitespace-nowrap transition-colors duration-120 ease-out disabled:cursor-not-allowed disabled:opacity-50"
-            :class="model === item.value ? 'bg-default font-semibold text-highlighted shadow-(--hm-shadow-segment)' : 'font-medium text-muted hover:text-default'"
+            class="hm-focus cursor-pointer rounded-[7px] px-[11px] py-1 text-xs leading-[18px] font-medium whitespace-nowrap transition-colors duration-120 ease-out disabled:cursor-not-allowed disabled:opacity-50"
+            :class="model === item.value ? 'bg-default text-highlighted shadow-(--hm-shadow-segment)' : 'text-muted hover:text-default'"
             @click="model = item.value"
             @keydown="onKey($event, i)"
         >

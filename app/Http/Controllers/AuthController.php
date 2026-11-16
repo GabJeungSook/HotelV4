@@ -54,6 +54,12 @@ final class AuthController extends Controller
                 'src' => "/images/photos/signin-{$part}.jpg",
                 'srcset' => "/images/photos/signin-{$part}-1200.jpg 1200w, /images/photos/signin-{$part}.jpg 2000w",
             ],
+            // The framed photo panel cross-fades three photos, the part of the day first (mockup v6).
+            'photos' => [
+                ['src' => "/images/photos/signin-{$part}.jpg", 'srcset' => "/images/photos/signin-{$part}-1200.jpg 1200w, /images/photos/signin-{$part}.jpg 2000w"],
+                ['src' => '/images/photos/room-deluxe.jpg', 'srcset' => ''],
+                ['src' => '/images/photos/lobby.jpg', 'srcset' => '/images/photos/lobby-1200.jpg 1200w, /images/photos/lobby.jpg 2000w'],
+            ],
             'facts' => $branch === null ? null : $today->signInFacts($branch->id),
         ]);
     }

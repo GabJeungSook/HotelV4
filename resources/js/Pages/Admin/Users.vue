@@ -5,6 +5,7 @@ import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
+import PersonPill from '@/Components/PersonPill.vue';
 import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { type FlashData, useShared } from '@/Composables/useShared';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
@@ -159,7 +160,7 @@ const isMe = computed(() => editing.value !== null && editing.value.id === me.va
                 </thead>
                 <tbody>
                     <tr v-for="u in users" :key="u.id" :data-user="u.username">
-                        <td class="text-highlighted">{{ u.name }}</td>
+                        <td><PersonPill :name="u.name" /></td>
                         <td>{{ u.username }}</td>
                         <td><StatusLabel :tone="roleTone(u.role)" :label="u.role_label" /></td>
                         <td :class="u.pin === false ? 'text-bad' : ''">{{ u.pin === null ? '—' : u.pin ? 'Set' : 'Not set' }}</td>

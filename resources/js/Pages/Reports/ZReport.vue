@@ -10,6 +10,7 @@ import OptionTiles from '@/Components/OptionTiles.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import ZPaper, { type ZPaperData } from '@/Components/ZPaper.vue';
+import PersonPill from '@/Components/PersonPill.vue';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
 import { useReport } from '@/Composables/useReport';
@@ -183,7 +184,7 @@ function print(): void {
                                     </template>
                                     <template v-else>
                                         <td>
-                                            {{ row.guest }}
+                                            <PersonPill :name="row.guest" />
                                             <StatusLabel v-if="row.forwarded" tone="bad" label="FWD" class="ms-1" />
                                             <StatusLabel v-if="row.extended" tone="warn" label="EXT" class="ms-1" />
                                         </td>
@@ -225,7 +226,7 @@ function print(): void {
                             <td>{{ time(t.due_at) }}</td>
                             <td>{{ time(t.started_at) }}</td>
                             <td>{{ time(t.finished_at) }}</td>
-                            <td>{{ t.by ? shortName(t.by) : '—' }}</td>
+                            <td><PersonPill v-if="t.by" :name="shortName(t.by)" /><span v-else class="text-muted">—</span></td>
                             <td>
                                 <StatusLabel v-if="t.is_late" tone="bad" label="Late" />
                                 <StatusLabel v-else-if="t.status !== 'done'" tone="violet" :label="t.status === 'in_progress' ? 'Cleaning' : 'Waiting'" />
@@ -251,7 +252,7 @@ function print(): void {
                         </thead>
                         <tbody>
                             <tr v-for="p in housekeeping.people" :key="p.user_id">
-                                <td>{{ p.name }}</td>
+                                <td><PersonPill :name="p.name" /></td>
                                 <td>{{ p.floors }}</td>
                                 <td class="r">{{ p.cleans }}</td>
                                 <td class="r">{{ p.average_minutes }} min</td>
@@ -304,7 +305,7 @@ function print(): void {
                             <td>{{ time(e.occurred_at) }}</td>
                             <td>{{ e.category ?? kindLabel[e.kind] }}</td>
                             <td class="!whitespace-normal">{{ e.note }}<template v-if="e.voided"> · voided: {{ e.void_reason }}</template></td>
-                            <td>{{ shortName(e.by) }}</td>
+                            <td><PersonPill :name="shortName(e.by)" /></td>
                             <td class="r">{{ formatMoney(e.amount, 'column') }}</td>
                         </tr>
                     </tbody>

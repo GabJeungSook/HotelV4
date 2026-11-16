@@ -8,6 +8,7 @@ import MoneyRow from '@/Components/MoneyRow.vue';
 import OptionTiles from '@/Components/OptionTiles.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
+import PersonPill from '@/Components/PersonPill.vue';
 import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
@@ -228,7 +229,7 @@ function approve(payload: { approver_id: number; pin: string }): void {
                 <tbody>
                     <tr v-for="r in rows" :key="r.id" :data-reservation="r.id">
                         <td class="whitespace-nowrap">{{ arrival(r) }}</td>
-                        <td>{{ r.guest }}</td>
+                        <td><PersonPill :name="r.guest" /></td>
                         <td class="whitespace-nowrap">{{ r.room }}</td>
                         <td class="whitespace-nowrap">{{ r.stay }}</td>
                         <td class="text-right num">{{ r.paid_ahead ? formatMoney(r.paid_ahead, 'column') : '—' }}</td>

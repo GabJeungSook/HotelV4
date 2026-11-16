@@ -10,7 +10,7 @@ export const frontDeskNav: NavGroup[] = [
         items: [
             { key: 'today', label: 'Today', route: '/today', icon: 'i-lucide-clock' },
             { key: 'board', label: 'Room board', route: '/board', icon: 'i-lucide-bed' },
-            { key: 'reservations', label: 'Reservations', route: '/reservations', icon: 'i-lucide-list' },
+            { key: 'reservations', label: 'Reservations', route: '/reservations', icon: 'i-lucide-calendar' },
             { key: 'pos', label: 'POS', route: '/pos', icon: 'i-lucide-shopping-cart' },
             { key: 'stock', label: 'Stock', route: '/stock', icon: 'i-lucide-package' },
         ],
@@ -23,17 +23,25 @@ export const backOfficeNav: NavGroup[] = [
     {
         heading: 'Reports',
         items: [
-            { key: 'reports', label: 'Reports', route: '/reports', icon: 'i-lucide-list' },
-            { key: 'shift-reports', label: 'Shift reports', route: '/reports/shifts', icon: 'i-lucide-banknote' },
-            { key: 'z-report', label: 'Z-report', route: '/reports/z', icon: 'i-lucide-list' },
-            { key: 'daily', label: 'Daily sales', route: '/reports/daily', icon: 'i-lucide-chart-column' },
-            { key: 'occupancy', label: 'Occupancy', route: '/reports/occupancy', icon: 'i-lucide-bed' },
-            { key: 'housekeeping', label: 'Housekeeping', route: '/reports/housekeeping', icon: 'i-lucide-brush' },
-            { key: 'inventory', label: 'Inventory', route: '/reports/inventory', icon: 'i-lucide-package' },
-            { key: 'audit', label: 'Audit trail', route: '/reports/audit', icon: 'i-lucide-lock' },
+            {
+                key: 'reports-menu',
+                label: 'Reports',
+                route: '/reports',
+                icon: 'i-lucide-list',
+                children: [
+                    { key: 'reports', label: 'Report hub', route: '/reports', icon: 'i-lucide-list' },
+                    { key: 'shift-reports', label: 'Shift reports', route: '/reports/shifts', icon: 'i-lucide-banknote' },
+                    { key: 'z-report', label: 'Z-report', route: '/reports/z', icon: 'i-lucide-list' },
+                    { key: 'daily', label: 'Daily sales', route: '/reports/daily', icon: 'i-lucide-chart-column' },
+                    { key: 'occupancy', label: 'Occupancy', route: '/reports/occupancy', icon: 'i-lucide-bed' },
+                    { key: 'housekeeping-report', label: 'Housekeeping', route: '/reports/housekeeping', icon: 'i-lucide-brush' },
+                    { key: 'inventory', label: 'Inventory', route: '/reports/inventory', icon: 'i-lucide-package' },
+                    { key: 'audit', label: 'Audit trail', route: '/reports/audit', icon: 'i-lucide-lock' },
+                ],
+            },
         ],
     },
-    { heading: 'Analytics', items: [{ key: 'stats', label: 'Stats', route: '/stats', icon: 'i-lucide-chart-column' }] },
+    { heading: 'Analytics', items: [{ key: 'stats', label: 'Stats', route: '/stats', icon: 'i-lucide-trending-up' }] },
 ];
 
 export const adminNav: NavGroup[] = [
@@ -57,8 +65,18 @@ export const adminNav: NavGroup[] = [
     {
         heading: 'Reports',
         items: [
-            { key: 'reports', label: 'Reports', route: '/reports', icon: 'i-lucide-list' },
-            { key: 'stats', label: 'Stats', route: '/stats', icon: 'i-lucide-chart-column' },
+            {
+                key: 'reports-menu',
+                label: 'Reports',
+                route: '/reports',
+                icon: 'i-lucide-list',
+                children: [
+                    { key: 'reports', label: 'Report hub', route: '/reports', icon: 'i-lucide-list' },
+                    { key: 'shift-reports', label: 'Shift reports', route: '/reports/shifts', icon: 'i-lucide-banknote' },
+                    { key: 'daily', label: 'Daily sales', route: '/reports/daily', icon: 'i-lucide-chart-column' },
+                ],
+            },
+            { key: 'stats', label: 'Stats', route: '/stats', icon: 'i-lucide-trending-up' },
         ],
     },
 ];
@@ -68,15 +86,25 @@ export const ownerNav: NavGroup[] = [
         heading: 'Overview',
         items: [
             { key: 'dashboard', label: 'Dashboard', route: '/owner', icon: 'i-lucide-chart-column' },
-            { key: 'branches', label: 'Branches', route: '/owner/branches', icon: 'i-lucide-list' },
-            { key: 'summary', label: 'Owner summary', route: '/owner/summary', icon: 'i-lucide-chart-column' },
+            { key: 'branches', label: 'Branches', route: '/owner/branches', icon: 'i-lucide-building-2' },
+            { key: 'summary', label: 'Owner summary', route: '/owner/summary', icon: 'i-lucide-list' },
         ],
     },
     {
         heading: 'Reports',
         items: [
-            { key: 'reports', label: 'Reports', route: '/reports', icon: 'i-lucide-list' },
-            { key: 'stats', label: 'Stats', route: '/stats', icon: 'i-lucide-chart-column' },
+            {
+                key: 'reports-menu',
+                label: 'Reports',
+                route: '/reports',
+                icon: 'i-lucide-list',
+                children: [
+                    { key: 'reports', label: 'Report hub', route: '/reports', icon: 'i-lucide-list' },
+                    { key: 'shift-reports', label: 'Shift reports', route: '/reports/shifts', icon: 'i-lucide-banknote' },
+                    { key: 'daily', label: 'Daily sales', route: '/reports/daily', icon: 'i-lucide-chart-column' },
+                ],
+            },
+            { key: 'stats', label: 'Stats', route: '/stats', icon: 'i-lucide-trending-up' },
         ],
     },
     { heading: 'People', items: [{ key: 'owners', label: 'Owner accounts', route: '/owner/accounts', icon: 'i-lucide-user' }] },

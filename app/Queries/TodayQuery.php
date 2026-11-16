@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Queries;
 
+use App\Enums\CleaningStatus;
 use App\Enums\RoomStatus;
 use App\Enums\StayState;
 use App\Models\Branch;
+use App\Models\CleaningTask;
+use App\Models\Floor;
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\Stay;
@@ -120,8 +123,99 @@ final class TodayQuery
                 'cleaning' => (int) ($byStatus[RoomStatus::Cleaning->value] ?? 0),
             ],
             'due_soon_minutes' => $branch->due_soon_minutes,
+            'timeline' => $this->timeline($branch, $now),
             'now' => $now->toIso8601String(),
         ];
+    }
+
+    /**
+     * The stays timeline of Today (62, DESIGN_SYSTEM §0 StaysTimeline): every active room by floor
+     * with one block (a stay from check-in to expected check-out, a room waiting to be cleaned or
+     * being cleaned, a kiosk hold) or Vacant / Blocked. Names and times only, never an amount.
+     *
+     * @return list<array{label: string, rooms: list<array<string, mixed>>}>
+     */
+    public function timeline(Branch $branch, CarbonImmutable $now): array
+    {
+        $floors = Floor::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->orderBy('number')->get(['id', 'number']);
+        $rooms = Room::query()->withoutGlobalScopes()
+            ->join('room_types', 'room_types.id', '=', 'rooms.room_type_id')
+            ->where('rooms.branch_id', $branch->id)->where('rooms.is_active', true)
+            ->get(['rooms.id', 'rooms.number', 'rooms.floor_id', 'rooms.status', 'rooms.last_checkout_at', 'room_types.name as type_name']);
+        $stays = Stay::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->whereNotNull('active_room_id')
+            ->get(['id', 'active_room_id', 'state', 'guest_name', 'checked_in_at', 'expected_checkout_at', 'hold_expires_at', 'created_at'])
+            ->keyBy('active_room_id');
+        $tasks = CleaningTask::query()->withoutGlobalScopes()->where('branch_id', $branch->id)
+            ->whereIn('status', [CleaningStatus::Queued, CleaningStatus::InProgress])
+            ->get(['room_id', 'queued_at', 'started_at'])->keyBy('room_id');
+        $time = fn (?CarbonImmutable $t): string => $t === null ? '' : $this->clock->toLocal($t)->format('g:i A');
+        $iso = static fn (?CarbonImmutable $t): ?string => $t?->toIso8601String();
+        $grouped = [];
+
+        foreach ($rooms as $room) {
+            $stay = $stays->get($room->id);
+            $task = $tasks->get($room->id);
+            $row = ['id' => $room->id, 'number' => $room->number, 'kind' => 'vacant', 'checkInHref' => route('stays.create', ['room' => $room->id], absolute: false)];
+
+            if ($stay !== null && $stay->state === StayState::CheckedIn) {
+                $end = $stay->expected_checkout_at;
+                $left = $end === null ? null : intdiv($end->getTimestamp() - $now->getTimestamp(), 60);
+                $kind = match (true) {
+                    $left !== null && $left < 0 => 'overdue',
+                    $left !== null && $left <= $branch->due_soon_minutes => 'due_out',
+                    default => 'occupied',
+                };
+                $row = [
+                    'id' => $room->id, 'number' => $room->number, 'kind' => $kind,
+                    'start' => $iso($stay->checked_in_at), 'end' => $kind === 'overdue' ? $now->toIso8601String() : $iso($end),
+                    'label' => BoardQuery::shortName($stay->guest_name), 'person' => BoardQuery::shortName($stay->guest_name),
+                    'sub' => match ($kind) {
+                        'overdue' => (-$left).' min over',
+                        'due_out' => "out in {$left} min",
+                        default => 'out '.$time($end),
+                    },
+                    'href' => route('stays.show', $stay->id, absolute: false),
+                ];
+            } elseif ($stay !== null && $stay->state === StayState::Held) {
+                $left = $stay->hold_expires_at === null ? 0 : max(0, $stay->hold_expires_at->getTimestamp() - $now->getTimestamp());
+                $row = [
+                    'id' => $room->id, 'number' => $room->number, 'kind' => 'held',
+                    'start' => $now->toIso8601String(), 'end' => $now->addHour()->toIso8601String(),
+                    'label' => 'Kiosk hold', 'sub' => sprintf('%d:%02d left', intdiv($left, 60), $left % 60),
+                    'href' => route('stays.confirm', $stay->id, absolute: false),
+                ];
+            } elseif ($room->status === RoomStatus::Cleaning) {
+                $started = $task->started_at ?? $now;
+                $row = [
+                    'id' => $room->id, 'number' => $room->number, 'kind' => 'cleaning',
+                    'start' => $iso($started), 'end' => $now->addMinutes(15)->toIso8601String(),
+                    'label' => 'Cleaning', 'sub' => intdiv($now->getTimestamp() - $started->getTimestamp(), 60).' min so far',
+                ];
+            } elseif ($room->status === RoomStatus::Uncleaned) {
+                $since = $task->queued_at ?? $room->last_checkout_at ?? $now;
+                $row = [
+                    'id' => $room->id, 'number' => $room->number, 'kind' => 'to_clean',
+                    'start' => $iso($since), 'end' => $now->addMinutes(25)->toIso8601String(),
+                    'label' => 'To clean', 'sub' => 'waiting '.intdiv($now->getTimestamp() - $since->getTimestamp(), 60).' min',
+                ];
+            } elseif ($room->status === RoomStatus::Maintenance) {
+                $row = ['id' => $room->id, 'number' => $room->number, 'kind' => 'blocked', 'label' => 'Blocked · maintenance'];
+            }
+
+            $grouped[$room->floor_id][] = $row;
+        }
+
+        $out = [];
+        foreach ($floors as $f) {
+            $list = $grouped[$f->id] ?? [];
+            usort($list, static fn (array $a, array $b): int => strnatcasecmp((string) $a['number'], (string) $b['number']));
+
+            if ($list !== []) {
+                $out[] = ['label' => "Floor {$f->number}", 'rooms' => $list];
+            }
+        }
+
+        return $out;
     }
 
     /**

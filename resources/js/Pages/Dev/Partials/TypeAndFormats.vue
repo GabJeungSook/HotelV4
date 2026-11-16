@@ -4,7 +4,7 @@ import { formatDateRange, formatDateTime, formatDuration, formatStayLength } fro
 import { formatMoney, formatPesoShort } from '@/Composables/useMoney';
 import Block from './Block.vue';
 
-/** Peso sign check (ASSETS §1.1): ₱ must render in IBM Plex Sans 400/500/600, not the fallback. */
+/** Peso sign check (ASSETS §1.1): ₱ must render in Geist 400/500/600 (latin-ext file), not the fallback. */
 const fontChecks = ref<{ face: string; ok: boolean }[]>([]);
 
 /** True when a FontFace unicode-range ("U+0-FF, U+20AD-20C0, …") covers the code point. */
@@ -18,11 +18,11 @@ function covers(range: string, codePoint: number): boolean {
 }
 
 const faces: [string, string, boolean][] = [
-    ['IBM Plex Sans', '400', true],
-    ['IBM Plex Sans', '500', true],
-    ['IBM Plex Sans', '600', true],
-    ['IBM Plex Mono', '500', false],
-    ['Newsreader', '400', false],
+    ['Geist', '400', true],
+    ['Geist', '500', true],
+    ['Geist', '600', true],
+    ['Geist Mono', '500', false],
+    ['Geist Mono', '600', false],
 ];
 
 function check(): void {
@@ -84,12 +84,12 @@ const timeRows: [string, string][] = [
 <template>
     <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,330px),1fr))] gap-4">
         <Block title="Typefaces and the peso sign">
-            <p class="text-sm font-normal">IBM Plex Sans 400 · <span class="tabular">₱1,234.00</span></p>
-            <p class="text-sm font-medium">IBM Plex Sans 500 · <span class="tabular">₱1,234.00</span></p>
-            <p class="num text-sm">IBM Plex Sans 600 · ₱1,234.00 · −₱50.00</p>
-            <p class="mt-2 font-mono text-sm font-medium">IBM Plex Mono 500 · DGS-26-004126</p>
-            <p class="font-mono text-sm font-semibold">IBM Plex Mono 600 · TOTAL 800.00</p>
-            <p class="hm-light mt-2 font-serif text-[32px] leading-[38px] text-highlighted">Three ways to stay</p>
+            <p class="text-sm font-normal">Geist 400 · <span class="tabular">₱1,234.00</span></p>
+            <p class="text-sm font-medium">Geist 500 · <span class="tabular">₱1,234.00</span></p>
+            <p class="num text-sm">Geist 600 · ₱1,234.00 · −₱50.00</p>
+            <p class="mt-2 font-mono text-sm font-medium">Geist Mono 500 · DGS-26-004126</p>
+            <p class="font-mono text-sm font-semibold">Geist Mono 600 · TOTAL 800.00</p>
+            <p class="hm-light mt-2 text-[30px] leading-[1.15] font-semibold tracking-[-0.03em] text-highlighted">Three ways to stay</p>
             <ul class="mt-3 flex flex-col gap-1 text-xs" data-font-checks>
                 <li v-for="check in fontChecks" :key="check.face" class="flex items-center gap-1.5">
                     <UIcon :name="check.ok ? 'i-lucide-check' : 'i-lucide-triangle-alert'" class="size-3.5" :class="check.ok ? 'text-ok' : 'text-bad'" aria-hidden="true" />

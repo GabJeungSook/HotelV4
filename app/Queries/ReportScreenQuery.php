@@ -52,14 +52,29 @@ final class ReportScreenQuery
      * The shifts list (APP_FLOW §8.1): shifts by business date, newest first, with their Z
      * numbers and, for a closed shift, its frozen net sales and short or over.
      *
+     * @param  array{period?: string|null, desk?: int|null, status?: string|null, from?: string|null, to?: string|null, q?: string|null}  $filters
      * @return array<string, mixed>
      */
-    public function shifts(int $branchId, int $page): array
+    public function shifts(int $branchId, int $page, array $filters = []): array
     {
+        $q = trim((string) ($filters['q'] ?? ''));
+        $digits = ltrim((string) preg_replace('/\D/', '', $q), '0');
+
         /** @var LengthAwarePaginator<int, ShiftSession> $paginator */
         $paginator = ShiftSession::query()->withoutGlobalScopes()
             ->with(['members.user', 'closer'])
             ->where('branch_id', $branchId)
+            ->when(($filters['period'] ?? null) !== null, fn ($w) => $w->where('period_name', $filters['period']))
+            ->when(($filters['desk'] ?? null) !== null, fn ($w) => $w->whereHas('members', fn ($m) => $m->where('user_id', $filters['desk'])))
+            ->when(($filters['from'] ?? null) !== null, fn ($w) => $w->whereDate('business_date', '>=', $filters['from']))
+            ->when(($filters['to'] ?? null) !== null, fn ($w) => $w->whereDate('business_date', '<=', $filters['to']))
+            ->when(($filters['status'] ?? null) === 'open', fn ($w) => $w->whereIn('status', [ShiftStatus::Open, ShiftStatus::Closing]))
+            ->when(($filters['status'] ?? null) === 'closed', fn ($w) => $w->where('status', ShiftStatus::Closed)->where('is_force_closed', false))
+            ->when(($filters['status'] ?? null) === 'short', fn ($w) => $w->where('status', ShiftStatus::Closed)->where('variance_amount', '<', 0))
+            ->when(($filters['status'] ?? null) === 'force', fn ($w) => $w->where('is_force_closed', true))
+            ->when($q !== '', fn ($w) => $w->where(fn ($or) => $or
+                ->when($digits !== '', fn ($z) => $z->orWhere('z_no', (int) $digits))
+                ->orWhereHas('members.user', fn ($u) => $u->where('name', 'like', '%'.addcslashes($q, '%_\\').'%'))))
             ->orderByDesc('business_date')->orderByDesc('opened_at')
             ->paginate(25, ['*'], 'page', $page);
 
@@ -73,6 +88,7 @@ final class ReportScreenQuery
                 'opened_at' => $s->opened_at->toIso8601String(),
                 'closed_at' => $s->closed_at?->toIso8601String(),
                 'members' => $s->members->sortBy('joined_at')->map(fn ($m): string => $m->user->name ?? '')->values()->all(),
+                // An open shift is listed with no money at all (37a): its figures appear once it closes.
                 'net_sales' => $s->status === ShiftStatus::Closed ? Totals::int($s->totals ?? [], 'sales.total') : null,
                 'variance' => $s->status === ShiftStatus::Closed ? ($s->variance_amount?->centavos() ?? 0) : null,
                 'is_force_closed' => $s->is_force_closed,

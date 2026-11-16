@@ -36,7 +36,7 @@ The owner asked for a less generic look, using a Dribbble hotel-software shot as
 | Welcome (59) | Photo hero, serif, numbered steps | Hero 520 px: cross-fading photos with drift and a progress bar per photo, location pill, headline revealed **word by word** (blur and rise, 60 ms apart), sub-line and two buttons rise in. A white **facts strip** overlaps the hero bottom (open 24 h, lowest price, how to pay, key deposit). Room cards (photo 190 px, three amenity tags, price "₱350 / 6 hours" and overnight) lift 4 px and zoom the photo on hover. "How a stay works": three icon steps on a line that **draws itself** once. "Find us": lobby photo beside address, hours and payment. No eyebrow labels above headings, no 01/02/03 numbers. |
 | Motion | Fade-up only | Public pages: the sequences above, easing `cubic-bezier(.16,1,.3,1)`, all of it off under `prefers-reduced-motion`. In the app: 150–250 ms hover, focus and sheet transitions only; the live pulse dot is the one looping element. |
 
-Component names above (`PageHeader`, `FilterBar`, `PersonPill`, `ShiftCalendar`, `StaysTimeline`, `Pager`, `StackedBars`) are added to section 5.2 when they are built; until then this table and the mockup are their spec.
+The components named above were built in Phase 11 and are described in section 5.2 ("Mockup v6 components"); all of them are in the gallery at `/dev/components#v6`.
 
 ## 1. Principles
 
@@ -108,7 +108,7 @@ Cards, stat cards, inputs and buttons carry `--hm-shadow-xs` · `0 1px 2px rgba(
 | clay | `--hm-clay` · `#93370d` | `--hm-clay-50` · `#fef6ee` | `--hm-clay-line` · `#f9dbaf` |
 | neutral | `--hm-grey` · `#475467` | `--hm-grey-50` · `#f2f4f7` | `--hm-grey-line` · `#e4e7ec` |
 
-Utilities follow the token name without the prefix: `text-ok`, `bg-ok-50`, `border-warn-line`, and so on. The same text colours fill the room-status shares bar and the chart series (section 5.2, Charts), where they are large shapes, not text.
+Utilities follow the token name without the prefix: `text-ok`, `bg-ok-50`, `border-warn-line`, and so on. Phase 11 added `--hm-faint` (`#98a2b3`, `text-faint`: group labels, breadcrumbs, chart axes), `--hm-thead` (`#f9fafb`, `bg-thead`: the header row of a flush table), `--hm-group-row` (`#fcfcfd`: floor rows), `--hm-tile` / `--hm-on-tile` (the ink icon tile of the page header), `--hm-live` (`#12b76a`, the pulse dot on 1), the seven avatar pairs `--hm-av-1…7` and `--hm-av-1…7-ink`, and the chart series `--hm-bar-1` `#3b93cf`, `--hm-bar-2` `#a9d3ef`, `--hm-bar-3` (= line) and `--hm-bar-now` `#005f9e`. The same text colours fill the room-status shares bar and the chart series (section 5.2, Charts), where they are large shapes, not text.
 
 **Supporting**
 
@@ -149,14 +149,14 @@ Utilities follow the token name without the prefix: `text-ok`, `bg-ok-50`, `bord
 /* 1. The primary scale Nuxt UI needs (a full 50–950 scale), built around #0077c2.
       The logo blue #009ef5 is not part of the scale: it is the logo's colour only. */
 @theme static {
-  --color-homi-50:  #eaf2f8;   /* = --hm-primary-50 */
-  --color-homi-100: #d4e6f3;
-  --color-homi-200: #a9cde8;
-  --color-homi-300: #5aa9e0;   /* = dark-mode --hm-primary */
-  --color-homi-400: #2b8dd0;
-  --color-homi-500: #0f82c9;
+  --color-homi-50:  #eaf4fb;   /* = --hm-primary-50 */
+  --color-homi-100: #cfe6f6;   /* = --hm-primary-line */
+  --color-homi-200: #a9d3ef;   /* = --hm-bar-2 */
+  --color-homi-300: #6fb5e3;   /* = --hm-select-line */
+  --color-homi-400: #3b93cf;   /* = --hm-bar-1 */
+  --color-homi-500: #1784c8;
   --color-homi-600: #0077c2;   /* = --hm-primary */
-  --color-homi-700: #0b5f96;   /* = --hm-primary-ink */
+  --color-homi-700: #005f9e;   /* = --hm-primary-ink */
   --color-homi-800: #0d4b73;
   --color-homi-900: #0f3a57;
   --color-homi-950: #0b2638;
@@ -165,7 +165,7 @@ Utilities follow the token name without the prefix: `text-ok`, `bg-ok-50`, `bord
 }
 
 /* 2. The Homi layer (light). Dark values: section 2.4. */
-:root, .hm-light { --hm-ink: #1d2329; --hm-text: #3d434a; /* …every token of 2.1 */ }
+:root, .hm-light { --hm-ink: #0f1728; --hm-text: #344054; /* …every token of 2.1 */ }
 
 /* 3. Nuxt UI's variables point at the Homi layer. Declared on the same selectors
       as the layer, so a light-only subtree (.hm-light) resolves them again. */
@@ -204,16 +204,16 @@ Utilities follow the token name without the prefix: `text-ok`, `bg-ok-50`, `bord
 |---|---|---|---|
 | `--ui-primary` | `--hm-primary` | `#0077c2` | Solid button, links, focus border, checked switch and checkbox |
 | `--ui-bg` | `--hm-card` | `#ffffff` | `bg-default`: cards, inputs, modals, dropdowns |
-| `--ui-bg-muted` | `--hm-bg` | `#f5f4f1` | `bg-muted`: the page behind the cards |
-| `--ui-bg-elevated` | `--hm-hover` | `#f7f6f3` | `bg-elevated`: hover fills, skeleton blocks |
-| `--ui-border` | `--hm-line` | `#e6e3dd` | Card borders, dividers |
-| `--ui-border-accented` | `--hm-line-strong` | `#d9d6cf` | Rings of white buttons, inputs, selects |
-| `--ui-border-muted` | `--hm-row` | `#f0f0f0` | Table row lines |
-| `--ui-text` | `--hm-text` | `#3d434a` | `text-default` |
-| `--ui-text-muted` | `--hm-muted` | `#6b7178` | `text-muted` |
-| `--ui-text-highlighted` | `--hm-ink` | `#1d2329` | `text-highlighted`: titles and numbers |
-| `--ui-success` / `--ui-warning` / `--ui-error` / `--ui-info` | `--hm-ok` / `--hm-warn` / `--hm-bad` / `--hm-info` | `#2f6b47` / `#8a5a12` / `#9b3328` / `#3b5373` | Toast and alert colours, the red confirm button |
-| `--ui-radius` | `--hm-radius` ÷ 1.5 | `4px` | Nuxt UI v4 derives `rounded-sm/md/lg/xl` as 1×/1.5×/2×/3× this, so `rounded-md` = 6 px on every control, `rounded-lg` = 8 px, `rounded-xl` = 12 px |
+| `--ui-bg-muted` | `--hm-bg` | `#f7f8fa` | `bg-muted`: the page behind the cards |
+| `--ui-bg-elevated` | `--hm-hover` | `#f2f4f7` | `bg-elevated`: hover fills, skeleton blocks |
+| `--ui-border` | `--hm-line` | `#e4e7ec` | Card borders, dividers |
+| `--ui-border-accented` | `--hm-line-strong` | `#d0d5dd` | Rings of white buttons, inputs, selects |
+| `--ui-border-muted` | `--hm-row` | `#eef0f3` | Table row lines |
+| `--ui-text` | `--hm-text` | `#344054` | `text-default` |
+| `--ui-text-muted` | `--hm-muted` | `#667085` | `text-muted` |
+| `--ui-text-highlighted` | `--hm-ink` | `#0f1728` | `text-highlighted`: titles and numbers |
+| `--ui-success` / `--ui-warning` / `--ui-error` / `--ui-info` | `--hm-ok` / `--hm-warn` / `--hm-bad` / `--hm-info` | `#067647` / `#b54708` / `#b42318` / `#3538cd` | Toast and alert colours, the red confirm button |
+| `--ui-radius` | `--hm-radius` ÷ 1.5 | `4px` | Nuxt UI v4 derives `rounded-sm/md/lg/xl` as 1×/1.5×/2×/3× this. Buttons, inputs and selects add `rounded-control` (8 px, v6) in `nuxt-ui.config.ts`; cards are `rounded-card` (12 px); modals `rounded-xl` (12 px) |
 
 `vite.config.ts` (the Nuxt UI Vite plugin; full list of overrides in section 5.1):
 
@@ -275,48 +275,45 @@ The board header counts use the same words and tones, in this order: Vacant `ok`
 | Switch | The user menu in the top bar has "Appearance": **Light · Dark · System**. It is Nuxt UI's colour mode (`useColorMode()` from `@vueuse/core`), which sets the `dark` class on `<html>` and remembers the choice in `localStorage`. Default: Light. |
 | How it works | `.dark` re-declares the `--hm-*` tokens below. The `--ui-*` mapping and every component follow. No page has a `dark:` class. |
 | Light-only surfaces | Sign-in (1), welcome (59), every kiosk screen (27–31b), and everything printed or exported (slips, A4, PDF). Their root element carries the class `hm-light`, which re-declares the light values, so they look the same whatever the user chose. The photo-layer tokens have no dark value. `PhoneLayout` follows the user's choice. |
-| Character | The same warm neutrals turned down: warm near-black page, slightly lighter warm cards, thin warm borders, no shadows. Status meaning is unchanged: labels keep a tinted fill with lighter text. |
+| Character | The v6 cool neutrals turned down: near-black blue-grey page, slightly lighter cards, thin cool borders, the hairline shadow darkened. Status meaning is unchanged: pills keep a tinted fill and edge with lighter text. |
 
 | Token | Light | Dark |
 |---|---|---|
-| `--hm-ink` | `#1d2329` | `#f2f0ec` |
-| `--hm-text` | `#3d434a` | `#d9d6d0` |
-| `--hm-muted` | `#6b7178` | `#a39f98` |
-| `--hm-line` | `#e6e3dd` | `#34322e` |
-| `--hm-line-strong` | `#d9d6cf` | `#45423d` |
-| `--hm-row` | `#f0f0f0` | `#2b2926` |
-| `--hm-bg` | `#f5f4f1` | `#161513` |
-| `--hm-card` | `#ffffff` | `#1e1d1b` |
-| `--hm-sidebar` | `#fbfaf8` | `#1a1917` |
-| `--hm-nav-active` | `#ecebe6` | `#2c2a27` |
-| `--hm-hover` | `#f7f6f3` | `#262422` |
-| `--hm-blocked` | `#f7f6f3` | `#242320` |
-| `--hm-track` / `--hm-step` | `#e9e9ec` / `#eeedea` | `#2c2a27` / `#2c2a27` |
-| `--hm-brand` | `#009ef5` | `#009ef5` (logo only) |
-| `--hm-primary` | `#0077c2` | `#5aa9e0` (solid button text becomes `#121416`, 7.2 : 1) |
-| `--hm-primary-ink` | `#0b5f96` | `#8cc4ec` |
-| `--hm-primary-50` | `#eaf2f8` | `#1a2a36` |
-| `--hm-select` / `--hm-select-line` | `#eef4f9` / `#9fc3de` | `#1a2a36` / `#3f6b8c` |
-| `--hm-focus` | `#e2edf6` | `#1f3445` |
-| `--hm-accent` / `--hm-accent-50` | `#b7791f` / `#fbf1dc` | `#e0a94a` / `#33290f` |
-| `--hm-ok` / `-50` | `#2f6b47` / `#e8f1eb` | `#8cc7a1` / `#1f2e25` |
-| `--hm-warn` / `-50` / `-line` | `#8a5a12` / `#f6eedd` / `#e6d6b2` | `#e0b56a` / `#33291a` / `#5a4a2c` |
-| `--hm-bad` / `-50` / `-line` | `#9b3328` / `#f7e8e5` / `#e6c2bc` | `#eb9a8f` / `#3a2320` / `#5e3a34` |
-| `--hm-info` / `-50` | `#3b5373` / `#ecf0f5` | `#a4b8d4` / `#232a35` |
-| `--hm-held-line` | `#95bcd9` | `#3f6b8c` |
-| `--hm-violet` / `-50` | `#5a4f80` / `#efedf5` | `#b8aee0` / `#2a2735` |
-| `--hm-clay` / `-50` | `#7a5236` / `#f3ece5` | `#d6a98a` / `#342a22` |
-| `--hm-grey` / `-50` | `#5f646b` / `#eeeeeb` | `#b0b3b8` / `#2a2a28` |
-| `--hm-control-dash` | `#cfd5df` | `#45423d` |
-| `--hm-disabled` / `-ink` | `#d7dce4` / `#8b93a2` | `#2c2a27` / `#8a867f` |
-| `--hm-void` | `#9aa3b2` | `#6f6b65` |
-| `--hm-empty-icon` | `#b3bac6` | `#57534d` |
-| `--hm-bar-soft` | `#d6e2eb` | `#2f3f4b` |
-| `--hm-promo-line` | `#eccf8f` | `#6b5726` |
-| `--hm-overlay` | `rgba(18,24,34,.5)` | `rgba(0,0,0,.6)` |
-| `--hm-shadow-modal` | `0 14px 34px rgba(29,35,41,.18)` | `0 14px 34px rgba(0,0,0,.45)` |
+| `--hm-ink` | `#0f1728` | `#f5f6f8` |
+| `--hm-text` | `#344054` | `#cdd1d8` |
+| `--hm-muted` | `#667085` | `#959cab` |
+| `--hm-faint` | `#98a2b3` | `#737b8d` |
+| `--hm-line` | `#e4e7ec` | `#262c38` |
+| `--hm-line-strong` | `#d0d5dd` | `#363e4d` |
+| `--hm-row` | `#eef0f3` | `#1f2430` |
+| `--hm-bg` | `#f7f8fa` | `#0c111b` |
+| `--hm-card` / `--hm-sidebar` | `#ffffff` | `#141924` |
+| `--hm-nav-active` / `--hm-hover` | `#f2f4f7` | `#1e2431` / `#1b212d` |
+| `--hm-thead` / `--hm-group-row` | `#f9fafb` / `#fcfcfd` | `#171c27` / `#161b26` |
+| `--hm-tile` / `--hm-on-tile` | `#0f1728` / `#ffffff` | `#f5f6f8` / `#0c111b` |
+| `--hm-brand` | `#009ef5` | `#009ef5` (logo only)` |
+| `--hm-primary` | `#0077c2` | `#5aa9e0` (solid button text becomes `#0c111b`)` |
+| `--hm-primary-ink` | `#005f9e` | `#8cc4ec` |
+| `--hm-primary-50` / `-line` | `#eaf4fb` / `#cfe6f6` | `#10263a` / `#1d4566` |
+| `--hm-select` / `--hm-select-line` | `#eaf4fb` / `#6fb5e3` | `#10263a` / `#2f6390` |
+| `--hm-focus` | `#eaf4fb` | `#143049` |
+| `--hm-ok` / `-50` / `-line` | `#067647` / `#ecfdf3` / `#abefc6` | `#6ad39b` / `#0f2a1e` / `#1c4a34` |
+| `--hm-warn` / `-50` / `-line` | `#b54708` / `#fffaeb` / `#fedf89` | `#f5b54a` / `#2c2110` / `#574117` |
+| `--hm-bad` / `-50` / `-line` | `#b42318` / `#fef3f2` / `#fecdca` | `#f4837a` / `#321719` / `#5a2a2b` |
+| `--hm-info` / `-50` / `-line` | `#3538cd` / `#eef4ff` / `#c7d7fe` | `#a4b9fc` / `#181f40` / `#2d3a75` |
+| `--hm-violet` / `-50` / `-line` | `#5925dc` / `#f4f3ff` / `#d9d6fe` | `#bcb2fd` / `#211c3c` / `#3d3370` |
+| `--hm-clay` / `-50` / `-line` | `#93370d` / `#fef6ee` / `#f9dbaf` | `#f2ac78` / `#2c1c12` / `#573821` |
+| `--hm-grey` / `-50` / `-line` | `#475467` / `#f2f4f7` / `#e4e7ec` | `#aeb4c0` / `#1e2431` / `#2c3340` |
+| `--hm-av-1…7` (fill / ink)` | `soft tints, e.g. `#dbeafe` / `#1e40af` | `deep tints, e.g. `#1c2c4f` / `#a8c4fb` |
+| `--hm-bar-1` / `-2` / `-3` / `-now` | `#3b93cf` / `#a9d3ef` / `#e4e7ec` / `#005f9e` | `#3f8fc8` / `#24496a` / `#2c3340` / `#8cc4ec` |
+| `--hm-disabled` / `-ink` | `#e4e7ec` / `#98a2b3` | `#222834` / `#737b8d` |
+| `--hm-overlay` | `rgba(15,23,40,.5)` | `rgba(0,0,0,.6)` |
+| `--hm-shadow-xs` | `0 1px 2px rgba(16,24,40,.05)` | `0 1px 2px rgba(0,0,0,.3)` |
+| `--hm-shadow-modal` | `0 14px 34px rgba(15,23,40,.18)` | `0 14px 34px rgba(0,0,0,.5)` |
 
-In dark mode the solid buttons whose fill becomes light — primary, the red confirm button and the green "Room is ready" button — use dark text `#121416` (7.2 : 1, 8.4 : 1 and 9.5 : 1).
+The dark values were derived from the v6 light layer in Phase 11: a cool near-black page and slightly lighter cards (the blue-grey of the v6 neutrals, not the old warm greys), thin cool borders, and each status hue lifted so its text reads on its tinted fill (every pair is above 4.5 : 1). `resources/css/app.css` holds the full list.
+
+In dark mode the solid buttons whose fill becomes light — primary, the red confirm button and the green "Room is ready" button — use dark text `#0c111b` (`--hm-on-primary`).
 
 ## 3. Typography
 
@@ -671,6 +668,23 @@ By default it renders nothing in the page: it teleports its slot into the top ba
 | `canSwitch` | Front desk with other members on the open shift → shows "Switch user" (opens `PinSwitch`) |
 
 `UAvatar` initials + the short name ("Jessa Mae D.") as the trigger of a `UDropdownMenu`: role label (not clickable) · "Switch user" (front desk) · Appearance: Light / Dark / System (`i-lucide-sun`, `i-lucide-moon`, `i-lucide-monitor`). Sign out stays in the sidebar footer, as in the mockup.
+
+#### Mockup v6 components (Phase 11)
+
+| Component | Props and slots | Look |
+|---|---|---|
+| `PageHeader` | default slot: the page's actions; `#status`: a status pill after the title; `sub`: the sub-line; `title`: draws an in-page title row instead (wizard steps) | The shell (`AppShell`) draws the header itself under the top bar: 44 px ink tile (`bg-tile`) with the nav icon in white, `<h1>` 21 px/600 −0.018em, one 12.5 px `muted` sub-line (the page's `sub`, else the layout's `subtitle`, else the nav item's subtitle, else the branch), actions on the right. `PageHeader` teleports into it. |
+| `FilterBar` | `v-model:view` + `views` (List / Calendar), `v-model:search` (debounced 300 ms), `searchPlaceholder`, `searchable`, `loading`; default slot for the chips | The row above a list card: segmented switch, chips, a spacer, a 220 px search box (32 px) at the right end |
+| `FilterSelect` | `v-model`, `items`, `label`, `icon` | A `USelect` styled as a 32 px chip: 1 px `line` border, 12.5 px/500, quiet chevron |
+| `DateRangeChip` | `from`, `to`, `placeholder`; emits `change` | Calendar icon, "5–12 Nov 2026", chevron; a popover with two native date fields, Clear and Apply |
+| `PersonPill` | `name`, `extra` ("+1") | 22 px initials avatar in one of seven soft colours picked from the name (stable), inside a white 28 px pill with a 1 px border. Every table that lists people uses it. `PersonAvatar` (`name`, `size`, `ring`) and `PersonStack` (`names`) are its parts. In print the pill is the plain name. |
+| `Pager` | `page`, `perPage`, `total`; emits `update:page` | Previous (outline, sm) · page numbers with "…" (current in `primary-50`/`primary-ink`) · Next, on a 1 px line at the bottom of the table card; hidden on one page |
+| `StackedBars` (Charts) | `labels`, `series` (`{ name, values, color? }`), `current`, `max`, `money`, `unit`, `titles`, `height` (190), `loading`, `emptyText`, `caption`, `legend` | One column per day, series stacked bottom-up 2 px apart in `bar-1`, `bar-2`, `bar-3`, the current day's main segment in `bar-now` and its label in ink; five grid lines, scale on the left in `faint`; tooltip on hover/focus; a hidden table carries the values |
+| `ShiftCalendar` | `days` (`{ date, weekday, day, today }`), `bands` (`{ label, rows: Block[][] }`), `emptyText` | Days across (today in a `primary` chip), a dashed-rule label per shift period, blocks spanning a person's consecutive days (`ok` while open with the static `live` dot, `primary` when closed, `bad` force-closed), dashed white block for days not opened yet. Built by `App\Queries\ShiftCalendarQuery`; used on 61 and the Calendar tab of 37a. |
+| `StaysTimeline` | `floors` (`{ label, rooms }`), `now`, `hours` (8), `before` (2) | Rooms down, hours across from now −2 h, a 2 px `primary` now-line with the time; a block per room from check-in to expected check-out (`primary` occupied, `warn` due out, `bad` overdue, `clay` to clean, `violet` cleaning, dashed `held-line` kiosk hold), "Vacant · Check in" or "Blocked". Names and times only. Built by `TodayQuery::timeline()`. |
+| `SalesOverview` | `overview`, `title`, `showRange`; `#control` slot | Big net-sales figure, Rooms and Extras side by side, one 6 px bar per payment method with its share (61 Sales overview, 60 How guests paid). Managers only. |
+
+`StatusLabel` is now a pill (22 px, radius 99, 11.5 px/500, 1 px border in the tone's `-line`). `StepBar` is one bordered strip. `StatCard` takes `change` (shown on the right of the sub-line in `ok`/`bad`) and draws a trend arrow beside the value; `StatCards` lays out 3, 4 or 5 columns by count. `SidebarNav` has the branch card, folding parents (`NavItem.children`), Notifications, Help (a dialog with the keys that work everywhere) and the user card whose menu holds Switch user, Appearance and Sign out; `TopBar` has breadcrumbs, the room search (front desk; Ctrl K) and the bell. The shared `branchCard` prop feeds the branch card.
 
 #### StatCard / StatCards
 

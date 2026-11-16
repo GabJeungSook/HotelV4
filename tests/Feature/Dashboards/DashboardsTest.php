@@ -8,6 +8,7 @@ use App\Enums\PaymentMethod;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\Branch;
 use App\Models\User;
+use App\Queries\ShiftCalendarQuery;
 use App\Queries\StayQuery;
 use App\Services\Dashboard\Period;
 use App\Services\DashboardService;
@@ -157,6 +158,11 @@ it('keeps each dashboard card within three queries', function (): void {
         'payments' => fn () => dash()->paymentsByMethod($periods, ['cash']),
         'open shift' => fn () => dash()->openShift($branch, $admin),
         'housekeeping' => fn () => dash()->housekeeping($branch, $periods),
+        'occupancy nights' => fn () => dash()->occupancyNights($branch),
+        'sales by branch' => fn () => dash()->salesByBranch([$branch]),
+        'sales overview' => fn () => dash()->salesOverview($periods, ['cash', 'gcash']),
+        'recent check-ins' => fn () => dash()->recentCheckins($branch),
+        'shift calendar' => fn () => app(ShiftCalendarQuery::class)->week($branch),
     ];
 
     foreach ($cards as $name => $card) {
@@ -200,7 +206,7 @@ it('shows a front desk payment on the branch and owner dashboards after the next
     $gcash = fn (User $u, string $url) => collect($this->actingAs($u)->get($url, [
         'X-Inertia' => 'true', 'X-Inertia-Version' => app(HandleInertiaRequests::class)->version(request()) ?? '',
         'X-Inertia-Partial-Component' => $url === '/owner' ? 'Dashboard/Owner' : 'Dashboard/Branch',
-        'X-Inertia-Partial-Data' => $url === '/owner' ? 'charts' : 'shift',
+        'X-Inertia-Partial-Data' => $url === '/owner' ? 'charts' : 'overview',
     ])->json('props'));
 
     $before = $gcash($owner, '/owner')['charts']['methods'];
@@ -214,5 +220,5 @@ it('shows a front desk payment on the branch and owner dashboards after the next
 
     // The 30 s partial reload of the same page now carries it.
     expect(collect($gcash($owner, '/owner')['charts']['methods'])->firstWhere('method', 'gcash')['amount'])->toBe($due->centavos());
-    expect($gcash($admin, '/dashboard')['shift']['shift']['members'][0]['collected'])->toBeGreaterThanOrEqual($due->centavos());
+    expect(collect($gcash($admin, '/dashboard')['overview']['methods'])->firstWhere('method', 'gcash')['amount'])->toBe($due->centavos());
 });

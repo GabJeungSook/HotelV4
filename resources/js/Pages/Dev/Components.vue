@@ -13,6 +13,7 @@ import BuildingBlocks from './Partials/BuildingBlocks.vue';
 import Dashboards from './Partials/Dashboards.vue';
 import NuxtUi from './Partials/NuxtUi.vue';
 import TypeAndFormats from './Partials/TypeAndFormats.vue';
+import V6Components from './Partials/V6Components.vue';
 
 /** Component gallery at /dev/components (local only, ROADMAP phase 1). */
 const props = defineProps<{ layout: string; layouts: string[] }>();
@@ -41,6 +42,7 @@ const shell = computed(
 );
 
 const sections = [
+    { id: 'v6', label: 'Mockup v6 components' },
     { id: 'blocks', label: 'Building blocks' },
     { id: 'nuxt', label: 'Nuxt UI' },
     { id: 'dash', label: 'Dashboards 60–63' },
@@ -71,6 +73,10 @@ const sections = [
             <nav aria-label="Gallery sections" class="flex flex-wrap gap-4 text-sm">
                 <a v-for="s in sections" :key="s.id" :href="`#${s.id}`" class="hm-focus font-medium text-primary">{{ s.label }}</a>
             </nav>
+            <section id="v6" aria-labelledby="v6-h">
+                <h2 id="v6-h" class="mb-3 text-[18px] leading-[26px] font-semibold text-highlighted">Mockup v6 components</h2>
+                <V6Components :state="state" />
+            </section>
             <section id="blocks" aria-labelledby="blocks-h">
                 <h2 id="blocks-h" class="mb-3 text-[18px] leading-[26px] font-semibold text-highlighted">Building blocks</h2>
                 <BuildingBlocks :kiosk="layout === 'kiosk'" :phone="layout === 'phone'" :state="state" />

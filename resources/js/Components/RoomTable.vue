@@ -73,24 +73,24 @@ const groups = computed(() => {
         <div v-else class="relative overflow-x-auto">
             <table class="w-full border-collapse">
                 <thead>
-                    <tr class="bg-sidebar text-left text-xs leading-[18px] text-muted">
-                        <th scope="col" class="py-2.5 ps-3 pe-2 font-medium">Room</th>
+                    <tr class="border-y border-default bg-thead text-left text-xs leading-[18px] text-muted">
+                        <th scope="col" class="py-2.5 ps-5 pe-2 font-medium">Room</th>
                         <th scope="col" class="px-2 py-2.5 font-medium">Type</th>
                         <th scope="col" class="px-2 py-2.5 font-medium">Status</th>
                         <th scope="col" class="px-2 py-2.5 font-medium">Guest</th>
                         <th scope="col" class="px-2 py-2.5 font-medium whitespace-nowrap">Due out</th>
                         <th scope="col" class="px-2 py-2.5 font-medium">Time</th>
                         <th scope="col" class="px-2 py-2.5 text-right font-medium">Balance</th>
-                        <th scope="col" class="py-2.5 ps-2 pe-3"><span class="sr-only">Action</span></th>
+                        <th scope="col" class="py-2.5 ps-2 pe-5"><span class="sr-only">Action</span></th>
                     </tr>
                 </thead>
                 <tbody v-for="group in groups" :key="group.label" class="[&>tr]:border-t [&>tr]:border-(--hm-row-line)">
-                    <tr v-if="floors.length > 1" class="bg-sidebar">
-                        <th scope="rowgroup" colspan="8" class="py-1.5 ps-3 text-left text-xs font-medium text-muted">{{ group.label }} · {{ group.total }} {{ group.total === 1 ? 'room' : 'rooms' }}</th>
+                    <tr v-if="floors.length > 1" class="bg-group-row">
+                        <th scope="rowgroup" colspan="8" class="py-[7px] ps-5 text-left text-[11.5px] font-semibold text-muted">{{ group.label }} · {{ group.total }} {{ group.total === 1 ? 'room' : 'rooms' }}</th>
                     </tr>
                     <RoomRow v-for="room in group.rooms" :key="room.id" :room="room" :now="now" @select="emit('select', $event)" />
                     <tr v-if="group.hidden > 0">
-                        <td colspan="8" class="py-2 ps-3 text-xs text-muted">{{ group.hidden }} more {{ group.hidden === 1 ? 'room' : 'rooms' }} on {{ group.label }}</td>
+                        <td colspan="8" class="py-2 ps-5 text-xs text-muted">{{ group.hidden }} more {{ group.hidden === 1 ? 'room' : 'rooms' }} on {{ group.label }}</td>
                     </tr>
                 </tbody>
             </table>

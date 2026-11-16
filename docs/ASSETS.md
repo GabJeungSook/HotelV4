@@ -13,17 +13,17 @@ The app needs few assets. Apart from the Homi logo and six real photographs on t
 
 ### 1.1 Fonts
 
-Two families from one designer, both under the SIL Open Font License 1.1, self-hosted. The mockup loads them from Google Fonts for review only; the app never calls an outside font server. The woff2 files are copied once from the free `@fontsource/geist-sans` and `@fontsource/geist-mono` npm packages into `resources/fonts/` and committed, so the packages do not stay in `package.json`. `@font-face` rules with `font-display: swap` and a `unicode-range` per subset live in `resources/css/app.css`. Mockup v6 (16 Nov 2026) replaced IBM Plex Sans, IBM Plex Mono and Newsreader: their files are deleted from `resources/fonts/` together with their licence texts. The public pages now use Geist too, set larger and tighter, so the whole product reads as one hand.
+Two families from one designer, both under the SIL Open Font License 1.1, self-hosted. The mockup loads them from Google Fonts for review only; the app never calls an outside font server. The woff2 files are copied once from the free `@fontsource/geist` (Geist) and `@fontsource/geist-mono` npm packages into `resources/fonts/` and committed, so the packages do not stay in `package.json`. Geist comes from `@fontsource/geist`, the Google Fonts build, because the older `@fontsource/geist-sans` (v1.0.1) has no latin-ext subset and no peso sign (checked on 16 Nov 2026 in Phase 11); its files keep the `geist-sans-` names below. `@font-face` rules with `font-display: swap` and a `unicode-range` per subset live in `resources/css/app.css`. Mockup v6 (16 Nov 2026) replaced IBM Plex Sans, IBM Plex Mono and Newsreader: their files are deleted from `resources/fonts/` together with their licence texts. The public pages now use Geist too, set larger and tighter, so the whole product reads as one hand.
 
 | Path in repo | What it is | Status | Fallback until supplied | Source and licence |
 |---|---|---|---|---|
-| `resources/fonts/geist-sans-latin-400-normal.woff2` | Geist Regular — body text, inputs, table cells | Needed (v6) | `system-ui, sans-serif` | `@fontsource/geist-sans` · SIL OFL 1.1 |
-| `resources/fonts/geist-sans-latin-500-normal.woff2` | Geist Medium — buttons, field labels, status labels, table headers, sidebar links | Needed (v6) | as above | as above |
-| `resources/fonts/geist-sans-latin-600-normal.woff2` | Geist SemiBold — page titles, numbers, KPI figures, room numbers, bold text, public headlines | Needed (v6) | as above | as above |
-| `resources/fonts/geist-sans-latin-ext-400-normal.woff2`, `-500-`, `-600-` (three files) | The latin-ext subset of the same three weights. It carries the peso sign ₱ (U+20B1). | Needed (v6) | as above | as above |
-| `resources/fonts/geist-mono-latin-500-normal.woff2` | Geist Mono Medium — slips, printed receipts, stay codes | Needed (v6) | `ui-monospace, monospace` | `@fontsource/geist-mono` · SIL OFL 1.1 |
-| `resources/fonts/geist-mono-latin-600-normal.woff2` | Geist Mono SemiBold — slip header and totals, the stay code on the kiosk hold screen | Needed (v6) | as above | as above |
-| `resources/fonts/OFL-Geist.txt` | Licence text for Geist and Geist Mono | Needed (v6) | — | Copied from the package |
+| `resources/fonts/geist-sans-latin-400-normal.woff2` | Geist Regular — body text, inputs, table cells | Shipped (Phase 11) | `system-ui, sans-serif` | `@fontsource/geist` 5.x · SIL OFL 1.1 |
+| `resources/fonts/geist-sans-latin-500-normal.woff2` | Geist Medium — buttons, field labels, status labels, table headers, sidebar links | Shipped (Phase 11) | as above | as above |
+| `resources/fonts/geist-sans-latin-600-normal.woff2` | Geist SemiBold — page titles, numbers, KPI figures, room numbers, bold text, public headlines | Shipped (Phase 11) | as above | as above |
+| `resources/fonts/geist-sans-latin-ext-400-normal.woff2`, `-500-`, `-600-` (three files) | The latin-ext subset of the same three weights. It carries the peso sign ₱ (U+20B1). | Shipped (Phase 11) | as above | as above |
+| `resources/fonts/geist-mono-latin-500-normal.woff2` | Geist Mono Medium — slips, printed receipts, stay codes | Shipped (Phase 11) | `ui-monospace, monospace` | `@fontsource/geist-mono` 5.x · SIL OFL 1.1 |
+| `resources/fonts/geist-mono-latin-600-normal.woff2` | Geist Mono SemiBold — slip header and totals, the stay code on the kiosk hold screen | Shipped (Phase 11) | as above | as above |
+| `resources/fonts/OFL-Geist.txt` | Licence text for Geist and Geist Mono | Shipped (Phase 11) | — | Copied from both packages |
 
 Notes:
 

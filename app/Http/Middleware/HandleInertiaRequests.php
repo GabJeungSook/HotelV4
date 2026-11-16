@@ -12,6 +12,7 @@ use App\Services\CurrentBranch;
 use App\Services\PinGuard;
 use App\Support\Navigation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Middleware;
 
 /**
@@ -52,12 +53,16 @@ class HandleInertiaRequests extends Middleware
                 'roleLabel' => $user->role->label(),
             ] : null,
             'branch' => fn (): ?array => $this->branch(),
+            // The branch switcher card in the sidebar: "46 rooms · General Santos City" (mockup v6).
+            // Its own key, because some pages send a `branch` prop of their own.
+            'branchCard' => fn (): ?array => $this->branchCard(),
             'shift' => fn (): ?array => $this->shift($user),
             'nav' => fn (): array => $user instanceof User ? Navigation::for($user, app(CurrentBranch::class)->branch()) : [],
             'home' => fn (): ?string => $user instanceof User ? route('home', absolute: false) : null,
             // The branch picker on reports and dashboards (ROADMAP Phase 9): owners only.
             'ownerBranches' => fn (): array => $user instanceof User && $user->role === Role::Owner
-                ? Branch::query()->withoutGlobalScopes()->orderBy('name')->get(['id', 'name'])->map(fn (Branch $b): array => ['id' => $b->id, 'name' => $b->name])->all()
+                ? Branch::query()->withoutGlobalScopes()->withCount(['rooms' => fn ($q) => $q->withoutGlobalScopes()->where('is_active', true)])->orderBy('name')->get(['id', 'name'])
+                    ->map(fn (Branch $b): array => ['id' => $b->id, 'name' => $b->name, 'rooms' => (int) $b->getAttribute('rooms_count')])->all()
                 : [],
             'pinLocked' => fn (): bool => $user instanceof User && app(PinGuard::class)->isLocked(EnsureDeviceKey::of($request)),
         ];
@@ -82,6 +87,18 @@ class HandleInertiaRequests extends Middleware
                 'pos_enabled' => $branch->pos_enabled,
                 'housekeeping_enabled' => $branch->housekeeping_enabled,
             ],
+        ];
+    }
+
+    /** @return array{name: string, rooms: int, place: string}|null */
+    private function branchCard(): ?array
+    {
+        $branch = app(CurrentBranch::class)->branch();
+
+        return $branch === null ? null : [
+            'name' => $branch->name,
+            'rooms' => $branch->rooms()->withoutGlobalScopes()->where('is_active', true)->count(),
+            'place' => trim(Str::afterLast($branch->address, ',')),
         ];
     }
 

@@ -7,6 +7,7 @@ import type { ConfirmReason } from '@/Components/ConfirmDialog.vue';
 import MoneyInput from '@/Components/MoneyInput.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import TotalRow from '@/Components/TotalRow.vue';
+import PersonPill from '@/Components/PersonPill.vue';
 import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { useIdempotencyKey } from '@/Composables/useIdempotencyKey';
@@ -303,7 +304,7 @@ function actions(s: Sale) {
                                 <StatusLabel v-else class="ms-2" :tone="s.mode === 'walk_in' ? 'ok' : 'info'" :label="s.mode === 'walk_in' ? 'Cash' : `Room ${s.room}`" />
                             </td>
                             <td :class="s.voided ? 'text-muted line-through' : ''">{{ s.items }}</td>
-                            <td>{{ s.by ? firstName(s.by) : '' }}</td>
+                            <td><PersonPill v-if="s.by" :name="firstName(s.by)" /></td>
                             <td class="num text-right" :class="s.voided ? 'text-muted line-through' : 'text-highlighted'">{{ formatMoney(s.amount, 'column') }}</td>
                             <td class="text-right">
                                 <UDropdownMenu v-if="!s.voided && !s.room_checked_out" :items="actions(s)" :content="{ align: 'end' }">

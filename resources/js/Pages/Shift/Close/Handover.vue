@@ -6,6 +6,7 @@ import MoneyInput from '@/Components/MoneyInput.vue';
 import MoneyRow from '@/Components/MoneyRow.vue';
 import PinPad from '@/Components/PinPad.vue';
 import PinUnlock from '@/Components/PinUnlock.vue';
+import PersonPill from '@/Components/PersonPill.vue';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
 import { firstName, useShared } from '@/Composables/useShared';
@@ -118,8 +119,8 @@ const flashMessage = computed(() => flash.value.error?.message);
                     <tr v-for="s in visibleStays" :key="s.stay_id">
                         <td class="tabular">{{ s.room }}</td>
                         <td>
-                            {{ s.guest_name }}
-                            <span v-if="s.unpaid > 0" class="block text-xs text-muted">owes {{ formatMoney(s.unpaid) }}</span>
+                            <PersonPill :name="s.guest_name" />
+                            <span v-if="s.unpaid > 0" class="mt-1 block text-xs text-muted">owes {{ formatMoney(s.unpaid) }}</span>
                         </td>
                         <td class="text-right" :class="s.late ? 'text-bad' : ''">{{ formatDateTime(s.expected_checkout_at, 'dayTime') }}{{ s.late ? ', late' : '' }}</td>
                     </tr>

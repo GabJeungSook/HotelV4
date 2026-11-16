@@ -222,11 +222,11 @@ it('builds the navigation on the server from the role and the pages that exist',
 
     expect($nav)->toBe([
         ['heading' => 'Front desk', 'items' => [
-            ['key' => 'today', 'label' => 'Today', 'route' => '/today', 'icon' => 'i-lucide-clock', 'subtitle' => null],
+            ['key' => 'today', 'label' => 'Today', 'route' => '/today', 'icon' => 'i-lucide-clock', 'subtitle' => 'What needs doing in the next half hour'],
             ['key' => 'board', 'label' => 'Room board', 'route' => '/board', 'icon' => 'i-lucide-bed', 'subtitle' => null],
-            ['key' => 'reservations', 'label' => 'Reservations', 'route' => '/reservations', 'icon' => 'i-lucide-list', 'subtitle' => null],
-            ['key' => 'pos', 'label' => 'POS', 'route' => '/pos', 'icon' => 'i-lucide-shopping-cart', 'subtitle' => null],
-            ['key' => 'stock', 'label' => 'Stock', 'route' => '/stock', 'icon' => 'i-lucide-package', 'subtitle' => null],
+            ['key' => 'reservations', 'label' => 'Reservations', 'route' => '/reservations', 'icon' => 'i-lucide-calendar', 'subtitle' => 'Bookings and their arrival times'],
+            ['key' => 'pos', 'label' => 'POS', 'route' => '/pos', 'icon' => 'i-lucide-shopping-cart', 'subtitle' => 'Sell to a room or for cash'],
+            ['key' => 'stock', 'label' => 'Stock', 'route' => '/stock', 'icon' => 'i-lucide-package', 'subtitle' => 'Counts, deliveries and adjustments'],
         ]],
         ['heading' => 'Shift', 'items' => [
             ['key' => 'shift', 'label' => 'Shift cash', 'route' => '/shift', 'icon' => 'i-lucide-banknote', 'subtitle' => null],
@@ -235,11 +235,14 @@ it('builds the navigation on the server from the role and the pages that exist',
 
     $adminNav = $this->actingAs(Hotel::user('ramil.ortega'))->get('/dashboard')->viewData('page')['props']['nav'];
     expect(collect($adminNav)->pluck('items')->flatten(1)->pluck('key')->all())
-        ->toBe(['dashboard', 'attention', 'rooms', 'rates', 'products', 'users', 'settings', 'reports', 'stats']);
+        ->toBe(['dashboard', 'attention', 'rooms', 'rates', 'products', 'users', 'settings', 'reports-menu', 'stats']);
+    // Reports fold under one parent in the sidebar (mockup v6): the hub, shift reports and daily sales for an admin.
+    $reports = collect($adminNav)->pluck('items')->flatten(1)->firstWhere('key', 'reports-menu');
+    expect(collect($reports['children'])->pluck('key')->all())->toBe(['reports', 'shift-reports', 'daily']);
 
     // An owner gets a branch's own pages only after opening it (DESIGN_SYSTEM §6.1).
     $ownerNav = $this->actingAs(Hotel::user('ramon.alvarez'))->get('/owner')->viewData('page')['props']['nav'];
-    expect(collect($ownerNav)->pluck('items')->flatten(1)->pluck('key')->all())->toBe(['owner', 'branches', 'summary', 'reports', 'stats', 'owners']);
+    expect(collect($ownerNav)->pluck('items')->flatten(1)->pluck('key')->all())->toBe(['owner', 'branches', 'summary', 'reports-menu', 'stats', 'owners']);
 });
 
 it('shares the open shift without any money', function (): void {

@@ -19,7 +19,7 @@ defineEmits<{ start: [] }>();
     <PhotoHero :photos="[photo]" scrim="kiosk" class="flex min-h-dvh w-full cursor-pointer flex-col" role="button" tabindex="0" aria-label="Tap to start" @click="$emit('start')" @keydown.enter="$emit('start')">
         <div class="flex min-h-dvh flex-col p-16 text-on-primary">
             <HomiLogo variant="white" :width="300" :height="91" class="hm-up" />
-            <h1 class="hm-up mt-16 font-serif text-[80px] leading-[84px] font-normal [animation-delay:0.12s]">
+            <h1 class="hm-up mt-16 text-[80px] leading-[84px] font-semibold tracking-[-0.035em] [animation-delay:0.12s]">
                 Welcome to<br />
                 {{ hotel }}
             </h1>

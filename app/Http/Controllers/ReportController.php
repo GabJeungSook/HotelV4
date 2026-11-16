@@ -20,6 +20,7 @@ use App\Models\ShiftSession;
 use App\Models\User;
 use App\Queries\ReportQuery;
 use App\Queries\ReportScreenQuery;
+use App\Queries\ShiftCalendarQuery;
 use App\Services\CurrentBranch;
 use App\Services\ReportService;
 use App\Services\ZReportExport;
@@ -67,11 +68,33 @@ final class ReportController extends Controller
     }
 
     /** The shifts list, newest business date first (APP_FLOW §8.1); each row opens 37, 37b or 37c. */
-    public function shifts(ReportRequest $request): Response
+    /**
+     * Shift reports (37a): the list with filters (shift, front desk, status, dates), search (a Z
+     * number or a name) and pages, or with `view=calendar` the same shifts as week blocks.
+     */
+    public function shifts(ReportRequest $request, ShiftCalendarQuery $calendar): Response
     {
         $branch = $this->branch($request);
+        $ymd = fn (string $key): ?string => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $request->query($key)) === 1 ? (string) $request->query($key) : null;
+        $filters = [
+            'period' => $request->filled('period') ? (string) $request->query('period') : null,
+            'desk' => $request->filled('desk') ? $request->integer('desk') : null,
+            'status' => in_array($request->query('status'), ['open', 'closed', 'short', 'force'], true) ? (string) $request->query('status') : null,
+            'from' => $ymd('from'),
+            'to' => $ymd('to'),
+            'q' => $request->filled('q') ? mb_substr((string) $request->query('q'), 0, 60) : null,
+        ];
+        $view = $request->query('view') === 'calendar' ? 'calendar' : 'list';
+        $week = $calendar->week($branch->id, $ymd('week'), $filters['desk'], $filters['period']);
 
-        return Inertia::render('Reports/Shifts', ['list' => $this->screens->shifts($branch->id, max(1, $request->integer('page', 1)))]);
+        return Inertia::render('Reports/Shifts', [
+            'view' => $view,
+            'filters' => [...$filters, 'week' => $ymd('week')],
+            'branch' => ['id' => $branch->id, 'name' => $branch->name],
+            'options' => ['desks' => $week['desks'], 'periods' => $week['periods']],
+            'list' => $view === 'list' ? $this->screens->shifts($branch->id, max(1, $request->integer('page', 1)), $filters) : null,
+            'calendar' => $view === 'calendar' ? $week : null,
+        ]);
     }
 
     /** "Z-report" in the menu: the Z paper of the last closed shift, or the list when none. */

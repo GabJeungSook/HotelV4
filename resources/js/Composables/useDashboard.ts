@@ -29,11 +29,14 @@ export function useDashboard(groups: string[], seconds: number, at: Ref<string |
     return { refresh, failed, inFlight, updatedText, go };
 }
 
-/** "▲ 8% vs yesterday by this time"; nothing without earlier data (TRD §4.11: never "+100%"). */
-export function changeCard(change: number | null | undefined, comparedWith: string): { sub?: string; trend?: 'up' | 'down' } {
+/**
+ * "vs yesterday by this time" with "+8%" on the right and the trend arrow (mockup v6 `.stat`);
+ * nothing without earlier data (TRD §4.11: never "+100%"). `sub` overrides the comparison line.
+ */
+export function changeCard(change: number | null | undefined, comparedWith: string, sub?: string): { sub?: string; change?: string; trend?: 'up' | 'down' } {
     if (change === null || change === undefined) {
-        return { sub: 'No earlier figure to compare' };
+        return { sub: sub ?? 'No earlier figure to compare' };
     }
 
-    return { sub: `${Math.abs(change)}% ${comparedWith}`, trend: change >= 0 ? 'up' : 'down' };
+    return { sub: sub ?? comparedWith, change: `${change >= 0 ? '+' : '−'}${Math.abs(change)}%`, trend: change >= 0 ? 'up' : 'down' };
 }
