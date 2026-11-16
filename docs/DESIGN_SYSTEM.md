@@ -2,29 +2,55 @@
 
 | | |
 |---|---|
-| Version | 1.2 · 11 November 2026 |
-| Status | Approved with mockup v4 (calm and professional look, real photographs, motion on the front-door pages). Structure from v3 is unchanged: Nuxt UI, layouts, dashboards, Z paper, component list. |
+| Version | 2.0 · 16 November 2026 |
+| Status | Approved with mockup **v6** (operations look after the owner's Dribbble reference: labelled sidebar with branch switcher, page header with icon tile, filter row, people in tables, timelines; Geist; redesigned sign-in and welcome). Section 0 lists what v6 changed; where an older section still says otherwise, section 0 and the mockup win. Structure from v3 is unchanged: Nuxt UI, layouts, dashboards, Z paper. |
 | Component library | **Nuxt UI v4** on Tailwind CSS 4, themed once with the Homi tokens. Our own components only for what Nuxt UI does not have. |
 | Theme | Light by default; dark through the Nuxt UI colour mode (section 2.4). Sign-in, welcome, kiosk and print are light only. |
-| Source of truth | The `<style>` block of the [mockup](mockup/hotel-mockup.html) — the block that starts `/* ---------- v4: calm and professional` overrides the earlier blocks wherever it sets a value — plus screens 1, 4, 27, 59, 60, 61 and the "Building blocks" section. If this file and the mockup disagree on a look, stop and ask. Technical rules: [TRD](TRD.md). |
+| Source of truth | The `<style>` block of the [mockup](mockup/hotel-mockup.html) — the blocks that start `/* ---------- v6: operations look` and `/* ---------- v6 public pages` override every earlier block wherever they set a value — plus screens 1, 4, 37a, 59, 60, 61, 62 and the "Building blocks" section. If this file and the mockup disagree on a look, stop and ask. Technical rules: [TRD](TRD.md). |
 | Where the tokens live in code | `resources/css/app.css` (the `--hm-*` layer, the `--ui-*` mapping, `@theme` blocks, font faces, keyframes) and `vite.config.ts` (Nuxt UI colours and component overrides) |
 | Related | [ASSETS](ASSETS.md) · [SYSTEM_DESIGN](SYSTEM_DESIGN.md) · [APP_FLOW](APP_FLOW.md) · [TRD](TRD.md) |
 
-Homi is used by front desk staff for a whole 12-hour shift, by managers who want one calm page of numbers, by guests for one minute on a kiosk, and by housekeepers with one hand on a phone. The look is professional, clean and easy on the eyes: warm neutral greys, white cards with a thin border, one blue for the one main action, colour kept for status, and real photographs on the three pages people see first (sign-in, welcome page, kiosk welcome). Nothing is decorated for its own sake.
+Homi is used by front desk staff for a whole 12-hour shift, by managers who want one calm page of numbers, by guests for one minute on a kiosk, and by housekeepers with one hand on a phone. The look is professional, clean and easy on the eyes: cool neutral greys around the Homi blue, white cards with a thin border and a hairline shadow, one blue for the one main action, colour kept for status, people shown with initials avatars, and real photographs on the three pages people see first (sign-in, welcome page, kiosk welcome). Nothing is decorated for its own sake.
+
+## 0. What mockup v6 changed (16 Nov 2026) — read first
+
+The owner asked for a less generic look, using a Dribbble hotel-software shot as the reference for layout (not for colours or content), and a more professional sign-in and welcome page with animation. The structure, flows, rules and screen numbers are unchanged. The design was checked against the impeccable design skill (`.claude/skills/impeccable`): its craft floor and its list of overused AI-default fonts (IBM Plex and Newsreader are on it).
+
+| Area | Before (v4/v5) | Now (v6) |
+|---|---|---|
+| Font | IBM Plex Sans, IBM Plex Mono, Newsreader for public headings | **Geist** for everything (400, 500, 600) with tabular figures; **Geist Mono** for slips and stay codes only. Public headlines are Geist 600 with tight tracking (−0.035 to −0.04em). No serif anywhere. ([ASSETS §1.1](ASSETS.md#11-fonts)) |
+| Neutrals | Warm greys (`#f5f4f1` page, `#e6e3dd` lines) | Cool greys that sit with the blue: page `#f7f8fa`, line `#e4e7ec`, strong line `#d0d5dd`, row line `#eef0f3`, ink `#0f1728`, text `#344054`, muted `#667085`, faint `#98a2b3`, hover `#f2f4f7` (section 2.1) |
+| Cards | Flat, no shadow, 10 px radius | White, 1 px `line`, **12 px radius**, hairline shadow `0 1px 2px rgba(16,24,40,.05)` (`--hm-shadow-xs`). Still no gradients, no glass. |
+| Sidebar | 156–248 px, warm fill, short labels | `SidebarNav` 232 px, white. Logo + collapse button; **branch switcher card** (initials tile, branch name, "46 rooms · GenSan", up-down chevron; owner sees "All branches"); uppercase group labels (11 px, `faint`); links 13 px/500 with 17 px icons; the active link has a `hover` fill and a 1 px `line` border; a parent with children (Reports) folds open with an indented guide line; at the bottom Notifications (red count) and Help, then the **user card** (avatar, name, role, menu). |
+| Top bar | Page title on the left | `TopBar` 56 px: **breadcrumbs** (home icon / group / parent / page, the last one in `primary`), search box with "Ctrl K", the shift label and Close shift (front desk), a bell button. |
+| Page header | None (title in the top bar) | `PageHeader` under the top bar: a 44 px **ink icon tile** with the nav icon in white, the page title (21 px/600, may carry a status label), one quiet sub-line (period, refresh, or branch), and the page's actions on the right. Every desktop page has one. |
+| Lists | Table straight in a card | Dribbble list pattern: `FilterBar` (segmented List/Calendar where it applies, dropdown chips, a date-range chip, search on the right) above a flush table card; header row on `#f9fafb`; row menu "···"; `Pager` with Previous / numbers / Next. |
+| People | Plain names | `PersonPill`: a 22 px initials avatar in one of seven soft colours (picked from the name, stable) inside a white pill with a 1 px border. Used for guests, front desks and staff in every table, and stacked avatars where several people share a row. |
+| Status label | Square soft label, no border | **Pill** (radius 99, 22 px high, 11.5 px/500) with a 1 px border in a lighter tint of the same hue (`--hm-*-line` tokens). Sentence case, no dot. |
+| Dashboards (60, 61) | Four equal KPIs, small charts | Left column: three `StatCard`s (value, trend arrow, comparison line with the change on the right), a stacked-bar chart with legend and filter chips, then a two-card row (sales overview with channel bars; recent check-ins with people). Right column (384 px): **ShiftCalendar** on 61 (days across, AM/PM down, a block per front desk, green dot for on duty now, dashed block for a shift not opened yet) and Needs attention. Owner (60): sales by branch, branches table with people, attention and how guests paid. |
+| Today (62) | Lists only | **StaysTimeline**: rooms down, hours across (8 hours from 10 AM in the mockup; the app shows now −2 h to now +6 h), a blue now-line with the time, each stay a block from check-in to expected check-out coloured by state (occupied blue, due out amber, overdue red, to clean clay, cleaning violet, kiosk hold dashed blue), vacant rows offer "Check in". Leaving soon and Arriving on the right. Still counts and names only, never money. |
+| Shift reports | — | New list screen **37a** (`/reports/shifts`): the list pattern above plus a Calendar tab that shows the same shifts as `ShiftCalendar` blocks. |
+| StepBar | Separate pills | One bordered strip; the current step has a `primary-50` fill, `primary-ink` text and a 2 px `primary` underline; done steps show `ok` text. |
+| Phone header (32–35) | Solid blue or violet bar | White header with a 1 px line; "Cleaning" adds a 3 px violet top edge. No thick coloured left borders anywhere (craft floor). |
+| Sign-in (1) | Photo left, serif greeting | Framed photo panel (16 px radius, 12 px inset) that cross-fades three photos with a slow drift; top: white logo and a live "AM shift open since 7:58 AM" pill with a soft pulse; bottom: "Good morning." (Geist 46/600) and a white figures card. Right: logo, "Sign in to Homi", fields with icons (44 px), a 46 px blue button, help line, and a footer with the connection state. Load sequence: greeting, card and each field rise 14 px and fade in, 80 ms apart, once. |
+| Welcome (59) | Photo hero, serif, numbered steps | Hero 520 px: cross-fading photos with drift and a progress bar per photo, location pill, headline revealed **word by word** (blur and rise, 60 ms apart), sub-line and two buttons rise in. A white **facts strip** overlaps the hero bottom (open 24 h, lowest price, how to pay, key deposit). Room cards (photo 190 px, three amenity tags, price "₱350 / 6 hours" and overnight) lift 4 px and zoom the photo on hover. "How a stay works": three icon steps on a line that **draws itself** once. "Find us": lobby photo beside address, hours and payment. No eyebrow labels above headings, no 01/02/03 numbers. |
+| Motion | Fade-up only | Public pages: the sequences above, easing `cubic-bezier(.16,1,.3,1)`, all of it off under `prefers-reduced-motion`. In the app: 150–250 ms hover, focus and sheet transitions only; the live pulse dot is the one looping element. |
+
+Component names above (`PageHeader`, `FilterBar`, `PersonPill`, `ShiftCalendar`, `StaysTimeline`, `Pager`, `StackedBars`) are added to section 5.2 when they are built; until then this table and the mockup are their spec.
 
 ## 1. Principles
 
-1. **Calm and quiet.** The page is warm grey `#f5f4f1`; everything that holds content is a white card with a 1 px `line` border, a 10 px radius and **no shadow**. Borders, not shadows. There are **no gradients** anywhere in the product (the skeleton shimmer is the one exception) and no glass or blur effects. Colour appears only where it means something: the one primary button, links, focus, a selected choice, and a status. Never a table straight on the grey page, never a card inside a card.
+1. **Calm and quiet.** The page is cool grey `#f7f8fa`; everything that holds content is a white card with a 1 px `line` border, a 12 px radius and only a hairline shadow. Borders do the work, not shadows. There are **no gradients** anywhere in the product (the skeleton shimmer is the one exception) and no glass or blur effects. Colour appears only where it means something: the one primary button, links, focus, a selected choice, and a status. Never a table straight on the grey page, never a card inside a card.
 2. **One main action per screen.** Each screen has exactly one solid primary button ("Check in and print slip", "Save payment", "Close the day"). Every other button is white with a 1 px border, or plain text. A wizard shows its steps in a `StepBar` and one Next button.
-3. **A status is a small soft label.** One word or a short phrase in sentence case ("Overdue", "Closed", "9 min"), darker text on a light tint of the same hue, 4 px radius, no dot, no border. The same status has the same tone on every screen. Colour is never the only signal: the word is always there.
+3. **A status is a small soft pill.** One word or a short phrase in sentence case ("Overdue", "Closed", "9 min"), darker text on a light tint of the same hue with a 1 px border in a mid tint, fully rounded, no dot. The same status has the same tone on every screen. Colour is never the only signal: the word is always there.
 4. **Real photographs only.** The sign-in (1), the welcome page (59) and the kiosk welcome (27) carry real photographs of rooms and a lobby — never drawn illustrations, never AI-generated images, never a CGI render. Every photo sits under a flat dark scrim so white text stays readable. Inside the app there are no photos.
 5. **Every figure states its period.** A card says "Sales today", "Short / over · 7 days", "Rooms occupied now". A change figure names what it compares with ("▲ 8% vs yesterday by this time"). No previous data means no change figure.
-6. **Numbers are the sans font with tabular figures.** Money, counts, percentages, room numbers, timers and KPI figures use IBM Plex Sans at weight 600 (500 on the public pages) with `tabular-nums`, right-aligned in tables. IBM Plex Mono is only for thermal slips, printed receipts and stay codes.
+6. **Numbers are the sans font with tabular figures.** Money, counts, percentages, room numbers, timers and KPI figures use Geist at weight 600 with `tabular-nums`, right-aligned in tables. Geist Mono is only for thermal slips, printed receipts and stay codes.
 7. **Short and over are never netted.** Wherever both can occur over a period they are summed and shown separately.
 8. **Show the sum, not just the total.** Bills, cash results and the Z-report show the lines that add up to each total, so staff can check the arithmetic by eye.
 9. **Destructive or sensitive actions need a reason, and often a PIN.** Void, cancel, release and force close open a `ConfirmDialog` that says what happens to the room and the money, ask for a reason from the reason list (with a note or a manager when the reason requires it), and show a lock when a supervisor PIN follows.
 10. **Never leave the user guessing.** Every list has an empty state with one way forward, every first load has a skeleton shaped like the content, every disabled option says why, and every error says what happened and what to do next.
-11. **Motion belongs to the front door.** Slow photo drift, a hero cross-fade and one fade-up on load are used only on the sign-in, the welcome page and the kiosk welcome, and all of it stops under reduced motion. Inside the app, motion is limited to hover, focus, the sheet slide and the skeleton.
+11. **Motion belongs to the front door.** Photo cross-fade and drift, the word-by-word headline, the staggered rise of the sign-in form and the self-drawing steps line are used only on the sign-in, the welcome page and the kiosk welcome, and all of it stops under reduced motion. Inside the app, motion is limited to hover, focus, the sheet slide and the skeleton.
 
 ## 2. Colour tokens
 
@@ -32,28 +58,28 @@ Pages and components never contain a hex value ([TRD §12](TRD.md#12-coding-conv
 
 ### 2.1 The Homi token layer
 
-Light values are exactly the mockup's v4 block (and the earlier blocks where v4 sets nothing). "Utility" is the Tailwind class stem a page may use; where Nuxt UI already has a semantic utility for the same value, that one is used.
+Light values are exactly the mockup's v6 block (and the earlier blocks where v4 sets nothing). "Utility" is the Tailwind class stem a page may use; where Nuxt UI already has a semantic utility for the same value, that one is used.
 
 **Surfaces and text**
 
 | Token | Mockup | Light value | Utility | Use |
 |---|---|---|---|---|
-| `--hm-ink` | `--ink` | `#1d2329` | `text-highlighted` | Titles, numbers, bold text, the total-row rule, the active sidebar link |
-| `--hm-text` | `--text` | `#3d434a` | `text-default` | Body text, field labels, sidebar links, guest name on the room board |
-| `--hm-muted` | `--mut` | `#6b7178` | `text-muted` | Helper text, table headers, KPI labels, sub-lines, time column on the room board, step numbers on the welcome page |
-| `--hm-line` | `--line` | `#e6e3dd` | `border-default` | Every card, stat card, room table card and room-type card border; sidebar edge; top bar; dividers |
-| `--hm-line-strong` | `--line2` | `#d9d6cf` | `border-accented` | Inputs, selects, secondary buttons, option tiles and segmented options at rest |
-| `--hm-row` | literal | `#f0f0f0` | `border-muted` | Line between table rows and attention rows |
-| `--hm-bg` | `--bg` | `#f5f4f1` | `bg-muted` | Page background behind the cards; the "How a stay works" band on 59 |
+| `--hm-ink` | `--ink` | `#0f1728` | `text-highlighted` | Titles, numbers, bold text, the total-row rule, the active sidebar link |
+| `--hm-text` | `--text` | `#344054` | `text-default` | Body text, field labels, sidebar links, guest name on the room board |
+| `--hm-muted` | `--mut` | `#667085` | `text-muted` | Helper text, table headers, KPI labels, sub-lines, time column on the room board, step numbers on the welcome page |
+| `--hm-line` | `--line` | `#e4e7ec` | `border-default` | Every card, stat card, room table card and room-type card border; sidebar edge; top bar; dividers |
+| `--hm-line-strong` | `--line2` | `#d0d5dd` | `border-accented` | Inputs, selects, secondary buttons, option tiles and segmented options at rest |
+| `--hm-row` | literal | `#eef0f3` | `border-muted` | Line between table rows and attention rows |
+| `--hm-bg` | `--bg` | `#f7f8fa` | `bg-muted` | Page background behind the cards; the "How a stay works" band on 59 |
 | `--hm-card` | `--card` | `#ffffff` | `bg-default` | Cards, top bar, inputs, modals, slide-overs, the room table, the sign-in panel |
-| `--hm-sidebar` | literal | `#fbfaf8` | `bg-sidebar` | Sidebar background |
-| `--hm-nav-active` | literal | `#ecebe6` | `bg-nav-active` | Active sidebar link fill; avatar fill |
-| `--hm-hover` | — | `#f7f6f3` | `bg-elevated` | Hover fill of white buttons, table rows and sidebar links; skeleton blocks |
+| `--hm-sidebar` | literal | `#ffffff` | `bg-sidebar` | Sidebar background |
+| `--hm-nav-active` | literal | `#f2f4f7` | `bg-nav-active` | Active sidebar link fill; avatar fill |
+| `--hm-hover` | — | `#f2f4f7` | `bg-elevated` | Hover fill of white buttons, table rows and sidebar links; skeleton blocks |
 | `--hm-blocked` | literal | `#f7f6f3` | `bg-blocked` | Spare neutral fill (Blocked rooms are shown as muted text on the board) |
-| `--hm-track` | literal | `#e9e9ec` | `bg-track` | Track of the segmented period switch |
-| `--hm-step` | literal | `#eeedea` | `bg-step` | `StepBar` pill of a step not reached yet |
+| `--hm-track` | literal | `#f2f4f7` | `bg-track` | Track of the segmented period switch |
+| `--hm-step` | literal | `#ffffff` | `bg-step` | `StepBar` pill of a step not reached yet |
 
-There is no card shadow token: cards are flat.
+Cards, stat cards, inputs and buttons carry `--hm-shadow-xs` · `0 1px 2px rgba(16, 24, 40, 0.05)`; nothing else has a shadow except modals, the sign-in figures card and the welcome facts strip.
 
 **Brand and selection**
 
@@ -61,11 +87,11 @@ There is no card shadow token: cards are flat.
 |---|---|---|---|---|
 | `--hm-brand` | `--brand` | `#009ef5` | `brand` | The logo blue. **Logo only.** Never a button fill, a background or text: white on it is 2.9 : 1. |
 | `--hm-primary` | `--pri` | `#0077c2` | `primary` | The one solid button, links, focus border, current step, the active sidebar icon, the peak bar in charts, selected room tile outline |
-| `--hm-primary-ink` | literal | `#0b5f96` | `primary-ink` | Text on `primary-50` and on `select`: the Held label, the branch label in the top bar, the selected option's text |
-| `--hm-primary-50` | `--pri50` | `#eaf2f8` | `primary-50` | Held label fill, filled PIN cell, selected kiosk type card |
-| `--hm-select` | literal | `#eef4f9` | `bg-select` | Fill of a selected option tile or segmented option |
-| `--hm-select-line` | literal | `#9fc3de` | `border-select` | Border of a selected option tile or segmented option |
-| `--hm-focus` | literal | `#e2edf6` | — | The 3 px focus halo around an input |
+| `--hm-primary-ink` | literal | `#005f9e` | `primary-ink` | Text on `primary-50` and on `select`: the Held label, the branch label in the top bar, the selected option's text |
+| `--hm-primary-50` | `--pri50` | `#eaf4fb` | `primary-50` | Held label fill, filled PIN cell, selected kiosk type card |
+| `--hm-select` | literal | `#eaf4fb` | `bg-select` | Fill of a selected option tile or segmented option |
+| `--hm-select-line` | literal | `#6fb5e3` | `border-select` | Border of a selected option tile or segmented option |
+| `--hm-focus` | literal | `#eaf4fb` | — | The 4 px focus halo around an input |
 | `--hm-accent` | `--acc` | `#b7791f` | `accent` | Fourth hue of the shares chart |
 | `--hm-accent-50` | `--acc50` | `#fbf1dc` | `accent-50` | Promo card fill on the kiosk (29) |
 
@@ -73,14 +99,14 @@ There is no card shadow token: cards are flat.
 
 | Tone | Text token · value | Soft fill token · value | Edge token · value |
 |---|---|---|---|
-| ok | `--hm-ok` · `#2f6b47` | `--hm-ok-50` · `#e8f1eb` | — |
-| warn | `--hm-warn` · `#8a5a12` | `--hm-warn-50` · `#f6eedd` | `--hm-warn-line` · `#e6d6b2` |
-| bad | `--hm-bad` · `#9b3328` | `--hm-bad-50` · `#f7e8e5` | `--hm-bad-line` · `#e6c2bc` |
-| info | `--hm-info` · `#3b5373` | `--hm-info-50` · `#ecf0f5` | — |
-| primary | `--hm-primary-ink` · `#0b5f96` | `--hm-primary-50` · `#eaf2f8` | `--hm-held-line` · `#95bcd9` (dashed outline of a held option) |
-| violet | `--hm-violet` · `#5a4f80` | `--hm-violet-50` · `#efedf5` | — |
-| clay | `--hm-clay` · `#7a5236` | `--hm-clay-50` · `#f3ece5` | — |
-| neutral | `--hm-grey` · `#5f646b` | `--hm-grey-50` · `#eeeeeb` | — |
+| ok | `--hm-ok` · `#067647` | `--hm-ok-50` · `#ecfdf3` | `--hm-ok-line` · `#abefc6` |
+| warn | `--hm-warn` · `#b54708` | `--hm-warn-50` · `#fffaeb` | `--hm-warn-line` · `#fedf89` |
+| bad | `--hm-bad` · `#b42318` | `--hm-bad-50` · `#fef3f2` | `--hm-bad-line` · `#fecdca` |
+| info | `--hm-info` · `#3538cd` | `--hm-info-50` · `#eef4ff` | `--hm-info-line` · `#c7d7fe` |
+| primary | `--hm-primary-ink` · `#005f9e` | `--hm-primary-50` · `#eaf4fb` | `--hm-primary-line` · `#cfe6f6`; `--hm-held-line` · `#6fb5e3` (dashed outline of a held option) |
+| violet | `--hm-violet` · `#5925dc` | `--hm-violet-50` · `#f4f3ff` | `--hm-violet-line` · `#d9d6fe` |
+| clay | `--hm-clay` · `#93370d` | `--hm-clay-50` · `#fef6ee` | `--hm-clay-line` · `#f9dbaf` |
+| neutral | `--hm-grey` · `#475467` | `--hm-grey-50` · `#f2f4f7` | `--hm-grey-line` · `#e4e7ec` |
 
 Utilities follow the token name without the prefix: `text-ok`, `bg-ok-50`, `border-warn-line`, and so on. The same text colours fill the room-status shares bar and the chart series (section 5.2, Charts), where they are large shapes, not text.
 
@@ -92,7 +118,7 @@ Utilities follow the token name without the prefix: `text-ok`, `bg-ok-50`, `bord
 | `--hm-disabled` / `--hm-disabled-ink` | `#d7dce4` / `#8b93a2` | Disabled solid button fill and text; disabled input text |
 | `--hm-void` | `#9aa3b2` | Struck-through voided rows |
 | `--hm-empty-icon` | `#b3bac6` | Empty-state icon |
-| `--hm-bar-soft` | `#d6e2eb` | Chart bars that are not the peak |
+| `--hm-bar-soft` | `#a9d3ef` | Chart bars that are not the peak |
 | `--hm-promo-line` | `#eccf8f` | Border of the kiosk promo card |
 | `--hm-slip-line` | `#b9c0cc` | Dashed border of the on-screen slip preview |
 | `--hm-overlay` | `rgba(18, 24, 34, 0.5)` | Dim layer behind modals |
@@ -103,8 +129,8 @@ Utilities follow the token name without the prefix: `text-ok`, `bg-ok-50`, `bord
 
 | Token | Value | Use |
 |---|---|---|
-| `--hm-photo-fallback` | `#5b554d` | Flat warm colour block behind every photo. It shows while a photo loads and whenever one fails, so white text is still readable. |
-| `--hm-scrim` | `rgba(22, 24, 27, 0.40)` | Flat dark layer over the sign-in and welcome photos. Never a gradient. |
+| `--hm-photo-fallback` | `#3a3f45` | Flat warm colour block behind every photo. It shows while a photo loads and whenever one fails, so white text is still readable. |
+| `--hm-scrim` | `rgba(15, 23, 40, 0.42)` (sign-in panel 0.34) | Flat dark layer over the sign-in and welcome photos. Never a gradient. |
 | `--hm-scrim-kiosk` | `rgba(20, 22, 25, 0.52)` | The same layer on the kiosk welcome, stronger because the text sits over the middle of the photo and is read from further away |
 | `--hm-on-photo-soft` | `rgba(255, 255, 255, 0.85)` | Eyebrow lines, figure labels, the free-room line on the kiosk |
 | `--hm-on-photo-body` | `rgba(255, 255, 255, 0.92)` | The one sentence under a headline |
@@ -134,9 +160,8 @@ Utilities follow the token name without the prefix: `text-ok`, `bg-ok-50`, `bord
   --color-homi-800: #0d4b73;
   --color-homi-900: #0f3a57;
   --color-homi-950: #0b2638;
-  --font-sans:  "IBM Plex Sans", system-ui, sans-serif;
-  --font-mono:  "IBM Plex Mono", ui-monospace, monospace;
-  --font-serif: "Newsreader", Georgia, serif;
+  --font-sans:  "Geist", system-ui, sans-serif;
+  --font-mono:  "Geist Mono", ui-monospace, monospace;
 }
 
 /* 2. The Homi layer (light). Dark values: section 2.4. */
@@ -297,15 +322,14 @@ In dark mode the solid buttons whose fill becomes light — primary, the red con
 
 | Family | Token | Stack | Weights shipped | Use |
 |---|---|---|---|---|
-| IBM Plex Sans | `font-sans` | `"IBM Plex Sans", system-ui, sans-serif` | 400, 500, 600 | All interface text and **all numbers** (money, counts, percentages, room numbers, timers, countdowns, PIN digits, Z numbers) with `font-variant-numeric: tabular-nums`; the body text, buttons and figures of the public pages |
-| IBM Plex Mono | `font-mono` | `"IBM Plex Mono", ui-monospace, monospace` | 500, 600 | The whole of every 80 mm slip and its on-screen preview, printed receipts, and stay codes (`DGS-26-004126`) wherever they are shown. Nothing else. |
-| Newsreader | `font-serif` | `"Newsreader", Georgia, serif` | 400 | Display headings on the public and sign-in pages and the kiosk welcome only: the welcome headline, "Good morning." (and its afternoon and evening forms), "Sign in", "Three ways to stay", the 01 / 02 / 03 step numbers, and "Welcome to Hotel Dalisay" on the kiosk. **Never inside the app**: not in the shell, the kiosk step screens, the phone, the Z paper or any print. |
+| Geist | `font-sans` | `"Geist", system-ui, sans-serif` | 400, 500, 600 | All interface text, the public headlines, and **all numbers** (money, counts, percentages, room numbers, timers, countdowns, PIN digits, Z numbers) with `font-variant-numeric: tabular-nums`; the body text, buttons and figures of the public pages |
+| Geist Mono | `font-mono` | `"Geist Mono", ui-monospace, monospace` | 500, 600 | The whole of every 80 mm slip and its on-screen preview, printed receipts, and stay codes (`DGS-26-004126`) wherever they are shown. Nothing else. |
 
-Self-hosted woff2; files and licences in [ASSETS §1.1](ASSETS.md#11-fonts). Bold in running text (`<b>`, `<strong>`) is weight 600, in `ink`. There is no weight 700 or 800 anywhere; titles are 600. Newsreader is used at 400 only and is never bolded or italicised.
+Self-hosted woff2; files and licences in [ASSETS §1.1](ASSETS.md#11-fonts). Bold in running text (`<b>`, `<strong>`) is weight 600, in `ink`. There is no weight 700 or 800 anywhere; titles are 600. There is no serif face.
 
 The helper class `.num` (`font-sans`, 600, `tabular-nums`, letter-spacing −0.01em, `ink`) is applied by `MoneyRow`, `StatCard`, `RoomRow` and `.dtable td.r`; pages do not restyle numbers by hand.
 
-The mockup draws each desktop screen in a 720 px frame, so its text is small (body 12.5 px). The real app targets 1280 px and wider; the sizes below are the ones to build.
+Mockup v6 draws each desktop screen in a 1200 px frame at app size (body 13 px); the table below still lists the v4 frame sizes in its second column, and section 0 gives the v6 sizes for the shell, page header, stat cards and status pills. The real app targets 1280 px and wider; the sizes below are the ones to build.
 
 ### 3.1 Desktop scale (front desk, back office, admin, owner)
 
@@ -347,25 +371,27 @@ The mockup draws each desktop screen in a 720 px frame, so its text is small (bo
 
 ### 3.2 Public scale (sign-in 1, welcome 59)
 
+v6: every heading here is Geist 600 with tight tracking; there are no eyebrow labels above headings and no 01/02/03 numbers (section 0). Rows below that mention them are superseded.
+
 | Style | Mockup frame | App size / line height | Weight | Family · colour | Notes |
 |---|---|---|---|---|---|
 | Eyebrow line ("Hotel Dalisay GenSan · Wednesday, 11 November", "General Santos City · Open 24 hours", "Rooms") | 10 px | 12 px / 16 px | 500 | sans · `on-photo-soft` (on a photo) or `muted` (on white) | Uppercase, letter-spacing 0.12em |
-| Sign-in greeting ("Good morning.") | 42 px / 1.0 | 64 px / 64 px | 400 | **serif** · white | Letter-spacing −0.01em |
+| Sign-in greeting ("Good morning.") | 42 px / 1.0 | 64 px / 64 px | 600 | sans, tracking −0.035em · white | Letter-spacing −0.01em |
 | Sentence under the greeting | 12.5 px | 16 px / 24 px | 400 | sans · `on-photo-body` | One sentence, max width 480 px |
 | Sign-in figure | 20 px / 1.1 | 28 px / 32 px | 500 | sans · white | Tabular |
 | Sign-in figure label | 10.5 px | 13 px / 18 px | 400 | sans · `on-photo-soft` | "rooms free", "in house", "due out soon", "arriving today" |
-| Panel heading "Sign in" | 26 px / 1.1 | 34 px / 38 px | 400 | **serif** · `ink` | |
+| Panel heading "Sign in" | 26 px / 1.1 | 34 px / 38 px | 600 | sans, tracking −0.035em · `ink` | |
 | Panel line ("Use your own account. Never share it.") | 12.5 px | 14 px / 20 px | 400 | sans · `muted` | |
 | Panel fields and button | 12.5 px, 36 px high | 15 px, 44 px high | 400 / 500 | sans | `UInput size="xl"`, `UButton size="xl" block` |
 | "Forgot your password? Ask your branch admin." | 11 px | 13 px / 18 px | 400 | sans · `muted` | Bottom of the panel |
 | Welcome nav links | 12 px | 15 px / 20 px | 400 | sans · white at 90% | |
-| Welcome headline | 40 px / 1.02 | 60 px / 62 px | 400 | **serif** · white | Letter-spacing −0.01em, max width 640 px |
+| Welcome headline | 40 px / 1.02 | 60 px / 62 px | 600 | sans, tracking −0.035em · white | Letter-spacing −0.01em, max width 640 px |
 | Welcome sub-line | 13 px | 17 px / 26 px | 400 | sans · `on-photo-body` | Max width 520 px |
-| Section heading ("Three ways to stay") | 24 px | 32 px / 38 px | 400 | **serif** · `ink` | Under its eyebrow |
+| Section heading ("Three ways to stay") | 24 px | 32 px / 38 px | 600 | sans, tracking −0.035em · `ink` | Under its eyebrow |
 | Room-type card name | 13 px | 17 px / 24 px | 600 | sans · `ink` | |
 | Room-type card line | 11 px | 14 px / 20 px | 400 | sans · `muted` | |
 | Room-type price | 17 px | 22 px / 28 px | 500 | sans · `ink` | Tabular; "6 hours" after it and "Overnight ₱750" on the right in 13 px `muted` |
-| Step number ("01") | 22 px | 28 px / 32 px | 400 | **serif** · `muted` | |
+| Step number ("01") | 22 px | 28 px / 32 px | 600 | sans, tracking −0.035em · `muted` | |
 | Step title / text | 13 px / 11.5 px | 17 px / 24 px · 15 px / 22 px | 600 / 400 | sans · `ink` / `muted` | |
 | Footer | 11 px | 13 px / 18 px | 400 | sans · `muted` | |
 
@@ -403,7 +429,7 @@ The kiosk frame is 340 px wide for a 1080 px screen. Text is sized for reading a
 | Timer (33) | 44 px | 56 px | 600 sans, tabular |
 | Button | 11.5 px | 16 px | 500 |
 
-All phone text is IBM Plex Sans. The desktop app shell also works on a phone-width screen (section 6.1); it keeps the desktop scale with 16 px side padding.
+All phone text is Geist. The desktop app shell also works on a phone-width screen (section 6.1); it keeps the desktop scale with 16 px side padding.
 
 ## 4. Spacing, radius, elevation, motion
 
@@ -705,7 +731,7 @@ Tables are plain `<table>` elements with the `.dtable` style, as in Euphoria ([T
 |---|---|
 | Header | 13 px, weight 500, `muted`, not uppercase, no wrap, 1 px `line` below, transparent background |
 | Rows | 14 px, 1 px `row` line between rows, none after the last; hover `bg-elevated` when the row is a link |
-| Numbers | `td.r`: right-aligned, weight 600, tabular, `ink`. `td.code`: IBM Plex Mono, for a stay code only. Room numbers are sans 600 like any number. |
+| Numbers | `td.r`: right-aligned, weight 600, tabular, `ink`. `td.code`: Geist Mono, for a stay code only. Room numbers are sans 600 like any number. |
 | Footer | Weight 600, 1.5 px `ink` rule above |
 | Group row | `.grp`: weight 600, `ink`, 18 px top padding |
 | First column | No wrap |
@@ -949,7 +975,7 @@ Rendered by `FrontDeskLayout` when the shared `shift` prop says the shift is pas
 | `reprint` | Prints "REPRINT" under the title when the server marks the print as a reprint |
 | `preview` | Renders the on-screen preview with the dashed `--hm-slip-line` border |
 
-One component for the thermal slips (8, 18, 26) and the 80 mm form of the Z-report. IBM Plex Mono only. Labels left, amounts right-aligned in the same line; amounts have no ₱ sign and use an ASCII hyphen for negatives. Always light. Print layout: section 6.10.
+One component for the thermal slips (8, 18, 26) and the 80 mm form of the Z-report. Geist Mono only. Labels left, amounts right-aligned in the same line; amounts have no ₱ sign and use an ASCII hyphen for negatives. Always light. Print layout: section 6.10.
 
 #### ZPaper
 
@@ -1103,11 +1129,12 @@ Used by `FrontDeskLayout`, `BackOfficeLayout`, `AdminLayout` and `OwnerLayout`; 
 
 | Part | Spec |
 |---|---|
-| Sidebar | `SidebarNav`: 248 px, `sidebar` fill, 1 px `line` right edge. Blue logo, groups with uppercase headings, links, a rule, "Sign out". |
+| Sidebar | `SidebarNav`: 232 px, white, 1 px `line` right edge. Logo and collapse button, branch switcher card, groups with uppercase labels, links with icons (parents fold open), then Notifications, Help and the user card with Sign out in its menu (section 0). |
 | Collapsed | A toggle in the sidebar header (`i-lucide-panel-left`) collapses it to a 64 px icon rail with tooltips. The choice is remembered in `localStorage`; on a first visit under 1100 px wide it starts collapsed. |
 | Under 768 px | The sidebar is an off-canvas drawer (`min(280px, 85vw)`), opened by the menu button in the top bar, closed by a tap outside, Esc, or choosing a link. |
-| Top bar | `TopBar`: 56 px, white, 1 px `line` below. Left: the page title as `<h1>`, then the page's teleported actions. Right: status labels, then `UserMenu`. |
-| Content | `bg-muted` page, 24 px padding (16 px under 768 px). The page starts with content; there is no second title row unless the page is a wizard or form. |
+| Top bar | `TopBar`: 56 px, white, 1 px `line` below. Left: breadcrumbs. Right: search (Ctrl K), status labels (shift), Close shift for the front desk, the bell. |
+| Page header | `PageHeader`: ink icon tile, `<h1>` title with an optional status label, one sub-line, and the page's teleported actions on the right. |
+| Content | `bg-muted` page, 28 px side padding (16 px under 768 px), 20 px below the page header. |
 | Bars | `ConnectionBar` above everything; `OverdueBar` between the top bar and the content. |
 
 | Role | Sidebar groups → links (icon) | Top bar shows, after the title |
@@ -1239,8 +1266,8 @@ Printing is `window.print()` with print styles in `app.css`; no printer drivers 
 
 | Layout | Used by | Page | Type | Content rules |
 |---|---|---|---|---|
-| 80 mm thermal | Check-in slip (8), receipt (18), shift report (26), the slip form of the Z-report — the `Slip` component | `@page { size: 80mm auto; margin: 0 }`, content 72 mm wide, centred | IBM Plex Mono 11 pt, line height 1.4; about 30 characters per line; weight 600 for the header and totals | Black on white only, no colours, no logo, no images. Header: `slip_header` in capitals, then the slip title and its number, centred. Dashed rules between sections. Label left, amount right on one line. A reprint says "REPRINT". Ends with 3 blank lines for the tear-off. |
-| A4 portrait (browser) | Reports 37–43, 37b, 38b | `@page { size: A4; margin: 12mm }` | IBM Plex Sans 10 pt body, 9 pt tables, tabular figures; stay codes in IBM Plex Mono; no serif | Header on the first page: blue Homi logo (30 mm), branch name and address, report title and period, printed date and by whom. Tables keep their header row on every page; rows do not split. Status labels print as plain words without their fill. Card borders print as thin grey rules. Rooms by floor (37c) prints in landscape. |
+| 80 mm thermal | Check-in slip (8), receipt (18), shift report (26), the slip form of the Z-report — the `Slip` component | `@page { size: 80mm auto; margin: 0 }`, content 72 mm wide, centred | Geist Mono 11 pt, line height 1.4; about 30 characters per line; weight 600 for the header and totals | Black on white only, no colours, no logo, no images. Header: `slip_header` in capitals, then the slip title and its number, centred. Dashed rules between sections. Label left, amount right on one line. A reprint says "REPRINT". Ends with 3 blank lines for the tear-off. |
+| A4 portrait (browser) | Reports 37–43, 37b, 38b | `@page { size: A4; margin: 12mm }` | Geist 10 pt body, 9 pt tables, tabular figures; stay codes in Geist Mono; no serif | Header on the first page: blue Homi logo (30 mm), branch name and address, report title and period, printed date and by whom. Tables keep their header row on every page; rows do not split. Status labels print as plain words without their fill. Card borders print as thin grey rules. Rooms by floor (37c) prints in landscape. |
 | A4 PDF (dompdf) | Z-report (37b) and day Z (38b) — `resources/views/reports/zreport.blade.php` | A4 portrait, 12 mm margins | DejaVu Sans (bundled with dompdf, has the ₱ sign) 9.5 pt; numbers right-aligned | The same sections and lines as `ZPaper`, in the same order, from the same builder array. Plain CSS only (tables, borders); no flex, no grid, no web fonts. Logo embedded as PNG when GD is available, otherwise the product name as text ([ASSETS §1.4](ASSETS.md#14-printing-and-export)). |
 | CSV | Z-report, day Z, other reports | UTF-8 with BOM, streamed | — | Z-report columns: Section, Line, Count, Amount (pesos with two decimals, no ₱, no separators). |
 
@@ -1312,7 +1339,7 @@ No seconds, no 24-hour times, no numeric-only dates (`11/11/2026` is never shown
 | Value | Format | Example |
 |---|---|---|
 | Room number | Sans 600, tabular, exactly as stored | `205`, `3A` |
-| Stay code | IBM Plex Mono, prefix-year-number (6 digits) | `DGS-26-004126` |
+| Stay code | Geist Mono, prefix-year-number (6 digits) | `DGS-26-004126` |
 | Shift Z number | Sans 600, tabular, `Z-` + `shift_sessions.z_no` padded to 4 digits (wider when larger); mono only on a slip | `Z-0629` |
 | Day Z number | Sans 600, tabular, `D-` + `day_closings.day_z_no` padded to 4 digits | `D-0314` |
 | POS order number | Sans, tabular, `P-` + the per-branch number padded to 6 digits; mono only on a slip | `P-008821` |
@@ -1449,7 +1476,7 @@ Run through this for every screen before calling it done, next to its mockup fra
 - [ ] Every status is a `StatusLabel` — a small soft label in sentence case, no dot — with the tone from section 2.3. No `UBadge` used as a status, no bare coloured text as a status.
 - [ ] The room board is a table: one row per room, grouped by floor; rows are never tinted; only the status label has colour; the time is ochre when due out and brick when overdue
 - [ ] Every figure names its period; a change figure names what it compares with and is absent when there is no previous data; short and over are shown separately.
-- [ ] Numbers, room numbers, timers and KPI figures are IBM Plex Sans, weight 600, tabular, formatted by `formatMoney()`; IBM Plex Mono appears only on slips, printed receipts and stay codes; Newsreader appears only on the display headings of 1, 59 and 27. Centavos are dropped only where section 7.1 allows.
+- [ ] Numbers, room numbers, timers and KPI figures are Geist, weight 600, tabular, formatted by `formatMoney()`; Geist Mono appears only on slips, printed receipts and stay codes; Newsreader appears only on the display headings of 1, 59 and 27. Centavos are dropped only where section 7.1 allows.
 - [ ] The first load shows skeletons shaped like the content; each deferred card fills in without changing size; a 15 s or 30 s refresh changes values in place with no flash, no reorder and no lost scroll position.
 - [ ] The primary button shows its spinner within 100 ms of a click, cannot be clicked twice, and keeps its width.
 - [ ] After a save the user sees the result: a toast with the amount, the slip, or the updated page — never a blank wait. A blocking error is inline or a dialog, not only a toast.
@@ -1476,7 +1503,7 @@ Euphoria is the reference for the level of finish and for conventions (the token
 | Not copied | Why | Homi instead |
 |---|---|---|
 | The magenta (fuchsia) palette and Euphoria's secondary colour | It is Euphoria's brand | Warm neutral greys, the Homi primary `#0077c2` for actions and the logo blue `#009ef5` for the logo only; muted status hues (occupied rooms in slate blue) |
-| The park scene: rides, park wording, its fonts for public pages | Homi is a hotel | Real photographs of rooms and a lobby under a flat scrim; IBM Plex Sans everywhere and Newsreader for the few public headings |
+| The park scene: rides, park wording, its fonts for public pages | Homi is a hotel | Real photographs of rooms and a lobby under a flat scrim; Geist everywhere and Newsreader for the few public headings |
 | The ticket-style sign-in card: a coloured stub, a chip, a dashed tear line with notches, a card floating over a scene | It is Euphoria's own sign-in, and the owner asked for Homi not to look like it | A split screen: a full-height photograph with the greeting and four figures on the left, a plain white panel with the form on the right — no card, no stub, no tear line (section 6.7) |
 | Whole pesos in some money columns and two decimals in others, decided page by page | Staff could not tell whether centavos were dropped or absent | Two decimals everywhere, with the short fixed list of whole-peso places in section 7.1 |
 | Two pagers on one list (above and below the table) | Duplicate controls drift apart | One `Pager`, at the bottom of the `ListCard` |

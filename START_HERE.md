@@ -11,7 +11,7 @@ HotelV4/
 └─ docs/
    ├─ PRD.md  TRD.md  DATABASE_SCHEMA.md  SYSTEM_DESIGN.md
    ├─ APP_FLOW.md  DESIGN_SYSTEM.md  ROADMAP.md  ASSETS.md
-   └─ mockup/hotel-mockup.html     the approved screens, v3: 63 screens + 7 variants (open in a browser)
+   └─ mockup/hotel-mockup.html     the approved screens, v6: 63 screens + 8 variants (open in a browser)
 ```
 
 There is no app code yet. Phase 0 creates the Laravel project **in this folder**, around these files.
@@ -98,7 +98,13 @@ Do Phase 9 of docs/ROADMAP.md. Read docs/TRD.md §4.1, §4.9, §4.11, §6 (Sched
 **Phase 10 — Polish, printing and release**
 
 ```
-Do Phase 10 of docs/ROADMAP.md. Read docs/TRD.md §6, §7 and §11, docs/PRD.md §6 (F18) and mockup screen 59 first. Build the welcome page (59) at /. Then go through all 70 mockup frames against the built app, in light and dark mode, and list the differences before fixing them. Run the full check. Stop when the checklist is done.
+Do Phase 10 of docs/ROADMAP.md. Read docs/TRD.md §6, §7 and §11, docs/PRD.md §6 (F18) and mockup screen 59 first. Build the welcome page (59) at /. Then go through all 71 mockup frames against the built app, in light and dark mode, and list the differences before fixing them. Run the full check. Stop when the checklist is done.
+```
+
+**Phase 11 — Design refresh v6** (run before finishing Phase 10's open boxes)
+
+```
+Do Phase 11 of docs/ROADMAP.md. Read docs/DESIGN_SYSTEM.md §0 first, then §2.1, §3 and §6.1, docs/ASSETS.md §1.1, and mockup screens 1, 37a, 59, 60, 61 and 62 plus the "Building blocks" section of docs/mockup/hotel-mockup.html (the v6 CSS blocks win over older blocks). The impeccable skill is installed in .claude/skills/impeccable; follow its craft floor. Swap the fonts, apply the v6 tokens, rebuild the shell with the page header, add the new components to /dev/components, then rebuild 60, 61, 62, 1 and 59 and build 37a. Do not change business rules. Run the full check. Stop when the checklist is done and show me 61, 62, 37a, 1 and 59 next to their mockup frames.
 ```
 
 ## 4. Tips

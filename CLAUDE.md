@@ -6,7 +6,7 @@ Homi is a hotel management system for small Philippine hotels, inns and pension 
 
 | File | Read it when |
 |---|---|
-| [docs/mockup/hotel-mockup.html](docs/mockup/hotel-mockup.html) | Building or changing any screen. Screen numbers there (1–63 plus 2b, 4b, 4c, 31b, 37b, 37c, 38b) are used everywhere. |
+| [docs/mockup/hotel-mockup.html](docs/mockup/hotel-mockup.html) | Building or changing any screen. Screen numbers there (1–63 plus 2b, 4b, 4c, 31b, 37a, 37b, 37c, 38b) are used everywhere. |
 | [docs/PRD.md](docs/PRD.md) | You need the what and why, a feature's requirements (FR numbers), or the open decisions (§12). |
 | [docs/TRD.md](docs/TRD.md) | Before writing any code: stack, architecture rules, pricing and cash formulas, Z-report, dashboards, shift safeguards, tests required. **Wins on technical conflicts.** |
 | [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md) | Touching a migration, model, query or business transaction. **Wins on table and column names.** |

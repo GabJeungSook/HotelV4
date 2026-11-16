@@ -10,7 +10,7 @@
 | Wins on conflict | Product scope and priorities. Table and column names: [DATABASE_SCHEMA](DATABASE_SCHEMA.md). Technical rules and formulas: [TRD](TRD.md). |
 | Related | [Mockup](mockup/hotel-mockup.html) · [APP_FLOW](APP_FLOW.md) · [TRD](TRD.md) · [DATABASE_SCHEMA](DATABASE_SCHEMA.md) · [SYSTEM_DESIGN](SYSTEM_DESIGN.md) · [DESIGN_SYSTEM](DESIGN_SYSTEM.md) · [ROADMAP](ROADMAP.md) · [ASSETS](ASSETS.md) · [START_HERE](../START_HERE.md) |
 
-Screen numbers in this document are the mockup numbers (1–63 plus 2b, 4b, 4c, 31b, 37b, 37c, 38b: 70 frames). Feature IDs (F1–F18) and roadmap phases (0–10) are the same in every document.
+Screen numbers in this document are the mockup numbers (1–63 plus 2b, 4b, 4c, 31b, 37a, 37b, 37c, 38b: 71 frames). Feature IDs (F1–F18) and roadmap phases (0–10) are the same in every document.
 
 ## 1. Summary
 
@@ -22,7 +22,7 @@ The rebuild is built on three rules that every screen follows:
 2. **A shift is a real record.** Every peso points to the shift session that was open when it was recorded. Signing out never closes a shift.
 3. **A room can have only one open stay.** The database enforces it, so a room cannot be double-booked or shown free while a guest is checked in.
 
-One installation serves one owner with one or more branches. Front desk, back office, admin and owner use a desktop browser; guests use an optional portrait kiosk; housekeepers use their own phones. The product has 18 features, 63 screens and 7 screen variants (70 frames), all approved in the mockup on 11 November 2026.
+One installation serves one owner with one or more branches. Front desk, back office, admin and owner use a desktop browser; guests use an optional portrait kiosk; housekeepers use their own phones. The product has 18 features, 63 screens and 8 screen variants (71 frames), all approved in the mockup on 11 November 2026.
 
 The reference for the level of design is the owner's Euphoria system. Homi takes from it the component library (Nuxt UI v4, themed with the Homi tokens), a dashboard as each role's home, a Z-report with a Z number and a running grand total, and its cashier-shift safeguards. Homi keeps what is specific to a hotel: one shared drawer per shift, a cash count at every shift change, and a handover accepted by the incoming front desk's PIN, because a hotel runs 24 hours and holds guest deposits in the drawer.
 
@@ -588,7 +588,7 @@ Task lists per phase are in [ROADMAP](ROADMAP.md).
 
 Version 1.0 is released when all of these are true:
 
-1. All 70 mockup frames (63 screens + 7 variants) are built and each has been compared with its mockup number.
+1. All 71 mockup frames (63 screens + 8 variants) are built and each has been compared with its mockup number.
 2. Every functional requirement in section 6 passes its test or manual check.
 3. Every named test in [TRD](TRD.md) §10 exists and passes on MySQL 8.0.
 4. The "before done" command in [TRD](TRD.md) §11 is green: Pint, Larastan level 6, Pest, Vitest, production build.

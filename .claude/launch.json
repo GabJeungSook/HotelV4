@@ -1,0 +1,36 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "homi",
+      "runtimeExecutable": "C:\\Users\\User\\.config\\herd\\bin\\php84\\php.exe",
+      "runtimeArgs": [
+        "artisan",
+        "serve",
+        "--port=8000"
+      ],
+      "port": 8000
+    },
+    {
+      "name": "homi-scheduler",
+      "runtimeExecutable": "C:\\Users\\User\\.config\\herd\\bin\\php84\\php.exe",
+      "runtimeArgs": [
+        "artisan",
+        "schedule:work"
+      ],
+      "port": 8001
+    },
+    {
+      "name": "mockup",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8090",
+        "--bind",
+        "127.0.0.1"
+      ],
+      "port": 8090
+    }
+  ]
+}

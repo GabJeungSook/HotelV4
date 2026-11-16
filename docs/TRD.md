@@ -38,7 +38,7 @@
 | `@vueuse/core`, `date-fns` | Colour mode, timers, date helpers |
 | `barryvdh/laravel-dompdf` | PDF export of the Z-report and other reports |
 | `qrcode` (npm) | QR on kiosk hold screen (30) |
-| IBM Plex Sans, IBM Plex Mono and Newsreader font files (one-time source: `@fontsource/ibm-plex-sans`, `@fontsource/ibm-plex-mono`, `@fontsource/newsreader`) | The woff2 files are copied into `resources/fonts/` and committed (ASSETS §1); the packages are not kept in `package.json` |
+| Geist and Geist Mono font files (one-time source: `@fontsource/geist-sans`, `@fontsource/geist-mono`) | The woff2 files are copied into `resources/fonts/` and committed (ASSETS §1); the packages are not kept in `package.json` |
 | `pestphp/pest` ^4, `pestphp/pest-plugin-laravel` ^4 | Tests |
 | `laravel/pint` | Code style |
 | `larastan/larastan` ^3.15 | Static analysis, level 6 |

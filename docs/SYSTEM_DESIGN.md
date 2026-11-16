@@ -281,7 +281,7 @@ HotelV4/
 ├─ resources/
 │  ├─ css/app.css                         @import "tailwindcss" and "@nuxt/ui"; the --hm-* token layer, light and dark; the --ui-*
 │  │                                      mapping; @theme blocks (DESIGN_SYSTEM §2); font faces; .dtable; print styles
-│  ├─ fonts/                              self-hosted IBM Plex Sans, IBM Plex Mono and Newsreader woff2 (ASSETS §1)
+│  ├─ fonts/                              self-hosted Geist and Geist Mono woff2 (ASSETS §1)
 │  ├─ images/brand/                       homi-logo.png, homi-logo-white.png (ASSETS §1)
 │  ├─ images/photos/                       sign-in, welcome, kiosk and room-type photographs (ASSETS §2); room-{slug}.jpg per room type
 │  ├─ views/app.blade.php                 the single Inertia root view

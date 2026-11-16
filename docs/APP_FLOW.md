@@ -10,7 +10,7 @@
 | Wins on conflict | Navigation, flow order, allowed state transitions (§5) and edge-case behaviour (§6). Table and column names: [DATABASE_SCHEMA](DATABASE_SCHEMA.md). Formulas, permissions and error names: [TRD](TRD.md). |
 | Related | [Mockup](mockup/hotel-mockup.html) · [PRD](PRD.md) · [TRD](TRD.md) · [DATABASE_SCHEMA](DATABASE_SCHEMA.md) · [SYSTEM_DESIGN](SYSTEM_DESIGN.md) · [DESIGN_SYSTEM](DESIGN_SYSTEM.md) · [ROADMAP](ROADMAP.md) |
 
-Screen numbers are the mockup numbers: 1–63 plus 2b, 4b, 4c, 31b, 37b, 37c and 38b (70 frames in total). Screen 37c is the room chart that was numbered 37b before mockup v3; 37b is now the sales-and-cash paper. Terms used throughout:
+Screen numbers are the mockup numbers: 1–63 plus 2b, 4b, 4c, 31b, 37a, 37b, 37c and 38b (71 frames in total). Screen 37c is the room chart that was numbered 37b before mockup v3; 37b is now the sales-and-cash paper. Terms used throughout:
 
 | Term | Meaning |
 |---|---|
@@ -165,6 +165,7 @@ flowchart TD
     dash["/dashboard (61)"]
     stats["/stats (63)"]
     hub["/reports (36)"]
+    rshifts["/reports/shifts (37a)"]
     rshift["/reports/shifts/{id} (37)"]
     rz["/reports/shifts/{id}/z (37b)"]
     rzrooms["/reports/shifts/{id}/z?tab=rooms (37c)"]
@@ -889,7 +890,7 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-All 70 mockup frames: 63 numbered screens and 7 variants (2b, 4b, 4c, 31b, 37b, 37c, 38b). Page components are under `resources/js/Pages`; shared components under `resources/js/Components`; charts under `resources/js/Components/Charts`.
+All 71 mockup frames: 63 numbered screens and 8 variants (2b, 4b, 4c, 31b, 37a, 37b, 37c, 38b). Page components are under `resources/js/Pages`; shared components under `resources/js/Components`; charts under `resources/js/Components/Charts`.
 
 | Screen | Name | Route or sheet | Component | Feature | Status |
 |---|---|---|---|---|---|
@@ -933,6 +934,7 @@ All 70 mockup frames: 63 numbered screens and 7 variants (2b, 4b, 4c, 31b, 37b, 
 | 34 | Housekeeping — my cleans | `/housekeeping/history` | `Housekeeping/History.vue` | F9 | Planned |
 | 35 | Housekeeping — nothing to clean | `/housekeeping` | `Housekeeping/Queue.vue` with `Components/EmptyState.vue` | F9 | Planned |
 | 36 | Report hub | `/reports` | `Reports/Hub.vue` | F12 | Planned |
+| 37a | Shift reports — list (and Calendar tab) | `/reports/shifts` | `Reports/Shifts.vue` | F12 | Planned (v6) |
 | 37 | Shift report | `/reports/shifts/{id}` | `Reports/Shift.vue` | F12 | Planned |
 | 37b | Z-report — sales and cash | `/reports/shifts/{id}/z` | `Reports/ZReport.vue` | F12 | Planned |
 | 37c | Z-report — rooms by floor | `/reports/shifts/{id}/z?tab=rooms` | `Reports/ZReport.vue` | F12 | Planned |
@@ -975,7 +977,7 @@ These fill gaps the mockup does not draw. The rules are in [TRD §4.9](TRD.md); 
 |---|---|---|---|
 | `/pin/setup` | `Auth\PinController@edit` / `update` | frontdesk, supervisor, admin at first sign-in | Set your 4-digit PIN (uses PinPad) |
 | `/password/change` | `Auth\PasswordController@edit` / `update` | any user with a temporary password | Replace a temporary password |
-| `/reports/shifts` | `ReportController@shifts` | backoffice, supervisor, admin, owner | List of shifts by business date with their Z numbers; each row opens 37, 37b or 37c. An open shift opens as a preview. |
+| `/reports/shifts` | `ReportController@shifts` | backoffice, supervisor, admin, owner | Screen 37a. List of shifts by business date with their Z numbers, filters (shift, front desk, status, dates), search and pages; `view=calendar` shows the same shifts as week blocks. Each row opens 37, 37b or 37c. An open shift opens as a preview and shows no money in the list. |
 | `/reports/z` | `ReportController@zLatest` | backoffice, supervisor, admin, owner | "Z-report" in the menu: redirects to the Z-report (37b) of the last closed shift, or to the shifts list when there is none |
 | `POST /reports/shifts/{id}/print`, `POST /reports/daily/{date}/print` | `ReportController@shiftPrint`, `@dayPrint` | Same as `/reports` | Log a browser print of 37, 37b/37c or the day paper in `print_logs` before the print dialog opens; a preview cannot be printed |
 | `POST /stays/{stay}/print` | `StayController@slipPrint` | frontdesk, supervisor | Log a print of the check-in slip (8) or the receipt (18) before the print dialog opens; a second print is a reprint |

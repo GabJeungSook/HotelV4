@@ -13,25 +13,22 @@ The app needs few assets. Apart from the Homi logo and six real photographs on t
 
 ### 1.1 Fonts
 
-Three families, all under the SIL Open Font License 1.1, self-hosted. The mockup loads them from Google Fonts for review only; the app never calls an outside font server. The woff2 files are copied once from the free `@fontsource/ibm-plex-sans`, `@fontsource/ibm-plex-mono` and `@fontsource/newsreader` npm packages into `resources/fonts/` and committed, so the packages do not stay in `package.json`. `@font-face` rules with `font-display: swap` and a `unicode-range` per subset live in `resources/css/app.css`. Geist, Geist Mono, Plus Jakarta Sans and JetBrains Mono from earlier versions are not used; no file of theirs is added.
+Two families from one designer, both under the SIL Open Font License 1.1, self-hosted. The mockup loads them from Google Fonts for review only; the app never calls an outside font server. The woff2 files are copied once from the free `@fontsource/geist-sans` and `@fontsource/geist-mono` npm packages into `resources/fonts/` and committed, so the packages do not stay in `package.json`. `@font-face` rules with `font-display: swap` and a `unicode-range` per subset live in `resources/css/app.css`. Mockup v6 (16 Nov 2026) replaced IBM Plex Sans, IBM Plex Mono and Newsreader: their files are deleted from `resources/fonts/` together with their licence texts. The public pages now use Geist too, set larger and tighter, so the whole product reads as one hand.
 
 | Path in repo | What it is | Status | Fallback until supplied | Source and licence |
 |---|---|---|---|---|
-| `resources/fonts/ibm-plex-sans-latin-400-normal.woff2` | IBM Plex Sans Regular — body text, inputs, table cells | Have (phase 1) | `system-ui, sans-serif` | `@fontsource/ibm-plex-sans` · SIL OFL 1.1 |
-| `resources/fonts/ibm-plex-sans-latin-500-normal.woff2` | IBM Plex Sans Medium — buttons, field labels, status labels, table headers, public-page figures and prices | Have (phase 1) | as above | as above |
-| `resources/fonts/ibm-plex-sans-latin-600-normal.woff2` | IBM Plex Sans SemiBold — titles, numbers, KPI figures, room numbers, bold text | Have (phase 1) | as above | as above |
-| `resources/fonts/ibm-plex-sans-latin-ext-400-normal.woff2`, `-500-`, `-600-` (three files) | The latin-ext subset of the same three weights. It carries the peso sign ₱ (U+20B1). | Have (phase 1) | as above | as above |
-| `resources/fonts/ibm-plex-mono-latin-500-normal.woff2` | IBM Plex Mono Medium — slips, printed receipts, stay codes | Have (phase 1) | `ui-monospace, monospace` | `@fontsource/ibm-plex-mono` · SIL OFL 1.1 |
-| `resources/fonts/ibm-plex-mono-latin-600-normal.woff2` | IBM Plex Mono SemiBold — slip header and totals, the stay code on the kiosk hold screen | Have (phase 1) | as above | as above |
-| `resources/fonts/newsreader-latin-400-normal.woff2` | Newsreader Regular — display headings on 1, 59 and 27 only ("Good morning.", "Sign in", the welcome headline, "Three ways to stay", 01 / 02 / 03, "Welcome to …") | Have (phase 1) | `Georgia, serif` | `@fontsource/newsreader` · SIL OFL 1.1 |
-| `resources/fonts/OFL-IBM-Plex.txt` | Licence text for IBM Plex Sans and IBM Plex Mono | Have (phase 1) | — | Copied from the package |
-| `resources/fonts/OFL-Newsreader.txt` | Licence text for Newsreader | Have (phase 1) | — | Copied from the package |
+| `resources/fonts/geist-sans-latin-400-normal.woff2` | Geist Regular — body text, inputs, table cells | Needed (v6) | `system-ui, sans-serif` | `@fontsource/geist-sans` · SIL OFL 1.1 |
+| `resources/fonts/geist-sans-latin-500-normal.woff2` | Geist Medium — buttons, field labels, status labels, table headers, sidebar links | Needed (v6) | as above | as above |
+| `resources/fonts/geist-sans-latin-600-normal.woff2` | Geist SemiBold — page titles, numbers, KPI figures, room numbers, bold text, public headlines | Needed (v6) | as above | as above |
+| `resources/fonts/geist-sans-latin-ext-400-normal.woff2`, `-500-`, `-600-` (three files) | The latin-ext subset of the same three weights. It carries the peso sign ₱ (U+20B1). | Needed (v6) | as above | as above |
+| `resources/fonts/geist-mono-latin-500-normal.woff2` | Geist Mono Medium — slips, printed receipts, stay codes | Needed (v6) | `ui-monospace, monospace` | `@fontsource/geist-mono` · SIL OFL 1.1 |
+| `resources/fonts/geist-mono-latin-600-normal.woff2` | Geist Mono SemiBold — slip header and totals, the stay code on the kiosk hold screen | Needed (v6) | as above | as above |
+| `resources/fonts/OFL-Geist.txt` | Licence text for Geist and Geist Mono | Needed (v6) | — | Copied from the package |
 
 Notes:
 
-- Numbers on screen — money, counts, room numbers, timers, KPI figures — are IBM Plex Sans with tabular figures, not the mono ([DESIGN_SYSTEM §3](DESIGN_SYSTEM.md#3-typography)). IBM Plex Mono is only for slips, printed receipts and stay codes. Newsreader is never used inside the app.
-- Peso sign check (phase 1). IBM Plex Sans has ₱ in its latin-ext subset, which is why the three latin-ext files are shipped. Phase 1 checks in the component gallery (`/dev/components`) that `₱1,234.00` renders in IBM Plex Sans at 400, 500 and 600 (not in the system fallback) in Chrome and Edge. IBM Plex Mono and Newsreader ship latin only: slips print amounts without ₱ and no serif heading contains a peso amount ([DESIGN_SYSTEM §7.1](DESIGN_SYSTEM.md#71-money)).
-- Newsreader is shipped at weight 400 only and is never bolded, so no faux bold appears.
+- Numbers on screen — money, counts, room numbers, timers, KPI figures — are Geist with tabular figures, not the mono ([DESIGN_SYSTEM §3](DESIGN_SYSTEM.md#3-typography)). Geist Mono is only for slips, printed receipts and stay codes.
+- Peso sign check. Geist has ₱ in its latin-ext subset (checked in the mockup on 16 Nov 2026: the glyph renders in Geist, not the fallback), which is why the three latin-ext files are shipped. The component gallery (`/dev/components`) checks that `₱1,234.00` renders in Geist at 400, 500 and 600 in Chrome and Edge. Geist Mono ships latin only: slips print amounts without ₱ ([DESIGN_SYSTEM §7.1](DESIGN_SYSTEM.md#71-money)).
 - PDF exports do not use these files: dompdf cannot read woff2. The PDF view uses DejaVu Sans, which ships inside dompdf and has the peso sign (section 1.4).
 
 ### 1.2 Icons
@@ -182,7 +179,7 @@ The brand is one name, two logo files, the photographs and one set of tokens (de
 | Logo | Replace the two master files, keeping the file names, a transparent background, and one version for light and one for photographs and dark backgrounds; re-export the 400 px and 800 px files. If the new logo's ratio is not about 3.3 : 1, adjust the display sizes in section 1.3. | `resources/images/brand/` |
 | Favicon and rail mark | Regenerate the three icon files from the new mark | `public/favicon.svg`, `public/favicon.ico`, `public/apple-touch-icon.png` |
 | Photographs | Replace a file with another real photograph under the **same file name**, at the sizes in section 1.5 (2000 px and `-1200` for hero and sign-in, 1200 px for room cards). Check the text area against the scrim as in [DESIGN_SYSTEM §8.1](DESIGN_SYSTEM.md#81-contrast). Update or remove its entry in `photo_credits`. A new room type needs `room-{slug}.jpg`. | `public/images/photos/`, `config/hotel.php` |
-| Typeface (only if one is supplied with a web licence) | Add its woff2 files and licence text, change `--font-sans` (and `--font-serif` for the display headings). IBM Plex Mono stays for slips and stay codes. Re-run the peso-sign check of section 1.1. | `resources/fonts/`, `resources/css/app.css`, [DESIGN_SYSTEM §3](DESIGN_SYSTEM.md#3-typography) |
+| Typeface (only if one is supplied with a web licence) | Add its woff2 files and licence text, change `--font-sans`. Geist Mono stays for slips and stay codes. Re-run the peso-sign check of section 1.1. | `resources/fonts/`, `resources/css/app.css`, [DESIGN_SYSTEM §3](DESIGN_SYSTEM.md#3-typography) |
 | PDF header | Nothing to edit: the Blade view reads the same logo file and the same config name | `resources/views/reports/zreport.blade.php` |
 | Slip header per branch | No code change: the owner or admin edits it | Screen 46 (`branches.slip_header`, `branches.address`) |
 | Welcome page and kiosk wording | The welcome page shows the branch name and its rates; "Welcome to …" on the kiosk uses the branch name; house rules are edited on screen 46 | No code change |
@@ -193,8 +190,7 @@ After a change: open `/dev/components` and screens 1 (morning, afternoon and eve
 
 | Asset | Licence | What it requires | How we comply |
 |---|---|---|---|
-| IBM Plex Sans and IBM Plex Mono (IBM) | SIL Open Font License 1.1 | Keep the licence with the font files; do not sell the fonts by themselves; a modified version may not use the reserved name | `resources/fonts/OFL-IBM-Plex.txt` is committed next to the files; the files are used unmodified (subset files as published by Fontsource) |
-| Newsreader (Production Type, for Google Fonts) | SIL Open Font License 1.1 | Same as above | `resources/fonts/OFL-Newsreader.txt` is committed next to the file |
+| Geist and Geist Mono (Vercel) | SIL Open Font License 1.1 | Keep the licence with the font files; do not sell the fonts by themselves; a modified version may not use the reserved name | `resources/fonts/OFL-Geist.txt` is committed next to the files |
 | `@fontsource/ibm-plex-sans`, `@fontsource/ibm-plex-mono`, `@fontsource/newsreader` (packaging) | Font files under OFL 1.1 | Same as the fonts | Used only as the download source; not kept in `package.json` |
 | The six photographs (section 1.5) | Unsplash License | Free to use, also commercially, and to modify, without permission or attribution. Not allowed: selling unaltered copies, and using the photos to build a similar or competing photo service. | Used as page photographs inside the product only, cropped and compressed; never sold or offered for download as photos; credit given in the welcome footer as a courtesy. Downloaded only after the owner agrees. |
 | Nuxt UI v4 (`@nuxt/ui`) | MIT | Keep the copyright notice in copies of the software | The notice stays in `node_modules` and in the built bundle's licence comments |
