@@ -35,6 +35,11 @@ pest()->extend(TestCase::class)
 pest()->extend(TestCase::class)
     ->in('Unit');
 
+// Performance budgets (TRD §7): bulk-generated rows, so no per-test invariant check.
+pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
+    ->in('Performance');
+
 // Builds and empties the database itself (see SimultaneousCheckInTest).
 pest()->extend(TestCase::class)
     ->in('Concurrency');

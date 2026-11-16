@@ -77,7 +77,7 @@ function save(payNow: boolean): void {
 <template>
     <FrontDeskLayout current="board" :title="`Extend stay — Room ${stay.room ?? ''} · ${stay.guest_name}`">
         <UAlert v-if="errorText" class="mb-4" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="errorText" />
-        <div class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1">
+        <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="option && !option.disabled && pay.amount > 0 && save(true)">
             <section class="rounded-card border border-default bg-default p-5">
                 <h2 class="mb-3 text-base font-semibold text-highlighted">Add hours</h2>
                 <OptionTiles v-model="form.hours" :options="tiles" label="Hours to add" />
@@ -106,10 +106,10 @@ function save(payNow: boolean): void {
                 <TotalRow label="Total" :amount="option?.amount ?? null" />
                 <MoneyRow v-if="balance > 0" class="mt-2" label="Already unpaid on the folio" :amount="balance" />
                 <PaymentFields v-model="pay" class="mt-4" :methods="methods" :due="(option?.amount ?? 0) + balance" :errors="form.errors" />
-                <UButton class="mt-5" size="xl" block label="Extend and take payment" :disabled="!option || option.disabled || pay.amount <= 0" :loading="form.processing" @click="save(true)" />
+                <UButton class="mt-5" size="xl" block label="Extend and take payment" :disabled="!option || option.disabled || pay.amount <= 0" :loading="form.processing" type="submit" />
                 <UButton class="mt-2" block color="neutral" variant="outline" label="Extend, pay later" :disabled="!option || option.disabled || form.processing" @click="save(false)" />
                 <UButton class="mt-2" block color="neutral" variant="ghost" label="Back to folio" @click="router.visit(route('stays.show', stay.id))" />
             </section>
-        </div>
+        </form>
     </FrontDeskLayout>
 </template>

@@ -121,7 +121,13 @@ describe('HeatGrid', () => {
         const sat8 = cells.find((c) => c.attributes('aria-label') === 'Sat 8a: 0 check-ins')!;
         expect(sat9.attributes('style')).toContain('opacity: 1');
         expect(sat8.attributes('style')).toContain('opacity: 0.04');
-        expect(wrapper.text()).toContain('darker is busier');
+        expect(wrapper.text()).toContain('8a to 9a · darker is busier');
+    });
+
+    it('names the hour range from the full hour titles', () => {
+        const wrapper = mount(HeatGrid, { props: { hours: ['12m', '10p'], hourTitles: ['12 midnight', '10 PM'], grid: { Mon: [1, 2] } }, global });
+
+        expect(wrapper.text()).toContain('12 midnight to 10 PM · darker is busier');
     });
 
     it('renders the empty state with no check-ins', () => {

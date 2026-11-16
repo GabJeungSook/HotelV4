@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 import { useConnection } from '@/Composables/useConnection';
 import { useShared } from '@/Composables/useShared';
+import ServerErrorDialog from '@/Components/ServerErrorDialog.vue';
 import Offline from '@/Pages/Kiosk/Offline.vue';
 
 /**
@@ -23,6 +24,7 @@ onMounted(() => useConnection().start(shared.value.app?.heartbeat ?? 5));
 
 <template>
     <Head :title="title" />
+    <ServerErrorDialog />
     <div class="hm-light flex min-h-dvh justify-center bg-default text-lg leading-7 text-default select-none">
         <main class="flex min-h-dvh w-full max-w-[1080px] flex-col" :class="bare && online ? '' : 'p-8'">
             <Offline v-if="!online" />

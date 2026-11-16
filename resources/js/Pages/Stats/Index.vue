@@ -207,7 +207,6 @@ const Layout = computed(() => (isOwner.value ? OwnerLayout : BackOfficeLayout));
             <section class="rounded-card border border-default bg-default p-4">
                 <h2 class="text-[15px] leading-[22px] font-semibold text-highlighted">Check-ins by day and hour</h2>
                 <HeatGrid class="mt-2" :hours="heatHours.map(formatAxisHour)" :hour-titles="heatHours.map(formatHour)" :grid="heatEmpty ? {} : (heat ?? {})" :loading="!heat" unit="check-ins" />
-                <p class="mt-1 text-xs text-muted">Darker is busier</p>
             </section>
             <div class="flex flex-col gap-4">
                 <section class="rounded-card border border-default bg-default p-4">

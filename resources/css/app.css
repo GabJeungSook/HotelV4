@@ -182,6 +182,8 @@
     --hm-on-photo-line: rgba(255, 255, 255, 0.4);
     --hm-on-photo-divider: rgba(255, 255, 255, 0.28);
     --hm-slide-off: rgba(255, 255, 255, 0.45);
+    --hm-on-photo-strong: rgba(255, 255, 255, 0.7);
+    --hm-on-photo-hover: rgba(255, 255, 255, 0.12);
 }
 
 /* Dark values (DESIGN_SYSTEM §2.4). `.dark .hm-light` keeps light-only surfaces light. */
@@ -504,6 +506,34 @@
 }
 .hm-up {
     animation: hm-up 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+/* Welcome hero (59): three stacked photos on a 21 s cycle, each showing for 7 s. */
+.hm-slides > * {
+    opacity: 0;
+    animation: hm-xfade 21s linear infinite;
+}
+.hm-slides > :nth-child(2) {
+    animation-delay: 7s;
+}
+.hm-slides > :nth-child(3) {
+    animation-delay: 14s;
+}
+
+/* Buttons on a photo (59, 27; DESIGN_SYSTEM §5.1): white fill, or a white outline. */
+.on-photo {
+    background: var(--hm-card);
+    color: var(--hm-ink);
+}
+.on-photo:hover {
+    background: var(--hm-hover);
+}
+.on-photo-outline {
+    background: transparent;
+    color: var(--hm-card);
+    box-shadow: inset 0 0 0 1px var(--hm-on-photo-strong);
+}
+.on-photo-outline:hover {
+    background: var(--hm-on-photo-hover);
 }
 @media (prefers-reduced-motion: reduce) {
     .hm-drift,

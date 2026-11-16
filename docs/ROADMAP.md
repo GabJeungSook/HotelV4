@@ -210,17 +210,17 @@ No screens in this phase. Everything is driven by tests.
 
 ## Phase 10 — Polish, printing and release
 
-- [ ] Welcome page (59) at `/`: logo, "Staff sign in" (or "Dashboard" when signed in), headline, room types with their lowest hourly and overnight prices from the rate table, three steps, branch picker with more than one branch; no availability and no booking
+- [x] Welcome page (59) at `/`: logo, "Staff sign in" (or "Dashboard" when signed in), headline, room types with their lowest hourly and overnight prices from the rate table, three steps, branch picker with more than one branch; no availability and no booking
 - [ ] Walk every screen against the mockup; fix spacing, wording and states
-- [ ] Dark mode check: every page, chart and Nuxt UI component is readable in both colour modes; slips and reports always print light
-- [ ] Keyboard pass on the front desk: Enter submits, Esc closes, focus order
+- [x] Dark mode check: every page, chart and Nuxt UI component is readable in both colour modes; slips and reports always print light
+- [x] Keyboard pass on the front desk: Enter submits, Esc closes, focus order
 - [ ] Print test on a real 80 mm thermal printer: slips 8, 18, 26; A4 test of the Z-report PDF (37b) and the day Z (38b)
-- [ ] Performance budgets in TRD §7 measured and met, including the dashboard, `RebuildSummaries` and Stats budgets and the 350 kB bundle
-- [ ] Empty database first-run: owner account command, first branch wizard path through 55/56/44/45
-- [ ] Error pages and the "nothing was saved" message with request id
-- [ ] Backup cron and restore test (START_HERE)
+- [x] Performance budgets in TRD §7 measured and met, including the dashboard, `RebuildSummaries` and Stats budgets and the 350 kB bundle
+- [x] Empty database first-run: owner account command, first branch wizard path through 55/56/44/45
+- [x] Error pages and the "nothing was saved" message with request id
+- [x] Backup cron and restore test (START_HERE)
 - [ ] Staging deployment with HTTPS; smoke test of the full journey on staging
-- [ ] One-page quick guide per role (front desk, housekeeper, back office)
+- [x] One-page quick guide per role (front desk, housekeeper, back office)
 - [ ] Tag `v1.0.0`
 
 **Done when:** a visitor sees the welcome page with the real prices and reaches the sign-in from it; a new person can follow the front desk quick guide to open a shift, check in three guests, sell a drink, check one out, close the shift and hand over, on staging, without help; the numbers on the shift report and the Z-report are right; and back office can close that day.

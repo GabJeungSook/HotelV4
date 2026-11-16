@@ -294,7 +294,7 @@ function actions(m: Movement) {
 
         <UModal v-model:open="open" :title="title" :ui="{ content: 'max-w-[420px]' }">
             <template #body>
-                <div class="flex flex-col gap-4">
+                <form id="cash-movement-form" class="flex flex-col gap-4" @submit.prevent="save">
                     <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
                     <UFormField v-if="form.kind === 'expense'" label="Category" name="expense_category_id" :error="form.errors.expense_category_id">
                         <USelect v-model="form.expense_category_id" :items="categoryItems" placeholder="Pick a category" class="w-full" />
@@ -316,12 +316,12 @@ function actions(m: Movement) {
                         :description="`${category.name} needs a supervisor PIN before it is saved.`"
                     />
                     <p class="text-xs text-muted">Recorded on the {{ period.period_name }} shift by {{ shared.auth ? firstName(shared.auth.user.name) : '' }}.</p>
-                </div>
+                </form>
             </template>
             <template #footer>
                 <div class="flex w-full justify-end gap-2">
                     <UButton color="neutral" variant="ghost" label="Cancel" @click="open = false" />
-                    <UButton :label="`Save ${kindLabel[form.kind].toLowerCase()}`" :icon="category?.needs_manager ? 'i-lucide-lock' : undefined" :disabled="!canSave" :loading="form.processing" @click="save" />
+                    <UButton :label="`Save ${kindLabel[form.kind].toLowerCase()}`" :icon="category?.needs_manager ? 'i-lucide-lock' : undefined" :disabled="!canSave" :loading="form.processing" type="submit" form="cash-movement-form" />
                 </div>
             </template>
         </UModal>

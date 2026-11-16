@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import ConnectionBar from '@/Components/ConnectionBar.vue';
+import ServerErrorDialog from '@/Components/ServerErrorDialog.vue';
 import { useFlashToast } from '@/Composables/useFlashToast';
 
 /**
@@ -29,6 +30,7 @@ const links = [
 <template>
     <div class="min-h-dvh bg-muted text-base leading-6 text-default">
         <ConnectionBar />
+        <ServerErrorDialog />
         <header data-shell class="p-4 text-on-primary" :class="tone === 'violet' ? 'bg-violet' : 'bg-primary'">
             <div class="mx-auto flex max-w-xl items-start justify-between gap-3">
                 <div class="min-w-0">

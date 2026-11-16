@@ -249,7 +249,7 @@ function submit(approval?: { approver_id: number; pin: string }): void {
 
         <UModal v-model:open="open" :title="form.kind === 'receive' ? 'Receive stock' : 'Record wastage'" :ui="{ content: 'max-w-[420px]' }">
             <template #body>
-                <div class="flex flex-col gap-4">
+                <form id="stock-form" class="flex flex-col gap-4" @submit.prevent="save">
                     <UAlert v-if="formError" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="formError" data-form-error />
                     <UFormField label="Product" name="product_id" :error="form.errors.product_id">
                         <USelectMenu v-model="form.product_id" :items="productItems" value-key="value" placeholder="Pick a product" class="w-full" />
@@ -275,7 +275,7 @@ function submit(approval?: { approver_id: number; pin: string }): void {
                         icon="i-lucide-lock"
                         :description="`${reason.name} needs a supervisor PIN before it is saved.`"
                     />
-                </div>
+                </form>
             </template>
             <template #footer>
                 <div class="flex w-full justify-end gap-2">
@@ -285,7 +285,8 @@ function submit(approval?: { approver_id: number; pin: string }): void {
                         :icon="form.kind === 'wastage' && reason?.needs_manager ? 'i-lucide-lock' : undefined"
                         :disabled="!canSave"
                         :loading="form.processing"
-                        @click="save"
+                        type="submit"
+                        form="stock-form"
                     />
                 </div>
             </template>

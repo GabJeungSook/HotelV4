@@ -2,6 +2,7 @@
 import { useLocalStorage } from '@vueuse/core';
 import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import ServerErrorDialog from '@/Components/ServerErrorDialog.vue';
 import SidebarNav from '@/Components/SidebarNav.vue';
 import TopBar from '@/Components/TopBar.vue';
 import { useConnection } from '@/Composables/useConnection';
@@ -36,6 +37,7 @@ const fallbackTitle = () => props.nav.flatMap((g) => g.items).find((i) => i.key 
 
 <template>
     <div class="flex min-h-dvh bg-muted">
+        <ServerErrorDialog />
         <Head v-if="title ?? fallbackTitle()" :title="title ?? fallbackTitle()" />
         <aside
             data-shell

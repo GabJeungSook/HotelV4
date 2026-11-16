@@ -227,7 +227,7 @@ function actions(s: Sale) {
                 </div>
             </section>
 
-            <aside class="sticky top-4 rounded-card border border-default bg-default p-4" aria-label="Sale">
+            <form class="sticky top-4 rounded-card border border-default bg-default p-4" aria-label="Sale" @submit.prevent="canComplete && complete()">
                 <div role="tablist" aria-label="How the sale is paid" class="flex gap-1 rounded-md bg-grey-50 p-1">
                     <button
                         v-for="m in [
@@ -276,8 +276,8 @@ function actions(s: Sale) {
                     <USelect v-model="form.stay_id" :items="roomItems" placeholder="Pick a room" class="w-full" :disabled="!rooms.length" />
                 </UFormField>
 
-                <UButton class="mt-4" block label="Complete sale" :disabled="!canComplete" :loading="form.processing" @click="complete" />
-            </aside>
+                <UButton class="mt-4" block label="Complete sale" :disabled="!canComplete" :loading="form.processing" type="submit" />
+            </form>
         </div>
 
         <section class="mt-6">

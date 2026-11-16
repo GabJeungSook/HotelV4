@@ -40,6 +40,7 @@ export interface FlashError {
     type?: string | null;
     next_room_id?: number | null;
     next_room?: string | null;
+    request_id?: string | null;
 }
 
 export interface FlashData {

@@ -113,7 +113,39 @@ Do Phase 10 of docs/ROADMAP.md. Read docs/TRD.md §6, §7 and §11, docs/PRD.md 
 
 ## 5. Backups (set up before going live)
 
-Add a nightly cron on the server that runs `mysqldump` of the production database to a second disk or free cloud storage, keeps 14 daily copies, and try a restore into a scratch database once before launch. Phase 10 has this on its checklist.
+Two scripts in `scripts/` do this. Both read the database name, host, port and user from the app's `.env`; the MySQL password comes from `~/.my.cnf` (or, without one, from `DB_PASSWORD` through the environment), never from the command line.
+
+1. On the server, give the backup user a `~/.my.cnf`, readable by that user only:
+
+   ```ini
+   [client]
+   user=homi_backup
+   password=the-backup-password
+   ```
+
+   ```bash
+   chmod 600 ~/.my.cnf
+   ```
+
+2. Mount a second disk (or a folder that a free cloud client syncs) at `/mnt/backup/homi`, then add the nightly cron (`crontab -e`), 2:15 AM:
+
+   ```
+   15 2 * * *  BACKUP_DIR=/mnt/backup/homi /var/www/homi/scripts/backup.sh >> /var/log/homi-backup.log 2>&1
+   ```
+
+   `backup.sh` runs `mysqldump --single-transaction` (no locks on the front desk), gzips it to `hotelv4-YYYY-MM-DD.sql.gz`, refuses a dump that did not finish, and keeps the newest 14 copies (`KEEP=14`).
+
+3. Once before launch, and after any change to the server, try a restore:
+
+   ```bash
+   /var/www/homi/scripts/restore-test.sh /mnt/backup/homi/hotelv4-2026-11-16.sql.gz
+   ```
+
+   It loads the backup into a scratch database (`hotelv4_restore_check`, never the live one), lists every table's row count beside the live database, fails if a table is missing, runs `php artisan homi:check-invariants --database=hotelv4_restore_check` on the copy, and drops the scratch database.
+
+   Tried on 16 Nov 2026 against the development database: 51 tables restored with the same row counts, all invariants held.
+
+To bring a backup back for real: put the site in maintenance (`php artisan down`), load the file into the live database (`gunzip -c file.sql.gz | mysql hotelv4`), run `php artisan migrate --force`, then `php artisan up`.
 
 ## 6. Brand and real branches
 

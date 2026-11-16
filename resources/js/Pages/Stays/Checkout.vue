@@ -78,19 +78,19 @@ function checkOut(): void {
         <template v-if="screen.done">
             <Done :stay-id="screen.stay.id" :room="screen.stay.room" :guest="screen.stay.guest_name" :code="screen.stay.code" :done="screen.done" />
         </template>
-        <template v-else-if="step === 1">
+        <form v-else-if="step === 1" @submit.prevent="answered && next()">
             <Returns v-model:key-returned="key" v-model:remote-returned="remote" v-model:damages="damages" :lost="screen.lost ?? { key: 0, remote: 0 }" :products="screen.damage_products ?? []" />
             <div class="mt-4 flex justify-end gap-2">
                 <UButton color="neutral" variant="ghost" label="Back to folio" @click="router.visit(route('stays.show', screen.stay.id))" />
-                <UButton label="Next: settle" :disabled="!answered" :loading="loading" @click="next" />
+                <UButton label="Next: settle" :disabled="!answered" :loading="loading" type="submit" />
             </div>
-        </template>
-        <template v-else-if="settle">
+        </form>
+        <form v-else-if="settle" @submit.prevent="canCheckOut && checkOut()">
             <Settle v-model:payment="pay" v-model:claimed="claimed" :settle="settle" :methods="screen.methods ?? []" :loading="loading" />
             <div class="mt-4 flex justify-end gap-2">
                 <UButton color="neutral" variant="ghost" label="Back" @click="step = 1" />
-                <UButton label="Check out guest" :disabled="!canCheckOut" :loading="form.processing" @click="checkOut" />
+                <UButton label="Check out guest" :disabled="!canCheckOut" :loading="form.processing" type="submit" />
             </div>
-        </template>
+        </form>
     </FrontDeskLayout>
 </template>

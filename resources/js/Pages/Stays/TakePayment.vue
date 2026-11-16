@@ -64,6 +64,7 @@ function save(): void {
 <template>
     <UModal v-model:open="open" title="Take payment" :description="`Room ${room} · ${lines.length + (charge ? 1 : 0)} unpaid ${lines.length + (charge ? 1 : 0) === 1 ? 'line' : 'lines'}`" :ui="{ content: 'max-w-md' }">
         <template #body>
+            <form id="take-payment-form" @submit.prevent="save">
             <UAlert v-if="error" class="mb-3" color="error" variant="subtle" icon="i-lucide-triangle-alert" :description="error" />
             <div class="flex flex-col gap-1.5">
                 <MoneyRow v-for="(l, i) in lines" :key="i" :label="l.description" :amount="l.due" />
@@ -71,11 +72,12 @@ function save(): void {
             </div>
             <TotalRow label="Balance due" :amount="due" />
             <PaymentFields v-model="pay" class="mt-4" :methods="methods" :due="due" :guest-deposit="guestDeposit" :errors="form.errors" />
+            </form>
         </template>
         <template #footer>
             <div class="flex w-full justify-end gap-2">
                 <UButton color="neutral" variant="ghost" label="Cancel" @click="open = false" />
-                <UButton label="Save payment" :disabled="!ready" :loading="form.processing" @click="save" />
+                <UButton label="Save payment" :disabled="!ready" :loading="form.processing" type="submit" form="take-payment-form" />
             </div>
         </template>
     </UModal>

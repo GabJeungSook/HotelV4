@@ -3,12 +3,13 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\WelcomeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Phase 0 placeholder. The welcome page (mockup 59) is built in Phase 10.
-Route::get('/', fn () => Inertia::render('Welcome'))->name('welcome');
+// The public welcome page (59).
+Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 require __DIR__.'/auth.php';
 require __DIR__.'/frontdesk.php';

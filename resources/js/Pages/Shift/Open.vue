@@ -94,7 +94,7 @@ function submit(approval?: { approver_id: number; pin: string }): void {
 <template>
     <FrontDeskLayout :title="`Open the ${picked?.name ?? ''} shift`">
         <UAlert v-if="error" color="error" variant="subtle" icon="i-lucide-triangle-alert" class="mb-4" :description="error" />
-        <div class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1">
+        <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="save">
             <section class="rounded-card border border-default bg-default p-5">
                 <h2 class="mb-3 text-base font-semibold text-highlighted">Shift</h2>
                 <OptionTiles v-model="form.definition_id" :options="tiles" label="Shift period" />
@@ -142,9 +142,9 @@ function submit(approval?: { approver_id: number; pin: string }): void {
                         <UTextarea v-model="form.note" :rows="2" class="w-full" />
                     </UFormField>
                 </template>
-                <UButton class="mt-5" size="xl" block :icon="needsApproval ? 'i-lucide-lock' : undefined" label="Open shift" :disabled="!canSave" :loading="form.processing" @click="save" />
+                <UButton class="mt-5" size="xl" block :icon="needsApproval ? 'i-lucide-lock' : undefined" label="Open shift" :disabled="!canSave" :loading="form.processing" type="submit" />
             </section>
-        </div>
+        </form>
         <ApprovalPin
             v-model:open="approving"
             :summary="`Open ${picked?.name ?? ''} instead of the proposed period`"

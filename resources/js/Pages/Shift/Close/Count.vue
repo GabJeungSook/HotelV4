@@ -76,7 +76,7 @@ const draftText = computed(() => ({ idle: 'The pieces are saved as you type.', s
 </script>
 
 <template>
-    <div class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1">
+    <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="confirmCount">
         <section class="overflow-hidden rounded-card border border-default bg-default">
             <table class="dtable w-full">
                 <thead>
@@ -127,10 +127,10 @@ const draftText = computed(() => ({ idle: 'The pieces are saved as you type.', s
                 <p class="mt-3 text-xs text-muted" data-draft-state :data-state="draft">{{ draftText }}</p>
             </section>
             <div>
-                <UButton size="xl" block label="Confirm count" :loading="submit.processing" data-confirm-count @click="confirmCount" />
+                <UButton size="xl" block label="Confirm count" :loading="submit.processing" data-confirm-count type="submit" />
                 <p class="mt-2 text-center text-[13px] text-muted">You cannot change the count after confirming.</p>
                 <UButton class="mt-2" block color="neutral" variant="ghost" label="Not yet — reopen the shift" :loading="notYet.processing" @click="notYet.post(route('shift.close.store'))" />
             </div>
         </div>
-    </div>
+    </form>
 </template>

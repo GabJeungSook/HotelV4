@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useColorMode } from '@vueuse/core';
 import { computed } from 'vue';
 import EmptyState from '../EmptyState.vue';
 import { hideTip, num, showTip } from './chart';
@@ -13,6 +14,7 @@ const props = withDefaults(
     defineProps<{
         hours: string[];
         grid: Partial<Record<Weekday, number[]>>;
+        /** Defaults to "8 AM to 10 PM · darker is busier" from the first and last hour ("brighter" in dark mode, where busy cells are lighter). */
         caption?: string;
         unit?: string;
         /** Full hour names for the tooltip ("9 PM") when the axis uses short ones ("9p"). */
@@ -20,8 +22,20 @@ const props = withDefaults(
         emptyText?: string;
         loading?: boolean;
     }>(),
-    { caption: '8 AM to 10 PM · darker is busier', unit: 'check-ins', hourTitles: undefined, emptyText: 'No check-ins in this period', loading: false },
+    { caption: undefined, unit: 'check-ins', hourTitles: undefined, emptyText: 'No check-ins in this period', loading: false },
 );
+
+const mode = useColorMode();
+const captionText = computed(() => {
+    if (props.caption) {
+        return props.caption;
+    }
+
+    const names = props.hourTitles ?? props.hours;
+    const span = names.length > 1 ? `${names[0]} to ${names[names.length - 1]} · ` : '';
+
+    return `${span}${mode.value === 'dark' ? 'brighter' : 'darker'} is busier`;
+});
 
 const days: Weekday[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const max = computed(() => Math.max(0, ...days.flatMap((d) => props.grid[d] ?? [])));
@@ -41,7 +55,7 @@ function cellText(value: number): string {
         <USkeleton v-if="loading" class="h-[136px] w-full" />
         <EmptyState v-else-if="isEmpty" compact :title="emptyText" />
         <template v-else>
-            <div class="grid gap-0.5 text-[11px] text-muted" :style="{ gridTemplateColumns: `2.25rem repeat(${hours.length}, minmax(0, 1fr))` }" role="grid" :aria-label="caption">
+            <div class="grid gap-0.5 text-[11px] text-muted" :style="{ gridTemplateColumns: `2.25rem repeat(${hours.length}, minmax(0, 1fr))` }" role="grid" :aria-label="captionText">
                 <template v-for="day in days" :key="day">
                     <span class="self-center" role="rowheader">{{ day }}</span>
                     <span
@@ -62,7 +76,7 @@ function cellText(value: number): string {
                 <span aria-hidden="true" />
                 <span v-for="(hour, h) in hours" :key="`l${hour}`" class="text-center" aria-hidden="true">{{ h % 2 === 0 ? hour : '' }}</span>
             </div>
-            <p class="mt-1.5 text-xs text-muted">{{ caption }}</p>
+            <p class="mt-1.5 text-xs text-muted">{{ captionText }}</p>
         </template>
     </div>
 </template>
