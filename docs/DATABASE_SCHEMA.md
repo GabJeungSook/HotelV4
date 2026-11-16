@@ -201,6 +201,7 @@ CREATE TABLE users (
   name VARCHAR(80) NOT NULL,
   username VARCHAR(40) NOT NULL,
   password VARCHAR(255) NOT NULL,
+  must_change_password TINYINT(1) NOT NULL DEFAULT 0,  -- temporary password; added by migration 000033
   pin_hash VARCHAR(255) NULL,                 -- bcrypt of a 4-digit PIN
   role ENUM('owner','admin','supervisor','frontdesk','backoffice','housekeeper','kiosk') NOT NULL,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
@@ -216,6 +217,7 @@ CREATE TABLE users (
 );
 ```
 
+- `must_change_password` is set when an admin or owner creates a user or resets a password with a temporary one (47, 56, owner accounts); the user replaces it at `/password/change` before anything else, then sets a PIN (TRD §4.9; Gab, 16 Nov 2026).
 - A PIN is required for `supervisor`, `admin` and `frontdesk`; it is set by the user at first sign-in and can only be reset (set to `NULL`) by an admin.
 - `last_seen_at` is touched at most once a minute and is used for "housekeepers online" (screen 32).
 - No shift state is stored on users.
@@ -1142,6 +1144,7 @@ File names use the prefix `2026_11_12_` plus a running number so they sort in de
 | 000030 | `create_print_logs_table` | `print_logs` |
 | 000031 | `create_summary_tables` | `summary_days`, `daily_summaries`, `hourly_sales_summaries`, `daily_payment_summaries`, `daily_report_lines` |
 | 000032 | `add_idempotency_key_to_payments_table` | `payments.idempotency_key` (`CHAR(36) NULL`, unique `payments_idempotency_unique`): the take payment form (11) carries a UUID; a repeated key returns the first payment (Gab, 12 Nov 2026) |
+| 000033 | `add_must_change_password_to_users_table` | `users.must_change_password` (`TINYINT(1) NOT NULL DEFAULT 0`): a temporary password must be replaced at first sign-in (Gab, 16 Nov 2026) |
 
 Generated columns and CHECK constraints are added with `DB::statement()` inside the migration, because the schema builder cannot express them.
 

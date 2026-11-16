@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PinController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,8 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+    Route::get('/password/change', [PasswordController::class, 'edit'])->name('password.edit');
+    Route::put('/password/change', [PasswordController::class, 'update'])->name('password.update');
     Route::get('/pin/setup', [PinController::class, 'edit'])->name('pin.edit');
     Route::put('/pin/setup', [PinController::class, 'update'])->name('pin.update');
     Route::post('/pin/unlock', [PinController::class, 'unlock'])->name('pin.unlock');

@@ -234,7 +234,12 @@ it('builds the navigation on the server from the role and the pages that exist',
     ]);
 
     $adminNav = $this->actingAs(Hotel::user('ramil.ortega'))->get('/dashboard')->viewData('page')['props']['nav'];
-    expect(collect($adminNav)->pluck('items')->flatten(1)->pluck('key')->all())->toBe(['dashboard', 'reports']);
+    expect(collect($adminNav)->pluck('items')->flatten(1)->pluck('key')->all())
+        ->toBe(['dashboard', 'attention', 'rooms', 'rates', 'products', 'users', 'settings', 'reports', 'stats']);
+
+    // An owner gets a branch's own pages only after opening it (DESIGN_SYSTEM §6.1).
+    $ownerNav = $this->actingAs(Hotel::user('ramon.alvarez'))->get('/owner')->viewData('page')['props']['nav'];
+    expect(collect($ownerNav)->pluck('items')->flatten(1)->pluck('key')->all())->toBe(['owner', 'branches', 'summary', 'reports', 'stats', 'owners']);
 });
 
 it('shares the open shift without any money', function (): void {
@@ -249,13 +254,13 @@ it('shares the open shift without any money', function (): void {
             ->missing('shift.expected_cash'));
 });
 
-it('shows placeholder homes for pages of later phases', function (string $username, string $url, string $layout): void {
+it('serves the dashboard homes built in Phase 9', function (string $username, string $url, string $component): void {
     $this->actingAs(Hotel::user($username))->get($url)
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component('Placeholder')->where('layout', $layout));
+        ->assertInertia(fn (Assert $page) => $page->component($component));
 })->with([
-    ['ramil.ortega', '/dashboard', 'backoffice'],
-    ['ramon.alvarez', '/owner', 'owner'],
+    ['ramil.ortega', '/dashboard', 'Dashboard/Branch'],
+    ['ramon.alvarez', '/owner', 'Dashboard/Owner'],
 ]);
 
 it('answers the heartbeat for a signed-in user', function (): void {

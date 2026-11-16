@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Enums\Role;
+use App\Models\Branch;
 use App\Models\User;
 use App\Queries\ShiftQuery;
 use App\Services\CurrentBranch;
@@ -54,6 +55,10 @@ class HandleInertiaRequests extends Middleware
             'shift' => fn (): ?array => $this->shift($user),
             'nav' => fn (): array => $user instanceof User ? Navigation::for($user, app(CurrentBranch::class)->branch()) : [],
             'home' => fn (): ?string => $user instanceof User ? route('home', absolute: false) : null,
+            // The branch picker on reports and dashboards (ROADMAP Phase 9): owners only.
+            'ownerBranches' => fn (): array => $user instanceof User && $user->role === Role::Owner
+                ? Branch::query()->withoutGlobalScopes()->orderBy('name')->get(['id', 'name'])->map(fn (Branch $b): array => ['id' => $b->id, 'name' => $b->name])->all()
+                : [],
             'pinLocked' => fn (): bool => $user instanceof User && app(PinGuard::class)->isLocked(EnsureDeviceKey::of($request)),
         ];
     }

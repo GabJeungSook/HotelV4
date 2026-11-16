@@ -472,6 +472,38 @@ trait DayReaders
             }
         }
 
+        // Setup changes (44–48, 55–56, 49): rates, prices, settings, users, rooms and lists (mockup 45:
+        // "Price changes are logged in the audit trail"). Passwords and PINs are never in these rows.
+        if ($type === 'all' || $type === 'other') {
+            $prefixes = ['room.', 'floor.', 'room_type.', 'rate.', 'extension_rate.', 'discount.', 'settings.', 'shift_definition.', 'transfer_reason.',
+                'expense_category.', 'reason.', 'user.', 'product.', 'branch.', 'cleaning.reset', 'owner.'];
+            $setup = AuditLog::query()->withoutGlobalScopes()->where('branch_id', $branchId)->whereBetween('created_at', [$start, $end])
+                ->where(fn ($q) => collect($prefixes)->each(fn (string $p) => $q->orWhere('action', 'like', $p.'%')))
+                ->when($userId !== null, fn ($q) => $q->where('actor_id', $userId))
+                ->get();
+
+            foreach ($setup as $log) {
+                $after = is_array($log->after_json) ? $log->after_json : [];
+                $before = is_array($log->before_json) ? $log->before_json : [];
+                $parts = [];
+                foreach ($after as $key => $value) {
+                    if (is_scalar($value) || $value === null) {
+                        $old = $before[$key] ?? null;
+                        $parts[] = $key.' '.(array_key_exists($key, $before) && (is_scalar($old) || $old === null) && $old !== $value ? var_export($old, true).' → ' : '').var_export($value, true);
+                    }
+                }
+                $rows[] = [
+                    'id' => 'log-'.$log->id,
+                    'at' => $log->created_at->toIso8601String(),
+                    'type' => 'other',
+                    'action' => 'Setup · '.str_replace(['.', '_'], [' ', ' '], $log->action),
+                    'details' => mb_substr(implode(' · ', $parts), 0, 240),
+                    'by' => $names[$log->actor_id] ?? '',
+                    'approved_by' => '',
+                ];
+            }
+        }
+
         usort($rows, fn (array $a, array $b): int => strcmp($a['at'], $b['at']));
 
         return [

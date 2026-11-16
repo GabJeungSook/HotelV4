@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Services\CurrentBranch;
 use App\Services\ShiftCalendar;
+use App\Summaries\SummaryDays;
 use App\Support\Clock;
 use App\Support\Transaction;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -26,12 +27,18 @@ class AppServiceProvider extends ServiceProvider
         // Tracks the outermost action transaction and the writes that must outlive a rollback.
         $this->app->scoped(Transaction::class);
 
+        // Collects the branch-days a transaction made dirty and writes them after it commits.
+        $this->app->scoped(SummaryDays::class);
+
         $this->app->singleton(ShiftCalendar::class, fn (): ShiftCalendar => new ShiftCalendar(Clock::displayTimezone()));
     }
 
     public function boot(): void
     {
         Model::preventLazyLoading(! $this->app->isProduction());
+
+        // Ledger rows and state changes mark their business day for the summary rebuild (TRD §4.11).
+        SummaryDays::listen();
 
         // A guard per computer against guessing many accounts; each account also locks after
         // five wrong passwords for 15 minutes (users.locked_until, TRD §9).

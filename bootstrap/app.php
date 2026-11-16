@@ -6,6 +6,7 @@ use App\Exceptions\DomainException;
 use App\Http\DomainErrorResponse;
 use App\Http\Middleware\EnsureDeviceKey;
 use App\Http\Middleware\EnsureModule;
+use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsurePinSet;
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\EnsureShiftMember;
@@ -29,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             EnsureDeviceKey::class,
             HandleInertiaRequests::class,
+            EnsurePasswordChanged::class,
         ]);
 
         $middleware->alias([

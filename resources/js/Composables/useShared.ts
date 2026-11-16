@@ -25,6 +25,7 @@ export interface SharedProps {
     nav: NavGroup[];
     home: string | null;
     pinLocked: boolean;
+    ownerBranches: { id: number; name: string }[];
     errors: Record<string, string>;
     [key: string]: unknown;
 }

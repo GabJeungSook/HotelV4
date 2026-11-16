@@ -188,23 +188,23 @@ No screens in this phase. Everything is driven by tests.
 
 ## Phase 9 — Admin, owner, dashboards and stats
 
-- [ ] Rooms, floors and room types (44) with the status rules
-- [ ] Rates, extension rates and discounts (45)
-- [ ] Branch settings (46) including shift definitions, payment methods, modules, the stale-shift limit, the VAT block (on or off, rate, TIN, registered name) and the reason lists with their note and manager flags
-- [ ] Users (47): roles, PIN reset, floor assignment, deactivate
-- [ ] Products (48) with price log
-- [ ] Summary tables: `RebuildSummaries` every minute (dirty branch-days recomputed from the ledgers, one transaction per day) and `CheckSummaries` every 10 minutes for today and yesterday; code in `app/Summaries`
-- [ ] `AttentionList`: one class that builds every "Needs attention" row with a severity, a sentence and a route
-- [ ] Needs attention (49) from `AttentionList`: overdue stays, shift open too long, cleaning stuck, failed invariants, a day not yet closed; force close with approval; `ResetCleaning`
-- [ ] Owner dashboard (60) at `/owner`: period switch, cards, sales chart, "Branches now", how guests paid, top of `AttentionList`
-- [ ] Branch dashboard (61) at `/dashboard`: cards, rooms now, sales by hour, the open-shift block for managers, housekeeping today, top of `AttentionList`
-- [ ] Stats (63) at `/stats`: date range with quick choices, grain by range, cards with the same-length comparison, heat grid, shares, bars, front desk table
-- [ ] Dashboard behaviour (TRD §4.11): every figure a deferred prop with a skeleton; partial reload every 30 seconds, skipped while the tab is hidden or a request is in flight; "Could not refresh. Retry"; same-time comparison; no change figure without previous data; short and over never netted
-- [ ] Reports in the admin menu
-- [ ] Owner: branches (55), add branch (56) with `CreateBranch` copy options, open a branch (lands on 61), owner accounts
-- [ ] Owner summary (39) and branch picker on every report, dashboard and Stats
-- [ ] `audit_logs` written for every settings, rate, price and user change
-- [ ] "Branches and permissions" and "Dashboards and summaries" tests in TRD §10
+- [x] Rooms, floors and room types (44) with the status rules
+- [x] Rates, extension rates and discounts (45)
+- [x] Branch settings (46) including shift definitions, payment methods, modules, the stale-shift limit, the VAT block (on or off, rate, TIN, registered name) and the reason lists with their note and manager flags
+- [x] Users (47): roles, PIN reset, floor assignment, deactivate
+- [x] Products (48) with price log
+- [x] Summary tables: `RebuildSummaries` every minute (dirty branch-days recomputed from the ledgers, one transaction per day) and `CheckSummaries` every 10 minutes for today and yesterday; code in `app/Summaries`
+- [x] `AttentionList`: one class that builds every "Needs attention" row with a severity, a sentence and a route
+- [x] Needs attention (49) from `AttentionList`: overdue stays, shift open too long, cleaning stuck, failed invariants, a day not yet closed; force close with approval; `ResetCleaning`
+- [x] Owner dashboard (60) at `/owner`: period switch, cards, sales chart, "Branches now", how guests paid, top of `AttentionList`
+- [x] Branch dashboard (61) at `/dashboard`: cards, rooms now, sales by hour, the open-shift block for managers, housekeeping today, top of `AttentionList`
+- [x] Stats (63) at `/stats`: date range with quick choices, grain by range, cards with the same-length comparison, heat grid, shares, bars, front desk table
+- [x] Dashboard behaviour (TRD §4.11): every figure a deferred prop with a skeleton; partial reload every 30 seconds, skipped while the tab is hidden or a request is in flight; "Could not refresh. Retry"; same-time comparison; no change figure without previous data; short and over never netted
+- [x] Reports in the admin menu
+- [x] Owner: branches (55), add branch (56) with `CreateBranch` copy options, open a branch (lands on 61), owner accounts
+- [x] Owner summary (39) and branch picker on every report, dashboard and Stats
+- [x] `audit_logs` written for every settings, rate, price and user change
+- [x] "Branches and permissions" and "Dashboards and summaries" tests in TRD §10
 
 **Done when:** an owner can create a second branch by copying the first, add rooms, and run a shift there; nothing from one branch is visible to the other branch's admin; switching hourly stays off in settings removes the hourly options from check-in, kiosk and rates; a payment taken at the front desk shows on the branch and owner dashboards within two minutes without a page reload; the dashboard figures for a scripted day equal the ledgers; and `CheckSummaries` logs an error when a summary row is changed by hand.
 

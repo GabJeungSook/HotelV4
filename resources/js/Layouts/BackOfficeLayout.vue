@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import { computed, onMounted } from 'vue';
+import BranchPicker from '@/Components/BranchPicker.vue';
 import ConnectionBar from '@/Components/ConnectionBar.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import { useConnection } from '@/Composables/useConnection';
@@ -23,12 +24,16 @@ onMounted(() => useConnection().start(shared.value.app?.heartbeat ?? 5));
 
 const nav = computed(() => (shared.value.nav?.length ? shared.value.nav : backOfficeNav));
 const branchName = computed(() => props.branch ?? shared.value.branch?.name);
+const isOwner = computed(() => shared.value.auth?.role === 'owner' && (shared.value.ownerBranches?.length ?? 0) > 0);
 const me = computed(() => props.user ?? (shared.value.auth ? { name: shared.value.auth.user.name, role: shared.value.auth.roleLabel } : undefined));
 </script>
 
 <template>
     <AppShell :nav="nav" :current="current" :title="title" :user="me" @sign-out="router.post(route('logout'))">
-        <template #status><StatusLabel v-if="branchName" tone="primary" :label="branchName" /></template>
+        <template #status>
+            <BranchPicker v-if="isOwner" />
+            <StatusLabel v-else-if="branchName" tone="primary" :label="branchName" />
+        </template>
         <template #bars><ConnectionBar /></template>
         <slot />
     </AppShell>

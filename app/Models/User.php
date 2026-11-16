@@ -26,7 +26,7 @@ class User extends Authenticatable
     use HasFactory;
 
     protected $fillable = [
-        'branch_id', 'name', 'username', 'password', 'pin_hash', 'role',
+        'branch_id', 'name', 'username', 'password', 'must_change_password', 'pin_hash', 'role',
         'is_active', 'failed_logins', 'locked_until', 'last_seen_at',
     ];
 
@@ -42,6 +42,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'pin_hash' => 'hashed',
             'role' => Role::class,
+            'must_change_password' => 'boolean',
             'is_active' => 'boolean',
             'locked_until' => 'immutable_datetime',
             'last_seen_at' => 'immutable_datetime',

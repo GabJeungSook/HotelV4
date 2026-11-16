@@ -23,6 +23,9 @@ final class Navigation
 {
     private const FRONT = [Role::Frontdesk, Role::Supervisor];
 
+    /** Pages of one branch: for an owner, shown only once a branch is opened. */
+    private const OPENED_BRANCH_ONLY = ['dashboard', 'attention', 'rooms', 'rates', 'products', 'users', 'settings'];
+
     private const BACK = [Role::Admin, Role::Backoffice, Role::Supervisor, Role::Owner];
 
     /** Every report in the menu (DESIGN_SYSTEM §6.1): back office; admin and owner reach them from the hub (36). */
@@ -52,7 +55,7 @@ final class Navigation
                 ['key' => 'summary', 'label' => 'Owner summary', 'route' => 'owner.summary', 'icon' => 'i-lucide-chart-column', 'roles' => [Role::Owner]],
             ]],
             ['layout' => 'backoffice', 'heading' => 'Overview', 'items' => [
-                ['key' => 'dashboard', 'label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'i-lucide-chart-column', 'roles' => [Role::Admin, Role::Backoffice, Role::Supervisor]],
+                ['key' => 'dashboard', 'label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'i-lucide-chart-column', 'roles' => [Role::Admin, Role::Backoffice, Role::Supervisor, Role::Owner]],
                 ['key' => 'attention', 'label' => 'Attention', 'route' => 'admin.exceptions', 'icon' => 'i-lucide-triangle-alert', 'roles' => [Role::Admin, Role::Supervisor, Role::Owner]],
             ]],
             ['layout' => 'admin', 'heading' => 'Setup', 'items' => [
@@ -106,7 +109,7 @@ final class Navigation
 
                 $items[] = [
                     'key' => $item['key'],
-                    'label' => $item['label'],
+                    'label' => $user->role === Role::Owner && $item['key'] === 'dashboard' ? 'Branch dashboard' : $item['label'],
                     'route' => route($item['route'], absolute: false),
                     'icon' => $item['icon'],
                     'subtitle' => $item['subtitle'] ?? null,
@@ -157,6 +160,11 @@ final class Navigation
     private static function visible(array $item, User $user, ?Branch $branch): bool
     {
         if (! in_array($user->role, $item['roles'], true) || ! Route::has($item['route'])) {
+            return false;
+        }
+
+        // An owner gets a branch's own pages (61, 44–49) only after opening it (DESIGN_SYSTEM §6.1).
+        if ($user->role === Role::Owner && $branch === null && in_array($item['key'], self::OPENED_BRANCH_ONLY, true)) {
             return false;
         }
 

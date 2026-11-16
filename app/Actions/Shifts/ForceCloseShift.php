@@ -67,7 +67,8 @@ final class ForceCloseShift
             $expected = $this->close->expected($shift);
             $counted = $count->total_cash ?? Money::zero();
             $variance = $this->cash->variance($counted, $expected);
-            $shift->update(['expected_cash' => $expected, 'counted_cash' => $counted, 'variance_amount' => $variance]);
+            // Marked force-closed with the variance: a force close needs no variance note (shift_sessions_variance_chk).
+            $shift->update(['expected_cash' => $expected, 'counted_cash' => $counted, 'variance_amount' => $variance, 'is_force_closed' => true]);
 
             if (! $variance->isZero()) {
                 Approval::query()->create([
