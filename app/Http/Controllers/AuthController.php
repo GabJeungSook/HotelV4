@@ -61,6 +61,8 @@ final class AuthController extends Controller
                 ['src' => '/images/photos/lobby.jpg', 'srcset' => '/images/photos/lobby-1200.jpg 1200w, /images/photos/lobby.jpg 2000w'],
             ],
             'facts' => $branch === null ? null : $today->signInFacts($branch->id),
+            // Dev quick sign-in buttons, developer machine only (routes/web.php `dev.login`).
+            'dev' => app()->environment('local'),
         ]);
     }
 

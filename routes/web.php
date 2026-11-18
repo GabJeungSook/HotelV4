@@ -2,9 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Enums\Role;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WelcomeController;
+use App\Models\User;
+use App\Support\Clock;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -40,4 +45,30 @@ if (app()->environment('local')) {
             'layouts' => $layouts,
         ]);
     })->name('dev.components');
+
+    // Dev quick sign-in: become a seeded user of any role, no password. Developer machine only;
+    // the buttons for it show on the sign-in page only when the app runs in the local environment.
+    Route::get('/dev/login/{role}', function (Request $request, string $role, Clock $clock) {
+        $target = Role::tryFrom($role);
+        abort_unless($target instanceof Role, 404);
+
+        $user = User::query()->withoutGlobalScopes()
+            ->where('role', $target)
+            ->where('is_active', true)
+            ->orderByRaw('pin_hash is null') // prefer a user who already has a PIN set
+            ->orderBy('id')
+            ->first();
+        abort_unless($user instanceof User, 404, "No seeded {$role} user to sign in as.");
+
+        Auth::login($user);
+        $request->session()->regenerate();
+        $request->session()->put('homi.signed_in_at', $clock->now()->toIso8601String());
+
+        $response = redirect()->route('home');
+        if ($user->branch_id !== null && $target !== Role::Owner && $target !== Role::Kiosk) {
+            $response->withCookie(cookie(AuthController::BRANCH_COOKIE, (string) $user->branch_id, 60 * 24 * 365, secure: (bool) config('session.secure'), httpOnly: true, sameSite: 'lax'));
+        }
+
+        return $response;
+    })->name('dev.login');
 }

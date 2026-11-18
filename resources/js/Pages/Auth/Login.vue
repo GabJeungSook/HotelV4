@@ -21,7 +21,19 @@ const props = defineProps<{
         arriving: number;
         shift: { period_name: string; opened_at: string | null } | null;
     } | null;
+    dev?: boolean;
 }>();
+
+// Dev quick sign-in (local only) — one click to become any role, handled by routes/web.php.
+const devRoles = [
+    { role: 'owner', label: 'Owner' },
+    { role: 'admin', label: 'Admin' },
+    { role: 'supervisor', label: 'Supervisor' },
+    { role: 'frontdesk', label: 'Front desk' },
+    { role: 'backoffice', label: 'Back office' },
+    { role: 'housekeeper', label: 'Housekeeper' },
+    { role: 'kiosk', label: 'Kiosk' },
+];
 
 const { flash } = useShared();
 const form = useForm({ username: '', password: '' });
@@ -89,6 +101,21 @@ function submit(): void {
                     <UIcon v-else name="i-solar-wi-fi-router-bold-duotone" class="size-3.5 text-bad" aria-hidden="true" />
                     {{ online ? 'Connected' : 'No connection' }}<template v-if="place"> · {{ place }}</template>
                 </span>
+            </div>
+
+            <div v-if="dev" class="hm-rise mt-6 rounded-2xl border border-dashed border-primary-line bg-primary-50/60 p-4" style="--hm-step: 6">
+                <p class="mb-2.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold tracking-[0.08em] text-primary-ink uppercase">
+                    <UIcon name="i-solar-bolt-bold-duotone" class="size-3.5" aria-hidden="true" />Dev quick sign-in
+                </p>
+                <div class="flex flex-wrap justify-center gap-2">
+                    <a
+                        v-for="d in devRoles"
+                        :key="d.role"
+                        :href="`/dev/login/${d.role}`"
+                        class="hm-focus rounded-full border border-primary-line bg-default px-3 py-1.5 text-[12.5px] font-medium text-primary-ink transition-colors hover:bg-primary hover:text-on-primary"
+                        >{{ d.label }}</a
+                    >
+                </div>
             </div>
         </div>
     </div>
