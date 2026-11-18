@@ -24,7 +24,7 @@ it('goes from an empty database to a branch on the welcome page', function (): v
     expect(User::query()->count())->toBe(0)->and(Branch::query()->count())->toBe(0);
 
     // Before anything exists, the public pages still render.
-    $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Welcome')->where('branch', null)->where('types', []));
+    $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Welcome'));
     $this->get('/login')->assertOk();
 
     // The first owner, on the server.
@@ -51,9 +51,9 @@ it('goes from an empty database to a branch on the welcome page', function (): v
     $temporary = (string) session('inertia.flash_data.created.password');
     expect($branch->status)->toBe(BranchStatus::SettingUp)->and($temporary)->not->toBe('');
 
-    // A branch still setting up is not on the welcome page.
+    // The public landing renders throughout, signed out.
     $this->post('/logout');
-    $this->get('/')->assertInertia(fn (Assert $page) => $page->where('branch', null));
+    $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Welcome'));
 
     // The first admin: temporary password → change it → set a PIN → home.
     $this->post('/login', ['username' => 'noel', 'password' => $temporary])->assertRedirect();
@@ -83,14 +83,8 @@ it('goes from an empty database to a branch on the welcome page', function (): v
     $this->get('/admin/users')->assertOk();
     $this->get('/dashboard')->assertOk();
 
-    // 59: a visitor sees the new branch with its lowest prices and reaches the sign-in from it.
+    // 59: the public landing and the sign-in both render once the branch is live.
     $this->post('/logout');
-    $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->where('branch.name', 'Hotel Bagong Araw')
-        ->where('branch.place', 'Koronadal City')
-        ->has('types', 1)
-        ->where('types.0.name', 'Standard')
-        ->where('types.0.price', ['amount' => 25000, 'hours' => 6])
-        ->where('types.0.overnight', $branch->fresh()?->overnight_enabled ? 70000 : null));
+    $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Welcome'));
     $this->get('/login')->assertOk();
 });

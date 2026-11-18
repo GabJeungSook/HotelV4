@@ -1,146 +1,95 @@
-<!-- Mockup 59 — public front page. A professional, multi-section marketing layout: sticky nav with
-     the 3D Homi mark, a two-column hero with a floating info card, the rooms as service cards, a
-     "why stay" band with live facts, a 3-step process, a dark amenities strip, an FAQ accordion, a
-     call-to-action band and a footer. Data (branch, room types, live prices) is unchanged; light
-     only; every motion stops under reduced motion. -->
+<!-- Mockup 59 — public front page: the HOMI product landing, in a professional multi-section layout.
+     Sticky nav with the 2D Homi wordmark, a two-column hero led by a real dashboard screenshot, the
+     features, one end-to-end flow, why hotels switch (dark), the system in action (real screens),
+     the channels, an about note, a call-to-action and a footer. Light only; scroll-reveal, hero and
+     hover animations all stop under reduced motion. -->
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import HomiLogo from '@/Components/HomiLogo.vue';
-import { formatMoney } from '@/Composables/useMoney';
 import { useShared } from '@/Composables/useShared';
 
-interface RoomTypeCard {
-    id: number;
-    name: string;
-    line: string | null;
-    photo: string | null;
-    price: { amount: number; hours: number } | null;
-    overnight: number | null;
-}
-
-const props = defineProps<{
-    headline: string;
-    subline: string;
-    hero: { src: string; srcset: string }[];
-    branches: { id: number; name: string }[];
-    branch: { id: number; name: string; address: string; place: string; deposit: { name: string; amount: number } | null; methods?: string[] } | null;
-    types: RoomTypeCard[];
-    credits: { file: string; by: string; url: string }[];
-    year: number;
-}>();
+const FB = 'https://www.facebook.com/profile.php?id=61578393755918';
+const MAIL = 'mailto:homi@gmail.com';
+const img = (n: string) => `/images/landing/${n}`;
 
 const { props: shared } = useShared();
 const signedIn = computed(() => shared.value.auth !== null);
 const homeUrl = computed(() => shared.value.home ?? route('home'));
 
-const eyebrow = computed(() => (props.branch ? `${props.branch.place} · Open 24 hours` : 'Open 24 hours'));
-const words = computed(() => props.headline.split(/\s+/).filter(Boolean));
-
-const WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
-const heading = computed(() => {
-    const n = props.types.length;
-    const word = WORDS[n];
-
-    return word ? `${word} ${n === 1 ? 'way' : 'ways'} to stay` : 'Ways to stay';
-});
-
-const depositLine = computed(() => {
-    const d = props.branch?.deposit;
-
-    return d ? `A ${formatMoney(d.amount, 'tile')} ${d.name.toLowerCase()} deposit is added at check-in and returned when you leave.` : null;
-});
-
-const METHOD: Record<string, string> = { cash: 'Cash', gcash: 'GCash', card: 'Card' };
-const payWords = computed(() => {
-    const list = (props.branch?.methods ?? ['cash']).map((m) => METHOD[m]).filter(Boolean);
-
-    return list.length <= 1 ? (list[0] ?? 'Cash') : `${list.slice(0, -1).join(', ')} or ${list[list.length - 1]}`;
-});
-
-const lowest = computed(() => {
-    const priced = props.types.filter((t) => t.price !== null) as (RoomTypeCard & { price: { amount: number; hours: number } })[];
-
-    return priced.length ? priced.reduce((a, b) => (b.price.amount < a.price.amount ? b : a)) : null;
-});
-
-function hoursLabel(h: number): string {
-    return h === 1 ? '1 hour' : `${h} hours`;
-}
-
-const facts = computed(() => [
-    { icon: 'i-solar-clock-circle-bold-duotone', title: 'Open 24 hours', text: 'Walk in any time' },
-    ...(lowest.value ? [{ icon: 'i-solar-bed-bold-duotone', title: `From ${formatMoney(lowest.value.price.amount, 'tile')}`, text: `${hoursLabel(lowest.value.price.hours)}, ${lowest.value.name} room` }] : []),
-    { icon: 'i-solar-banknote-2-bold-duotone', title: payWords.value, text: 'Pay at the front desk' },
-    ...(props.branch?.deposit ? [{ icon: 'i-solar-key-bold-duotone', title: `${formatMoney(props.branch.deposit.amount, 'tile')} ${props.branch.deposit.name.toLowerCase()} deposit`, text: 'Returned when you leave' }] : []),
-]);
-
-function tags(line: string | null): string[] {
-    return (line ?? '')
-        .replace(/\.$/, '')
-        .split(/,\s*|\s+and\s+/)
-        .map((t) => t.trim())
-        .filter(Boolean)
-        .slice(0, 3)
-        .map((t) => t.charAt(0).toUpperCase() + t.slice(1));
-}
-
-const steps = [
-    { n: '01', icon: 'i-solar-bed-bold-duotone', title: 'Choose your room', text: 'Pick a room type and how many hours — at the lobby kiosk or the front desk.' },
-    { n: '02', icon: 'i-solar-banknote-2-bold-duotone', title: 'Pay at the desk', text: 'Cash or GCash. Your slip carries your stay code — no account, no booking.' },
-    { n: '03', icon: 'i-solar-key-bold-duotone', title: 'Extend or check out', text: 'Add hours any time. Return the key and remote to get your deposit back.' },
+const features = [
+    {
+        icon: 'i-solar-widget-5-bold-duotone',
+        title: 'Your whole hotel in one system',
+        body: 'Rooms, guests, bookings, front desk, and sales live together — no more jumping between notebooks, chat threads, and three versions of the same spreadsheet.',
+        points: ['Real-time room status and availability', 'Guest profiles and stay history', 'Live sales, occupancy, and revenue'],
+    },
+    {
+        icon: 'i-solar-chart-2-bold-duotone',
+        title: 'Reports in seconds, not hours',
+        body: 'The end-of-shift scramble is over. HOMI builds the numbers as the day happens, so a Z-report, a daily sales summary, or occupancy is one tap away — and it always reconciles.',
+        points: ['Shift and daily reports built automatically', 'Occupancy, ADR, and RevPAR at a glance', 'Every peso traces back to a real record'],
+    },
+    {
+        icon: 'i-solar-smartphone-bold-duotone',
+        title: 'Housekeeping on their phones',
+        body: 'Room boys see what to clean and in what order — prioritised by checkout time — straight from a phone. The front desk sees a room go ready the moment it is done.',
+        points: ['Tasks pushed by checkout schedule', 'Live status: pending, cleaning, ready', 'No radios, no sticky notes, no guessing'],
+    },
+    {
+        icon: 'i-solar-point-on-map-bold-duotone',
+        title: 'A lobby kiosk that skips the queue',
+        body: 'Guests check in and out themselves at a HOMI kiosk — scan, confirm, and go. The front desk stays free for the moments that actually need a person.',
+        points: ['Self check-in and check-out', 'Smoother flow at peak hours', 'Faster room turnover'],
+    },
+    {
+        icon: 'i-solar-bolt-bold-duotone',
+        title: 'Automation that frees your team',
+        body: 'HOMI handles the routine — the counting, the posting, the reconciling — so your people spend their shift on guests and service instead of paperwork.',
+        points: ['Smarter day-to-day operations', 'Fewer manual errors', 'Decisions backed by live data'],
+    },
 ];
 
-const amenities = computed(() => [
-    { icon: 'i-solar-snowflake-bold-duotone', title: 'Air-conditioned', text: 'Every room, always cool.' },
-    { icon: 'i-solar-bath-bold-duotone', title: 'Private bathroom', text: 'Hot and cold water.' },
-    { icon: 'i-solar-hanger-2-bold-duotone', title: 'Fresh linen', text: 'Changed for every guest.' },
-    { icon: 'i-solar-clock-circle-bold-duotone', title: 'Open 24/7', text: 'The desk is always staffed.' },
-    { icon: 'i-solar-banknote-2-bold-duotone', title: `${payWords.value} accepted`, text: 'Pay at the front desk.' },
-    { icon: 'i-solar-shield-check-bold-duotone', title: 'Private & secure', text: 'Discreet and well-kept.' },
-]);
+const benefits = [
+    { icon: 'i-solar-users-group-rounded-bold-duotone', title: 'Less manpower', text: 'One system does the work that used to take a stack of logbooks and a full team.' },
+    { icon: 'i-solar-bolt-bold-duotone', title: 'More efficiency', text: 'Check-ins, reports, and turnover that used to take hours take seconds.' },
+    { icon: 'i-solar-shield-check-bold-duotone', title: 'Fewer errors', text: 'Money is written once and never overwritten, so the books always add up.' },
+    { icon: 'i-solar-heart-bold-duotone', title: 'Happier guests', text: 'Shorter waits, smoother service, and no "we have no record of your booking."' },
+    { icon: 'i-solar-cloud-bold-duotone', title: 'Cloud-based', text: 'Reach your hotel from anywhere, on any device, at any time.' },
+    { icon: 'i-solar-lock-keyhole-bold-duotone', title: 'Secure & reliable', text: 'Enterprise-grade security and an audit trail you can trust.' },
+];
 
-const points = computed(() => [
-    'No booking needed — walk in any time.',
-    `Pay by ${payWords.value} at the front desk.`,
-    'Rooms by the hour or overnight.',
-    ...(props.branch?.deposit ? ['Your key deposit is returned at checkout.'] : ['A private bathroom and fresh linen in every room.']),
-]);
+const channels = [
+    { icon: 'i-solar-smartphone-bold-duotone', title: 'Mobile app', text: 'For staff on the move and guests on their own phones.' },
+    { icon: 'i-solar-monitor-bold-duotone', title: 'Web browser', text: 'The full back office and front desk, nothing to install.' },
+    { icon: 'i-solar-point-on-map-bold-duotone', title: 'Lobby kiosk', text: 'Self-service check-in and check-out, embedded in the system.' },
+];
 
-const faqs = computed(() => [
-    { label: 'Do I need a reservation?', content: 'No. Walk in any time — the front desk is open 24 hours. Just pick a room and how long you’ll stay.' },
-    { label: 'How do I pay?', content: `${payWords.value} at the front desk. There is no online payment.` },
-    ...(props.branch?.deposit && depositLine.value ? [{ label: 'Is there a deposit?', content: depositLine.value }] : []),
-    { label: 'Can I extend my stay?', content: 'Yes — add hours any time at the desk. Just let the front desk know before your time is up.' },
-    { label: 'What’s in every room?', content: 'Air-conditioning, a private bathroom with hot water, and fresh linen.' },
-]);
-
-const logo3d = '/images/landing/homi-19.jpg';
+// Real screens from the running system, for the "see it in action" gallery.
+const shots = [
+    { image: 'app-dashboard.jpg', label: 'Owner dashboard', text: 'Sales, occupancy and what needs attention — across every branch, live.' },
+    { image: 'app-summary.jpg', label: 'Owner summary', text: 'Sales, net, expenses and occupancy by branch, for any period.' },
+    { image: 'app-stats.jpg', label: 'Stats', text: 'Trends, busiest hours and what guests choose, at a glance.' },
+];
 
 const nav = [
-    { label: 'Rooms', href: '#rooms' },
+    { label: 'Features', href: '#features' },
     { label: 'How it works', href: '#how' },
-    { label: 'Why us', href: '#why' },
-    { label: 'FAQ', href: '#faq' },
-    { label: 'Find us', href: '#find-us' },
+    { label: 'Why HOMI', href: '#why' },
+    { label: 'Contact', href: '#contact' },
 ];
 
-const branchItems = computed(() => props.branches.map((b) => ({ label: b.name, value: b.id })));
-function pickBranch(id: number): void {
-    router.get(route('welcome'), { branch: id }, { preserveScroll: true, preserveState: false });
-}
-
-const aboutPhoto = computed(() => props.types.find((t) => t.photo)?.photo ?? props.hero[0]?.src ?? null);
-
 const scrolled = ref(false);
+const activeId = ref('');
 const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let io: IntersectionObserver | null = null;
+let reveal: IntersectionObserver | null = null;
+let spy: IntersectionObserver | null = null;
 
 function onScroll(): void {
     scrolled.value = window.scrollY > 8;
 }
 
-// Smooth-scroll in-page anchors (nav, hero, footer); the window is the scroller, so do it in JS.
+// Smooth-scroll in-page anchors, offset for the sticky nav.
 function onAnchorClick(e: MouseEvent): void {
     const link = (e.target as HTMLElement)?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
     if (!link) return;
@@ -148,7 +97,7 @@ function onAnchorClick(e: MouseEvent): void {
     const target = id ? document.getElementById(id) : null;
     if (!target) return;
     e.preventDefault();
-    const top = id === 'top' ? 0 : target.getBoundingClientRect().top + window.scrollY - 84;
+    const top = id === 'top' ? 0 : target.getBoundingClientRect().top + window.scrollY - 80;
     window.scrollTo({ top: Math.max(0, top), behavior: reduced ? 'auto' : 'smooth' });
     history.replaceState(null, '', `#${id}`);
 }
@@ -159,330 +108,253 @@ onMounted(() => {
     document.addEventListener('click', onAnchorClick);
 
     if (!reduced) {
-        io = new IntersectionObserver(
+        reveal = new IntersectionObserver(
             (entries) => {
                 for (const entry of entries) {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('in');
-                        io?.unobserve(entry.target);
+                        reveal?.unobserve(entry.target);
                     }
                 }
             },
             { rootMargin: '0px 0px -10% 0px', threshold: 0.12 },
         );
-        document.querySelectorAll('[data-reveal]').forEach((el) => io?.observe(el));
+        document.querySelectorAll('[data-reveal]').forEach((el) => reveal?.observe(el));
     } else {
         document.querySelectorAll('[data-reveal]').forEach((el) => el.classList.add('in'));
     }
+
+    spy = new IntersectionObserver((entries) => entries.forEach((e) => e.isIntersecting && (activeId.value = e.target.id)), { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    document.querySelectorAll('section[id]').forEach((el) => spy?.observe(el));
 });
 
 onBeforeUnmount(() => {
     window.removeEventListener('scroll', onScroll);
     document.removeEventListener('click', onAnchorClick);
-    io?.disconnect();
+    reveal?.disconnect();
+    spy?.disconnect();
 });
 </script>
 
 <template>
-    <Head :title="branch?.name ?? 'Welcome'" />
+    <Head title="HOMI — the smarter way to run your hotel" />
     <div id="top" class="hm-light min-h-dvh scroll-smooth bg-default font-sans text-default">
-        <!-- Sticky nav with the 3D Homi mark -->
+        <!-- Sticky nav -->
         <header
             class="sticky top-0 z-50 border-b transition-[background-color,box-shadow,border-color] duration-300"
             :class="scrolled ? 'border-default bg-default/90 shadow-xs backdrop-blur-md' : 'border-transparent bg-default'"
         >
             <div class="mx-auto flex h-[72px] max-w-[1200px] items-center gap-6 px-6 max-[600px]:h-16 max-[600px]:px-4">
-                <a href="#top" class="hm-focus shrink-0 rounded" aria-label="Home">
-                    <span class="block h-11 w-[116px] overflow-hidden max-[600px]:h-9 max-[600px]:w-[96px]">
-                        <img :src="logo3d" alt="Homi" class="size-full object-cover" style="object-position: center 50%" />
-                    </span>
-                </a>
+                <a href="#top" class="hm-focus shrink-0 rounded" aria-label="HOMI home"><HomiLogo variant="blue" :width="104" :height="32" /></a>
                 <nav class="ms-auto hidden items-center gap-0.5 md:flex" aria-label="Main">
-                    <a v-for="n in nav" :key="n.href" :href="n.href" class="nav-link hm-focus relative rounded-lg px-3 py-2 text-[14px] font-medium text-default transition-colors hover:text-primary">{{ n.label }}</a>
+                    <a
+                        v-for="n in nav"
+                        :key="n.href"
+                        :href="n.href"
+                        class="nav-link hm-focus relative rounded-lg px-3 py-2 text-[14px] font-medium transition-colors"
+                        :class="activeId === n.href.slice(1) ? 'text-primary' : 'text-default hover:text-primary'"
+                        >{{ n.label }}</a
+                    >
                 </nav>
-                <UButton
-                    v-if="signedIn"
-                    :as="Link"
-                    :href="homeUrl"
-                    label="Dashboard"
-                    icon="i-solar-widget-5-bold-duotone"
-                    size="lg"
-                    class="ms-auto rounded-full md:ms-2"
-                    data-test="welcome-dashboard"
-                />
-                <UButton
-                    v-else
-                    :as="Link"
-                    :href="route('login')"
-                    label="Staff sign in"
-                    icon="i-solar-user-bold-duotone"
-                    size="lg"
-                    class="ms-auto rounded-full md:ms-2"
-                    data-test="welcome-sign-in"
-                />
+                <UButton v-if="signedIn" :as="Link" :href="homeUrl" label="Dashboard" icon="i-solar-widget-5-bold-duotone" size="lg" class="ms-auto rounded-full md:ms-2" data-test="welcome-dashboard" />
+                <UButton v-else :as="Link" :href="route('login')" label="Staff sign in" icon="i-solar-user-bold-duotone" size="lg" class="ms-auto rounded-full md:ms-2" data-test="welcome-sign-in" />
             </div>
         </header>
 
         <!-- Hero -->
         <section class="relative overflow-hidden bg-gradient-to-b from-homi-50 to-default">
-            <span aria-hidden="true" class="pointer-events-none absolute -top-24 -right-24 size-[460px] rounded-full bg-primary/10 blur-3xl" />
-            <div class="mx-auto grid max-w-[1200px] items-center gap-12 px-6 py-16 max-[600px]:px-4 max-[600px]:py-10 lg:grid-cols-[1.05fr_1fr] lg:py-24">
+            <span aria-hidden="true" class="pointer-events-none absolute -top-28 -right-24 size-[500px] rounded-full bg-primary/10 blur-3xl" />
+            <div class="mx-auto grid max-w-[1200px] items-center gap-12 px-6 py-16 max-[600px]:px-4 max-[600px]:py-10 lg:grid-cols-[1.02fr_1fr] lg:py-24">
                 <div class="max-w-[560px]">
                     <span class="hm-rise inline-flex items-center gap-2 rounded-full border border-primary-line bg-default px-3.5 py-1.5 text-[12.5px] font-semibold text-primary-ink shadow-xs">
-                        <span class="size-1.5 rounded-full bg-primary" aria-hidden="true" />{{ eyebrow }}
+                        <span class="size-1.5 rounded-full bg-primary" aria-hidden="true" />Hotel Solution Software
                     </span>
-                    <h1 class="mt-5 text-[clamp(2.3rem,5.2vw,3.7rem)] leading-[1.04] font-semibold tracking-[-0.035em] text-highlighted" :aria-label="headline">
-                        <template v-for="(w, i) in words" :key="`${w}-${i}`"
-                            ><span class="hm-word" :class="i === words.length - 1 ? 'text-primary' : ''" :style="{ '--hm-step': i }" aria-hidden="true">{{ w }}</span>{{ i < words.length - 1 ? ' ' : '' }}</template
-                        >
+                    <h1 class="hm-rise mt-5 text-[clamp(2.3rem,5.2vw,3.7rem)] leading-[1.04] font-semibold tracking-[-0.035em] text-highlighted" style="--hm-step: 1">
+                        The smarter way to run your <span class="text-primary">hotel.</span>
                     </h1>
-                    <p class="hm-rise mt-5 max-w-[480px] text-[1.05rem] leading-[1.6] text-muted" style="--hm-step: 5">{{ subline }}</p>
-
-                    <USelect
-                        v-if="branches.length > 1 && branch"
-                        :model-value="branch.id"
-                        :items="branchItems"
-                        aria-label="Branch"
-                        size="lg"
-                        class="hm-rise mt-6 w-72"
-                        style="--hm-step: 5"
-                        data-test="welcome-branch"
-                        @update:model-value="pickBranch($event as number)"
-                    />
-
-                    <div class="hm-rise mt-7 flex flex-wrap items-center gap-3" style="--hm-step: 6">
-                        <UButton href="#rooms" size="xl" label="See rooms & rates" trailing-icon="i-solar-alt-arrow-right-linear" class="rounded-full px-6" />
-                        <UButton href="#how" size="xl" variant="soft" color="neutral" icon="i-solar-play-circle-bold" label="How a stay works" class="rounded-full" />
+                    <p class="hm-rise mt-5 max-w-[480px] text-[1.05rem] leading-[1.6] text-muted" style="--hm-step: 2">
+                        Front desk, housekeeping, kiosk, bookings, and reports — one system that means less manpower, more efficiency, and happier guests.
+                    </p>
+                    <div class="hm-rise mt-7 flex flex-wrap items-center gap-3" style="--hm-step: 3">
+                        <UButton href="#how" size="xl" label="See how it works" trailing-icon="i-solar-alt-arrow-right-linear" class="rounded-full px-6" />
+                        <UButton :as="Link" :href="route('login')" size="xl" variant="soft" color="neutral" icon="i-solar-user-bold-duotone" label="Staff sign in" class="rounded-full" />
                     </div>
-
-                    <dl class="hm-rise mt-10 flex flex-wrap gap-x-8 gap-y-4" style="--hm-step: 7" data-test="welcome-facts">
-                        <div v-for="f in facts" :key="f.title" class="flex items-center gap-2.5">
-                            <span class="grid size-9 shrink-0 place-items-center rounded-full bg-primary-50"><UIcon :name="f.icon" class="size-[18px] text-primary" aria-hidden="true" /></span>
-                            <div>
-                                <dt class="text-[13px] leading-tight font-semibold text-highlighted">{{ f.title }}</dt>
-                                <dd class="text-[11.5px] text-muted">{{ f.text }}</dd>
-                            </div>
+                    <dl class="hm-rise mt-10 flex flex-wrap gap-x-8 gap-y-4" style="--hm-step: 4">
+                        <div v-for="c in channels" :key="c.title" class="flex items-center gap-2.5">
+                            <span class="grid size-9 shrink-0 place-items-center rounded-full bg-primary-50"><UIcon :name="c.icon" class="size-[18px] text-primary" aria-hidden="true" /></span>
+                            <dt class="text-[13.5px] font-semibold text-highlighted">{{ c.title }}</dt>
                         </div>
                     </dl>
                 </div>
 
-                <div class="hm-rise relative" style="--hm-step: 3">
-                    <div class="relative aspect-[4/3] overflow-hidden rounded-[28px] border border-default shadow-(--hm-shadow-lift)">
-                        <img :src="hero[0]?.src" :srcset="hero[0]?.srcset" sizes="(max-width: 1024px) 100vw, 45vw" alt="" class="hm-drift size-full object-cover" />
-                        <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" aria-hidden="true" />
-                    </div>
-                    <div class="hm-floaty absolute -bottom-5 -left-5 flex items-center gap-3 rounded-2xl border border-default bg-default p-3.5 pe-5 shadow-(--hm-shadow-float) max-[600px]:-left-2 max-[600px]:-bottom-3">
-                        <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-on-primary"><UIcon name="i-solar-clock-circle-bold-duotone" class="size-6" aria-hidden="true" /></span>
-                        <div>
-                            <b class="block text-[14px] leading-tight font-semibold text-highlighted">Open 24 hours</b>
-                            <span class="text-[12px] text-muted">Walk in any time — no booking</span>
+                <div class="hm-rise relative" style="--hm-step: 2">
+                    <div class="overflow-hidden rounded-2xl border border-default shadow-(--hm-shadow-lift)">
+                        <div class="flex items-center gap-1.5 border-b border-default bg-muted px-4 py-2.5">
+                            <span class="size-2.5 rounded-full bg-control-dash" aria-hidden="true" />
+                            <span class="size-2.5 rounded-full bg-control-dash" aria-hidden="true" />
+                            <span class="size-2.5 rounded-full bg-control-dash" aria-hidden="true" />
+                            <span class="ms-3 text-[11.5px] text-muted">HOMI · Owner dashboard</span>
                         </div>
+                        <img :src="img('app-dashboard.jpg')" width="1516" height="784" alt="The HOMI owner dashboard: sales, occupancy and attention across branches" class="block w-full" />
                     </div>
-                    <div v-if="lowest" class="hm-floaty absolute -top-4 -right-3 rounded-2xl border border-default bg-default px-4 py-2.5 shadow-(--hm-shadow-float) max-[900px]:hidden" style="animation-delay: -3s">
-                        <span class="text-[11px] font-medium text-muted">From</span>
-                        <b class="ms-1 text-[18px] font-semibold tracking-[-0.02em] tabular text-highlighted">{{ formatMoney(lowest.price.amount, 'tile') }}</b>
-                        <span class="text-[12px] text-muted"> / {{ hoursLabel(lowest.price.hours) }}</span>
+                    <div class="hm-floaty absolute -bottom-5 -left-5 flex items-center gap-3 rounded-2xl border border-default bg-default p-3.5 pe-5 shadow-(--hm-shadow-float) max-[600px]:-bottom-3 max-[600px]:-left-2">
+                        <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-on-primary"><UIcon name="i-solar-refresh-circle-bold-duotone" class="size-6" aria-hidden="true" /></span>
+                        <div>
+                            <b class="block text-[14px] leading-tight font-semibold text-highlighted">Live, always</b>
+                            <span class="text-[12px] text-muted">Numbers refresh as the day happens</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Rooms -->
-        <section id="rooms" class="scroll-mt-24 bg-default py-20 max-[600px]:py-14">
-            <div class="mx-auto max-w-[1200px] px-6 max-[600px]:px-4">
-                <div data-reveal class="sr mb-10 flex items-end justify-between gap-6 max-[700px]:flex-col max-[700px]:items-start">
-                    <div>
-                        <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">Our rooms</p>
-                        <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-highlighted">{{ heading }}</h2>
-                        <p class="mt-2.5 max-w-[480px] text-[15px] text-muted">Every room has air-conditioning, a private bathroom and fresh linen. Pay by the hour or overnight.</p>
-                    </div>
-                    <small v-if="depositLine" class="max-w-[280px] rounded-xl bg-muted px-4 py-3 text-right text-[12.5px] text-muted max-[700px]:text-left" data-test="welcome-deposit">{{ depositLine }}</small>
-                </div>
+        <!-- Trust strip -->
+        <section class="border-y border-default bg-muted">
+            <div class="mx-auto flex max-w-[1200px] flex-wrap items-center justify-center gap-x-10 gap-y-3 px-6 py-5 text-[13.5px] font-medium text-muted max-[600px]:px-4">
+                <span class="inline-flex items-center gap-2"><UIcon name="i-solar-point-on-map-bold-duotone" class="size-[18px] text-primary" aria-hidden="true" />Now with kiosk integration</span>
+                <span class="hidden h-4 w-px bg-default sm:block" />
+                <span class="inline-flex items-center gap-2"><UIcon name="i-solar-buildings-2-bold-duotone" class="size-[18px] text-primary" aria-hidden="true" />Built for hotels, inns &amp; pension houses</span>
+                <span class="hidden h-4 w-px bg-default sm:block" />
+                <span class="inline-flex items-center gap-2"><UIcon name="i-solar-cloud-bold-duotone" class="size-[18px] text-primary" aria-hidden="true" />Cloud-based, on every device</span>
+            </div>
+        </section>
 
-                <div v-if="types.length" class="grid grid-cols-3 gap-6 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+        <!-- Problem -->
+        <section class="bg-default py-20 max-[600px]:py-14">
+            <div data-reveal class="sr mx-auto max-w-[760px] px-6 text-center max-[600px]:px-4">
+                <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">The problem</p>
+                <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-highlighted">Still running the hotel on paper?</h2>
+                <p class="mx-auto mt-5 max-w-[640px] text-[1.05rem] leading-[1.65] text-muted">
+                    Logbooks, radios, and a folder full of <span class="rounded bg-elevated px-1.5 py-0.5 font-mono text-[.9em] text-default">FINAL_REPORT_v7.xlsx</span>. A guest walks in and nobody can find the booking. A room sits dirty because the message never got through.
+                </p>
+                <p class="mx-auto mt-4 max-w-[640px] text-[1.05rem] leading-[1.65] text-muted">HOMI replaces all of it with one connected system — so the answer to “who’s in Room 205?” takes two seconds, not a flip through three notebooks.</p>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="features" class="scroll-mt-24 bg-muted py-20 max-[600px]:py-14">
+            <div class="mx-auto max-w-[1200px] px-6 max-[600px]:px-4">
+                <div data-reveal class="sr mx-auto mb-12 max-w-[640px] text-center">
+                    <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">Features</p>
+                    <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-highlighted">Everything your front desk needs</h2>
+                    <p class="mt-2.5 text-[15px] text-muted">One platform for the whole operation — from the lobby kiosk to the housekeeper’s phone to the owner’s nightly report.</p>
+                </div>
+                <div class="grid grid-cols-3 gap-6 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
                     <article
-                        v-for="(t, i) in types"
-                        :key="t.id"
+                        v-for="(f, i) in features"
+                        :key="f.title"
                         data-reveal
-                        class="sr group flex flex-col overflow-hidden rounded-3xl border border-default bg-default shadow-xs transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:-translate-y-1.5 hover:shadow-(--hm-shadow-lift) motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                        :style="{ transitionDelay: `${i * 90}ms` }"
-                        data-test="welcome-type"
+                        class="sr flex flex-col rounded-3xl border border-default bg-default p-6 shadow-xs transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:-translate-y-1.5 hover:shadow-(--hm-shadow-lift) motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                        :style="{ transitionDelay: `${(i % 3) * 80}ms` }"
                     >
-                        <div class="relative h-[200px] overflow-hidden bg-(--hm-photo-fallback)">
-                            <img
-                                v-if="t.photo"
-                                :src="t.photo"
-                                alt=""
-                                loading="lazy"
-                                class="size-full object-cover transition-transform duration-[800ms] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-                            />
-                            <span class="absolute top-3.5 left-3.5 grid size-10 place-items-center rounded-xl bg-default/95 shadow-xs backdrop-blur-sm"><UIcon name="i-solar-bed-bold-duotone" class="size-5 text-primary" aria-hidden="true" /></span>
-                        </div>
-                        <div class="flex flex-1 flex-col px-5 pt-4 pb-5">
-                            <h3 class="text-[17px] font-semibold text-highlighted">{{ t.name }}</h3>
-                            <p v-if="t.line" class="mt-1 text-[13px] text-muted">{{ t.line }}</p>
-                            <div v-if="tags(t.line).length" class="mt-3 flex flex-wrap gap-1.5">
-                                <span v-for="tag in tags(t.line)" :key="tag" class="rounded-md bg-primary-50 px-2 py-[3px] text-[11.5px] font-medium text-primary-ink">{{ tag }}</span>
-                            </div>
-                            <div class="mt-auto flex items-end justify-between gap-3 border-t border-muted pt-4">
-                                <div>
-                                    <span v-if="t.price" class="block">
-                                        <b class="text-[24px] leading-none font-semibold tracking-[-0.02em] tabular text-highlighted">{{ formatMoney(t.price.amount, 'tile') }}</b>
-                                        <span class="ms-1 text-[12.5px] text-muted">/ {{ hoursLabel(t.price.hours) }}</span>
-                                    </span>
-                                    <span v-else-if="t.overnight !== null" class="block">
-                                        <b class="text-[24px] leading-none font-semibold tracking-[-0.02em] tabular text-highlighted">{{ formatMoney(t.overnight, 'tile') }}</b>
-                                        <span class="ms-1 text-[12.5px] text-muted">overnight</span>
-                                    </span>
-                                    <span v-if="t.price && t.overnight !== null" class="mt-1 block text-[12.5px] text-muted tabular">Overnight {{ formatMoney(t.overnight, 'tile') }}</span>
-                                </div>
-                                <span class="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-on-primary"><UIcon name="i-solar-alt-arrow-right-linear" class="size-5" aria-hidden="true" /></span>
-                            </div>
-                        </div>
+                        <span class="grid size-12 place-items-center rounded-2xl bg-primary-50"><UIcon :name="f.icon" class="size-7 text-primary" aria-hidden="true" /></span>
+                        <h3 class="mt-5 text-[18px] font-semibold text-highlighted">{{ f.title }}</h3>
+                        <p class="mt-2 text-[14px] leading-[1.6] text-muted">{{ f.body }}</p>
+                        <ul class="mt-4 space-y-2 border-t border-muted pt-4">
+                            <li v-for="p in f.points" :key="p" class="flex items-start gap-2.5 text-[13.5px] text-default">
+                                <UIcon name="i-solar-check-circle-bold-duotone" class="mt-0.5 size-[18px] shrink-0 text-primary" aria-hidden="true" />
+                                <span>{{ p }}</span>
+                            </li>
+                        </ul>
                     </article>
                 </div>
-                <p v-else class="rounded-2xl border border-default bg-muted px-5 py-6 text-muted" data-test="welcome-no-types">Rates will be listed here soon. Please ask at the front desk.</p>
             </div>
         </section>
 
-        <!-- Why stay with us -->
-        <section id="why" class="scroll-mt-24 bg-homi-50 py-20 max-[600px]:py-14">
-            <div class="mx-auto grid max-w-[1200px] items-center gap-12 px-6 max-[600px]:px-4 lg:grid-cols-2">
-                <div data-reveal class="sr relative">
-                    <div class="aspect-[5/4] overflow-hidden rounded-[28px] border border-default shadow-(--hm-shadow-lift)">
-                        <img v-if="aboutPhoto" :src="aboutPhoto" alt="" loading="lazy" class="size-full object-cover" />
-                    </div>
-                    <div class="absolute right-5 -bottom-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-default bg-default shadow-(--hm-shadow-float) max-[600px]:static max-[600px]:mt-4 max-[600px]:grid-cols-4">
-                        <div v-for="f in facts" :key="f.title" class="bg-default px-4 py-3">
-                            <UIcon :name="f.icon" class="size-5 text-primary" aria-hidden="true" />
-                            <b class="mt-1.5 block text-[14px] leading-tight font-semibold text-highlighted">{{ f.title }}</b>
-                            <span class="text-[11px] text-muted">{{ f.text }}</span>
-                        </div>
-                    </div>
-                </div>
-                <div data-reveal class="sr" style="transition-delay: 0.1s">
-                    <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">Why stay with us</p>
-                    <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-highlighted">A comfortable room, any hour of the day</h2>
-                    <p class="mt-4 text-[15px] leading-[1.65] text-muted">No apps, no accounts, no waiting. Walk in, pick a room, and rest — by the hour or for the night. The front desk is open around the clock.</p>
-                    <ul class="mt-6 grid gap-3 sm:grid-cols-2">
-                        <li v-for="p in points" :key="p" class="flex items-start gap-2.5 text-[14px] text-default">
-                            <UIcon name="i-solar-check-circle-bold-duotone" class="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
-                            <span>{{ p }}</span>
-                        </li>
-                    </ul>
-                    <div class="mt-8">
-                        <UButton href="#rooms" size="xl" label="See rooms & rates" trailing-icon="i-solar-alt-arrow-right-linear" class="rounded-full px-6" />
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- How a stay works -->
+        <!-- How it works -->
         <section id="how" class="scroll-mt-24 bg-default py-20 max-[600px]:py-14">
             <div class="mx-auto max-w-[1100px] px-6 max-[600px]:px-4">
-                <div data-reveal class="sr mx-auto mb-12 max-w-[640px] text-center">
+                <div data-reveal class="sr mx-auto mb-10 max-w-[640px] text-center">
                     <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">How it works</p>
-                    <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-highlighted">A stay in three simple steps</h2>
-                    <p class="mt-2.5 text-[15px] text-muted">No booking needed. It takes about two minutes from the door to your room.</p>
+                    <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-highlighted">One flow, end to end</h2>
+                    <p class="mt-2.5 text-[15px] text-muted">A guest books on the app, the web, or the kiosk. It lands at the front desk, flows to billing, the kitchen, and housekeeping — and closes the loop at checkout.</p>
                 </div>
-                <ol class="relative grid grid-cols-3 gap-7 max-[700px]:grid-cols-1">
-                    <i class="hm-draw absolute top-[34px] right-[16%] left-[16%] h-0.5 origin-left bg-primary-line max-[700px]:hidden" aria-hidden="true" />
-                    <li v-for="(s, i) in steps" :key="s.title" data-reveal class="sr relative text-center" :style="{ transitionDelay: `${i * 110}ms` }">
-                        <div class="relative mx-auto mb-5 grid size-[70px] place-items-center rounded-2xl border border-default bg-default shadow-xs">
-                            <UIcon :name="s.icon" class="size-8 text-primary" aria-hidden="true" />
-                            <span class="absolute -top-2 -right-2 grid size-7 place-items-center rounded-full bg-primary text-[12px] font-semibold text-on-primary tabular">{{ s.n }}</span>
-                        </div>
-                        <h3 class="mb-1.5 text-[17px] font-semibold text-highlighted">{{ s.title }}</h3>
-                        <p class="mx-auto max-w-[300px] text-[13.5px] leading-[1.55] text-muted">{{ s.text }}</p>
-                    </li>
-                </ol>
+                <div data-reveal class="sr overflow-hidden rounded-[24px] border border-default bg-muted p-3 shadow-(--hm-shadow-lift) sm:p-5">
+                    <img :src="img('homi-14.jpg')" width="1920" height="1080" loading="lazy" alt="HOMI flow: guests book via app, web, or kiosk; bookings reach the admin panel, then billing, kitchen and housekeeping." class="block w-full rounded-[14px]" />
+                </div>
             </div>
         </section>
 
-        <!-- Amenities (dark) -->
-        <section class="bg-homi-950 py-20 text-white max-[600px]:py-14">
+        <!-- Why HOMI (dark) -->
+        <section id="why" class="scroll-mt-24 bg-homi-950 py-20 text-white max-[600px]:py-14">
             <div class="mx-auto max-w-[1200px] px-6 max-[600px]:px-4">
-                <div data-reveal class="sr mx-auto mb-12 max-w-[640px] text-center">
-                    <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-homi-300 uppercase">Everything included</p>
-                    <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-white">Everything you need for a good night</h2>
+                <div data-reveal class="sr mx-auto mb-12 max-w-[680px] text-center">
+                    <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-homi-300 uppercase">Why HOMI</p>
+                    <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-white">Why hotels switch to HOMI</h2>
+                    <p class="mt-4 text-[15px] leading-[1.65] text-white/70">The old system failed in production. HOMI was rebuilt on three rules: money is written once, every peso points to a shift, and a room has one open stay.</p>
                 </div>
                 <div class="grid grid-cols-3 gap-5 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
-                    <div v-for="(a, i) in amenities" :key="a.title" data-reveal class="sr flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-5 transition-colors duration-300 hover:bg-white/[0.08]" :style="{ transitionDelay: `${i * 70}ms` }">
-                        <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/20"><UIcon :name="a.icon" class="size-6 text-homi-300" aria-hidden="true" /></span>
-                        <div>
-                            <h3 class="text-[15.5px] font-semibold text-white">{{ a.title }}</h3>
-                            <p class="mt-0.5 text-[13px] text-white/70">{{ a.text }}</p>
-                        </div>
+                    <div v-for="(b, i) in benefits" :key="b.title" data-reveal class="sr rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-colors duration-300 hover:bg-white/[0.08]" :style="{ transitionDelay: `${(i % 3) * 70}ms` }">
+                        <span class="grid size-11 place-items-center rounded-xl bg-primary/20"><UIcon :name="b.icon" class="size-6 text-homi-300" aria-hidden="true" /></span>
+                        <h3 class="mt-4 text-[17px] font-semibold text-white">{{ b.title }}</h3>
+                        <p class="mt-1.5 text-[13.5px] leading-[1.55] text-white/70">{{ b.text }}</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- FAQ -->
-        <section id="faq" class="scroll-mt-24 bg-default py-20 max-[600px]:py-14">
-            <div class="mx-auto grid max-w-[1100px] gap-12 px-6 max-[600px]:px-4 lg:grid-cols-[0.85fr_1.15fr]">
-                <div data-reveal class="sr">
-                    <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">FAQ</p>
-                    <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-highlighted">Questions? We’ve got answers</h2>
-                    <p class="mt-3 text-[15px] leading-[1.6] text-muted">Everything you need to know before you walk in. Still unsure? Ask the front desk — they’re there all day and night.</p>
-                    <UButton :as="Link" :href="route('login')" variant="soft" color="neutral" size="lg" icon="i-solar-user-bold-duotone" label="Staff sign in" class="mt-6 rounded-full" />
+        <!-- See it in action (real screens) -->
+        <section class="bg-muted py-20 max-[600px]:py-14">
+            <div class="mx-auto max-w-[1200px] px-6 max-[600px]:px-4">
+                <div data-reveal class="sr mx-auto mb-12 max-w-[640px] text-center">
+                    <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">See it in action</p>
+                    <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-highlighted">The system, in detail</h2>
+                    <p class="mt-2.5 text-[15px] text-muted">Real screens from HOMI — the owner’s view of sales, occupancy and trends across every branch.</p>
                 </div>
-                <div data-reveal class="sr" style="transition-delay: 0.1s">
-                    <UAccordion
-                        :items="faqs"
-                        :ui="{ item: 'border border-default rounded-2xl mb-3 px-5 bg-default', trigger: 'py-4 text-[15px] font-medium text-highlighted', content: 'pb-4 text-[14px] text-muted leading-[1.6]' }"
-                    />
+                <div class="grid grid-cols-3 gap-6 max-[900px]:grid-cols-1">
+                    <figure v-for="(s, i) in shots" :key="s.image" data-reveal class="sr overflow-hidden rounded-3xl border border-default bg-default shadow-xs transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:-translate-y-1.5 hover:shadow-(--hm-shadow-lift) motion-reduce:transition-none motion-reduce:hover:translate-y-0" :style="{ transitionDelay: `${i * 90}ms` }">
+                        <div class="overflow-hidden border-b border-default bg-homi-950">
+                            <img :src="img(s.image)" width="1516" height="784" loading="lazy" :alt="`HOMI ${s.label}`" class="block w-full" />
+                        </div>
+                        <figcaption class="p-5">
+                            <h3 class="text-[15.5px] font-semibold text-highlighted">{{ s.label }}</h3>
+                            <p class="mt-1 text-[13px] leading-[1.5] text-muted">{{ s.text }}</p>
+                        </figcaption>
+                    </figure>
                 </div>
             </div>
         </section>
 
-        <!-- CTA band -->
-        <section class="px-6 py-6 max-[600px]:px-4">
+        <!-- Channels -->
+        <section class="bg-default py-20 max-[600px]:py-14">
+            <div class="mx-auto grid max-w-[1200px] items-center gap-12 px-6 max-[600px]:px-4 lg:grid-cols-[0.9fr_1.1fr]">
+                <div data-reveal class="sr">
+                    <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">Everywhere</p>
+                    <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-highlighted">Works everywhere your hotel does</h2>
+                    <p class="mt-4 text-[15px] leading-[1.65] text-muted">The same system on the front-desk screen, in a staff member’s pocket, and on the lobby kiosk — no installs, always in sync.</p>
+                </div>
+                <div data-reveal class="sr grid gap-4 sm:grid-cols-3" style="transition-delay: 0.1s">
+                    <div v-for="c in channels" :key="c.title" class="rounded-2xl border border-default bg-muted p-5">
+                        <span class="grid size-11 place-items-center rounded-xl bg-primary-50"><UIcon :name="c.icon" class="size-6 text-primary" aria-hidden="true" /></span>
+                        <h3 class="mt-4 text-[15.5px] font-semibold text-highlighted">{{ c.title }}</h3>
+                        <p class="mt-1 text-[13px] leading-[1.5] text-muted">{{ c.text }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About -->
+        <section class="bg-muted py-16 max-[600px]:py-12">
+            <div data-reveal class="sr mx-auto max-w-[760px] px-6 text-center max-[600px]:px-4">
+                <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">About</p>
+                <h2 class="text-[clamp(1.7rem,3.6vw,2.3rem)] leading-[1.15] font-semibold tracking-[-0.03em] text-highlighted">Built by a startup that knows hotels</h2>
+                <p class="mx-auto mt-5 max-w-[620px] text-[1.02rem] leading-[1.65] text-muted">
+                    HOMI is a tech-driven startup making smart hotel operations accessible and affordable — now powered by kiosk integration for seamless, self-service convenience. We keep building toward one goal: hotels made smarter, guests made happier.
+                </p>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section id="contact" class="scroll-mt-24 bg-default px-6 py-8 max-[600px]:px-4">
             <div data-reveal class="sr relative mx-auto max-w-[1200px] overflow-hidden rounded-[32px] bg-gradient-to-br from-homi-600 to-homi-800 px-10 py-14 text-white max-[600px]:px-6 max-[600px]:py-10">
                 <span aria-hidden="true" class="pointer-events-none absolute -top-20 -right-10 size-80 rounded-full bg-white/10 blur-2xl" />
                 <span aria-hidden="true" class="pointer-events-none absolute -bottom-24 -left-10 size-96 rounded-full bg-brand/20 blur-3xl" />
-                <div class="relative flex flex-wrap items-center justify-between gap-8">
-                    <div class="max-w-[560px]">
-                        <h2 class="text-[clamp(1.9rem,4.4vw,2.8rem)] leading-[1.08] font-semibold tracking-[-0.03em]">Rest well tonight — walk in any time</h2>
-                        <p class="mt-3 text-[1.05rem] leading-[1.55] text-white/85">{{ branch?.name ?? 'We' }} {{ branch ? 'is' : 'are' }} open 24 hours. No booking, no account — just a clean, quiet room when you need it.</p>
-                    </div>
-                    <div class="flex flex-col gap-3">
-                        <UButton href="#rooms" size="xl" class="on-photo rounded-full px-7" label="See rooms & rates" trailing-icon="i-solar-alt-arrow-right-linear" />
-                        <span v-if="branch" class="inline-flex items-center gap-2 text-[13.5px] text-white/85"><UIcon name="i-solar-map-point-bold-duotone" class="size-[18px]" aria-hidden="true" />{{ branch.address }}</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Find us -->
-        <section id="find-us" class="scroll-mt-24 bg-default py-16 max-[600px]:py-12">
-            <div class="mx-auto grid max-w-[1200px] items-stretch gap-6 px-6 max-[600px]:px-4 lg:grid-cols-[1.1fr_1fr]">
-                <div data-reveal class="sr min-h-[260px] overflow-hidden rounded-[28px] border border-default bg-(--hm-photo-fallback)">
-                    <img :src="hero[0]?.src" :srcset="hero[0]?.srcset" sizes="(max-width: 1024px) 100vw, 55vw" alt="" loading="lazy" class="size-full object-cover" />
-                </div>
-                <div data-reveal class="sr rounded-[28px] border border-default bg-default p-7" style="transition-delay: 0.08s">
-                    <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">Find us</p>
-                    <h2 class="mb-4 text-[clamp(1.6rem,3.2vw,2.1rem)] leading-[1.12] font-semibold tracking-[-0.03em] text-highlighted">Come on over</h2>
-                    <div class="flex gap-3.5 border-b border-muted py-3.5">
-                        <UIcon name="i-solar-home-2-bold-duotone" class="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
-                        <div>
-                            <b class="block text-[14px] font-semibold text-highlighted">{{ branch?.name ?? shared.app.name }}</b>
-                            <span class="text-[13.5px] text-muted">{{ branch?.address ?? '' }}</span>
-                        </div>
-                    </div>
-                    <div class="flex gap-3.5 border-b border-muted py-3.5">
-                        <UIcon name="i-solar-clock-circle-bold-duotone" class="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
-                        <div>
-                            <b class="block text-[14px] font-semibold text-highlighted">Open 24 hours, every day</b>
-                            <span class="text-[13.5px] text-muted">The front desk is always staffed</span>
-                        </div>
-                    </div>
-                    <div class="flex gap-3.5 py-3.5">
-                        <UIcon name="i-solar-banknote-2-bold-duotone" class="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
-                        <div>
-                            <b class="block text-[14px] font-semibold text-highlighted">{{ payWords }}</b>
-                            <span class="text-[13.5px] text-muted">Paid at the front desk; no online payment</span>
-                        </div>
+                <div class="relative mx-auto max-w-[720px] text-center">
+                    <h2 class="text-[clamp(1.9rem,4.4vw,2.9rem)] leading-[1.08] font-semibold tracking-[-0.03em]">Ready to run your hotel smarter?</h2>
+                    <p class="mx-auto mt-4 max-w-[520px] text-[1.05rem] leading-[1.55] text-white/85">Less manpower. More efficiency. Happier guests. Let’s set up HOMI for your hotel.</p>
+                    <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+                        <UButton :href="FB" target="_blank" rel="noopener" size="xl" class="on-photo rounded-full px-7" icon="i-solar-chat-round-line-bold-duotone" label="Message us on Facebook" />
+                        <UButton :href="MAIL" size="xl" variant="outline" class="rounded-full border-white/40 px-6 text-white hover:bg-white/10" icon="i-solar-letter-bold-duotone" label="homi@gmail.com" />
                     </div>
                 </div>
             </div>
@@ -491,38 +363,29 @@ onBeforeUnmount(() => {
         <!-- Footer -->
         <footer class="bg-homi-950 pt-14 pb-8 text-white/70">
             <div class="mx-auto max-w-[1200px] px-6 max-[600px]:px-4">
-                <div class="grid gap-10 pb-10 md:grid-cols-[1.4fr_1fr_1fr]">
+                <div class="grid gap-10 pb-10 md:grid-cols-[1.5fr_1fr_1fr]">
                     <div>
-                        <HomiLogo variant="white" :width="96" :height="30" />
-                        <p class="mt-4 max-w-[320px] text-[13.5px] leading-[1.6] text-white/70">{{ branch?.name ?? shared.app.name }} — a clean, quiet room whenever you need one, by the hour or overnight. Open 24 hours.</p>
+                        <HomiLogo variant="white" :width="100" :height="30" />
+                        <p class="mt-4 max-w-[340px] text-[13.5px] leading-[1.6] text-white/70">The smarter way to run your hotel — front desk, housekeeping, kiosk, bookings and reports in one connected system.</p>
                     </div>
                     <div>
                         <h3 class="mb-3 text-[13px] font-semibold tracking-[0.1em] text-white uppercase">Explore</h3>
                         <ul class="space-y-2 text-[14px]">
                             <li v-for="n in nav" :key="n.href"><a :href="n.href" class="hm-focus rounded transition-colors hover:text-white">{{ n.label }}</a></li>
+                            <li><a :href="route('login')" class="hm-focus rounded transition-colors hover:text-white">Staff sign in</a></li>
                         </ul>
                     </div>
                     <div>
-                        <h3 class="mb-3 text-[13px] font-semibold tracking-[0.1em] text-white uppercase">Visit</h3>
+                        <h3 class="mb-3 text-[13px] font-semibold tracking-[0.1em] text-white uppercase">Contact</h3>
                         <ul class="space-y-2.5 text-[14px]">
-                            <li class="flex gap-2.5"><UIcon name="i-solar-map-point-bold-duotone" class="mt-0.5 size-[18px] shrink-0 text-homi-300" aria-hidden="true" /><span>{{ branch?.address ?? '' }}</span></li>
-                            <li class="flex gap-2.5"><UIcon name="i-solar-clock-circle-bold-duotone" class="mt-0.5 size-[18px] shrink-0 text-homi-300" aria-hidden="true" /><span>Open 24 hours, every day</span></li>
+                            <li><a :href="FB" target="_blank" rel="noopener" class="hm-focus inline-flex items-center gap-2 rounded transition-colors hover:text-white"><UIcon name="i-solar-chat-round-line-bold-duotone" class="size-[18px] text-homi-300" aria-hidden="true" />facebook.com/homi</a></li>
+                            <li><a :href="MAIL" class="hm-focus inline-flex items-center gap-2 rounded transition-colors hover:text-white"><UIcon name="i-solar-letter-bold-duotone" class="size-[18px] text-homi-300" aria-hidden="true" />homi@gmail.com</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-white/10 pt-6 text-[12.5px] text-white/60">
-                    <span>{{ eyebrow }}</span>
-                    <UPopover v-if="credits.length">
-                        <UButton variant="link" color="neutral" size="xs" label="Photos: Unsplash" class="p-0 text-[12.5px] font-normal text-white/60 hover:text-white" />
-                        <template #content>
-                            <ul class="max-w-72 space-y-1 p-3 text-[13px]" data-test="welcome-credits">
-                                <li v-for="c in credits" :key="c.url">
-                                    <a :href="c.url" target="_blank" rel="noopener" class="hm-focus text-primary hover:underline">Photo by {{ c.by }} on Unsplash</a>
-                                </li>
-                            </ul>
-                        </template>
-                    </UPopover>
-                    <span class="ms-auto">© {{ year }} {{ branch?.name ?? shared.app.name }}</span>
+                    <span>Hotel Solution Software</span>
+                    <span class="ms-auto">© 2026 HOMI</span>
                 </div>
             </div>
         </footer>
@@ -530,7 +393,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* Scroll-reveal: rise and clear from an already-legible default. */
 .sr {
     opacity: 0;
     transform: translateY(26px);
@@ -544,7 +406,6 @@ onBeforeUnmount(() => {
     transform: none;
 }
 
-/* Nav link underline, drawn on hover. */
 .nav-link::after {
     content: '';
     position: absolute;
@@ -562,7 +423,6 @@ onBeforeUnmount(() => {
     transform: scaleX(1);
 }
 
-/* Floating hero cards drift gently. */
 .hm-floaty {
     animation: floaty 6s ease-in-out infinite;
 }

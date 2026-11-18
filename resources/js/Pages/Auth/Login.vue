@@ -53,7 +53,6 @@ const figures = computed(() =>
 );
 const year = computed(() => props.now.slice(0, 4));
 const slides = computed(() => (props.photos?.length ? props.photos : [props.photo]));
-const logo3d = '/images/landing/homi-19.jpg';
 
 function submit(): void {
     form.post(route('login.store'), { onFinish: () => form.reset('password') });
@@ -95,9 +94,7 @@ function submit(): void {
 
         <div class="flex flex-col justify-center px-14 py-10 max-[900px]:px-6 max-[900px]:py-10">
             <div class="mx-auto w-full max-w-[380px]">
-                <span class="hm-rise block h-12 w-[128px] overflow-hidden">
-                    <img :src="logo3d" alt="Homi" class="size-full object-cover" style="object-position: center 50%" />
-                </span>
+                <HomiLogo variant="blue" :width="96" :height="30" class="hm-rise" />
                 <h1 class="hm-rise mt-6 text-[28px] leading-[1.15] font-semibold tracking-[-0.025em] text-highlighted" style="--hm-step: 1">Welcome back</h1>
                 <p class="hm-rise mt-1.5 text-[13.5px] text-muted" style="--hm-step: 2">Sign in to your branch. Use your own account — never share it.</p>
 
