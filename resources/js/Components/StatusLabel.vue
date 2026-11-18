@@ -1,26 +1,34 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { type Tone, toneClasses } from '@/types/ui';
+import { type Tone, toneFill, toneTextClass } from '@/types/ui';
 
 /**
- * A status is a small soft pill (DESIGN_SYSTEM §0, §5.2): one word in sentence case, the tone's
- * text on its fill with a 1 px border in a lighter tint of the same hue, fully rounded, no dot.
+ * A status shown as a small coloured dot + coloured text, not a pill (DESIGN_SYSTEM §5.2, v7): the
+ * tone's colour on the dot and the label, no fill, no border, no rounded container. One word in
+ * sentence case. The dot shows at the default size and is dropped at `lg` (a big focal label on the
+ * kiosk reads cleaner as colour alone); pass `:dot` to force it either way.
  */
 const props = withDefaults(
     defineProps<{
         label?: string;
         tone?: Tone;
         size?: 'md' | 'lg';
+        dot?: boolean;
     }>(),
-    { label: undefined, tone: 'neutral', size: 'md' },
+    { label: undefined, tone: 'neutral', size: 'md', dot: undefined },
 );
 
+const showDot = computed(() => props.dot ?? props.size === 'md');
+
 const classes = computed(() => [
-    toneClasses[props.tone],
-    props.size === 'lg' ? 'rounded-[10px] px-3.5 py-1.5 text-[28px] leading-9 font-semibold tabular' : 'h-[22px] rounded-full px-2 text-[11.5px] leading-none font-medium',
+    toneTextClass[props.tone],
+    props.size === 'lg' ? 'gap-2 text-[28px] leading-9 font-semibold tabular' : 'gap-1.5 text-[11.5px] leading-none font-medium',
 ]);
 </script>
 
 <template>
-    <span data-status-label :data-tone="tone" class="inline-flex items-center gap-[5px] border whitespace-nowrap" :class="classes"><slot>{{ label }}</slot></span>
+    <span data-status-label :data-tone="tone" class="inline-flex items-center whitespace-nowrap" :class="classes">
+        <span v-if="showDot" class="shrink-0 rounded-full" :class="size === 'lg' ? 'size-2.5' : 'size-1.5'" :style="{ backgroundColor: toneFill[tone] }" aria-hidden="true" />
+        <slot>{{ label }}</slot>
+    </span>
 </template>

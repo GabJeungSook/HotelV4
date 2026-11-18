@@ -40,7 +40,19 @@ export const toneBlock: Record<Tone, string> = {
     clay: 'bg-clay-50 border-clay-line',
 };
 
-/** Solid fill per tone for chart shapes (shares bars, legend swatches). */
+/** Tone text colour for a status shown as a coloured dot + text, not a pill (StatusLabel v7). */
+export const toneTextClass: Record<Tone, string> = {
+    neutral: 'text-muted',
+    ok: 'text-ok',
+    warn: 'text-warn',
+    bad: 'text-bad',
+    info: 'text-info',
+    primary: 'text-primary',
+    violet: 'text-violet',
+    clay: 'text-clay',
+};
+
+/** Solid fill per tone for chart shapes (shares bars, legend swatches) and the status dot. */
 export const toneFill: Record<Tone, string> = {
     neutral: 'var(--hm-grey)',
     ok: 'var(--hm-ok)',
