@@ -3,7 +3,7 @@ import type { DropdownMenuItem } from '@nuxt/ui';
 import { Link } from '@inertiajs/vue3';
 import { useColorMode } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
-import type { NavGroup, NavItem } from '@/types/ui';
+import { type NavGroup, type NavItem, roleText } from '@/types/ui';
 import HomiLogo from './HomiLogo.vue';
 import PersonAvatar from './PersonAvatar.vue';
 
@@ -27,7 +27,7 @@ const props = withDefaults(
         collapsed?: boolean;
         drawer?: boolean;
         branch?: SidebarBranch;
-        user?: { name: string; role: string };
+        user?: { name: string; role: string; roleKey?: string };
         canSwitch?: boolean;
         notifications?: { route: string; count?: number };
     }>(),
@@ -207,7 +207,7 @@ const linkBase =
                     <PersonAvatar :name="user.name" :size="32" />
                     <span v-if="!collapsed" class="min-w-0">
                         <b class="block truncate text-[13px] leading-tight font-semibold">{{ user.name }}</b>
-                        <small class="block truncate text-[11.5px] text-muted">{{ user.role }}</small>
+                        <small class="block truncate text-[11.5px]" :class="roleText[user.roleKey ?? ''] ?? 'text-muted'">{{ user.role }}</small>
                     </span>
                     <UIcon v-if="!collapsed" name="i-solar-menu-dots-linear" class="ms-auto size-4 shrink-0 text-faint" aria-hidden="true" />
                 </button>

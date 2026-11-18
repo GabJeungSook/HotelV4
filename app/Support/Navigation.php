@@ -58,7 +58,7 @@ final class Navigation
             ['layout' => 'owner', 'heading' => 'Overview', 'items' => [
                 ['key' => 'owner', 'label' => 'Dashboard', 'route' => 'owner.dashboard', 'icon' => 'i-solar-chart-2-bold-duotone', 'roles' => [Role::Owner]],
                 ['key' => 'branches', 'label' => 'Branches', 'route' => 'owner.branches.index', 'icon' => 'i-solar-buildings-2-bold-duotone', 'roles' => [Role::Owner]],
-                ['key' => 'summary', 'label' => 'Owner summary', 'route' => 'owner.summary', 'icon' => 'i-solar-list-bold-duotone', 'roles' => [Role::Owner]],
+                ['key' => 'summary', 'label' => 'Superadmin summary', 'route' => 'owner.summary', 'icon' => 'i-solar-list-bold-duotone', 'roles' => [Role::Owner]],
             ]],
             ['layout' => 'backoffice', 'heading' => 'Overview', 'items' => [
                 ['key' => 'dashboard', 'label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'i-solar-chart-2-bold-duotone', 'roles' => [Role::Admin, Role::Backoffice, Role::Supervisor, Role::Owner]],
@@ -86,7 +86,7 @@ final class Navigation
                 ['key' => 'stats', 'label' => 'Stats', 'route' => 'stats', 'icon' => 'i-solar-graph-up-bold-duotone', 'roles' => self::REPORTS_FULL, 'subtitle' => 'Totals and trends for any period'],
             ]],
             ['layout' => 'owner', 'heading' => 'People', 'items' => [
-                ['key' => 'owners', 'label' => 'Owner accounts', 'route' => 'owner.accounts', 'icon' => 'i-solar-user-bold-duotone', 'roles' => [Role::Owner]],
+                ['key' => 'owners', 'label' => 'Superadmin accounts', 'route' => 'owner.accounts', 'icon' => 'i-solar-user-bold-duotone', 'roles' => [Role::Owner]],
             ]],
             ['layout' => 'housekeeping', 'heading' => 'Housekeeping', 'items' => [
                 ['key' => 'housekeeping', 'label' => 'Queue', 'route' => 'housekeeping.index', 'icon' => 'i-solar-broom-bold-duotone', 'roles' => [Role::Housekeeper], 'module' => 'housekeeping_enabled'],

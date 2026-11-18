@@ -13,6 +13,21 @@ export const toneClasses: Record<Tone, string> = {
     clay: 'bg-clay-50 text-clay border-clay-line',
 };
 
+/**
+ * A role shown as plain colored text, not a pill (DESIGN_SYSTEM §5.2): the account level at a
+ * glance. Superadmin reads in brand blue, admin in strong ink, everyone else quietly. One map
+ * app-wide; `roleText[key] ?? 'text-default'` for an unknown key.
+ */
+export const roleText: Record<string, string> = {
+    owner: 'text-primary font-semibold',
+    admin: 'text-highlighted font-semibold',
+    supervisor: 'text-highlighted font-medium',
+    backoffice: 'text-default font-medium',
+    frontdesk: 'text-default',
+    housekeeper: 'text-muted',
+    kiosk: 'text-muted',
+};
+
 /** Soft block fill + edge per tone: calendar and timeline blocks (ShiftCalendar, StaysTimeline). */
 export const toneBlock: Record<Tone, string> = {
     neutral: 'bg-grey-50 border-grey-line',

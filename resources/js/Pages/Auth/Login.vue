@@ -26,7 +26,7 @@ const props = defineProps<{
 
 // Dev quick sign-in (local only) — one click to become any role, handled by routes/web.php.
 const devRoles = [
-    { role: 'owner', label: 'Owner' },
+    { role: 'owner', label: 'Superadmin' },
     { role: 'admin', label: 'Admin' },
     { role: 'supervisor', label: 'Supervisor' },
     { role: 'frontdesk', label: 'Front desk' },

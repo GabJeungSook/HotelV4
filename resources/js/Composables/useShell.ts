@@ -46,7 +46,7 @@ export function useShell(overrides: { branch?: () => string | undefined; user?: 
         return { name, sub, items };
     });
 
-    const user = computed(() => overrides.user?.() ?? (shared.value.auth ? { name: shared.value.auth.user.name, role: shared.value.auth.roleLabel } : undefined));
+    const user = computed(() => overrides.user?.() ?? (shared.value.auth ? { name: shared.value.auth.user.name, role: shared.value.auth.roleLabel, roleKey: shared.value.auth.role } : undefined));
 
     /** Attention (49) for those who can act on it, Today for the front desk, else the dashboard. */
     const notifications = computed<string | undefined>(() => {

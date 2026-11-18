@@ -42,7 +42,7 @@ final class SaveUser
     public function handle(User $by, int $branchId, ?int $userId, string $name, string $username, Role $role, array $floorIds = []): array
     {
         if (! in_array($role, self::ROLES, true)) {
-            throw ActionRefused::because('Owner accounts are managed from the owner menu, not from a branch.');
+            throw ActionRefused::because('Superadmin accounts are managed from the superadmin menu, not from a branch.');
         }
 
         $username = mb_strtolower(trim($username));

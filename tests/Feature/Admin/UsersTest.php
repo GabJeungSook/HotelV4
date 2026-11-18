@@ -59,7 +59,7 @@ it('assigns floors to a housekeeper only, and clears them when the role changes'
 });
 
 it('refuses an owner role, a username in use, another branch’s floor and changing your own role', function (): void {
-    expect(fn () => ($this->save)(null, 'Boss', 'boss', Role::Owner))->toThrow(ActionRefused::class, 'Owner accounts');
+    expect(fn () => ($this->save)(null, 'Boss', 'boss', Role::Owner))->toThrow(ActionRefused::class, 'Superadmin accounts');
     expect(fn () => ($this->save)(null, 'Jessa Two', 'jessa.delacruz', Role::Frontdesk))->toThrow(ActionRefused::class, 'jessa.delacruz is already used');
     expect(fn () => ($this->save)(null, 'Hk', 'hk', Role::Housekeeper, [Floor::factory()->create()->id]))->toThrow(ActionRefused::class, 'floors of this branch');
     expect(fn () => ($this->save)($this->admin->id, $this->admin->name, $this->admin->username, Role::Supervisor))->toThrow(ActionRefused::class, 'your own role');

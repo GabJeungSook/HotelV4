@@ -87,7 +87,7 @@ export const ownerNav: NavGroup[] = [
         items: [
             { key: 'dashboard', label: 'Dashboard', route: '/owner', icon: 'i-solar-chart-2-bold-duotone' },
             { key: 'branches', label: 'Branches', route: '/owner/branches', icon: 'i-solar-buildings-2-bold-duotone' },
-            { key: 'summary', label: 'Owner summary', route: '/owner/summary', icon: 'i-solar-list-bold-duotone' },
+            { key: 'summary', label: 'Superadmin summary', route: '/owner/summary', icon: 'i-solar-list-bold-duotone' },
         ],
     },
     {
@@ -107,5 +107,5 @@ export const ownerNav: NavGroup[] = [
             { key: 'stats', label: 'Stats', route: '/stats', icon: 'i-solar-graph-up-bold-duotone' },
         ],
     },
-    { heading: 'People', items: [{ key: 'owners', label: 'Owner accounts', route: '/owner/accounts', icon: 'i-solar-user-bold-duotone' }] },
+    { heading: 'People', items: [{ key: 'owners', label: 'Superadmin accounts', route: '/owner/accounts', icon: 'i-solar-user-bold-duotone' }] },
 ];

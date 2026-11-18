@@ -8,6 +8,7 @@ import PersonPill from '@/Components/PersonPill.vue';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { useShared } from '@/Composables/useShared';
 import OwnerLayout from '@/Layouts/OwnerLayout.vue';
+import { roleText } from '@/types/ui';
 
 /**
  * Owner accounts: everyone with the owner role, above the branches. Add, edit, deactivate (never
@@ -68,10 +69,10 @@ function save(): void {
 </script>
 
 <template>
-    <OwnerLayout current="owners" :title="`Owner accounts · ${accounts.length}`">
-        <Head title="Owner accounts" />
+    <OwnerLayout current="owners" :title="`Superadmin accounts · ${accounts.length}`">
+        <Head title="Superadmin accounts" />
         <PageHeader>
-            <UButton icon="i-solar-add-square-linear" label="Add owner" @click="add" />
+            <UButton icon="i-solar-add-square-linear" label="Add superadmin" @click="add" />
         </PageHeader>
 
         <UAlert v-if="created" color="success" variant="subtle" icon="i-solar-check-circle-bold-duotone" class="mb-4" :title="created.kind === 'reset' ? 'Password reset' : `${created.name} is added`" data-test="owner-created">
@@ -101,7 +102,7 @@ function save(): void {
                             <span v-if="a.is_me" class="ms-2 text-xs text-muted">(you)</span>
                         </td>
                         <td>{{ a.username }}</td>
-                        <td><StatusLabel tone="primary" label="Owner" /></td>
+                        <td><span class="text-[12.5px]" :class="roleText.owner">Superadmin</span></td>
                         <td>{{ a.last_seen_at ? formatDateTime(a.last_seen_at, 'dayTime') : '—' }}</td>
                         <td><StatusLabel :tone="a.is_active ? 'ok' : 'neutral'" :label="a.is_active ? 'Active' : 'Deactivated'" /></td>
                         <td class="text-right"><UButton color="neutral" variant="outline" size="sm" label="Edit" @click="edit(a)" /></td>
@@ -110,7 +111,7 @@ function save(): void {
             </table>
         </div>
 
-        <USlideover v-model:open="sheet" :title="editing ? `Edit ${editing.name}` : 'Add owner'" :ui="{ content: 'max-w-[420px]' }">
+        <USlideover v-model:open="sheet" :title="editing ? `Edit ${editing.name}` : 'Add superadmin'" :ui="{ content: 'max-w-[420px]' }">
             <template #body>
                 <form class="flex flex-col gap-3" @submit.prevent="save">
                     <UFormField label="Full name" name="name" :error="form.errors.name">
@@ -120,11 +121,11 @@ function save(): void {
                         <UInput v-model="form.username" class="w-full" autocomplete="off" />
                     </UFormField>
                     <template v-if="editing">
-                        <USwitch v-model="form.is_active" label="Active" :disabled="editing.is_me" :description="editing.is_me ? 'You cannot deactivate your own account.' : 'A deactivated owner cannot sign in. Nothing is deleted.'" />
+                        <USwitch v-model="form.is_active" label="Active" :disabled="editing.is_me" :description="editing.is_me ? 'You cannot deactivate your own account.' : 'A deactivated superadmin cannot sign in. Nothing is deleted.'" />
                         <USwitch v-model="form.reset_password" label="Reset password" description="A new temporary password is shown once after saving." />
                     </template>
                     <p v-else class="text-xs text-muted">A temporary password is shown once after saving.</p>
-                    <UButton type="submit" block class="mt-2" :label="editing ? 'Save' : 'Add owner'" :loading="form.processing" />
+                    <UButton type="submit" block class="mt-2" :label="editing ? 'Save' : 'Add superadmin'" :loading="form.processing" />
                 </form>
             </template>
         </USlideover>

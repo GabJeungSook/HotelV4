@@ -9,6 +9,7 @@ import PersonPill from '@/Components/PersonPill.vue';
 import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { type FlashData, useShared } from '@/Composables/useShared';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { roleText } from '@/types/ui';
 
 /**
  * Users (47, APP_FLOW §8.2): one account per person of this branch, with a role, plus kiosk
@@ -133,7 +134,6 @@ async function setActive(row: UserRow, active: boolean): Promise<void> {
     }
 }
 
-const roleTone = (role: string) => (role === 'supervisor' || role === 'admin' ? 'primary' : 'neutral');
 const activeCount = computed(() => props.users.filter((u) => u.is_active).length);
 const isMe = computed(() => editing.value !== null && editing.value.id === me.value?.id);
 </script>
@@ -162,7 +162,7 @@ const isMe = computed(() => editing.value !== null && editing.value.id === me.va
                     <tr v-for="u in users" :key="u.id" :data-user="u.username">
                         <td><PersonPill :name="u.name" /></td>
                         <td>{{ u.username }}</td>
-                        <td><StatusLabel :tone="roleTone(u.role)" :label="u.role_label" /></td>
+                        <td><span class="text-[12.5px]" :class="roleText[u.role] ?? 'text-default'">{{ u.role_label }}</span></td>
                         <td :class="u.pin === false ? 'text-bad' : ''">{{ u.pin === null ? '—' : u.pin ? 'Set' : 'Not set' }}</td>
                         <td>{{ u.floors.length ? u.floors.join(', ') : '—' }}</td>
                         <td><StatusLabel :tone="u.is_active ? 'ok' : 'neutral'" :label="u.is_active ? 'Active' : 'Deactivated'" /></td>
