@@ -563,6 +563,8 @@ Screens 27 → 28 → 29 → 30 · Action `HoldRoom` · Service `RoomRotation` �
 9. The guest walks to the front desk; the flow continues at 4.6 step 2.
 10. If the guest does not pay in time, `ExpireKioskHolds` (every minute) writes `stays.state = expired`. The room is on sale again.
 
+**Staff exit.** The kiosk shows no sign-out button (a guest must not reach it). To take the device out of kiosk mode, staff **press and hold the top-right corner for ~2 seconds** — a quick tap does nothing — then confirm "Sign out this kiosk?". That posts `logout` and returns the device to sign-in (1), where a staff member signs in again to set it up. Available on every kiosk screen (it lives in `KioskLayout`).
+
 ### 4.19 Reservations: make one, check in from it, no-show
 
 Screens 57, 58, 6 · Action `ReserveRoom` · [DATABASE_SCHEMA](DATABASE_SCHEMA.md) §8.7
