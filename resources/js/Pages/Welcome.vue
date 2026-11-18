@@ -20,30 +20,40 @@ const homeUrl = computed(() => shared.value.home ?? route('home'));
 const features = [
     {
         icon: 'i-solar-widget-5-bold-duotone',
+        image: 'homi-03.jpg',
+        alt: 'HOMI admin dashboard showing rooms, guests, and sales in one screen',
         title: 'Your whole hotel in one system',
         body: 'Rooms, guests, bookings, front desk, and sales live together — no more jumping between notebooks, chat threads, and three versions of the same spreadsheet.',
         points: ['Real-time room status and availability', 'Guest profiles and stay history', 'Live sales, occupancy, and revenue'],
     },
     {
         icon: 'i-solar-chart-2-bold-duotone',
+        image: 'homi-25.jpg',
+        alt: 'A front-desk manager generating an instant report in HOMI',
         title: 'Reports in seconds, not hours',
         body: 'The end-of-shift scramble is over. HOMI builds the numbers as the day happens, so a Z-report, a daily sales summary, or occupancy is one tap away — and it always reconciles.',
         points: ['Shift and daily reports built automatically', 'Occupancy, ADR, and RevPAR at a glance', 'Every peso traces back to a real record'],
     },
     {
         icon: 'i-solar-smartphone-bold-duotone',
+        image: 'homi-22.jpg',
+        alt: 'A housekeeper checking room tasks on the HOMI phone app',
         title: 'Housekeeping on their phones',
         body: 'Room boys see what to clean and in what order — prioritised by checkout time — straight from a phone. The front desk sees a room go ready the moment it is done.',
         points: ['Tasks pushed by checkout schedule', 'Live status: pending, cleaning, ready', 'No radios, no sticky notes, no guessing'],
     },
     {
         icon: 'i-solar-point-on-map-bold-duotone',
+        image: 'homi-26.jpg',
+        alt: 'A guest using a HOMI self-service check-in kiosk',
         title: 'A lobby kiosk that skips the queue',
         body: 'Guests check in and out themselves at a HOMI kiosk — scan, confirm, and go. The front desk stays free for the moments that actually need a person.',
         points: ['Self check-in and check-out', 'Smoother flow at peak hours', 'Faster room turnover'],
     },
     {
         icon: 'i-solar-bolt-bold-duotone',
+        image: 'homi-24.jpg',
+        alt: 'A receptionist working with the HOMI dashboard at the front desk',
         title: 'Automation that frees your team',
         body: 'HOMI handles the routine — the counting, the posting, the reconciling — so your people spend their shift on guests and service instead of paperwork.',
         points: ['Smarter day-to-day operations', 'Fewer manual errors', 'Decisions backed by live data'],
@@ -65,11 +75,14 @@ const channels = [
     { icon: 'i-solar-point-on-map-bold-duotone', title: 'Lobby kiosk', text: 'Self-service check-in and check-out, embedded in the system.' },
 ];
 
-// Real screens from the running system, for the "see it in action" gallery.
-const shots = [
-    { image: 'app-dashboard.jpg', label: 'Owner dashboard', text: 'Sales, occupancy and what needs attention — across every branch, live.' },
-    { image: 'app-summary.jpg', label: 'Owner summary', text: 'Sales, net, expenses and occupancy by branch, for any period.' },
-    { image: 'app-stats.jpg', label: 'Stats', text: 'Trends, busiest hours and what guests choose, at a glance.' },
+// The HOMI graphics that document the system in detail, shown as a gallery.
+const gallery = [
+    { image: 'homi-23.jpg', alt: 'Stop searching, start managing smarter' },
+    { image: 'homi-07.jpg', alt: 'Every booking, always recorded' },
+    { image: 'homi-21.jpg', alt: 'Smarter reporting, faster decisions' },
+    { image: 'homi-05.jpg', alt: 'Manage smarter, grow faster — with POS and kitchen' },
+    { image: 'homi-16.jpg', alt: 'Now with kiosk integration — mobile, web, and kiosk' },
+    { image: 'homi-11.jpg', alt: 'Hotels made smarter, guests made happier' },
 ];
 
 const nav = [
@@ -188,20 +201,14 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="hm-rise relative" style="--hm-step: 2">
-                    <div class="overflow-hidden rounded-2xl border border-default shadow-(--hm-shadow-lift)">
-                        <div class="flex items-center gap-1.5 border-b border-default bg-muted px-4 py-2.5">
-                            <span class="size-2.5 rounded-full bg-control-dash" aria-hidden="true" />
-                            <span class="size-2.5 rounded-full bg-control-dash" aria-hidden="true" />
-                            <span class="size-2.5 rounded-full bg-control-dash" aria-hidden="true" />
-                            <span class="ms-3 text-[11.5px] text-muted">HOMI · Owner dashboard</span>
-                        </div>
-                        <img :src="img('app-dashboard.jpg')" width="1516" height="784" alt="The HOMI owner dashboard: sales, occupancy and attention across branches" class="block w-full" />
+                    <div class="overflow-hidden rounded-[24px] border border-default bg-default shadow-(--hm-shadow-lift)">
+                        <img :src="img('homi-02.jpg')" width="1254" height="1254" alt="HOMI — smarter hotel management starts here" class="block w-full" />
                     </div>
                     <div class="hm-floaty absolute -bottom-5 -left-5 flex items-center gap-3 rounded-2xl border border-default bg-default p-3.5 pe-5 shadow-(--hm-shadow-float) max-[600px]:-bottom-3 max-[600px]:-left-2">
-                        <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-on-primary"><UIcon name="i-solar-refresh-circle-bold-duotone" class="size-6" aria-hidden="true" /></span>
+                        <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-on-primary"><UIcon name="i-solar-cloud-bold-duotone" class="size-6" aria-hidden="true" /></span>
                         <div>
-                            <b class="block text-[14px] leading-tight font-semibold text-highlighted">Live, always</b>
-                            <span class="text-[12px] text-muted">Numbers refresh as the day happens</span>
+                            <b class="block text-[14px] leading-tight font-semibold text-highlighted">Cloud-based</b>
+                            <span class="text-[12px] text-muted">Reach your hotel from anywhere</span>
                         </div>
                     </div>
                 </div>
@@ -234,28 +241,27 @@ onBeforeUnmount(() => {
         <!-- Features -->
         <section id="features" class="scroll-mt-24 bg-muted py-20 max-[600px]:py-14">
             <div class="mx-auto max-w-[1200px] px-6 max-[600px]:px-4">
-                <div data-reveal class="sr mx-auto mb-12 max-w-[640px] text-center">
+                <div data-reveal class="sr mx-auto mb-14 max-w-[640px] text-center">
                     <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">Features</p>
                     <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-highlighted">Everything your front desk needs</h2>
                     <p class="mt-2.5 text-[15px] text-muted">One platform for the whole operation — from the lobby kiosk to the housekeeper’s phone to the owner’s nightly report.</p>
                 </div>
-                <div class="grid grid-cols-3 gap-6 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
-                    <article
-                        v-for="(f, i) in features"
-                        :key="f.title"
-                        data-reveal
-                        class="sr flex flex-col rounded-3xl border border-default bg-default p-6 shadow-xs transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:-translate-y-1.5 hover:shadow-(--hm-shadow-lift) motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                        :style="{ transitionDelay: `${(i % 3) * 80}ms` }"
-                    >
-                        <span class="grid size-12 place-items-center rounded-2xl bg-primary-50"><UIcon :name="f.icon" class="size-7 text-primary" aria-hidden="true" /></span>
-                        <h3 class="mt-5 text-[18px] font-semibold text-highlighted">{{ f.title }}</h3>
-                        <p class="mt-2 text-[14px] leading-[1.6] text-muted">{{ f.body }}</p>
-                        <ul class="mt-4 space-y-2 border-t border-muted pt-4">
-                            <li v-for="p in f.points" :key="p" class="flex items-start gap-2.5 text-[13.5px] text-default">
-                                <UIcon name="i-solar-check-circle-bold-duotone" class="mt-0.5 size-[18px] shrink-0 text-primary" aria-hidden="true" />
-                                <span>{{ p }}</span>
-                            </li>
-                        </ul>
+                <div class="flex flex-col gap-16 sm:gap-24">
+                    <article v-for="(f, i) in features" :key="f.title" data-reveal class="sr grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+                        <div class="overflow-hidden rounded-[22px] border border-default bg-default shadow-(--hm-shadow-lift)" :class="i % 2 === 1 ? 'lg:order-2' : ''">
+                            <img :src="img(f.image)" :alt="f.alt" width="1254" height="1254" loading="lazy" class="block w-full" />
+                        </div>
+                        <div :class="i % 2 === 1 ? 'lg:order-1' : ''">
+                            <span class="grid size-12 place-items-center rounded-2xl bg-primary-50"><UIcon :name="f.icon" class="size-7 text-primary" aria-hidden="true" /></span>
+                            <h3 class="mt-5 text-[clamp(1.5rem,3vw,2rem)] leading-[1.15] font-semibold tracking-[-0.025em] text-highlighted">{{ f.title }}</h3>
+                            <p class="mt-3 text-[1.02rem] leading-[1.6] text-muted">{{ f.body }}</p>
+                            <ul class="mt-5 space-y-3">
+                                <li v-for="p in f.points" :key="p" class="flex items-start gap-3 text-[15px] text-default">
+                                    <UIcon name="i-solar-check-circle-bold-duotone" class="mt-0.5 size-[22px] shrink-0 text-primary" aria-hidden="true" />
+                                    <span>{{ p }}</span>
+                                </li>
+                            </ul>
+                        </div>
                     </article>
                 </div>
             </div>
@@ -293,23 +299,23 @@ onBeforeUnmount(() => {
             </div>
         </section>
 
-        <!-- See it in action (real screens) -->
+        <!-- The system in detail (gallery) -->
         <section class="bg-muted py-20 max-[600px]:py-14">
             <div class="mx-auto max-w-[1200px] px-6 max-[600px]:px-4">
                 <div data-reveal class="sr mx-auto mb-12 max-w-[640px] text-center">
-                    <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">See it in action</p>
-                    <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-highlighted">The system, in detail</h2>
-                    <p class="mt-2.5 text-[15px] text-muted">Real screens from HOMI — the owner’s view of sales, occupancy and trends across every branch.</p>
+                    <p class="mb-2 text-[13px] font-semibold tracking-[0.12em] text-primary uppercase">In detail</p>
+                    <h2 class="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-highlighted">See the system in detail</h2>
+                    <p class="mt-2.5 text-[15px] text-muted">A closer look at what HOMI does, straight from the team.</p>
                 </div>
-                <div class="grid grid-cols-3 gap-6 max-[900px]:grid-cols-1">
-                    <figure v-for="(s, i) in shots" :key="s.image" data-reveal class="sr overflow-hidden rounded-3xl border border-default bg-default shadow-xs transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:-translate-y-1.5 hover:shadow-(--hm-shadow-lift) motion-reduce:transition-none motion-reduce:hover:translate-y-0" :style="{ transitionDelay: `${i * 90}ms` }">
-                        <div class="overflow-hidden border-b border-default bg-homi-950">
-                            <img :src="img(s.image)" width="1516" height="784" loading="lazy" :alt="`HOMI ${s.label}`" class="block w-full" />
-                        </div>
-                        <figcaption class="p-5">
-                            <h3 class="text-[15.5px] font-semibold text-highlighted">{{ s.label }}</h3>
-                            <p class="mt-1 text-[13px] leading-[1.5] text-muted">{{ s.text }}</p>
-                        </figcaption>
+                <div class="grid grid-cols-3 gap-6 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+                    <figure
+                        v-for="(g, i) in gallery"
+                        :key="g.image"
+                        data-reveal
+                        class="sr overflow-hidden rounded-[18px] border border-default bg-default shadow-xs transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:-translate-y-1.5 hover:shadow-(--hm-shadow-lift) motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                        :style="{ transitionDelay: `${(i % 3) * 80}ms` }"
+                    >
+                        <img :src="img(g.image)" :alt="g.alt" width="1254" height="1254" loading="lazy" class="block w-full" />
                     </figure>
                 </div>
             </div>
