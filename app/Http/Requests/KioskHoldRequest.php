@@ -23,7 +23,9 @@ final class KioskHoldRequest extends FormRequest
     {
         return [
             'room_type_id' => ['required', 'integer'],
-            'hours' => ['required', 'integer', 'min:1', 'max:24'],
+            'kind' => ['nullable', 'string', 'in:hourly,long_stay'],
+            'hours' => ['nullable', 'required_unless:kind,long_stay', 'integer', 'min:1', 'max:24'],
+            'days' => ['nullable', 'required_if:kind,long_stay', 'integer', 'min:1', 'max:31'],
             'guest_name' => ['required', 'string', 'max:80', 'regex:/(?:\p{L}.*){3}/u'],
             'guest_mobile' => ['nullable', 'string', 'regex:/^09\d{9}$/'],
             'idempotency_key' => ['required', 'uuid'],

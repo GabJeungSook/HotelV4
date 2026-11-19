@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\Stays\HoldRoom;
+use App\Enums\StayKind;
 use App\Http\Requests\KioskHoldRequest;
 use App\Models\Branch;
 use App\Models\Stay;
@@ -38,16 +39,22 @@ final class KioskController extends Controller
 
         return Inertia::render('Kiosk/PickRoom', [
             ...$props,
-            'chosen' => ['room_type_id' => $request->integer('room_type_id') ?: null, 'hours' => $request->integer('hours') ?: null],
+            'chosen' => [
+                'room_type_id' => $request->integer('room_type_id') ?: null,
+                'kind' => $request->string('kind')->toString() === 'long_stay' ? 'long_stay' : 'hourly',
+                'quantity' => $request->integer('quantity') ?: ($request->integer('hours') ?: null),
+            ],
             // Back from 29 after "room just taken" (APP_FLOW §4.18 step 7).
             'notice' => $request->filled('taken') ? 'Room '.mb_substr($request->string('taken')->toString(), 0, 8).' was just taken by another guest. Here is the next free room.' : null,
         ]);
     }
 
-    /** Your name (29) for a type and hours checked on the server. */
+    /** Your name (29) for a type and stay checked on the server. */
     public function details(Request $request): Response|RedirectResponse
     {
-        $details = $this->screens->details($this->branch($request), $request->integer('room_type'), $request->integer('hours'));
+        $kind = $request->string('kind')->toString() === 'long_stay' ? StayKind::LongStay : StayKind::Hourly;
+        $quantity = $request->integer('quantity') ?: $request->integer('hours');
+        $details = $this->screens->details($this->branch($request), $request->integer('room_type'), $kind, $quantity);
 
         if ($details === null) {
             Inertia::flash('error', ['code' => 'room_taken', 'message' => 'That room type is full right now. Please pick another.']);
@@ -61,13 +68,16 @@ final class KioskController extends Controller
     public function hold(KioskHoldRequest $request, HoldRoom $holdRoom): RedirectResponse
     {
         Gate::authorize('hold', Stay::class);
-        /** @var array{room_type_id: int|string, hours: int|string, guest_name: string, guest_mobile?: string|null, idempotency_key: string} $data */
+        /** @var array{room_type_id: int|string, kind?: string|null, hours?: int|string|null, days?: int|string|null, guest_name: string, guest_mobile?: string|null, idempotency_key: string} $data */
         $data = $request->validated();
+        $kind = ($data['kind'] ?? null) === 'long_stay' ? StayKind::LongStay : StayKind::Hourly;
+        $quantity = $kind === StayKind::LongStay ? (int) ($data['days'] ?? 0) : (int) ($data['hours'] ?? 0);
 
         $stay = $holdRoom->handle(
             $this->user($request),
             (int) $data['room_type_id'],
-            (int) $data['hours'],
+            $kind,
+            $quantity,
             $data['guest_name'],
             $data['guest_mobile'] ?? null,
             $data['idempotency_key'],

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Stays\HoldRoom;
+use App\Enums\StayKind;
 use App\Enums\StayState;
 use App\Http\Middleware\EnsureDeviceKey;
 use App\Models\FolioLine;
@@ -26,7 +27,7 @@ beforeEach(function (): void {
     $this->shift = Hotel::openShift();
     $this->actingAs(Hotel::frontdesk())->withUnencryptedCookie(EnsureDeviceKey::COOKIE, (string) Str::uuid());
     $this->hold = fn (string $name = 'Carlo Dumandan'): Stay => app(HoldRoom::class)->handle(
-        Hotel::user('kiosk-gensan-1'), RoomType::query()->where('name', 'Deluxe')->value('id'), 6, $name, null, (string) Str::uuid(),
+        Hotel::user('kiosk-gensan-1'), RoomType::query()->where('name', 'Deluxe')->value('id'), StayKind::Hourly, 6, $name, null, (string) Str::uuid(),
     );
 });
 

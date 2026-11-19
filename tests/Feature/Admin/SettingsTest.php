@@ -199,9 +199,10 @@ it('removes the hourly options from check-in (6), the kiosk (28) and the rate ta
 
     expect(fn () => Hotel::checkIn('205', 12))->toThrow(InvalidStayOption::class, 'Hourly stays are not sold');
 
-    // 28: the kiosk sells hourly stays only, so it offers no room type.
+    // 28: the kiosk offers no hourly option (it may still offer long stay).
     $this->actingAs(Hotel::user('kiosk-gensan-1'));
-    $this->get('/kiosk/start')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Kiosk/PickRoom')->where('types', []));
+    $this->get('/kiosk/start')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Kiosk/PickRoom')
+        ->where('types', fn ($types) => collect($types)->every(fn ($t) => $t['options'] === [])));
 });
 
 it('brings the hourly options back when hourly stays are switched on again', function (): void {

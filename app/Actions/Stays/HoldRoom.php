@@ -51,7 +51,7 @@ final class HoldRoom
         private readonly Transaction $transaction,
     ) {}
 
-    public function handle(User $kiosk, int $roomTypeId, int $hours, string $guestName, ?string $guestMobile, string $idempotencyKey): Stay
+    public function handle(User $kiosk, int $roomTypeId, StayKind $kind, int $quantity, string $guestName, ?string $guestMobile, string $idempotencyKey): Stay
     {
         $existing = $this->replay($idempotencyKey);
 
@@ -75,7 +75,7 @@ final class HoldRoom
         }
 
         try {
-            return $this->transaction->run(fn (): Stay => $this->hold((int) $kiosk->branch_id, $roomTypeId, $hours, $name, $mobile, $idempotencyKey));
+            return $this->transaction->run(fn (): Stay => $this->hold((int) $kiosk->branch_id, $roomTypeId, $kind, $quantity, $name, $mobile, $idempotencyKey));
         } catch (QueryException $e) {
             if (DuplicateKey::on($e, 'stays_idempotency_unique')) {
                 return $this->replay($idempotencyKey) ?? throw $e;
@@ -85,19 +85,21 @@ final class HoldRoom
         }
     }
 
-    private function hold(int $branchId, int $roomTypeId, int $hours, string $name, ?string $mobile, string $idempotencyKey): Stay
+    private function hold(int $branchId, int $roomTypeId, StayKind $kind, int $quantity, string $name, ?string $mobile, string $idempotencyKey): Stay
     {
         $branch = Branch::query()->withoutGlobalScopes()->findOrFail($branchId);
+        $kindEnabled = $kind === StayKind::LongStay ? $branch->long_stay_enabled : $branch->hourly_enabled;
 
-        if (! $branch->kiosk_enabled || ! $branch->hourly_enabled) {
+        if (! $branch->kiosk_enabled || ! $kindEnabled) {
             throw ActionRefused::because('The kiosk is not taking holds. Please check in at the front desk.');
         }
 
         $type = RoomType::query()->withoutGlobalScopes()->where('branch_id', $branchId)->where('is_active', true)->findOrFail($roomTypeId);
         $card = RateCard::forBranch($branch);
+        $valid = $kind === StayKind::LongStay ? $this->offer->days($branch, $card, $type->id, $this->clock->now()) : $this->offer->hours($card, $type->id);
 
-        if (! in_array($hours, $this->offer->hours($card, $type->id), true)) {
-            throw ActionRefused::because("There is no {$hours}-hour stay for {$type->name} rooms.");
+        if (! in_array($quantity, $valid, true)) {
+            throw ActionRefused::because("That stay is not offered for {$type->name} rooms.");
         }
 
         $now = $this->clock->now();
@@ -105,7 +107,7 @@ final class HoldRoom
         $this->holds->expireDue($branchId);
 
         // The stay can start as late as the end of the hold, so that is the period to keep clear.
-        ['quote' => $latest] = $this->offer->quote($branchId, $card, $type->id, $hours, $expiresAt);
+        ['quote' => $latest] = $this->offer->quote($branchId, $card, $type->id, $kind, $quantity, $expiresAt);
         $next = $this->rotation->next($this->rooms->kioskCandidates($branchId, $type->id, $now, $latest->expectedCheckoutAt));
 
         if ($next === null) {
@@ -118,7 +120,7 @@ final class HoldRoom
             throw RoomTaken::room($room->number, $room->id);
         }
 
-        ['quote' => $quote, 'discount' => $discount] = $this->offer->quote($branchId, $card, $type->id, $hours, $now);
+        ['quote' => $quote, 'discount' => $discount] = $this->offer->quote($branchId, $card, $type->id, $kind, $quantity, $now);
         $code = $this->numbers->next($branch);
 
         try {
@@ -131,8 +133,10 @@ final class HoldRoom
                 'room_type_id' => $type->id,
                 'guest_name' => $name,
                 'guest_mobile' => $mobile,
-                'stay_kind' => StayKind::Hourly,
-                'hours' => $hours,
+                'stay_kind' => $kind,
+                'hours' => $kind === StayKind::Hourly ? $quantity : null,
+                'nights' => $kind === StayKind::Overnight ? $quantity : null,
+                'days' => $kind === StayKind::LongStay ? $quantity : null,
                 'discount_id' => $discount?->id,
                 'quoted_amount' => $quote->netRoomAmount(),
                 'hold_expires_at' => $expiresAt,

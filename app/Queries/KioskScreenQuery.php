@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Queries;
 
+use App\Enums\StayKind;
 use App\Enums\StayState;
 use App\Exceptions\RateNotFound;
 use App\Models\Branch;
@@ -70,7 +71,7 @@ final class KioskScreenQuery
      *
      * @return array<string, mixed>|null
      */
-    public function details(Branch $branch, int $roomTypeId, int $hours): ?array
+    public function details(Branch $branch, int $roomTypeId, StayKind $kind, int $quantity): ?array
     {
         $type = RoomType::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->where('is_active', true)->find($roomTypeId);
 
@@ -79,32 +80,42 @@ final class KioskScreenQuery
         }
 
         $card = RateCard::forBranch($branch);
+        $valid = $kind === StayKind::LongStay ? $this->offer->days($branch, $card, $type->id, $this->clock->now()) : $this->offer->hours($card, $type->id);
 
-        if (! in_array($hours, $this->offer->hours($card, $type->id), true)) {
+        if (! in_array($quantity, $valid, true)) {
             return null;
         }
 
-        $room = $this->offered($branch, $card, $type->id, $hours);
+        $room = $this->offered($branch, $card, $type->id, $kind, $quantity);
 
         if ($room === null) {
             return null;
         }
 
-        ['quote' => $quote, 'discount' => $discount] = $this->offer->quote($branch->id, $card, $type->id, $hours, $this->clock->now());
+        ['quote' => $quote, 'discount' => $discount] = $this->offer->quote($branch->id, $card, $type->id, $kind, $quantity, $this->clock->now());
+        $label = self::stayLabel($kind, $quantity);
 
         return [
             'type' => ['id' => $type->id, 'name' => $type->name],
             'room' => $this->roomLabel($room),
-            'hours' => $hours,
+            'kind' => $kind->value,
+            'quantity' => $quantity,
+            'stay_label' => $label,
             'room_amount' => $quote->roomAmount->centavos(),
             'discount' => $discount === null ? null : [
                 'name' => $discount->name,
                 'amount' => $quote->discountAmount->centavos(),
-                'text' => "{$discount->name} discount for {$hours}-hour stays.",
+                'text' => "{$discount->name} discount for {$quantity}-".($kind === StayKind::LongStay ? 'day' : 'hour').' stays.',
             ],
             'deposit' => ['name' => $branch->deposit_name, 'amount' => $quote->depositAmount->centavos()],
             'total' => $quote->totalToCollect()->centavos(),
         ];
+    }
+
+    /** "6 hours" or "2 days", for labels and the discount note. */
+    private static function stayLabel(StayKind $kind, int $quantity): string
+    {
+        return $kind === StayKind::LongStay ? $quantity.' '.($quantity === 1 ? 'day' : 'days') : $quantity.' hours';
     }
 
     /**
@@ -130,13 +141,14 @@ final class KioskScreenQuery
     }
 
     /**
-     * Each active type with a price: its offered room (or full), hour options and free count.
+     * Each active type with a price: its offered room (or full), the hour and whole-day options,
+     * and the free count.
      *
-     * @return list<array{id: int, name: string, description: string|null, room: array{id: int, number: string, label: string}|null, full: bool, options: list<array{hours: int, amount: int}>, free: int}>
+     * @return list<array{id: int, name: string, description: string|null, room: array{id: int, number: string, label: string}|null, full: bool, options: list<array{hours: int, amount: int}>, day_options: list<array{days: int, amount: int}>, free: int}>
      */
     private function types(Branch $branch): array
     {
-        if (! $branch->hourly_enabled) {
+        if (! $branch->hourly_enabled && ! $branch->long_stay_enabled) {
             return [];
         }
 
@@ -149,20 +161,33 @@ final class KioskScreenQuery
         foreach ($types as $type) {
             $options = [];
 
-            foreach ($this->offer->hours($card, $type->id) as $h) {
+            if ($branch->hourly_enabled) {
+                foreach ($this->offer->hours($card, $type->id) as $h) {
+                    try {
+                        $options[] = ['hours' => $h, 'amount' => $this->offer->quote($branch->id, $card, $type->id, StayKind::Hourly, $h, $now)['quote']->roomAmount->centavos()];
+                    } catch (RateNotFound) {
+                        continue;
+                    }
+                }
+            }
+
+            $dayOptions = [];
+
+            foreach ($this->offer->days($branch, $card, $type->id, $now) as $d) {
                 try {
-                    $options[] = ['hours' => $h, 'amount' => $this->offer->quote($branch->id, $card, $type->id, $h, $now)['quote']->roomAmount->centavos()];
+                    $dayOptions[] = ['days' => $d, 'amount' => $this->offer->quote($branch->id, $card, $type->id, StayKind::LongStay, $d, $now)['quote']->roomAmount->centavos()];
                 } catch (RateNotFound) {
                     continue;
                 }
             }
 
-            if ($options === []) {
+            if ($options === [] && $dayOptions === []) {
                 continue;
             }
 
-            // Offered for the shortest stay; HoldRoom checks again for the hours chosen.
-            $eligible = $this->rotation->order($this->rooms->kioskCandidates($branch->id, $type->id, $now, $this->period($branch, $card, $type->id, $options[0]['hours'])));
+            // Offered for the first available option; HoldRoom checks again for the stay chosen.
+            [$firstKind, $firstQty] = $options !== [] ? [StayKind::Hourly, $options[0]['hours']] : [StayKind::LongStay, $dayOptions[0]['days']];
+            $eligible = $this->rotation->order($this->rooms->kioskCandidates($branch->id, $type->id, $now, $this->period($branch, $card, $type->id, $firstKind, $firstQty)));
             $first = $eligible[0] ?? null;
             $room = $first === null ? null : Room::query()->withoutGlobalScopes()->find($first->id);
 
@@ -173,6 +198,7 @@ final class KioskScreenQuery
                 'room' => $room === null ? null : $this->roomLabel($room),
                 'full' => $room === null,
                 'options' => $options,
+                'day_options' => $dayOptions,
                 'free' => count($eligible),
             ];
         }
@@ -180,19 +206,19 @@ final class KioskScreenQuery
         return $out;
     }
 
-    private function offered(Branch $branch, RateCard $card, int $typeId, int $hours): ?Room
+    private function offered(Branch $branch, RateCard $card, int $typeId, StayKind $kind, int $quantity): ?Room
     {
-        $next = $this->rotation->next($this->rooms->kioskCandidates($branch->id, $typeId, $this->clock->now(), $this->period($branch, $card, $typeId, $hours)));
+        $next = $this->rotation->next($this->rooms->kioskCandidates($branch->id, $typeId, $this->clock->now(), $this->period($branch, $card, $typeId, $kind, $quantity)));
 
         return $next === null ? null : Room::query()->withoutGlobalScopes()->find($next->id);
     }
 
-    /** The latest a kiosk stay of these hours could end: started at the end of the hold. */
-    private function period(Branch $branch, RateCard $card, int $typeId, int $hours): CarbonImmutable
+    /** The latest a kiosk stay of this kind and length could end: started at the end of the hold. */
+    private function period(Branch $branch, RateCard $card, int $typeId, StayKind $kind, int $quantity): CarbonImmutable
     {
         $start = $this->clock->now()->addMinutes($branch->kiosk_hold_minutes);
 
-        return $this->offer->quote($branch->id, $card, $typeId, $hours, $start)['quote']->expectedCheckoutAt;
+        return $this->offer->quote($branch->id, $card, $typeId, $kind, $quantity, $start)['quote']->expectedCheckoutAt;
     }
 
     /** @return array{id: int, number: string, label: string} */

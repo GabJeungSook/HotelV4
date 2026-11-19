@@ -46,7 +46,7 @@ beforeEach(function (): void {
     $this->kiosk = Hotel::user('kiosk-gensan-1');
     $this->deluxe = RoomType::query()->where('name', 'Deluxe')->firstOrFail();
     $this->hold = fn (int $hours = 6, string $name = 'Carlo Dumandan', ?string $key = null, ?int $typeId = null): Stay => app(HoldRoom::class)
-        ->handle($this->kiosk, $typeId ?? $this->deluxe->id, $hours, $name, '09175550142', $key ?? (string) Str::uuid());
+        ->handle($this->kiosk, $typeId ?? $this->deluxe->id, StayKind::Hourly, $hours, $name, '09175550142', $key ?? (string) Str::uuid());
 });
 
 /** @return array{lines: int, payments: int} */
@@ -255,10 +255,27 @@ it('keeps a room with a reservation in the period off the kiosk', function (): v
     expect(($this->hold)()->room->number)->toBe('202');
 });
 
+it('holds a long stay priced per day from the 24-hour rate', function (): void {
+    $stay = app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, StayKind::LongStay, 2, 'Carlo Dumandan', '09175550142', (string) Str::uuid());
+
+    expect($stay->stay_kind)->toBe(StayKind::LongStay)
+        ->and($stay->days)->toBe(2)
+        ->and($stay->hours)->toBeNull()
+        // Deluxe 24-hour rate is ₱1,000, so two days is ₱2,000 (no kiosk discount on long stay).
+        ->and($stay->quoted_amount->centavos())->toBe(200000);
+});
+
+it('will not hold a long stay the branch does not offer', function (): void {
+    Hotel::branch()->update(['long_stay_enabled' => false]);
+
+    expect(fn () => app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, StayKind::LongStay, 2, 'Carlo Dumandan', '09175550142', (string) Str::uuid()))
+        ->toThrow(ActionRefused::class);
+});
+
 it('refuses a name shorter than 3 letters, an incomplete mobile and an hour option that does not exist', function (): void {
-    expect(fn () => app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, 6, 'Al', null, (string) Str::uuid()))->toThrow(ActionRefused::class)
-        ->and(fn () => app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, 6, 'Carlo', '091755', (string) Str::uuid()))->toThrow(ActionRefused::class, 'Enter all 11 digits')
-        ->and(fn () => app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, 7, 'Carlo', null, (string) Str::uuid()))->toThrow(ActionRefused::class);
+    expect(fn () => app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, StayKind::Hourly, 6, 'Al', null, (string) Str::uuid()))->toThrow(ActionRefused::class)
+        ->and(fn () => app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, StayKind::Hourly, 6, 'Carlo', '091755', (string) Str::uuid()))->toThrow(ActionRefused::class, 'Enter all 11 digits')
+        ->and(fn () => app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, StayKind::Hourly, 7, 'Carlo', null, (string) Str::uuid()))->toThrow(ActionRefused::class);
 
     expect(Stay::query()->count())->toBe(0);
 });

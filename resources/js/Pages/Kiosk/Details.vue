@@ -21,7 +21,9 @@ import KioskLayout from '@/Layouts/KioskLayout.vue';
 interface Offer {
     type: { id: number; name: string };
     room: { id: number; number: string; label: string };
-    hours: number;
+    kind: 'hourly' | 'long_stay';
+    quantity: number;
+    stay_label: string;
     room_amount: number;
     discount: { name: string; amount: number; text: string } | null;
     deposit: { name: string; amount: number };
@@ -36,7 +38,9 @@ useKioskIdle(60, () => router.visit(route('kiosk.index')));
 
 const form = useForm({
     room_type_id: props.offer.type.id,
-    hours: props.offer.hours,
+    kind: props.offer.kind,
+    hours: props.offer.kind === 'hourly' ? props.offer.quantity : null,
+    days: props.offer.kind === 'long_stay' ? props.offer.quantity : null,
     guest_name: '',
     guest_mobile: '',
     idempotency_key: key.value,
@@ -59,13 +63,13 @@ watch(
     () => flash.value.error,
     (e) => {
         if (e?.code === 'room_taken') {
-            router.visit(route('kiosk.start', { room_type_id: props.offer.type.id, hours: props.offer.hours, taken: e.room ?? props.offer.room.number }));
+            router.visit(route('kiosk.start', { room_type_id: props.offer.type.id, kind: props.offer.kind, quantity: props.offer.quantity, taken: e.room ?? props.offer.room.number }));
         }
     },
 );
 
 const rows = computed(() => [
-    { label: `${props.offer.type.name} · Room ${props.offer.room.number} · ${props.offer.hours} hours`, amount: props.offer.room_amount },
+    { label: `${props.offer.type.name} · Room ${props.offer.room.number} · ${props.offer.stay_label}`, amount: props.offer.room_amount },
     ...(props.offer.discount ? [{ label: 'Discount', amount: -props.offer.discount.amount }] : []),
     ...(props.offer.deposit.amount > 0 ? [{ label: `${props.offer.deposit.name} deposit`, amount: props.offer.deposit.amount }] : []),
 ]);
@@ -73,7 +77,7 @@ const rows = computed(() => [
 const error = computed(() => (flash.value.error && flash.value.error.code !== 'room_taken' ? flash.value.error.message : undefined));
 
 function back(): void {
-    router.visit(route('kiosk.start', { room_type_id: props.offer.type.id, hours: props.offer.hours }));
+    router.visit(route('kiosk.start', { room_type_id: props.offer.type.id, kind: props.offer.kind, quantity: props.offer.quantity }));
 }
 
 function submit(): void {
