@@ -58,7 +58,6 @@ final class Navigation
             ['layout' => 'owner', 'heading' => 'Overview', 'items' => [
                 ['key' => 'owner', 'label' => 'Dashboard', 'route' => 'owner.dashboard', 'icon' => 'i-solar-chart-2-bold-duotone', 'roles' => [Role::Owner]],
                 ['key' => 'branches', 'label' => 'Branches', 'route' => 'owner.branches.index', 'icon' => 'i-solar-buildings-2-bold-duotone', 'roles' => [Role::Owner]],
-                ['key' => 'summary', 'label' => 'Superadmin summary', 'route' => 'owner.summary', 'icon' => 'i-solar-list-bold-duotone', 'roles' => [Role::Owner]],
             ]],
             ['layout' => 'backoffice', 'heading' => 'Overview', 'items' => [
                 ['key' => 'dashboard', 'label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'i-solar-chart-2-bold-duotone', 'roles' => [Role::Admin, Role::Backoffice, Role::Supervisor, Role::Owner]],
@@ -73,6 +72,7 @@ final class Navigation
             ]],
             ['layout' => 'backoffice', 'heading' => 'Reports', 'items' => [
                 ['key' => 'reports', 'label' => 'Report hub', 'route' => 'reports.index', 'icon' => 'i-solar-list-bold-duotone', 'roles' => self::BACK, 'parent' => 'reports-menu'],
+                ['key' => 'summary', 'label' => 'Branch comparison', 'route' => 'owner.summary', 'icon' => 'i-solar-buildings-2-bold-duotone', 'roles' => [Role::Owner], 'parent' => 'reports-menu', 'subtitle' => 'Closed-books sales, cash and occupancy, branch by branch'],
                 ['key' => 'shift-reports', 'label' => 'Shift reports', 'route' => 'reports.shifts', 'icon' => 'i-solar-banknote-2-bold-duotone', 'roles' => self::REPORTS_SHORT, 'parent' => 'reports-menu', 'subtitle' => 'Closed shifts are read from their frozen totals'],
                 ['key' => 'z-report', 'label' => 'Z-report', 'route' => 'reports.z.latest', 'icon' => 'i-solar-list-bold-duotone', 'roles' => self::REPORTS_FULL, 'parent' => 'reports-menu'],
                 ['key' => 'daily', 'label' => 'Daily sales', 'route' => 'reports.daily', 'icon' => 'i-solar-chart-2-bold-duotone', 'roles' => self::REPORTS_SHORT, 'parent' => 'reports-menu'],

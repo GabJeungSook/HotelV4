@@ -132,6 +132,7 @@ const sub = computed(() => `${props.branch === 'all' ? 'All branches' : (props.b
                             <h2 class="text-[14.5px] leading-[1.3] font-semibold text-highlighted">Sales by branch</h2>
                             <small class="block text-xs text-muted">Net sales per business day · last 14 days</small>
                         </div>
+                        <UButton :to="route('owner.summary')" variant="link" size="sm" color="neutral" trailing-icon="i-solar-alt-arrow-right-linear" label="Branch comparison" class="ms-auto text-primary" />
                     </div>
                     <StackedBars
                         :labels="salesLabels"

@@ -242,7 +242,10 @@ it('builds the navigation on the server from the role and the pages that exist',
 
     // An owner gets a branch's own pages only after opening it (DESIGN_SYSTEM §6.1).
     $ownerNav = $this->actingAs(Hotel::user('ramon.alvarez'))->get('/owner')->viewData('page')['props']['nav'];
-    expect(collect($ownerNav)->pluck('items')->flatten(1)->pluck('key')->all())->toBe(['owner', 'branches', 'summary', 'reports-menu', 'stats', 'owners']);
+    expect(collect($ownerNav)->pluck('items')->flatten(1)->pluck('key')->all())->toBe(['owner', 'branches', 'reports-menu', 'stats', 'owners']);
+    // Branch comparison (the owner summary) folds under Reports, not as a top-level overview page.
+    $ownerReports = collect($ownerNav)->pluck('items')->flatten(1)->firstWhere('key', 'reports-menu');
+    expect(collect($ownerReports['children'])->pluck('key')->all())->toBe(['reports', 'summary', 'shift-reports', 'daily']);
 });
 
 it('shares the open shift without any money', function (): void {

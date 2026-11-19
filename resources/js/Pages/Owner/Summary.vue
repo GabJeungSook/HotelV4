@@ -111,8 +111,8 @@ const short = (c: number) => (c === 0 ? formatMoney(0, 'wholeColumn') : formatMo
 </script>
 
 <template>
-    <Head title="Superadmin summary" />
-    <OwnerLayout current="summary" :title="`Superadmin summary · ${heading}`">
+    <Head title="Branch comparison" />
+    <OwnerLayout current="summary" :title="`Branch comparison · ${heading}`" subtitle="Closed-books sales, cash and occupancy — branch by branch">
         <PageHeader>
             <PeriodSegments v-model="branch" label="Branch" :items="picker" />
         </PageHeader>

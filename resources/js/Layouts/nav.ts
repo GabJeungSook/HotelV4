@@ -87,7 +87,7 @@ export const ownerNav: NavGroup[] = [
         items: [
             { key: 'dashboard', label: 'Dashboard', route: '/owner', icon: 'i-solar-chart-2-bold-duotone' },
             { key: 'branches', label: 'Branches', route: '/owner/branches', icon: 'i-solar-buildings-2-bold-duotone' },
-            { key: 'summary', label: 'Superadmin summary', route: '/owner/summary', icon: 'i-solar-list-bold-duotone' },
+            { key: 'summary', label: 'Branch comparison', route: '/owner/summary', icon: 'i-solar-buildings-2-bold-duotone' },
         ],
     },
     {
