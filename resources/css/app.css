@@ -597,6 +597,20 @@
             padding-left: 0;
         }
     }
+
+    /* Roomier text for a detail folio where readability beats density (stay folio, 9). */
+    &.roomy {
+        font-size: 14px;
+
+        & th {
+            font-size: 13px;
+        }
+
+        & td {
+            padding-top: 12px;
+            padding-bottom: 12px;
+        }
+    }
 }
 
 /* The "on duty" dot (60, 61): static, not a status label. */

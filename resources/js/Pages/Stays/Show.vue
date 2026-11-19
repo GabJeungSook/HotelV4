@@ -207,8 +207,8 @@ function lineMenu(line: Line) {
         </p>
 
         <div class="grid grid-cols-[minmax(0,1fr)_300px] gap-4 max-[900px]:grid-cols-1">
-            <section class="overflow-hidden rounded-card border border-default bg-default">
-                <table class="dtable w-full">
+            <section class="overflow-x-auto rounded-card border border-default bg-default p-4">
+                <table class="dtable roomy w-full">
                     <thead>
                         <tr>
                             <th>Item</th>
@@ -221,7 +221,7 @@ function lineMenu(line: Line) {
                         <tr v-for="line in lines" :key="line.id" :data-line="line.id">
                             <td>
                                 <span :class="line.status === 'reversed' && !line.is_reversal ? 'text-muted line-through' : 'text-highlighted'">{{ line.description }}</span>
-                                <span class="block text-xs text-muted">{{ formatDateTime(line.at, 'auto', stay.now) }} · {{ line.by }}</span>
+                                <span class="block text-[13px] text-muted">{{ formatDateTime(line.at, 'auto', stay.now) }} · {{ line.by }}</span>
                             </td>
                             <td class="num text-right">{{ formatMoney(line.amount, 'column') }}</td>
                             <td class="text-right"><StatusLabel :tone="statusTone[line.status]" :label="statusText[line.status]" /></td>
@@ -233,7 +233,7 @@ function lineMenu(line: Line) {
                         </tr>
                         <template v-for="d in deposits" :key="d.type">
                             <tr v-if="d.amount > 0">
-                                <td><span class="text-highlighted">{{ d.label }}</span><span class="block text-xs text-muted">returned at check-out</span></td>
+                                <td><span class="text-highlighted">{{ d.label }}</span><span class="block text-[13px] text-muted">returned at check-out</span></td>
                                 <td class="num text-right">{{ formatMoney(d.amount, 'column') }}</td>
                                 <td class="text-right"><StatusLabel tone="primary" label="Held" /></td>
                                 <td />
