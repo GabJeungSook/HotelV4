@@ -46,10 +46,10 @@ const initialTab = new URLSearchParams(typeof window === 'undefined' ? '' : wind
 const tab = ref<RoomFilter>((['all', 'vacant', 'occupied', 'due_out', 'overdue', 'housekeeping', 'held'] as RoomFilter[]).includes(initialTab as RoomFilter) ? (initialTab as RoomFilter) : 'all');
 const sort = ref<'number' | 'attention'>('number');
 const q = ref(props.filters.q);
-const lastFloor = useLocalStorage('homi.board.floor', '');
-const floor = ref(props.filters.floor || lastFloor.value);
+const lastFloor = useLocalStorage('homi.board.floor', 'all');
+const floor = ref(props.filters.floor || lastFloor.value || 'all');
 
-if (floor.value !== props.filters.floor) {
+if (floor.value !== (props.filters.floor || 'all')) {
     visit();
 }
 
@@ -64,7 +64,7 @@ const tabs = computed(() => [
     { value: 'housekeeping', label: 'Housekeeping', n: count(['to_clean', 'cleaning']) },
     { value: 'held', label: 'Held', n: count(['held']) },
 ]);
-const floorItems = computed(() => [{ value: '', label: 'All floors' }, ...(props.board?.floorOptions ?? [])]);
+const floorItems = computed(() => [{ value: 'all', label: 'All floors' }, ...(props.board?.floorOptions ?? [])]);
 const sortItems = [
     { value: 'number', label: 'Sort: room no.' },
     { value: 'attention', label: 'Sort: needs attention first' },
@@ -72,7 +72,7 @@ const sortItems = [
 
 function visit(): void {
     lastFloor.value = floor.value;
-    router.get(route('board'), { ...(q.value ? { q: q.value } : {}), ...(floor.value ? { floor: floor.value } : {}) }, { preserveState: true, preserveScroll: true, replace: true, only: ['board', 'filters'] });
+    router.get(route('board'), { ...(q.value ? { q: q.value } : {}), ...(floor.value && floor.value !== 'all' ? { floor: floor.value } : {}) }, { preserveState: true, preserveScroll: true, replace: true, only: ['board', 'filters'] });
 }
 
 watchDebounced(q, visit, { debounce: 300 });
