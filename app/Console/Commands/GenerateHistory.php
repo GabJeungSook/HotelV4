@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Actions\Housekeeping\FinishCleaning;
+use App\Actions\Housekeeping\StartCleaning;
 use App\Actions\Owner\CreateBranch;
 use App\Actions\Pos\CompleteSale;
 use App\Actions\Pos\ReceiveStock;
@@ -17,6 +19,8 @@ use App\Actions\Stays\CheckInGuest;
 use App\Actions\Stays\CheckOutGuest;
 use App\Enums\BranchStatus;
 use App\Enums\CashMovementKind;
+use App\Enums\CleaningResult;
+use App\Enums\CleaningStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PosMode;
 use App\Enums\ProductKind;
@@ -24,6 +28,7 @@ use App\Enums\Role;
 use App\Enums\StayKind;
 use App\Enums\StayState;
 use App\Models\Branch;
+use App\Models\CleaningTask;
 use App\Models\ExpenseCategory;
 use App\Models\Floor;
 use App\Models\FolioLine;
@@ -33,7 +38,9 @@ use App\Models\RoomType;
 use App\Models\ShiftSession;
 use App\Models\Stay;
 use App\Models\User;
+use App\Queries\CleaningQuery;
 use App\Queries\StayQuery;
+use App\Services\CurrentBranch;
 use App\Services\CurrentShift;
 use App\Services\Pricing\RateCard;
 use App\Services\PricingService;
@@ -121,7 +128,7 @@ final class GenerateHistory extends Command
         } finally {
             app(Clock::class)->unfreeze();
             Carbon::setTestNow();
-            Branch::query()->withoutGlobalScopes()->update(['housekeeping_enabled' => true]); // restore normal operation
+            app(CurrentBranch::class)->reset();
         }
 
         $this->newLine();
@@ -209,7 +216,10 @@ final class GenerateHistory extends Command
             ['Elias Tan', 'elias.tan', Role::Frontdesk, '1234'],
             ['Noel Rama', 'noel.rama', Role::Housekeeper, null],
         ] as [$name, $username, $role, $pin]) {
-            User::query()->create(['branch_id' => $branch->id, 'name' => $name, 'username' => $username, 'password' => 'password', 'pin_hash' => $pin, 'role' => $role, 'is_active' => true]);
+            $user = User::query()->create(['branch_id' => $branch->id, 'name' => $name, 'username' => $username, 'password' => 'password', 'pin_hash' => $pin, 'role' => $role, 'is_active' => true]);
+            if ($role === Role::Housekeeper) {
+                $user->floors()->attach(Floor::query()->where('branch_id', $branch->id)->pluck('id')); // cover every floor
+            }
         }
 
         return true;
@@ -221,10 +231,12 @@ final class GenerateHistory extends Command
     private function generateShifts(Branch $branch, array $dates): void
     {
         $bid = $branch->id;
-        $branch->update(['housekeeping_enabled' => false]); // rooms return to sale at once; restored after
+        app(CurrentBranch::class)->set($bid);
+        $branch->update(['housekeeping_enabled' => true]); // checkouts create real cleaning tasks
         $people = User::query()->where('branch_id', $bid)->where('role', Role::Frontdesk)->whereNotNull('pin_hash')->orderBy('id')->take(2)->get()->all();
         $sellable = Product::query()->where('branch_id', $bid)->where('kind', ProductKind::FoodDrink)->where('is_active', true)->where('tracks_stock', true)->get();
         $expenseCat = ExpenseCategory::query()->where('branch_id', $bid)->first();
+        $housekeepers = User::query()->where('branch_id', $bid)->where('role', Role::Housekeeper)->where('is_active', true)->get()->all();
         [$amUser, $pmUser] = [$people[0], $people[1]];
 
         $this->setClock($this->utcAt($dates[0], '08:00'));
@@ -239,10 +251,10 @@ final class GenerateHistory extends Command
             foreach ($isLast ? ['AM'] : ['AM', 'PM'] as $period) {
                 $isAm = $period === 'AM';
                 $by = $isAm ? $amUser : $pmUser;
+                $isFinalOpenShift = $isLast && $isAm; // today's shift stays open, with a live cleaning queue
 
-                $this->runShift($branch, $by, $sellable, $expenseCat);
+                $this->runShift($branch, $by, $sellable, $expenseCat, $housekeepers, ! $isFinalOpenShift);
 
-                $isFinalOpenShift = $isLast && $isAm; // today's shift stays open
                 if (! $isFinalOpenShift) {
                     $this->setClock($isAm ? $this->utcAt($date, '20:00') : $this->utcAt($this->nextDate($date), '08:00'));
                     $this->handOver($branch, $by, $isAm ? $pmUser : $amUser);
@@ -267,8 +279,11 @@ final class GenerateHistory extends Command
         }
     }
 
-    /** @param  Collection<int, Product>  $sellable */
-    private function runShift(Branch $branch, User $by, Collection $sellable, ?ExpenseCategory $expenseCat): void
+    /**
+     * @param  Collection<int, Product>  $sellable
+     * @param  list<User>  $housekeepers
+     */
+    private function runShift(Branch $branch, User $by, Collection $sellable, ?ExpenseCategory $expenseCat, array $housekeepers, bool $cleanAfter): void
     {
         $bid = $branch->id;
 
@@ -312,6 +327,48 @@ final class GenerateHistory extends Command
         if ($expenseCat !== null && mt_rand(1, 3) === 1) {
             app(RecordCashMovement::class)->handle($by, $bid, CashMovementKind::Expense, Money::ofPesos(mt_rand(50, 400)), 'Supplies', (string) Str::uuid(), $expenseCat);
         }
+
+        // Housekeepers clean the rooms just vacated, so they return to sale. The final (open) shift
+        // skips this, leaving a live cleaning queue for today.
+        if ($cleanAfter) {
+            $this->cleanRooms($housekeepers);
+        }
+    }
+
+    /**
+     * Drain the cleaning queue: each housekeeper starts and finishes the next room on their floors.
+     *
+     * @param  list<User>  $housekeepers
+     */
+    private function cleanRooms(array $housekeepers): void
+    {
+        $query = app(CleaningQuery::class);
+        $start = app(StartCleaning::class);
+        $finish = app(FinishCleaning::class);
+        $base = app(Clock::class)->now();
+
+        do {
+            $cleaned = false;
+            foreach ($housekeepers as $hk) {
+                $ids = $query->startableIds($hk);
+                if ($ids === []) {
+                    continue;
+                }
+                $task = CleaningTask::query()->find($ids[0]);
+                if ($task === null || $task->status !== CleaningStatus::Queued) {
+                    continue;
+                }
+                // A few minutes to clean, then back to the base time so cleans stay before their
+                // deadline (every checkout shares the shift's opening time here).
+                $this->setClock($base);
+                $started = $start->handle($hk, $task);
+                $this->setClock($base->addMinutes(mt_rand(5, 14)));
+                $finish->handle($hk, $started, CleaningResult::Ready);
+                $cleaned = true;
+            }
+        } while ($cleaned);
+
+        $this->setClock($base);
     }
 
     private function handOver(Branch $branch, User $by, User $receiver): void
