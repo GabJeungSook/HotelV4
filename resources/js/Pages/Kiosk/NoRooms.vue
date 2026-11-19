@@ -1,6 +1,7 @@
 <!-- Mockup 31 -->
 <script setup lang="ts">
 import EmptyState from '@/Components/EmptyState.vue';
+import HomiLogo from '@/Components/HomiLogo.vue';
 
 /**
  * No rooms (31): shown on /kiosk while no room is free in any type. The welcome page checks again
@@ -10,6 +11,7 @@ defineEmits<{ check: [] }>();
 </script>
 
 <template>
+    <HomiLogo variant="blue" :width="124" :height="38" />
     <div class="flex flex-1 flex-col items-center justify-center" data-test="kiosk-no-rooms">
         <EmptyState
             size="kiosk"
