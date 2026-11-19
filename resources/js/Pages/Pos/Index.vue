@@ -56,6 +56,7 @@ const { props: shared, flash } = useShared();
 const confirm = useConfirmDialog();
 
 const category = ref<string>('All');
+const q = ref('');
 const qty = ref<Record<number, number>>({});
 const { key, renew } = useIdempotencyKey();
 const form = useForm({
@@ -68,7 +69,11 @@ const form = useForm({
 const saleError = ref<string | undefined>(undefined);
 
 const segments = computed(() => ['All', ...props.categories]);
-const shown = computed(() => props.products.filter((p) => category.value === 'All' || p.category === category.value));
+const shown = computed(() => {
+    const term = q.value.trim().toLowerCase();
+
+    return props.products.filter((p) => (category.value === 'All' || p.category === category.value) && (term === '' || p.name.toLowerCase().includes(term)));
+});
 const cart = computed(() => props.products.filter((p) => (qty.value[p.id] ?? 0) > 0));
 const total = computed(() => cart.value.reduce((sum, p) => sum + p.price * (qty.value[p.id] ?? 0), 0));
 const change = computed(() => Math.max(0, form.tendered - total.value));
@@ -196,6 +201,7 @@ function actions(s: Sale) {
 
         <div class="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-4 max-[900px]:grid-cols-1">
             <section>
+                <UInput v-model="q" icon="i-solar-magnifer-linear" placeholder="Search products" class="mb-3 w-full sm:w-72" aria-label="Search products" />
                 <div role="tablist" aria-label="Category" class="mb-3 inline-flex flex-wrap gap-1 rounded-md bg-grey-50 p-1">
                     <button
                         v-for="c in segments"
@@ -226,6 +232,7 @@ function actions(s: Sale) {
                         <span class="text-xs" :class="out(p) ? 'font-semibold text-bad' : p.low ? 'font-medium text-warn' : 'text-muted'">{{ stockLabel(p) }}</span>
                     </button>
                 </div>
+                <p v-if="shown.length === 0" class="rounded-card border border-default bg-default px-4 py-10 text-center text-sm text-muted">No products match "{{ q }}".</p>
             </section>
 
             <form class="sticky top-4 rounded-card border border-default bg-default p-4" aria-label="Sale" @submit.prevent="canComplete && complete()">
@@ -283,7 +290,7 @@ function actions(s: Sale) {
 
         <section class="mt-6">
             <h3 class="mb-2 text-sm font-semibold text-highlighted">Sales on this shift</h3>
-            <div class="overflow-hidden rounded-card border border-default bg-default">
+            <div class="overflow-x-auto rounded-card border border-default bg-default p-4">
                 <table v-if="sales.length" class="dtable w-full">
                     <thead>
                         <tr>
