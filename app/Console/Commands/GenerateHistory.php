@@ -101,7 +101,7 @@ final class GenerateHistory extends Command
             return self::SUCCESS;
         }
 
-        $today = CarbonImmutable::now('Asia/Manila')->toDateString();
+        $today = app(Clock::class)->localDate();
         $dates = $this->datesBetween((string) $this->option('from'), $today);
         $this->info(sprintf('Generating %d days (%s → %s) for both branches.', count($dates), $dates[0], $today));
 
