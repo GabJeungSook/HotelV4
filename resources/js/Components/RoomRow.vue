@@ -33,6 +33,19 @@ const emit = defineEmits<{ select: [room: BoardRoom] }>();
 const status = computed(() => roomStatus[props.room.status]);
 const actionable = computed(() => !['to_clean', 'cleaning', 'blocked'].includes(props.room.status));
 
+/** An in-house room with an hour or less left, or already over: the whole row goes red (like v2). */
+const nearlyDue = computed(() => ['occupied', 'due_out', 'overdue'].includes(props.room.status) && props.room.minutes != null && props.room.minutes <= 60);
+
+const timeTone = computed(() => {
+    const { status: s, minutes } = props.room;
+
+    if (!['occupied', 'due_out', 'overdue'].includes(s) || minutes === null || minutes === undefined) {
+        return 'text-muted';
+    }
+
+    return minutes < 0 ? 'font-semibold text-bad' : minutes <= 60 ? 'font-semibold text-warn' : 'text-muted';
+});
+
 const guestText = computed(() => {
     if (props.room.guest) {
         return props.room.guest;
@@ -107,7 +120,11 @@ function open(): void {
         :tabindex="actionable ? 0 : undefined"
         :aria-label="accessibleName"
         class="group text-[12.5px] leading-5 outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-        :class="[actionable ? 'cursor-pointer hover:bg-(--hm-row-hover)' : '', room.status === 'blocked' ? 'text-muted' : 'text-default']"
+        :class="[
+            actionable ? 'cursor-pointer' : '',
+            nearlyDue ? 'bg-bad-50' : actionable ? 'hover:bg-(--hm-row-hover)' : '',
+            room.status === 'blocked' ? 'text-muted' : 'text-default',
+        ]"
         :data-status="room.status"
         @click="open"
         @keydown.enter.prevent="open"
@@ -122,7 +139,7 @@ function open(): void {
         <td class="px-2 py-2.5 whitespace-nowrap tabular">{{ dueOut }}</td>
         <td
             class="px-2 py-2.5 whitespace-nowrap tabular"
-            :class="room.status === 'due_out' ? 'font-semibold text-warn' : room.status === 'overdue' ? 'font-semibold text-bad' : 'text-muted'"
+            :class="timeTone"
             data-time
         >
             {{ timeText }}

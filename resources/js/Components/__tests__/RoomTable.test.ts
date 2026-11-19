@@ -39,13 +39,17 @@ describe('RoomTable', () => {
         expect(wrapper.text()).toContain('Floor 2 · 3 rooms');
     });
 
-    it('shows the status word with its tone; the row itself is never tinted', () => {
-        const row = mountTable().find('tr[data-status="overdue"]');
+    it('shows the status word with its tone and reddens a room due within the hour or overdue', () => {
+        const wrapper = mountTable();
+        const row = wrapper.find('tr[data-status="overdue"]');
         const label = row.find('[data-status-label]');
 
         expect(label.text()).toBe('Overdue');
         expect(label.attributes('data-tone')).toBe('bad');
-        expect(row.classes().some((c) => c.startsWith('bg-'))).toBe(false);
+        // Overdue (-42 min) and due-out-soon (22 min) rows go red; a room with hours left does not.
+        expect(row.classes()).toContain('bg-bad-50');
+        expect(wrapper.find('tr[data-status="due_out"]').classes()).toContain('bg-bad-50');
+        expect(wrapper.find('tr[data-status="occupied"]').classes().some((c) => c.startsWith('bg-'))).toBe(false);
     });
 
     it('formats guest, due-out clock time, time left or over, and balance', () => {
