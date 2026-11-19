@@ -3,8 +3,8 @@
 import { router, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import KioskFooter from '@/Components/KioskFooter.vue';
+import KioskHeader from '@/Components/KioskHeader.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
-import StepBar from '@/Components/StepBar.vue';
 import { useIdempotencyKey } from '@/Composables/useIdempotencyKey';
 import { useKioskIdle } from '@/Composables/useKioskIdle';
 import { formatMoney } from '@/Composables/useMoney';
@@ -89,10 +89,13 @@ function submit(): void {
 
 <template>
     <KioskLayout title="Your name">
-        <StepBar :steps="['Room', 'Your name', 'Pay at desk']" :current="2" size="kiosk" />
+        <KioskHeader :current="2" />
         <UAlert v-if="error" class="mt-6 text-xl" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="error" />
 
-        <form class="mt-8 flex flex-col gap-6" @submit.prevent="submit">
+        <h1 class="mt-8 text-[40px] leading-[48px] font-semibold text-highlighted">Your details</h1>
+        <p class="mt-2 text-2xl leading-9 text-muted">We hold the room under your name. Pay at the front desk to check in.</p>
+
+        <form class="mt-7 flex flex-col gap-6" @submit.prevent="submit">
             <UFormField label="Your name" name="guest_name" :error="form.errors.guest_name" :ui="{ label: 'text-2xl leading-9', error: 'text-xl' }">
                 <UInput v-model="form.guest_name" class="kiosk w-full" size="xl" :ui="{ base: 'h-[72px] text-[28px]' }" autocomplete="off" autofocus />
             </UFormField>

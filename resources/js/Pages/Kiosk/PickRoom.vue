@@ -3,9 +3,9 @@
 import { router } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import KioskFooter from '@/Components/KioskFooter.vue';
+import KioskHeader from '@/Components/KioskHeader.vue';
 import KioskTypeCard from '@/Components/KioskTypeCard.vue';
 import OptionTiles from '@/Components/OptionTiles.vue';
-import StepBar from '@/Components/StepBar.vue';
 import { useKioskIdle } from '@/Composables/useKioskIdle';
 import { formatMoney } from '@/Composables/useMoney';
 import { useShared } from '@/Composables/useShared';
@@ -44,6 +44,8 @@ watch(typeId, () => {
 
 const tiles = computed(() => (type.value?.options ?? []).map((o) => ({ value: o.hours, label: `${o.hours} hours`, sub: formatMoney(o.amount, 'tile') })));
 const ready = computed(() => type.value !== null && !type.value.full && hours.value !== null);
+const fromPrice = (t: KioskType) => (t.options.length ? formatMoney(Math.min(...t.options.map((o) => o.amount)), 'tile') : null);
+const selectedOption = computed(() => type.value?.options.find((o) => o.hours === hours.value) ?? null);
 
 function next(): void {
     if (ready.value) {
@@ -54,11 +56,12 @@ function next(): void {
 
 <template>
     <KioskLayout title="Choose a room">
-        <StepBar :steps="['Room', 'Your name', 'Pay at desk']" :current="1" size="kiosk" />
+        <KioskHeader :current="1" />
         <UAlert v-if="flash.error" class="mt-6 text-xl" color="warning" variant="subtle" icon="i-solar-info-circle-bold-duotone" :description="flash.error.message" data-test="kiosk-taken" />
         <UAlert v-else-if="notice" class="mt-6 text-xl" color="warning" variant="subtle" icon="i-solar-info-circle-bold-duotone" :description="notice" data-test="kiosk-taken" />
 
-        <h1 class="mt-8 text-[40px] leading-[48px] font-semibold text-highlighted">Choose a room type</h1>
+        <h1 class="mt-8 text-[40px] leading-[48px] font-semibold text-highlighted">Choose your room</h1>
+        <p class="mt-2 text-2xl leading-9 text-muted">One room is ready in each type. Pick one, then choose how long you'll stay.</p>
         <div class="mt-6 flex flex-col gap-4">
             <KioskTypeCard
                 v-for="t in types"
@@ -66,6 +69,7 @@ function next(): void {
                 :name="t.name"
                 :description="t.description"
                 :room="t.room?.label"
+                :from-price="fromPrice(t)"
                 :full="t.full"
                 :selected="t.id === typeId"
                 @select="typeId = t.id"
@@ -78,10 +82,16 @@ function next(): void {
         </template>
 
         <KioskFooter>
+            <template v-if="ready && type && selectedOption" #summary>
+                <div class="flex items-center justify-between gap-4 rounded-card border border-default bg-muted px-7 py-5" data-test="kiosk-pick-summary">
+                    <span class="text-2xl text-muted">{{ type.name }} · {{ hours }} hours · Room {{ type.room?.number }}</span>
+                    <b class="text-[28px] font-semibold text-highlighted tabular">{{ formatMoney(selectedOption.amount) }}</b>
+                </div>
+            </template>
             <template #back>
                 <UButton class="h-[72px] justify-center text-2xl" size="xl" block color="neutral" variant="outline" label="Back" @click="router.visit(route('kiosk.index'))" />
             </template>
-            <UButton class="h-[72px] justify-center text-2xl" size="xl" block label="Next" :disabled="!ready" @click="next" />
+            <UButton class="h-[72px] justify-center text-2xl" size="xl" block label="Continue" trailing-icon="i-solar-alt-arrow-right-linear" :disabled="!ready" @click="next" />
         </KioskFooter>
     </KioskLayout>
 </template>
