@@ -47,7 +47,7 @@ interface BreakdownRow {
 }
 
 const props = defineProps<{
-    range: 'week' | 'month';
+    range: 'week' | 'month' | 'year' | 'all';
     date: string;
     branch: number | 'all';
     branches: { id: number; name: string }[];
@@ -66,7 +66,8 @@ const occ = (r: SummaryRow) => (r.room_days === 0 ? '—' : `${Math.round((r.occ
 const occNum = (r: SummaryRow) => (r.room_days === 0 ? 0 : (r.occupied * 100) / r.room_days);
 const pct = (cur: number, prev: number) => (prev === 0 ? null : Math.round(((cur - prev) / prev) * 100));
 const t = computed(() => props.summary.total);
-const cmpLabel = computed(() => (range.value === 'week' ? 'vs previous 7 days' : 'vs previous month'));
+const cmpLabel = computed(() => ({ week: 'vs previous 7 days', month: 'vs previous month', year: 'vs previous year', all: '' })[range.value]);
+const rangeStep = computed(() => (range.value === 'week' ? 7 : range.value === 'month' ? 30 : 365));
 
 const cards = computed<StatCardProps[]>(() => {
     const c = t.value;
@@ -102,8 +103,19 @@ const drillRows = computed<BreakdownRow[]>(() => (drill.value === 'rooms' ? prop
 const drillTotal = computed(() => drillRows.value.reduce((a, r) => a + r.amount, 0));
 const drillTitle = computed(() => (drill.value === 'rooms' ? 'Room revenue by type' : 'Extras by item'));
 
-const labels = computed(() => props.days.map((d) => (props.range === 'week' ? formatDateTime(`${d.date}T12:00:00+08:00`, 'businessDate').slice(0, 3) : String(Number(d.date.slice(8, 10))))));
-const titles = computed(() => props.days.map((d) => formatDateTime(`${d.date}T12:00:00+08:00`, 'businessDate')));
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const monthIdx = (d: string) => Number(d.slice(5, 7)) - 1;
+const labels = computed(() =>
+    props.days.map((d) => {
+        if (props.range === 'week') return formatDateTime(`${d.date}T12:00:00+08:00`, 'businessDate').slice(0, 3);
+        if (props.range === 'month') return String(Number(d.date.slice(8, 10)));
+        return props.range === 'all' ? `${MONTHS_SHORT[monthIdx(d.date)]} ${d.date.slice(2, 4)}` : MONTHS_SHORT[monthIdx(d.date)];
+    }),
+);
+const titles = computed(() =>
+    props.days.map((d) => (props.range === 'week' || props.range === 'month' ? formatDateTime(`${d.date}T12:00:00+08:00`, 'businessDate') : `${MONTHS_LONG[monthIdx(d.date)]} ${d.date.slice(0, 4)}`)),
+);
 const sales = computed(() => props.days.map((d) => d.sales));
 const heading = computed(() => formatDateRange(`${props.summary.from}T12:00:00+08:00`, `${props.summary.to}T12:00:00+08:00`));
 const picker = computed(() => [{ value: 'all', label: 'All branches' }, ...props.branches.map((b) => ({ value: String(b.id), label: b.name }))]);
@@ -123,9 +135,11 @@ const short = (c: number) => (c === 0 ? formatMoney(0, 'wholeColumn') : formatMo
                 :items="[
                     { value: 'week', label: '7 days' },
                     { value: 'month', label: 'Month' },
+                    { value: 'year', label: 'Year' },
+                    { value: 'all', label: 'All time' },
                 ]"
             />
-            <DateNav v-model="date" :step="range === 'week' ? 7 : 30" />
+            <DateNav v-if="range !== 'all'" v-model="date" :step="rangeStep" />
         </div>
 
         <StatCards :items="cards" />
