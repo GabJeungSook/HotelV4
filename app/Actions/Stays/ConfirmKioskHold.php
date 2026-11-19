@@ -99,7 +99,7 @@ final class ConfirmKioskHold
         $branch = Branch::query()->findOrFail($locked->branch_id);
         $discount = $locked->discount_id === null ? null : Discount::query()->withoutGlobalScopes()->find($locked->discount_id);
         $quote = $this->pricing->quoteStay(
-            RateCard::forBranch($branch), $locked->room_type_id, $locked->stay_kind, (int) $locked->hours, $now,
+            RateCard::forBranch($branch), $locked->room_type_id, $locked->stay_kind, (int) ($locked->hours ?? $locked->nights ?? $locked->days ?? 1), $now,
             $discount === null ? null : DiscountTerms::of($discount),
         );
 

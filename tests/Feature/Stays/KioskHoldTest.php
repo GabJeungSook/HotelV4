@@ -272,6 +272,24 @@ it('will not hold a long stay the branch does not offer', function (): void {
         ->toThrow(ActionRefused::class);
 });
 
+it('confirms a long-stay hold: checked in for the days booked, priced per day', function (): void {
+    $stay = app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, StayKind::LongStay, 2, 'Carlo Dumandan', '09175550142', (string) Str::uuid());
+    Hotel::openShift();
+    $this->travelClock(4);
+
+    $confirmed = app(ConfirmKioskHold::class)->handle(Hotel::frontdesk(), $stay, PaymentMethod::Cash, (string) Str::uuid(), Money::ofCentavos(250000));
+
+    expect($confirmed->state)->toBe(StayState::CheckedIn)
+        ->and($confirmed->stay_kind)->toBe(StayKind::LongStay)
+        ->and($confirmed->days)->toBe(2)
+        // Deluxe 24-hour rate ₱1,000 × 2 days = ₱2,000 (no kiosk discount on long stay).
+        ->and($confirmed->quoted_amount?->centavos())->toBe(200000)
+        // The days start at the desk: checkout is two days after check-in, not after the hold.
+        ->and($confirmed->expected_checkout_at?->toDateTimeString())->toBe($confirmed->checked_in_at?->addDays(2)->toDateTimeString())
+        ->and(app(StayQuery::class)->balanceDue($stay->id)->isZero())->toBeTrue()
+        ->and(app(StayQuery::class)->depositHeld($stay->id, DepositType::Key)->centavos())->toBe(20000);
+});
+
 it('refuses a name shorter than 3 letters, an incomplete mobile and an hour option that does not exist', function (): void {
     expect(fn () => app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, StayKind::Hourly, 6, 'Al', null, (string) Str::uuid()))->toThrow(ActionRefused::class)
         ->and(fn () => app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, StayKind::Hourly, 6, 'Carlo', '091755', (string) Str::uuid()))->toThrow(ActionRefused::class, 'Enter all 11 digits')
