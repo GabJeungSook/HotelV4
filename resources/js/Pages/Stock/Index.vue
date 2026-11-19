@@ -182,7 +182,7 @@ function submit(approval?: { approver_id: number; pin: string }): void {
             <UButton icon="i-solar-add-square-linear" label="Receive stock" @click="start('receive')" />
         </PageHeader>
 
-        <section class="overflow-hidden rounded-card border border-default bg-default">
+        <section class="overflow-x-auto rounded-card border border-default bg-default p-4">
             <table v-if="rows.length" class="dtable w-full">
                 <thead>
                     <tr>

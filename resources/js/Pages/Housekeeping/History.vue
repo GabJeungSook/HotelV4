@@ -35,7 +35,7 @@ const subtitle = computed(() => {
             <StatCard label="Late" :value="String(late)" :tone="late > 0 ? 'bad' : undefined" />
         </div>
 
-        <section class="overflow-hidden rounded-[10px] border border-default bg-default">
+        <section class="overflow-x-auto rounded-[10px] border border-default bg-default p-4">
             <table v-if="cleans.length" class="dtable w-full">
                 <thead>
                     <tr>

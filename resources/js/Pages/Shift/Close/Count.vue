@@ -77,7 +77,7 @@ const draftText = computed(() => ({ idle: 'The pieces are saved as you type.', s
 
 <template>
     <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="confirmCount">
-        <section class="overflow-hidden rounded-card border border-default bg-default">
+        <section class="overflow-x-auto rounded-card border border-default bg-default p-4">
             <table class="dtable w-full">
                 <thead>
                     <tr>

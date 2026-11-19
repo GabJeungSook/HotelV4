@@ -252,7 +252,7 @@ function actions(m: Movement) {
             <StatCard label="Remitted so far" :value="formatMoney(stats.remittance)" :sub="stats.shortage_payments ? `Shortage payments ${formatMoney(stats.shortage_payments)}` : undefined" />
         </div>
 
-        <section class="mt-4 overflow-hidden rounded-card border border-default bg-default">
+        <section class="mt-4 overflow-x-auto rounded-card border border-default bg-default p-4">
             <table v-if="movements.length" class="dtable w-full">
                 <thead>
                     <tr>

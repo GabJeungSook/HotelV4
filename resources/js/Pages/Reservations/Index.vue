@@ -213,7 +213,7 @@ function approve(payload: { approver_id: number; pin: string }): void {
             </div>
         </div>
 
-        <div class="rounded-card border border-default bg-default">
+        <div class="overflow-x-auto rounded-card border border-default bg-default p-4">
             <table class="dtable w-full">
                 <thead>
                     <tr>
