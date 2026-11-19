@@ -42,7 +42,7 @@ final class UpdateBranchSettings
             'pos_enabled', 'housekeeping_enabled', 'cleaning_deadline_minutes', 'cleaning_target_minutes', 'cleaning_urgent_minutes',
         ],
         'vat' => ['vat_enabled', 'vat_rate_percent', 'tin', 'registered_name'],
-        'printing' => ['slip_header', 'address', 'house_rules'],
+        'printing' => ['name', 'slip_header', 'address', 'house_rules'],
     ];
 
     private const MONEY = ['extension_per_hour_amount', 'deposit_amount', 'lost_key_amount', 'lost_remote_amount'];

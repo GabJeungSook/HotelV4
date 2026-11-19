@@ -73,12 +73,13 @@ final class BranchController extends Controller
         return redirect()->route('owner.branches.index');
     }
 
-    /** "Open": work inside that branch with admin rights, landing on its dashboard (61). */
-    public function open(Branch $branch): RedirectResponse
+    /** "Open": work inside that branch with admin rights, landing on its dashboard (61), or its
+     * settings when the owner chose "Edit settings" from the branches list. */
+    public function open(Branch $branch, Request $request): RedirectResponse
     {
         $this->currentBranch->open($branch->id);
 
-        return redirect()->route('dashboard');
+        return redirect()->route($request->input('to') === 'settings' ? 'admin.settings' : 'dashboard');
     }
 
     /** Back to "All branches". */

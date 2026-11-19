@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Requests\Admin;
 
 use App\Actions\Admin\UpdateBranchSettings;
+use App\Services\CurrentBranch;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * One group of branch settings (46). `group` names which settings the form sends; only that
@@ -67,7 +69,8 @@ final class BranchSettingsRequest extends FormRequest
             'vat_rate_percent' => ['sometimes', 'required', 'integer', 'between:1,100'],
             'tin' => ['sometimes', 'nullable', 'string', 'max:20'],
             'registered_name' => ['sometimes', 'nullable', 'string', 'max:120'],
-            // slip and house rules
+            // branch details, slip and house rules
+            'name' => ['sometimes', 'required', 'string', 'max:80', Rule::unique('branches', 'name')->ignore(app(CurrentBranch::class)->id())],
             'slip_header' => ['sometimes', 'required', 'string', 'max:80'],
             'address' => ['sometimes', 'required', 'string', 'max:160'],
             'house_rules' => ['sometimes', 'nullable', 'string', 'max:2000'],

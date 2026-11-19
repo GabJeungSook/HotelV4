@@ -66,6 +66,11 @@ function open(b: BranchRow): void {
     router.post(route('owner.branches.open', { branch: b.id }));
 }
 
+// Open the branch and jump straight to its Settings (every module, rate and option lives there).
+function openSettings(b: BranchRow): void {
+    router.post(route('owner.branches.open', { branch: b.id }), { to: 'settings' });
+}
+
 async function setStatus(b: BranchRow, status: 'active' | 'inactive'): Promise<void> {
     if (status === 'inactive') {
         const ok = await confirm({
@@ -85,15 +90,17 @@ async function setStatus(b: BranchRow, status: 'active' | 'inactive'): Promise<v
 }
 
 function menu(b: BranchRow) {
+    const edit = [{ label: 'Edit settings', icon: 'i-solar-settings-bold-duotone', onSelect: () => openSettings(b) }];
+
     if (b.status === 'active') {
-        return [[{ label: 'Deactivate', icon: 'i-solar-forbidden-circle-bold-duotone', color: 'error' as const, onSelect: () => setStatus(b, 'inactive') }]];
+        return [edit, [{ label: 'Deactivate', icon: 'i-solar-forbidden-circle-bold-duotone', color: 'error' as const, onSelect: () => setStatus(b, 'inactive') }]];
     }
 
     if (b.status === 'inactive') {
-        return [[{ label: 'Set back to active', icon: 'i-solar-restart-linear', onSelect: () => setStatus(b, 'active') }]];
+        return [edit, [{ label: 'Set back to active', icon: 'i-solar-restart-linear', onSelect: () => setStatus(b, 'active') }]];
     }
 
-    return [];
+    return [edit];
 }
 </script>
 

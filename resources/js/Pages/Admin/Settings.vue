@@ -109,10 +109,10 @@ const GROUP_KEYS: Record<Group, (keyof Settings)[]> = {
         'cleaning_urgent_minutes',
     ],
     vat: ['vat_enabled', 'vat_rate_percent', 'tin', 'registered_name'],
-    printing: ['slip_header', 'address', 'house_rules'],
+    printing: ['name', 'slip_header', 'address', 'house_rules'],
 };
 const CARD_GROUPS = ['stays', 'money', 'modules', 'vat'] as const;
-const GROUP_TITLE: Record<Group, string> = { stays: 'Stays', money: 'Money', shifts: 'Shifts', modules: 'Modules', vat: 'VAT', printing: 'Slip and house rules' };
+const GROUP_TITLE: Record<Group, string> = { stays: 'Stays', money: 'Money', shifts: 'Shifts', modules: 'Modules', vat: 'VAT', printing: 'Branch details' };
 
 const formError = ref<string | undefined>(undefined);
 
@@ -334,7 +334,7 @@ function saveReason(): void {
             <div class="flex flex-wrap gap-2">
                 <UButton v-for="l in lists" :key="l.key" color="neutral" variant="soft" size="sm" :label="`${l.label} · ${l.rows.filter((r) => r.is_active).length}`" @click="listKey = l.key" />
                 <UButton color="neutral" variant="soft" size="sm" :label="`House rules · ${houseRuleLines} lines`" @click="edit('printing')" />
-                <UButton color="neutral" variant="soft" size="sm" label="Slip header and address" @click="edit('printing')" />
+                <UButton color="neutral" variant="soft" size="sm" label="Branch name, slip & address" @click="edit('printing')" />
             </div>
         </section>
 
@@ -446,6 +446,7 @@ function saveReason(): void {
                     </template>
 
                     <template v-else-if="group === 'printing'">
+                        <UFormField label="Branch name" :error="form.errors.name" help="Shown across the app and on reports."><UInput v-model="form.name" maxlength="80" class="w-full" /></UFormField>
                         <UFormField label="Slip header" :error="form.errors.slip_header"><UInput v-model="form.slip_header" maxlength="80" class="w-full" /></UFormField>
                         <UFormField label="Address" :error="form.errors.address"><UInput v-model="form.address" maxlength="160" class="w-full" /></UFormField>
                         <UFormField label="House rules" :error="form.errors.house_rules" help="One rule per line. Shown on the kiosk and the check-in slip.">
