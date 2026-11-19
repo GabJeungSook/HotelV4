@@ -14,6 +14,9 @@
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
+        <testsuite name="Reconciliation">
+            <directory>tests/Reconciliation</directory>
+        </testsuite>
         <!-- Real parallel processes on committed rows; runs last and empties the database after. -->
         <testsuite name="Concurrency">
             <directory>tests/Concurrency</directory>

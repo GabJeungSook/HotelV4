@@ -32,6 +32,14 @@ pest()->extend(TestCase::class)
     })
     ->in('Feature');
 
+// Reconciliation: real ledger activity, so the TRD §8 invariants must hold here too.
+pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
+    ->afterEach(function (): void {
+        expect(Invariants::check())->toBe([], 'TRD §8 invariants 1–6 and 8 after the test');
+    })
+    ->in('Reconciliation');
+
 pest()->extend(TestCase::class)
     ->in('Unit');
 
