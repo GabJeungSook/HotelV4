@@ -32,7 +32,7 @@ class FolioLine extends Model
     protected $fillable = [
         'branch_id', 'shift_session_id', 'stay_id', 'pos_order_id', 'room_id', 'kind', 'product_id',
         'description', 'quantity', 'unit_amount', 'amount', 'reversal_of_id', 'reversal_reason',
-        'approval_id', 'created_by', 'occurred_at', 'created_at',
+        'approval_id', 'created_by', 'occurred_at', 'created_at', 'idempotency_key',
     ];
 
     protected function casts(): array

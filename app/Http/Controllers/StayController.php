@@ -289,6 +289,7 @@ final class StayController extends Controller
             $payNow ? Money::ofCentavos($request->integer('amount')) : null,
             $payNow && $request->filled('reference_no') ? $request->string('reference_no')->trim()->toString() : null,
             $payNow && $request->boolean('keep_change'),
+            idempotencyKey: $request->string('idempotency_key')->toString(),
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Stay extended by '.$request->integer('hours').' hours.']);

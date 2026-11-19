@@ -7,6 +7,7 @@ import OptionTiles from '@/Components/OptionTiles.vue';
 import PaymentFields, { type PaymentMethodOption, type PaymentValue } from '@/Components/PaymentFields.vue';
 import TotalRow from '@/Components/TotalRow.vue';
 import { formatDateTime } from '@/Composables/useDateTime';
+import { useIdempotencyKey } from '@/Composables/useIdempotencyKey';
 import { formatMoney } from '@/Composables/useMoney';
 import { useShared } from '@/Composables/useShared';
 import FrontDeskLayout from '@/Layouts/FrontDeskLayout.vue';
@@ -36,6 +37,7 @@ const props = defineProps<{
 }>();
 
 const { flash } = useShared();
+const { key, renew } = useIdempotencyKey();
 const first = props.options.find((o) => !o.disabled);
 const form = useForm({ hours: first?.hours ?? 0, pay_now: true, method: 'cash', amount: 0, reference_no: '', keep_change: false });
 const pay = ref<PaymentValue>({ method: props.methods[0]?.value ?? 'cash', amount: first?.amount ?? 0, reference_no: '', keep_change: false });
@@ -67,10 +69,11 @@ const errorText = computed(() => flash.value.error?.message);
 
 function save(payNow: boolean): void {
     form.transform(() => ({
+        idempotency_key: key.value,
         hours: form.hours,
         pay_now: payNow,
         ...(payNow ? { method: pay.value.method, amount: pay.value.amount, reference_no: pay.value.reference_no.trim() || null, keep_change: pay.value.keep_change } : {}),
-    })).post(route('stays.extend.store', props.stay.id), { preserveScroll: true, preserveState: true });
+    })).post(route('stays.extend.store', props.stay.id), { preserveScroll: true, preserveState: true, onSuccess: () => renew() });
 }
 </script>
 

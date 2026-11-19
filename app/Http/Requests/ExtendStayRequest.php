@@ -18,6 +18,7 @@ final class ExtendStayRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'idempotency_key' => ['required', 'uuid'],
             'hours' => ['required', 'integer', 'min:1', 'max:24'],
             'pay_now' => ['boolean'],
             'method' => ['nullable', 'required_if_accepted:pay_now', 'string', 'in:cash,gcash,card'],

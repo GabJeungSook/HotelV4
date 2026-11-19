@@ -16,14 +16,20 @@ use App\Services\CurrentShift;
 use App\Services\Pricing\RateCard;
 use App\Services\PricingService;
 use App\Services\StayLedger;
+use App\Support\DuplicateKey;
 use App\Support\Money;
 use App\Support\Transaction;
+use Illuminate\Database\QueryException;
 
 /**
  * Extend a stay (screen 12, DATABASE_SCHEMA §8.5, APP_FLOW §4.9). PricingService gives the
  * amount and the new cycle_hours_used (TRD §4.3); an extension line is written and the
  * expected check-out moves by the hours bought. With a payment it continues into
  * TakePayment's step in the same transaction.
+ *
+ * The form's idempotency key goes on the extension line (migration 000040): a repeated key
+ * returns the first line and writes nothing, so a double tap or a retry never extends the stay
+ * or charges the guest twice.
  */
 final class ExtendStay
 {
@@ -42,32 +48,50 @@ final class ExtendStay
         ?Money $amountGiven = null,
         ?string $referenceNo = null,
         bool $keepChangeAsDeposit = false,
+        ?string $idempotencyKey = null,
     ): FolioLine {
-        return $this->transaction->run(function () use ($by, $stay, $hours, $payWith, $amountGiven, $referenceNo, $keepChangeAsDeposit): FolioLine {
-            $shift = $this->currentShift->forPayment($stay->branch_id);
-            $locked = Stay::query()->withoutGlobalScopes()->lockForUpdate()->findOrFail($stay->id);
+        if ($idempotencyKey !== null && ($existing = $this->replay($idempotencyKey)) !== null) {
+            return $existing;
+        }
 
-            if ($locked->state !== StayState::CheckedIn || $locked->expected_checkout_at === null) {
-                throw ActionRefused::stayNotInHouse($locked->code);
+        try {
+            return $this->transaction->run(function () use ($by, $stay, $hours, $payWith, $amountGiven, $referenceNo, $keepChangeAsDeposit, $idempotencyKey): FolioLine {
+                $shift = $this->currentShift->forPayment($stay->branch_id);
+                $locked = Stay::query()->withoutGlobalScopes()->lockForUpdate()->findOrFail($stay->id);
+
+                if ($locked->state !== StayState::CheckedIn || $locked->expected_checkout_at === null) {
+                    throw ActionRefused::stayNotInHouse($locked->code);
+                }
+
+                $quote = $this->pricing->quoteExtension(
+                    RateCard::forBranch(Branch::query()->findOrFail($locked->branch_id)),
+                    $locked->room_type_id, $locked->stay_kind, $locked->cycle_hours_used, $hours,
+                );
+
+                $line = $this->ledger->line($shift, $locked, $by, LineKind::Extension, "Extension {$hours} hrs", $quote->amount, idempotencyKey: $idempotencyKey);
+
+                $locked->update([
+                    'expected_checkout_at' => $locked->expected_checkout_at->addHours($hours),
+                    'cycle_hours_used' => $quote->cycleHoursUsed,
+                ]);
+
+                if ($payWith !== null) {
+                    $this->ledger->collect($shift, $locked, $by, $payWith, $amountGiven ?? $quote->amount, $referenceNo, $keepChangeAsDeposit);
+                }
+
+                return $line;
+            });
+        } catch (QueryException $e) {
+            if ($idempotencyKey !== null && DuplicateKey::on($e, 'folio_lines_idempotency_unique')) {
+                return $this->replay($idempotencyKey) ?? throw $e;
             }
 
-            $quote = $this->pricing->quoteExtension(
-                RateCard::forBranch(Branch::query()->findOrFail($locked->branch_id)),
-                $locked->room_type_id, $locked->stay_kind, $locked->cycle_hours_used, $hours,
-            );
+            throw $e;
+        }
+    }
 
-            $line = $this->ledger->line($shift, $locked, $by, LineKind::Extension, "Extension {$hours} hrs", $quote->amount);
-
-            $locked->update([
-                'expected_checkout_at' => $locked->expected_checkout_at->addHours($hours),
-                'cycle_hours_used' => $quote->cycleHoursUsed,
-            ]);
-
-            if ($payWith !== null) {
-                $this->ledger->collect($shift, $locked, $by, $payWith, $amountGiven ?? $quote->amount, $referenceNo, $keepChangeAsDeposit);
-            }
-
-            return $line;
-        });
+    private function replay(string $idempotencyKey): ?FolioLine
+    {
+        return FolioLine::query()->withoutGlobalScopes()->where('idempotency_key', $idempotencyKey)->first();
     }
 }

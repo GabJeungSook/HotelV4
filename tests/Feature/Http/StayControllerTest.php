@@ -316,7 +316,7 @@ it('shows extend (12) with the price worked out and extends with payment', funct
         ->where('options.3.parts.0.amount', 40000)
         ->where('cycle_hours_used', 12));
 
-    $this->post("/stays/{$stay->id}/extend", ['hours' => 6, 'pay_now' => true, 'method' => 'cash', 'amount' => 25000])->assertRedirect('/stays/'.$stay->id);
+    $this->post("/stays/{$stay->id}/extend", ['idempotency_key' => (string) Str::uuid(), 'hours' => 6, 'pay_now' => true, 'method' => 'cash', 'amount' => 25000])->assertRedirect('/stays/'.$stay->id);
 
     expect($stay->fresh()->expected_checkout_at->toDateTimeString())->toBe('2026-11-12 19:12:00')
         ->and($this->stays->balanceDue($stay->id)->centavos())->toBe(0);

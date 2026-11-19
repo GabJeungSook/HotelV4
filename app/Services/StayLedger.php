@@ -54,6 +54,7 @@ final class StayLedger
         ?FolioLine $reversalOf = null,
         ?string $reversalReason = null,
         ?int $approvalId = null,
+        ?string $idempotencyKey = null,
     ): FolioLine {
         $now = $this->clock->now();
 
@@ -72,6 +73,7 @@ final class StayLedger
             'reversal_of_id' => $reversalOf?->id,
             'reversal_reason' => $reversalReason === null ? null : mb_substr($reversalReason, 0, 255),
             'approval_id' => $approvalId,
+            'idempotency_key' => $idempotencyKey,
             'created_by' => $by->id,
             'occurred_at' => $now,
             'created_at' => $now,

@@ -195,6 +195,23 @@ it('extends across the cycle end and takes the payment now', function (): void {
         ->and(Payment::query()->where('stay_id', $stay->id)->latest('id')->first()->change_amount->centavos())->toBe(5000);
 });
 
+it('returns the first extension for a repeated idempotency key and charges once', function (): void {
+    $key = (string) Str::uuid();
+
+    $first = app(ExtendStay::class)->handle(Hotel::frontdesk(), $this->stay, 6, PaymentMethod::Cash, Money::ofCentavos(25000), idempotencyKey: $key);
+    $payments = Payment::query()->count();
+    $second = app(ExtendStay::class)->handle(Hotel::frontdesk(), $this->stay, 6, PaymentMethod::Cash, Money::ofCentavos(25000), idempotencyKey: $key);
+
+    $stay = $this->stay->fresh();
+    expect($second->id)->toBe($first->id)
+        ->and($first->idempotency_key)->toBe($key)
+        ->and(FolioLine::query()->where('kind', LineKind::Extension)->count())->toBe(1)
+        ->and(Payment::query()->count())->toBe($payments)
+        // The check-out moved by 6 hours once, not twice.
+        ->and($stay->expected_checkout_at->toDateTimeString())->toBe('2026-11-12 19:12:00')
+        ->and($stay->cycle_hours_used)->toBe(18);
+});
+
 it('refuses an extension without a rate and changes nothing', function (): void {
     expect(fn () => app(ExtendStay::class)->handle(Hotel::frontdesk(), $this->stay, 2))->toThrow(RateNotFound::class);
 

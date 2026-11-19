@@ -664,10 +664,12 @@ CREATE TABLE folio_lines (
   reversal_of_id BIGINT UNSIGNED NULL,
   reversal_reason VARCHAR(255) NULL,
   approval_id BIGINT UNSIGNED NULL,
+  idempotency_key CHAR(36) NULL,              -- set by ExtendStay only (migration 000040); every other line is NULL
   created_by BIGINT UNSIGNED NOT NULL,
   occurred_at TIMESTAMP NOT NULL,
   created_at TIMESTAMP NOT NULL,
   UNIQUE KEY folio_lines_reversal_unique (reversal_of_id),
+  UNIQUE KEY folio_lines_idempotency_unique (idempotency_key),
   KEY folio_lines_stay_idx (stay_id, occurred_at),
   KEY folio_lines_shift_idx (branch_id, shift_session_id, kind),
   KEY folio_lines_product_idx (product_id, occurred_at),
@@ -688,6 +690,7 @@ CREATE TABLE folio_lines (
 - **This is the sales ledger.** "Sales" for a shift = `SUM(amount)` of its folio lines, by `kind`. A sale belongs to the shift that charged it.
 - A void inserts a new row with `reversal_of_id` set, `quantity` negated and the same `unit_amount`, stamped with the **current** open shift. The unique key stops a line being reversed twice.
 - `unit_amount` is the price at the moment of sale; later price changes do not touch old lines.
+- `idempotency_key` is a UUID the extend form (12) makes when it opens; only `ExtendStay` sets it, so a double tap or a retry returns the first extension line and charges once. Every other folio line leaves it NULL (the unique key allows many NULLs).
 - `discount` lines have a negative `unit_amount` and quantity 1. The room payment is allocated `+room amount` to the room line and `−discount` to the discount line, so both lines count as paid (TRD §4.9).
 - `forfeited_deposit` is income created at check-out when a deposit is kept (decision D10).
 
