@@ -19,6 +19,8 @@ export interface TimelineRoom {
     id: number;
     number: string;
     kind: TimelineKind | 'vacant' | 'blocked';
+    /** Minutes left (negative = over) for an in-house room; used only to order the rows by urgency. */
+    minutes?: number | null;
     /** ISO times of the block (check-in to expected check-out, or the cleaning window). */
     start?: string | null;
     end?: string | null;

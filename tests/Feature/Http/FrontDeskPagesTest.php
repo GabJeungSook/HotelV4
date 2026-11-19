@@ -136,7 +136,7 @@ it('shows Today (62) with counts and names', function (): void {
             ->where('today.counts.due_soon', 1)
             ->where('today.counts.overdue', 0)
             ->where('today.due_soon_rooms', ['116'])
-            ->where('today.leaving.0.guest', 'E. Cruz')
+            ->where('today.leaving.0.guest', 'Elena Cruz')
             ->where('today.leaving.0.minutes', 20)
             ->where('today.rooms.vacant', 44));
 });
@@ -179,7 +179,7 @@ it('loads the board (4) as a deferred prop with one row per room', function (): 
                 ->has('board.floors', 3)
                 ->where('board.floors.1.rooms.4.number', '205')
                 ->where('board.floors.1.rooms.4.status', 'occupied')
-                ->where('board.floors.1.rooms.4.guest', 'R. Manalastas')
+                ->where('board.floors.1.rooms.4.guest', 'Rico Manalastas')
                 ->where('board.floors.1.rooms.4.stayId', $stay->id)
                 ->where('board.floors.1.rooms.4.balance', null)));
 });

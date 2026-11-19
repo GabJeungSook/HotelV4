@@ -126,14 +126,14 @@ final class BoardQuery
             };
             $balance = $balances[$stay->id] ?? 0;
 
-            return [...$row, 'status' => $status, 'guest' => self::shortName($stay->guest_name), 'stayId' => $stay->id,
+            return [...$row, 'status' => $status, 'guest' => $stay->guest_name, 'stayId' => $stay->id,
                 'dueOutAt' => $stay->expected_checkout_at?->toIso8601String(), 'minutes' => $left, 'balance' => $balance > 0 ? $balance : null];
         }
 
         if ($stay !== null && $stay->state === StayState::Held) {
             $seconds = $stay->hold_expires_at === null ? 0 : max(0, $stay->hold_expires_at->getTimestamp() - $now->getTimestamp());
 
-            return [...$row, 'status' => 'held', 'guest' => self::shortName($stay->guest_name), 'stayId' => $stay->id, 'holdSeconds' => $seconds];
+            return [...$row, 'status' => 'held', 'guest' => $stay->guest_name, 'stayId' => $stay->id, 'holdSeconds' => $seconds];
         }
 
         return match ($room->status) {

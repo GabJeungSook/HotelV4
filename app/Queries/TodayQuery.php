@@ -50,7 +50,7 @@ final class TodayQuery
             }
 
             $minutes = intdiv($at->getTimestamp() - $now->getTimestamp(), 60);
-            $row = ['stay_id' => $stay->id, 'room' => (string) $stay->getAttribute('room_number'), 'guest' => BoardQuery::shortName($stay->guest_name), 'minutes' => $minutes];
+            $row = ['stay_id' => $stay->id, 'room' => (string) $stay->getAttribute('room_number'), 'guest' => $stay->guest_name, 'minutes' => $minutes];
             $leaving[] = $row;
             $minutes < 0 ? $overdue[] = $row : $dueSoon[] = $row;
         }
@@ -150,6 +150,14 @@ final class TodayQuery
             ->get(['room_id', 'queued_at', 'started_at'])->keyBy('room_id');
         $time = fn (?CarbonImmutable $t): string => $t === null ? '' : $this->clock->toLocal($t)->format('g:i A');
         $iso = static fn (?CarbonImmutable $t): ?string => $t?->toIso8601String();
+        // Whole minutes as "6h 16m" once past the hour, so the timeline never shows "376 min".
+        $span = static function (int $min): string {
+            $abs = abs($min);
+            $h = intdiv($abs, 60);
+            $m = $abs % 60;
+
+            return $h > 0 ? "{$h}h {$m}m" : "{$m}m";
+        };
         $grouped = [];
 
         foreach ($rooms as $room) {
@@ -166,12 +174,12 @@ final class TodayQuery
                     default => 'occupied',
                 };
                 $row = [
-                    'id' => $room->id, 'number' => $room->number, 'kind' => $kind,
+                    'id' => $room->id, 'number' => $room->number, 'kind' => $kind, 'minutes' => $left,
                     'start' => $iso($stay->checked_in_at), 'end' => $kind === 'overdue' ? $now->toIso8601String() : $iso($end),
-                    'label' => BoardQuery::shortName($stay->guest_name), 'person' => BoardQuery::shortName($stay->guest_name),
+                    'label' => $stay->guest_name, 'person' => $stay->guest_name,
                     'sub' => match ($kind) {
-                        'overdue' => (-$left).' min over',
-                        'due_out' => "out in {$left} min",
+                        'overdue' => $span((int) $left).' over',
+                        'due_out' => 'out in '.$span((int) $left),
                         default => 'out '.$time($end),
                     },
                     'href' => route('stays.show', $stay->id, absolute: false),

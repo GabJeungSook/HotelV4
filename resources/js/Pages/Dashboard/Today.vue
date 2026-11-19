@@ -7,7 +7,7 @@ import PageHeader from '@/Components/PageHeader.vue';
 import PeriodSegments from '@/Components/PeriodSegments.vue';
 import PersonAvatar from '@/Components/PersonAvatar.vue';
 import type { StatCardProps } from '@/Components/StatCard.vue';
-import StaysTimeline, { type TimelineFloor } from '@/Components/StaysTimeline.vue';
+import StaysTimeline, { type TimelineFloor, type TimelineRoom } from '@/Components/StaysTimeline.vue';
 import StatCards from '@/Components/StatCards.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import { formatDateTime, formatDuration, formatStayLength } from '@/Composables/useDateTime';
@@ -103,10 +103,29 @@ const keep: Record<string, string[]> = {
     vacant: ['vacant', 'held'],
     cleaning: ['to_clean', 'cleaning'],
 };
+// Same urgency order as the room board: due out within the hour first (closest to over first),
+// then overdue (most over first), then occupied, then vacant and the rooms not in play.
+const rank: Record<string, number> = { due_out: 0, overdue: 1, occupied: 2, vacant: 3, held: 4, to_clean: 5, cleaning: 6, blocked: 7 };
+function byUrgency(a: TimelineRoom, b: TimelineRoom): number {
+    const r = (rank[a.kind] ?? 9) - (rank[b.kind] ?? 9);
+
+    if (r !== 0) {
+        return r;
+    }
+
+    if (a.minutes != null && b.minutes != null) {
+        return a.minutes - b.minutes;
+    }
+
+    return a.number.localeCompare(b.number, undefined, { numeric: true });
+}
 const shown = computed<TimelineFloor[]>(() =>
     props.today.timeline
         .filter((f) => f.label === floor.value || floorItems.value.length < 2)
-        .map((f) => ({ label: f.label, rooms: show.value === 'all' ? f.rooms : f.rooms.filter((r) => keep[show.value]?.includes(r.kind)) })),
+        .map((f) => ({
+            label: f.label,
+            rooms: (show.value === 'all' ? f.rooms : f.rooms.filter((r) => keep[show.value]?.includes(r.kind))).slice().sort(byUrgency),
+        })),
 );
 const shownCount = computed(() => shown.value.reduce((n, f) => n + f.rooms.length, 0));
 const floorTotal = computed(() => props.today.timeline.find((f) => f.label === floor.value)?.rooms.length ?? 0);
@@ -159,7 +178,7 @@ const stayText = (kind: string, q: number | null) => (q === null ? '' : formatSt
                                     <b class="block truncate text-[12.5px] font-medium">{{ row.guest }}</b>
                                     <small class="block text-[11.5px] text-muted">{{ row.minutes < 0 ? 'was due' : 'due' }} {{ formatDateTime(new Date(new Date(today.now).getTime() + row.minutes * 60000).toISOString(), 'time') }}</small>
                                 </span>
-                                <StatusLabel :tone="row.minutes < 0 ? 'bad' : 'warn'" :label="formatDuration(row.minutes, 'min')" />
+                                <StatusLabel :tone="row.minutes < 0 ? 'bad' : 'warn'" :label="formatDuration(row.minutes, 'board')" />
                             </Link>
                         </li>
                     </ul>
