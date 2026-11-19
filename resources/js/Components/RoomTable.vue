@@ -39,26 +39,65 @@ const filters: Record<RoomFilter, RoomDisplayStatus[] | null> = {
     held: ['held'],
 };
 
-const attentionRank: Partial<Record<RoomDisplayStatus, number>> = { overdue: 0, due_out: 1, held: 2 };
+// Urgency order (sort = attention): about to be over first, then overdue, then occupied, then
+// vacant, then the rooms that are not in play (held, housekeeping, blocked).
+const urgencyRank: Record<RoomDisplayStatus, number> = {
+    due_out: 0,
+    overdue: 1,
+    occupied: 2,
+    vacant: 3,
+    held: 4,
+    to_clean: 5,
+    cleaning: 6,
+    blocked: 7,
+};
+const timed = (s: RoomDisplayStatus): boolean => s === 'due_out' || s === 'overdue' || s === 'occupied';
 
 function byNumber(a: BoardRoom, b: BoardRoom): number {
     return a.number.localeCompare(b.number, undefined, { numeric: true });
 }
 
+// Within a group, the room closest to being over (or the most over) comes first.
+function byUrgency(a: BoardRoom, b: BoardRoom): number {
+    const rank = urgencyRank[a.status] - urgencyRank[b.status];
+
+    if (rank !== 0) {
+        return rank;
+    }
+
+    if (timed(a.status) && a.minutes != null && b.minutes != null) {
+        return a.minutes - b.minutes;
+    }
+
+    return byNumber(a, b);
+}
+
 const groups = computed(() => {
     const allowed = filters[props.filter];
+    const pick = (rooms: BoardRoom[]): BoardRoom[] => (allowed ? rooms.filter((r) => allowed.includes(r.status)) : [...rooms]);
+
+    // Urgency is a single list across floors, so the most pressing rooms sit at the very top.
+    if (props.sort === 'attention') {
+        let rooms = pick(props.floors.flatMap((f) => f.rooms)).sort(byUrgency);
+        const total = rooms.length;
+
+        if (props.limit !== undefined) {
+            rooms = rooms.slice(0, props.limit);
+        }
+
+        return total === 0 ? [] : [{ label: '', heading: false, rooms, total, hidden: total - rooms.length }];
+    }
 
     return props.floors
         .map((floor) => {
-            let rooms = allowed ? floor.rooms.filter((r) => allowed.includes(r.status)) : [...floor.rooms];
-            rooms.sort(props.sort === 'attention' ? (a, b) => (attentionRank[a.status] ?? 3) - (attentionRank[b.status] ?? 3) || byNumber(a, b) : byNumber);
+            let rooms = pick(floor.rooms).sort(byNumber);
             const total = rooms.length;
 
             if (props.limit !== undefined) {
                 rooms = rooms.slice(0, props.limit);
             }
 
-            return { label: floor.label, rooms, total, hidden: total - rooms.length };
+            return { label: floor.label, heading: props.floors.length > 1, rooms, total, hidden: total - rooms.length };
         })
         .filter((g) => g.total > 0);
 });
@@ -84,13 +123,13 @@ const groups = computed(() => {
                         <th scope="col" class="py-2.5 ps-2 pe-5"><span class="sr-only">Action</span></th>
                     </tr>
                 </thead>
-                <tbody v-for="group in groups" :key="group.label" class="[&>tr]:border-t [&>tr]:border-(--hm-row-line)">
-                    <tr v-if="floors.length > 1" class="bg-group-row">
+                <tbody v-for="group in groups" :key="group.label || 'all'" class="[&>tr]:border-t [&>tr]:border-(--hm-row-line)">
+                    <tr v-if="group.heading" class="bg-group-row">
                         <th scope="rowgroup" colspan="8" class="py-[7px] ps-5 text-left text-[11.5px] font-semibold text-muted">{{ group.label }} · {{ group.total }} {{ group.total === 1 ? 'room' : 'rooms' }}</th>
                     </tr>
                     <RoomRow v-for="room in group.rooms" :key="room.id" :room="room" :now="now" @select="emit('select', $event)" />
                     <tr v-if="group.hidden > 0">
-                        <td colspan="8" class="py-2 ps-5 text-xs text-muted">{{ group.hidden }} more {{ group.hidden === 1 ? 'room' : 'rooms' }} on {{ group.label }}</td>
+                        <td colspan="8" class="py-2 ps-5 text-xs text-muted">{{ group.hidden }} more {{ group.hidden === 1 ? 'room' : 'rooms' }}<template v-if="group.label"> on {{ group.label }}</template></td>
                     </tr>
                 </tbody>
             </table>

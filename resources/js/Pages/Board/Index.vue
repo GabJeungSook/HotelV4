@@ -46,7 +46,7 @@ const boardSub = computed(() => {
 
 const initialTab = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search).get('tab');
 const tab = ref<RoomFilter>((['all', 'vacant', 'occupied', 'due_out', 'overdue', 'housekeeping', 'held'] as RoomFilter[]).includes(initialTab as RoomFilter) ? (initialTab as RoomFilter) : 'all');
-const sort = ref<'number' | 'attention'>('number');
+const sort = ref<'number' | 'attention'>('attention');
 const q = ref(props.filters.q);
 const lastFloor = useLocalStorage('homi.board.floor', 'all');
 const floor = ref(props.filters.floor || lastFloor.value || 'all');
@@ -68,8 +68,8 @@ const tabs = computed(() => [
 ]);
 const floorItems = computed(() => [{ value: 'all', label: 'All floors' }, ...(props.board?.floorOptions ?? [])]);
 const sortItems = [
+    { value: 'attention', label: 'Sort: most urgent first' },
     { value: 'number', label: 'Sort: room no.' },
-    { value: 'attention', label: 'Sort: needs attention first' },
 ];
 
 function visit(): void {

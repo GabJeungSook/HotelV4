@@ -47,9 +47,9 @@ describe('RoomTable', () => {
         expect(label.text()).toBe('Overdue');
         expect(label.attributes('data-tone')).toBe('bad');
         // Overdue (-42 min) and due-out-soon (22 min) rows go red; a room with hours left does not.
-        expect(row.classes()).toContain('bg-bad-50');
-        expect(wrapper.find('tr[data-status="due_out"]').classes()).toContain('bg-bad-50');
-        expect(wrapper.find('tr[data-status="occupied"]').classes().some((c) => c.startsWith('bg-'))).toBe(false);
+        expect(row.classes()).toContain('bg-bad-100');
+        expect(wrapper.find('tr[data-status="due_out"]').classes()).toContain('bg-bad-100');
+        expect(wrapper.find('tr[data-status="occupied"]').classes().some((c) => c.startsWith('bg-bad'))).toBe(false);
     });
 
     it('formats guest, due-out clock time, time left or over, and balance', () => {
@@ -88,10 +88,11 @@ describe('RoomTable', () => {
         expect(wrapper.find('tr[data-status="blocked"]').attributes('tabindex')).toBeUndefined();
     });
 
-    it('filters occupied (with due out and overdue) and sorts by attention', () => {
+    it('filters occupied and sorts by urgency: due out soon, then overdue, then occupied, across floors', () => {
         const wrapper = mountTable({ filter: 'occupied', sort: 'attention' });
 
-        expect(numbers(wrapper)).toEqual(['117', '106', '205']);
+        // 106 due out in 22 min, 117 overdue 42 min, 205 occupied with 9h left — one flat list, no floor headers.
+        expect(numbers(wrapper)).toEqual(['106', '117', '205']);
     });
 
     it('limits rows per floor with a "more rooms" line', () => {

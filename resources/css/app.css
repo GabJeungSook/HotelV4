@@ -145,6 +145,7 @@
     --hm-warn-line: #fedf89;
     --hm-bad: #b42318;
     --hm-bad-50: #fef3f2;
+    --hm-bad-100: #fcd4d1;
     --hm-bad-line: #fecdca;
     --hm-info: #3538cd;
     --hm-info-50: #eef4ff;
@@ -263,6 +264,7 @@
     --hm-warn-line: #574117;
     --hm-bad: #f4837a;
     --hm-bad-50: #321719;
+    --hm-bad-100: #4a2022;
     --hm-bad-line: #5a2a2b;
     --hm-info: #a4b9fc;
     --hm-info-50: #181f40;
@@ -368,6 +370,7 @@
     --color-warn-line: var(--hm-warn-line);
     --color-bad: var(--hm-bad);
     --color-bad-50: var(--hm-bad-50);
+    --color-bad-100: var(--hm-bad-100);
     --color-bad-line: var(--hm-bad-line);
     --color-info: var(--hm-info);
     --color-info-50: var(--hm-info-50);

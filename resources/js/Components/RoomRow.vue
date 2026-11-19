@@ -122,7 +122,7 @@ function open(): void {
         class="group text-[12.5px] leading-5 outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
         :class="[
             actionable ? 'cursor-pointer' : '',
-            nearlyDue ? 'bg-bad-50' : actionable ? 'hover:bg-(--hm-row-hover)' : '',
+            nearlyDue ? 'bg-bad-100' : actionable ? 'hover:bg-(--hm-row-hover)' : '',
             room.status === 'blocked' ? 'text-muted' : 'text-default',
         ]"
         :data-status="room.status"
