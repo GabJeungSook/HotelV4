@@ -10,6 +10,7 @@ enum PrintFormat: string
     case Print = 'print';
     case Pdf = 'pdf';
     case Csv = 'csv';
+    case Html = 'html';
 
     public function label(): string
     {
@@ -17,6 +18,7 @@ enum PrintFormat: string
             self::Print => 'Print',
             self::Pdf => 'PDF',
             self::Csv => 'CSV',
+            self::Html => 'HTML',
         };
     }
 }

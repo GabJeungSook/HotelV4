@@ -18,6 +18,7 @@ Route::middleware(['auth', 'pin.set', 'role:backoffice,supervisor,admin,owner'])
     Route::get('/shifts/{shift}/z', [ReportController::class, 'zReport'])->whereNumber('shift')->name('z');
     Route::get('/shifts/{shift}/z.pdf', [ReportController::class, 'zPdf'])->whereNumber('shift')->name('z.pdf');
     Route::get('/shifts/{shift}/z.csv', [ReportController::class, 'zCsv'])->whereNumber('shift')->name('z.csv');
+    Route::get('/shifts/{shift}/z.html', [ReportController::class, 'zHtml'])->whereNumber('shift')->name('z.html');
 
     Route::get('/daily', [ReportController::class, 'daily'])->name('daily');
     Route::get('/daily/close', [ReportController::class, 'closeDay'])->name('daily.close');

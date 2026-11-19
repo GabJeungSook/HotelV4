@@ -42,6 +42,32 @@ final class ZReportExport
         ])->setPaper('a4')->download($filename);
     }
 
+    /**
+     * The whole Z-report as one standalone HTML file: the Z paper plus the drawer, guests, rooms
+     * by floor, cleaning, housekeeping, stocks and expenses — everything on one page so it is read
+     * or printed without opening each report. Rendered from the one assembled array; a preview is
+     * refused.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function html(array $data, User $by, int $branchId, PrintDocument $document, int $subjectId, string $filename): Response
+    {
+        $this->refusePreview($data['paper']);
+        $this->log->handle($by, $branchId, $document, $subjectId, PrintFormat::Html);
+
+        $logo = resource_path('images/brand/homi-logo-400.png');
+        $html = view('reports.zreport-full', [
+            'data' => $data,
+            'logo' => extension_loaded('gd') && is_file($logo) ? 'data:image/png;base64,'.base64_encode((string) file_get_contents($logo)) : null,
+            'product' => config('hotel.name'),
+        ])->render();
+
+        return response($html, 200, [
+            'Content-Type' => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+
     /** @param  array<string, mixed>  $paper */
     public function csv(array $paper, User $by, int $branchId, PrintDocument $document, int $subjectId, string $filename): StreamedResponse
     {

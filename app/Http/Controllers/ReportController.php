@@ -163,6 +163,24 @@ final class ReportController extends Controller
         return $this->export->csv($this->reports->zReport($session), $this->user($request), $session->branch_id, PrintDocument::ZReport, $session->id, self::zFile($session).'.csv');
     }
 
+    /** The whole Z-report as one standalone HTML file (every section assembled from the ledger). */
+    public function zHtml(ReportRequest $request, ReportQuery $queries, int $shift): HttpResponse
+    {
+        $session = $this->shiftFor($request, $shift);
+
+        $data = [
+            'paper' => $this->reports->zReport($session),
+            'shift' => $this->reports->shift($session),
+            'rooms' => $this->reports->zRooms($session),
+            'cleaning' => $this->reports->zCleaning($session),
+            'housekeeping' => $this->reports->housekeeping($session->branch_id, $session->business_date->toDateString(), $session),
+            'stocks' => $queries->stock($session),
+            'expenses' => $this->reports->zExpenses($session),
+        ];
+
+        return $this->export->html($data, $this->user($request), $session->branch_id, PrintDocument::ZReport, $session->id, self::zFile($session).'.html');
+    }
+
     /** Logs a browser print of 37 (report) or 37b/37c (z_report) before it happens. */
     public function shiftPrint(ReportRequest $request, LogPrint $log, int $shift): JsonResponse
     {

@@ -97,6 +97,23 @@ it('exports the Z-report as CSV and PDF and logs each export', function (): void
         ->and($logs->last()->user_id)->toBe($this->backoffice->id);
 });
 
+it('exports the whole Z-report as one standalone HTML file with every section', function (): void {
+    $html = $this->actingAs($this->backoffice)->get("/reports/shifts/{$this->am->id}/z.html");
+    $html->assertOk()
+        ->assertHeader('Content-Type', 'text/html; charset=UTF-8')
+        ->assertDownload('z-0629-2026-11-11-AM.html');
+
+    $body = $html->getContent();
+    expect($body)->toContain('Shift reconciliation')
+        ->and($body)->toContain('Rooms by floor')
+        ->and($body)->toContain('Cleaning chart')
+        ->and($body)->toContain('Housekeeping')
+        ->and(PrintLog::query()->where('document', PrintDocument::ZReport)->where('subject_id', $this->am->id)->where('format', PrintFormat::Html)->exists())->toBeTrue();
+
+    // A preview (open shift) cannot be exported.
+    $this->actingAs($this->backoffice)->from("/reports/shifts/{$this->open->id}/z")->get("/reports/shifts/{$this->open->id}/z.html")->assertRedirect();
+});
+
 it('refuses to export or print the preview of an open shift', function (): void {
     $this->actingAs($this->backoffice)->get("/reports/shifts/{$this->open->id}/z")->assertOk()->assertInertia(fn (Assert $page) => $page
         ->where('paper.preview', true)->where('paper.header.number', null));

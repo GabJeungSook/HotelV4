@@ -101,10 +101,12 @@ function print(): void {
         <PageHeader>
             <StatusLabel v-if="paper.preview" tone="warn" label="Preview" />
             <ExportMenu
+                html
                 pdf
                 csv
                 :print="false"
                 :disabled="paper.preview"
+                @html="r.download(route('reports.z.html', shift.id))"
                 @pdf="r.download(route('reports.z.pdf', shift.id))"
                 @csv="r.download(route('reports.z.csv', shift.id))"
             />
