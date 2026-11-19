@@ -22,9 +22,6 @@ use Carbon\CarbonImmutable;
  */
 final class KioskOffer
 {
-    /** The most days a guest can self-book at the kiosk; longer stays are set up at the front desk. */
-    public const MAX_DAYS = 3;
-
     public function __construct(private readonly PricingService $pricing) {}
 
     /** @return array{quote: StayQuote, discount: Discount|null} */
@@ -70,29 +67,21 @@ final class KioskOffer
     }
 
     /**
-     * The whole-day options for long stay (1 up to the branch cap and MAX_DAYS), only while the
-     * branch allows long stay and the days actually price.
-     *
-     * @return list<int>
+     * The most whole days a guest may book for long stay at the kiosk: the branch's longest stay
+     * (settings), or 0 when the branch does not allow long stay or the day rate does not price.
      */
-    public function days(Branch $branch, RateCard $card, int $roomTypeId, CarbonImmutable $at): array
+    public function maxDays(Branch $branch, RateCard $card, int $roomTypeId, CarbonImmutable $at): int
     {
         if (! $branch->long_stay_enabled) {
-            return [];
+            return 0;
         }
 
-        $cap = min(self::MAX_DAYS, (int) $branch->long_stay_max_days);
-        $days = [];
-
-        for ($d = 1; $d <= $cap; $d++) {
-            try {
-                $this->pricing->quoteStay($card, $roomTypeId, StayKind::LongStay, $d, $at);
-                $days[] = $d;
-            } catch (RateNotFound) {
-                break;
-            }
+        try {
+            $this->pricing->quoteStay($card, $roomTypeId, StayKind::LongStay, 1, $at);
+        } catch (RateNotFound) {
+            return 0;
         }
 
-        return $days;
+        return (int) $branch->long_stay_max_days;
     }
 }

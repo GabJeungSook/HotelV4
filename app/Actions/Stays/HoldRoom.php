@@ -96,9 +96,11 @@ final class HoldRoom
 
         $type = RoomType::query()->withoutGlobalScopes()->where('branch_id', $branchId)->where('is_active', true)->findOrFail($roomTypeId);
         $card = RateCard::forBranch($branch);
-        $valid = $kind === StayKind::LongStay ? $this->offer->days($branch, $card, $type->id, $this->clock->now()) : $this->offer->hours($card, $type->id);
+        $offered = $kind === StayKind::LongStay
+            ? ($quantity >= 1 && $quantity <= $this->offer->maxDays($branch, $card, $type->id, $this->clock->now()))
+            : in_array($quantity, $this->offer->hours($card, $type->id), true);
 
-        if (! in_array($quantity, $valid, true)) {
+        if (! $offered) {
             throw ActionRefused::because("That stay is not offered for {$type->name} rooms.");
         }
 

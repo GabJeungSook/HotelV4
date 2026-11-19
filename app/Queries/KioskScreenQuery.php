@@ -80,9 +80,12 @@ final class KioskScreenQuery
         }
 
         $card = RateCard::forBranch($branch);
-        $valid = $kind === StayKind::LongStay ? $this->offer->days($branch, $card, $type->id, $this->clock->now()) : $this->offer->hours($card, $type->id);
 
-        if (! in_array($quantity, $valid, true)) {
+        if ($kind === StayKind::LongStay) {
+            if ($quantity < 1 || $quantity > $this->offer->maxDays($branch, $card, $type->id, $this->clock->now())) {
+                return null;
+            }
+        } elseif (! in_array($quantity, $this->offer->hours($card, $type->id), true)) {
             return null;
         }
 
@@ -144,7 +147,7 @@ final class KioskScreenQuery
      * Each active type with a price: its offered room (or full), the hour and whole-day options,
      * and the free count.
      *
-     * @return list<array{id: int, name: string, description: string|null, room: array{id: int, number: string, label: string}|null, full: bool, options: list<array{hours: int, amount: int}>, day_options: list<array{days: int, amount: int}>, free: int}>
+     * @return list<array{id: int, name: string, description: string|null, room: array{id: int, number: string, label: string}|null, full: bool, options: list<array{hours: int, amount: int}>, long_stay: array{max_days: int, per_day: int}|null, free: int}>
      */
     private function types(Branch $branch): array
     {
@@ -171,22 +174,17 @@ final class KioskScreenQuery
                 }
             }
 
-            $dayOptions = [];
+            $maxDays = $this->offer->maxDays($branch, $card, $type->id, $now);
+            $longStay = $maxDays > 0
+                ? ['max_days' => $maxDays, 'per_day' => $this->offer->quote($branch->id, $card, $type->id, StayKind::LongStay, 1, $now)['quote']->roomAmount->centavos()]
+                : null;
 
-            foreach ($this->offer->days($branch, $card, $type->id, $now) as $d) {
-                try {
-                    $dayOptions[] = ['days' => $d, 'amount' => $this->offer->quote($branch->id, $card, $type->id, StayKind::LongStay, $d, $now)['quote']->roomAmount->centavos()];
-                } catch (RateNotFound) {
-                    continue;
-                }
-            }
-
-            if ($options === [] && $dayOptions === []) {
+            if ($options === [] && $longStay === null) {
                 continue;
             }
 
             // Offered for the first available option; HoldRoom checks again for the stay chosen.
-            [$firstKind, $firstQty] = $options !== [] ? [StayKind::Hourly, $options[0]['hours']] : [StayKind::LongStay, $dayOptions[0]['days']];
+            [$firstKind, $firstQty] = $options !== [] ? [StayKind::Hourly, $options[0]['hours']] : [StayKind::LongStay, 1];
             $eligible = $this->rotation->order($this->rooms->kioskCandidates($branch->id, $type->id, $now, $this->period($branch, $card, $type->id, $firstKind, $firstQty)));
             $first = $eligible[0] ?? null;
             $room = $first === null ? null : Room::query()->withoutGlobalScopes()->find($first->id);
@@ -198,7 +196,7 @@ final class KioskScreenQuery
                 'room' => $room === null ? null : $this->roomLabel($room),
                 'full' => $room === null,
                 'options' => $options,
-                'day_options' => $dayOptions,
+                'long_stay' => $longStay,
                 'free' => count($eligible),
             ];
         }
