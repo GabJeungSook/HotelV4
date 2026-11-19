@@ -19,7 +19,15 @@ const props = defineProps<{
     report: {
         date: string;
         shift_id: number | null;
-        people: { user_id: number; name: string; floors: string; cleans: number; average_minutes: number; late: number }[];
+        people: {
+            user_id: number;
+            name: string;
+            floors: string;
+            cleans: number;
+            average_minutes: number;
+            late: number;
+            rooms: { room: string; ready: string | null; minutes: number; late: boolean }[];
+        }[];
         total: { cleans: number; late: number };
         late: { id: number; room: string; guest_left: string; deadline: string; ready: string; late_minutes: number; by: string }[];
     };
@@ -31,6 +39,14 @@ const date = ref(props.report.date);
 const shift = ref<number | 'day'>(props.report.shift_id ?? 'day');
 watch(date, (d) => r.go('reports.housekeeping', {}, { date: d }));
 watch(shift, (s) => r.go('reports.housekeeping', {}, s === 'day' ? { date: props.report.date } : { shift: s }));
+
+// Which housekeepers' room lists are expanded.
+const expanded = ref(new Set<number>());
+function toggle(id: number): void {
+    const next = new Set(expanded.value);
+    next.has(id) ? next.delete(id) : next.add(id);
+    expanded.value = next;
+}
 
 const title = computed(() => `Housekeeping · ${formatDateTime(`${props.report.date}T12:00:00+08:00`, 'businessDate').replace(',', '')}`);
 const scope = computed(() => [{ label: 'Whole day', value: 'day' as const }, ...props.shifts.map((s) => ({ label: s.label, value: s.id }))]);
@@ -62,13 +78,30 @@ const exportUrl = computed(() => route('reports.housekeeping', { ...(props.repor
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="p in report.people" :key="p.user_id">
-                            <td><PersonPill :name="p.name" /></td>
-                            <td>{{ p.floors }}</td>
-                            <td class="r">{{ p.cleans }}</td>
-                            <td class="r">{{ p.average_minutes }} min</td>
-                            <td class="r" :class="p.late ? '!text-bad' : ''">{{ p.late }}</td>
-                        </tr>
+                        <template v-for="p in report.people" :key="p.user_id">
+                            <tr>
+                                <td>
+                                    <button type="button" class="hm-focus inline-flex items-center gap-2 text-left" :aria-expanded="expanded.has(p.user_id)" @click="toggle(p.user_id)">
+                                        <UIcon :name="expanded.has(p.user_id) ? 'i-solar-alt-arrow-down-linear' : 'i-solar-alt-arrow-right-linear'" class="size-3.5 shrink-0 text-faint" aria-hidden="true" />
+                                        <PersonPill :name="p.name" />
+                                    </button>
+                                </td>
+                                <td>{{ p.floors }}</td>
+                                <td class="r">{{ p.cleans }}</td>
+                                <td class="r">{{ p.average_minutes }} min</td>
+                                <td class="r" :class="p.late ? '!text-bad' : ''">{{ p.late }}</td>
+                            </tr>
+                            <tr v-if="expanded.has(p.user_id)">
+                                <td colspan="5" class="!py-0">
+                                    <div class="flex flex-wrap gap-x-5 gap-y-1.5 rounded-lg bg-muted px-4 py-2.5 ps-7 text-[12.5px]">
+                                        <span v-for="(room, i) in p.rooms" :key="i" class="inline-flex items-baseline gap-1.5">
+                                            <span class="num font-medium" :class="room.late ? 'text-bad' : 'text-highlighted'">{{ room.room }}</span>
+                                            <span class="text-muted">{{ room.ready ? formatDateTime(room.ready, 'time') : '—' }}</span>
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
                     </tbody>
                     <tfoot v-if="report.people.length > 1">
                         <tr>

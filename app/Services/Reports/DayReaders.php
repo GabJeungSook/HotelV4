@@ -421,6 +421,12 @@ trait DayReaders
                 'cleans' => $done->count(),
                 'average_minutes' => $done->isEmpty() ? 0 : intdiv((int) $minutes->sum() + intdiv($done->count(), 2), $done->count()),
                 'late' => $done->where('is_late', true)->count(),
+                'rooms' => $done->map(fn (CleaningTask $t): array => [
+                    'room' => $t->room->number ?? '',
+                    'ready' => $t->finished_at?->toIso8601String(),
+                    'minutes' => $t->started_at === null ? 0 : intdiv($t->finished_at->getTimestamp() - $t->started_at->getTimestamp(), 60),
+                    'late' => (bool) $t->is_late,
+                ])->values()->all(),
             ];
         }
         usort($people, fn (array $a, array $b): int => strcmp($a['name'], $b['name']));
