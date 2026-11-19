@@ -33,17 +33,26 @@ const emit = defineEmits<{ select: [room: BoardRoom] }>();
 const status = computed(() => roomStatus[props.room.status]);
 const actionable = computed(() => !['to_clean', 'cleaning', 'blocked'].includes(props.room.status));
 
+// `now` ticks every second (the board passes a live clock), so the countdown runs on its own
+// without waiting for a server refresh. Seconds come straight from the room's checkout time.
+const nowMs = computed(() => new Date(props.now as string | number | Date).getTime());
+const secondsLeft = computed<number | null>(() => {
+    if (!['occupied', 'due_out', 'overdue'].includes(props.room.status) || !props.room.dueOutAt) {
+        return null;
+    }
+
+    return Math.round((new Date(props.room.dueOutAt).getTime() - nowMs.value) / 1000);
+});
+
 /** An in-house room with an hour or less left, or already over: the whole row goes red (like v2). */
-const nearlyDue = computed(() => ['occupied', 'due_out', 'overdue'].includes(props.room.status) && props.room.minutes != null && props.room.minutes <= 60);
+const nearlyDue = computed(() => secondsLeft.value !== null && secondsLeft.value <= 3600);
 
 const timeTone = computed(() => {
-    const { status: s, minutes } = props.room;
-
-    if (!['occupied', 'due_out', 'overdue'].includes(s) || minutes === null || minutes === undefined) {
+    if (secondsLeft.value === null) {
         return 'text-muted';
     }
 
-    return minutes < 0 ? 'font-semibold text-bad' : minutes <= 60 ? 'font-semibold text-warn' : 'text-muted';
+    return secondsLeft.value < 0 ? 'font-semibold text-bad' : secondsLeft.value <= 3600 ? 'font-semibold text-warn' : 'text-muted';
 });
 
 const guestText = computed(() => {
@@ -67,12 +76,12 @@ const timeText = computed(() => {
         return `hold ${formatDuration(holdSeconds, 'countdown')}`;
     }
 
-    if (minutes === null || minutes === undefined) {
-        return '';
+    if (secondsLeft.value !== null) {
+        return formatDuration(secondsLeft.value, 'live');
     }
 
-    if (s === 'occupied' || s === 'due_out' || s === 'overdue') {
-        return formatDuration(minutes, 'board');
+    if (minutes === null || minutes === undefined) {
+        return '';
     }
 
     if (s === 'to_clean') {
@@ -97,7 +106,13 @@ const accessibleName = computed(() => {
         parts.push(`due ${dueOut.value}`);
     }
 
-    if (timeText.value) {
+    if (secondsLeft.value !== null) {
+        const mins = Math.round(Math.abs(secondsLeft.value) / 60);
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        const span = h > 0 ? `${h} hour${h === 1 ? '' : 's'}${m ? ` ${m} minute${m === 1 ? '' : 's'}` : ''}` : `${m} minute${m === 1 ? '' : 's'}`;
+        parts.push(secondsLeft.value < 0 ? `${span} over` : `${span} left`);
+    } else if (timeText.value) {
         parts.push(timeText.value.replace(/(\d+)h/, '$1 hours').replace(/(\d+)m\b/, '$1 minutes'));
     }
 
@@ -132,7 +147,7 @@ function open(): void {
         <td class="w-16 py-[9px] ps-5 pe-2 text-[13px] font-semibold tabular" :class="room.status === 'blocked' ? 'text-muted' : 'text-highlighted'">{{ room.number }}</td>
         <td class="px-2 py-2.5 whitespace-nowrap">{{ room.type }}</td>
         <td class="px-2 py-2.5"><StatusLabel :tone="status.tone" :label="status.label" /></td>
-        <td class="max-w-48 truncate px-2 py-[7px]" :class="room.reservedAt && !room.guest ? 'text-muted' : ''">
+        <td class="max-w-[17rem] truncate px-2 py-[7px]" :class="room.reservedAt && !room.guest ? 'text-muted' : ''">
             <PersonPill v-if="room.guest" :name="room.guest" />
             <template v-else>{{ guestText }}</template>
         </td>

@@ -52,7 +52,9 @@ return [
 
     // Polling intervals in seconds (TRD §3.9, §4.11).
     'polling' => [
-        'board' => 15,
+        // The room-board countdown now ticks live in the browser; this is only the background
+        // reload that keeps the board's data (new check-ins, housekeeping) fresh.
+        'board' => 30,
         'kiosk_holds' => 5,
         'housekeeping' => 20,
         'kiosk_availability' => 20,

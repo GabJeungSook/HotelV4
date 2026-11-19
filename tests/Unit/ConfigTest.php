@@ -9,7 +9,7 @@ it('has the product constants of TRD §3.9 in config/hotel.php', function (): vo
         ->and(config('hotel.login.max_attempts'))->toBe(5)
         ->and(config('hotel.login.lock_minutes'))->toBe(15)
         ->and(config('hotel.polling'))->toBe([
-            'board' => 15,
+            'board' => 30,
             'kiosk_holds' => 5,
             'housekeeping' => 20,
             'kiosk_availability' => 20,

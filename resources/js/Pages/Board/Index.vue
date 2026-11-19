@@ -1,7 +1,7 @@
 <!-- Mockup 4 · 4c (nothing found) · 4b in Skeleton.vue · 5 in KioskHolds.vue -->
 <script setup lang="ts">
 import { Deferred, router } from '@inertiajs/vue3';
-import { useLocalStorage, watchDebounced } from '@vueuse/core';
+import { useLocalStorage, useNow, watchDebounced } from '@vueuse/core';
 import { computed, ref } from 'vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import type { BoardRoom } from '@/Components/RoomRow.vue';
@@ -33,15 +33,18 @@ const props = defineProps<{
 const { flash, props: shared } = useShared();
 const liveHolds = computed(() => props.holds.filter((h) => !h.expired).length);
 const kiosk = computed(() => !!shared.value.branch?.modules?.kiosk_enabled || props.holds.length > 0);
+// The countdown runs live off this clock (one 1 s tick for the whole board, no per-row timers);
+// the server reload below only keeps the data fresh (new check-ins, housekeeping) in the background.
+const now = useNow({ interval: 1000 });
 usePolling(['board'], props.poll);
 // Kiosk holds reload on their own timer, so a new hold shows on the rail without a refresh.
 usePolling(['holds'], props.holdsPoll);
 
-/** "46 rooms on 2 floors · updates every 15 s" (mockup v6). */
+/** "46 rooms on 2 floors" (mockup v6); the times tick live, so no "updates every N s" line. */
 const boardSub = computed(() => {
     const b = props.board;
 
-    return b ? `${b.total} rooms on ${b.floorOptions.length} ${b.floorOptions.length === 1 ? 'floor' : 'floors'} · updates every ${props.poll} s` : undefined;
+    return b ? `${b.total} rooms on ${b.floorOptions.length} ${b.floorOptions.length === 1 ? 'floor' : 'floors'}` : undefined;
 });
 
 const initialTab = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search).get('tab');
@@ -137,7 +140,7 @@ function open(room: BoardRoom): void {
                             @action="clearSearch"
                         />
                     </div>
-                    <RoomTable v-else :floors="board?.floors ?? []" :filter="tab" :sort="sort" :now="board?.now" @select="open" />
+                    <RoomTable v-else :floors="board?.floors ?? []" :filter="tab" :sort="sort" :now="now" @select="open" />
                 </Deferred>
             </div>
 

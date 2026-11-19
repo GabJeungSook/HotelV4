@@ -169,6 +169,8 @@ export type DurationStyle =
     | 'min'
     /** 3h 10m left · 42m over (room board) */
     | 'board'
+    /** live room-board countdown from seconds: 9h 28m left · 4m 05s left · 2m 12s over (ticks each second in the last hour) */
+    | 'live'
     /** 6:42 (hold countdown, m:ss) */
     | 'countdown'
     /** 06:12 (cleaning timer, mm:ss) */
@@ -189,6 +191,15 @@ export function formatDuration(amount: number, style: DurationStyle = 'text'): s
             const h = Math.floor(abs / 60);
             const m = abs % 60;
             const span = h > 0 ? `${h}h ${m}m` : `${m}m`;
+
+            return n < 0 ? `${span} over` : `${span} left`;
+        }
+        case 'live': {
+            // Whole seconds. Shows the seconds in the last hour so the row visibly ticks; minutes beyond.
+            const h = Math.floor(abs / 3600);
+            const m = Math.floor((abs % 3600) / 60);
+            const s = abs % 60;
+            const span = h > 0 ? `${h}h ${m}m` : `${m}m ${s.toString().padStart(2, '0')}s`;
 
             return n < 0 ? `${span} over` : `${span} left`;
         }

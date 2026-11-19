@@ -59,10 +59,11 @@ describe('RoomTable', () => {
 
         expect(overdue.text()).toContain('D. Abella');
         expect(overdue.text()).toContain('11:02 AM');
-        expect(overdue.find('[data-time]').text()).toBe('42m over');
+        // In the last hour the countdown ticks with seconds; past an hour it stays at minutes.
+        expect(overdue.find('[data-time]').text()).toBe('42m 00s over');
         expect(overdue.find('[data-time]').classes()).toContain('text-bad');
         expect(overdue.text()).toContain('₱150.00');
-        expect(dueOut.find('[data-time]').text()).toBe('22m left');
+        expect(dueOut.find('[data-time]').text()).toBe('22m 00s left');
         expect(dueOut.find('[data-time]').classes()).toContain('text-warn');
         expect(wrapper.find('tr[data-status="occupied"] [data-time]').text()).toBe('9h 28m left');
         expect(wrapper.find('tr[data-status="held"] [data-time]').text()).toBe('hold 6:42');
