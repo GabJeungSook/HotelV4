@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { onKeyStroke } from '@vueuse/core';
 import { ref } from 'vue';
+import NotificationBell from './NotificationBell.vue';
 
 /**
  * The 56 px top bar (DESIGN_SYSTEM §0, §6.1; mockup v6 `.tb`): breadcrumbs with the page in
  * primary, the search box ("Ctrl K" focuses it; Enter searches the room board) where the user can
- * search rooms, the status slot (shift label and Close shift on the front desk) and the bell.
+ * search rooms, the status slot (shift label and Close shift on the front desk) and the
+ * notification bell (its panel and feed come from NotificationBell).
  */
-const props = withDefaults(defineProps<{ crumbs: string[]; searchRoute?: string; notifications?: string }>(), { searchRoute: undefined, notifications: undefined });
+const props = withDefaults(defineProps<{ crumbs: string[]; searchRoute?: string }>(), { searchRoute: undefined });
 
 const emit = defineEmits<{ menu: [] }>();
 
@@ -61,13 +63,6 @@ function search(): void {
             </UInput>
         </form>
         <div class="flex shrink-0 items-center gap-2 max-md:hidden"><slot name="status" /></div>
-        <Link
-            v-if="notifications"
-            :href="notifications"
-            class="hm-focus grid size-[34px] shrink-0 place-items-center rounded-lg border border-default bg-default text-muted hover:bg-elevated"
-            aria-label="Notifications"
-        >
-            <UIcon name="i-solar-bell-bold-duotone" class="size-4" aria-hidden="true" />
-        </Link>
+        <NotificationBell />
     </header>
 </template>

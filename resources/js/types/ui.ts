@@ -64,6 +64,24 @@ export const toneFill: Record<Tone, string> = {
     clay: 'var(--hm-clay)',
 };
 
+/** Icon + tone per notification / "needs attention" kind (NotificationQuery, AttentionList). */
+export const notificationMeta: Record<string, { icon: string; tone: Tone }> = {
+    overdue_stay: { icon: 'i-solar-clock-circle-bold-duotone', tone: 'bad' },
+    due_out_soon: { icon: 'i-solar-alarm-bold-duotone', tone: 'warn' },
+    kiosk_hold: { icon: 'i-solar-smartphone-2-bold-duotone', tone: 'info' },
+    unpaid_balance: { icon: 'i-solar-wallet-money-bold-duotone', tone: 'warn' },
+    stock: { icon: 'i-solar-box-bold-duotone', tone: 'warn' },
+    no_open_shift: { icon: 'i-solar-lock-keyhole-bold-duotone', tone: 'bad' },
+    shift_open_too_long: { icon: 'i-solar-clock-circle-bold-duotone', tone: 'warn' },
+    cleaning_stuck: { icon: 'i-solar-broom-bold-duotone', tone: 'warn' },
+    day_not_closed: { icon: 'i-solar-calendar-bold-duotone', tone: 'warn' },
+    short_shift: { icon: 'i-solar-banknote-2-bold-duotone', tone: 'warn' },
+    no_pin: { icon: 'i-solar-key-bold-duotone', tone: 'warn' },
+    invariant_failed: { icon: 'i-solar-danger-triangle-bold-duotone', tone: 'bad' },
+};
+
+export const notificationFallback: { icon: string; tone: Tone } = { icon: 'i-solar-bell-bold-duotone', tone: 'neutral' };
+
 /** Room board display keys (DESIGN_SYSTEM §2.3), sent by the server's BoardQuery. */
 export type RoomDisplayStatus = 'vacant' | 'occupied' | 'due_out' | 'overdue' | 'held' | 'to_clean' | 'cleaning' | 'blocked';
 

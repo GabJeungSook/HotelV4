@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use App\Enums\Role;
 use App\Models\Branch;
 use App\Models\User;
+use App\Queries\NotificationQuery;
 use App\Queries\ShiftQuery;
 use App\Services\CurrentBranch;
 use App\Services\PinGuard;
@@ -57,6 +58,9 @@ class HandleInertiaRequests extends Middleware
             // Its own key, because some pages send a `branch` prop of their own.
             'branchCard' => fn (): ?array => $this->branchCard(),
             'shift' => fn (): ?array => $this->shift($user),
+            // The top-bar bell: a live count and the first items. The desk, back office, admin and
+            // owner have a feed; the kiosk and housekeeper phones do not (so no bell shows).
+            'notifications' => fn (): ?array => $this->notifications($user),
             'nav' => fn (): array => $user instanceof User ? Navigation::for($user, app(CurrentBranch::class)->branch()) : [],
             'home' => fn (): ?string => $user instanceof User ? route('home', absolute: false) : null,
             // The branch picker on reports and dashboards (ROADMAP Phase 9): owners only.
@@ -100,6 +104,22 @@ class HandleInertiaRequests extends Middleware
             'name' => $branch->name,
             'rooms' => $branch->rooms()->withoutGlobalScopes()->where('is_active', true)->count(),
             'place' => trim(Str::afterLast($branch->address, ',')),
+        ];
+    }
+
+    /** @return array{count: int, items: list<array<string, mixed>>, href: string}|null */
+    private function notifications(mixed $user): ?array
+    {
+        if (! $user instanceof User || ! in_array($user->role, [Role::Frontdesk, Role::Supervisor, Role::Backoffice, Role::Admin, Role::Owner], true)) {
+            return null;
+        }
+
+        $feed = app(NotificationQuery::class)->for($user);
+
+        return [
+            'count' => count($feed),
+            'items' => array_slice($feed, 0, 8),
+            'href' => route('notifications', absolute: false),
         ];
     }
 

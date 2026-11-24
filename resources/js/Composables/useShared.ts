@@ -17,12 +17,29 @@ export interface SharedShift {
     members: { id: number; name: string }[];
 }
 
+export interface NotificationItem {
+    kind: string;
+    severity: 'high' | 'normal';
+    title: string;
+    detail: string;
+    since: string | null;
+    since_text: string;
+    href: string;
+}
+
+export interface NotificationFeed {
+    count: number;
+    items: NotificationItem[];
+    href: string;
+}
+
 export interface SharedProps {
     app: { name: string; heartbeat: number };
     auth: { user: { id: number; name: string; username: string }; role: string; roleLabel: string } | null;
     branch: { id: number; name: string; status: string; modules: Record<string, boolean> } | null;
     branchCard?: { name: string; rooms: number; place: string } | null;
     shift: SharedShift | null;
+    notifications: NotificationFeed | null;
     nav: NavGroup[];
     home: string | null;
     pinLocked: boolean;

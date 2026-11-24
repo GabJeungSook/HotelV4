@@ -36,7 +36,6 @@ const shell = useShell({ branch: () => props.branch, user: () => props.user });
         :title="title"
         :user="shell.user.value"
         :branch="shell.branch.value"
-        :notifications="shell.notifications.value"
         :header="header"
         @sign-out="router.post(route('logout'))"
     >

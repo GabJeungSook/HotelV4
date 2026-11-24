@@ -24,12 +24,11 @@ const props = withDefaults(
         user?: { name: string; role: string };
         canSwitch?: boolean;
         branch?: SidebarBranch;
-        notifications?: string;
         searchRoute?: string;
         /** Pages that draw their own heading (none today) can switch the page header off. */
         header?: boolean;
     }>(),
-    { current: undefined, title: undefined, subtitle: undefined, user: undefined, canSwitch: false, branch: undefined, notifications: undefined, searchRoute: undefined, header: true },
+    { current: undefined, title: undefined, subtitle: undefined, user: undefined, canSwitch: false, branch: undefined, searchRoute: undefined, header: true },
 );
 
 const emit = defineEmits<{ signOut: []; switchUser: [] }>();
@@ -98,7 +97,6 @@ const keys = [
                 :branch="branch"
                 :user="user"
                 :can-switch="canSwitch"
-                :notifications="notifications ? { route: notifications } : undefined"
                 @toggle="collapsed = !collapsed"
                 @sign-out="emit('signOut')"
                 @switch-user="emit('switchUser')"
@@ -116,7 +114,6 @@ const keys = [
                         :branch="branch"
                         :user="user"
                         :can-switch="canSwitch"
-                        :notifications="notifications ? { route: notifications } : undefined"
                         drawer
                         @navigate="drawer = false"
                         @sign-out="emit('signOut')"
@@ -127,7 +124,7 @@ const keys = [
             </template>
         </USlideover>
         <div class="flex min-w-0 flex-1 flex-col">
-            <TopBar :crumbs="crumbs" :search-route="searchRoute" :notifications="notifications" @menu="drawer = true">
+            <TopBar :crumbs="crumbs" :search-route="searchRoute" @menu="drawer = true">
                 <template #status><slot name="status" /></template>
             </TopBar>
             <slot name="bars" />

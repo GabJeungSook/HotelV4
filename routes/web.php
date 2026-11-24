@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Role;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\WelcomeController;
 use App\Models\User;
 use App\Support\Clock;
@@ -31,6 +32,12 @@ Route::middleware(['auth', 'pin.set'])->group(function (): void {
 
     // Connection check for the bar (50), every 5 s while failing (APP_FLOW §8.1).
     Route::get('/heartbeat', fn () => response()->noContent())->name('heartbeat');
+
+    // All notifications (the full list behind the top-bar bell). The desk, back office, admin and
+    // owner have a feed; the kiosk and housekeeper phones do not.
+    Route::get('/notifications', [NotificationController::class, 'index'])
+        ->middleware('role:frontdesk,supervisor,backoffice,admin,owner')
+        ->name('notifications');
 });
 
 // Component gallery (ROADMAP phase 1), local only: every Nuxt UI component we use, every

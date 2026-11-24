@@ -7,7 +7,8 @@ import { useShared } from './useShared';
 /**
  * What every desktop layout gives the shell from the shared props (DESIGN_SYSTEM §0, §6.1):
  * the branch switcher card ("Dalisay GenSan · 46 rooms · General Santos City"; the owner's card
- * opens a branch or goes back to all branches), the user card, and where Notifications leads.
+ * opens a branch or goes back to all branches), the user card, and the room-board search route.
+ * The notification bell reads its own shared prop (NotificationBell), so it is not plumbed here.
  */
 export function useShell(overrides: { branch?: () => string | undefined; user?: () => { name: string; role: string } | undefined } = {}) {
     const { props: shared } = useShared();
@@ -48,27 +49,8 @@ export function useShell(overrides: { branch?: () => string | undefined; user?: 
 
     const user = computed(() => overrides.user?.() ?? (shared.value.auth ? { name: shared.value.auth.user.name, role: shared.value.auth.roleLabel, roleKey: shared.value.auth.role } : undefined));
 
-    /** Attention (49) for those who can act on it, Today for the front desk, else the dashboard. */
-    const notifications = computed<string | undefined>(() => {
-        const role = shared.value.auth?.role;
-
-        if (!role) {
-            return undefined;
-        }
-
-        if (['admin', 'supervisor'].includes(role) || (role === 'owner' && shared.value.branchCard)) {
-            return route('admin.exceptions');
-        }
-
-        if (role === 'frontdesk') {
-            return route('today');
-        }
-
-        return role === 'owner' ? route('owner.dashboard') : route('dashboard');
-    });
-
     /** The top-bar search goes to the room board, so only roles that have the board get it. */
     const searchRoute = computed(() => (['frontdesk', 'supervisor'].includes(shared.value.auth?.role ?? '') ? route('board') : undefined));
 
-    return { branch, user, notifications, searchRoute };
+    return { branch, user, searchRoute };
 }

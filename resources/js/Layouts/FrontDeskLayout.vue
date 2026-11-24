@@ -103,7 +103,6 @@ function signOut(): void {
         :title="title"
         :user="shell.user.value"
         :branch="shell.branch.value"
-        :notifications="shell.notifications.value"
         :search-route="shell.searchRoute.value"
         :can-switch="switchable"
         :header="header"

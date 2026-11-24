@@ -10,8 +10,8 @@ import PersonAvatar from './PersonAvatar.vue';
 /**
  * The sidebar (DESIGN_SYSTEM §0, §6.1; mockup v6 `.side`): logo and collapse button, the branch
  * switcher card, uppercase group labels, links with icons (a parent with children folds open with
- * an indented guide line), then Notifications and Help, and the user card whose menu holds Switch
- * user, Appearance and Sign out. Collapses to a 64 px icon rail with tooltips.
+ * an indented guide line), then Help, and the user card whose menu holds Switch user, Appearance
+ * and Sign out. Notifications live on the top-bar bell, not here. Collapses to a 64 px icon rail.
  */
 export interface SidebarBranch {
     name: string;
@@ -29,9 +29,8 @@ const props = withDefaults(
         branch?: SidebarBranch;
         user?: { name: string; role: string; roleKey?: string };
         canSwitch?: boolean;
-        notifications?: { route: string; count?: number };
     }>(),
-    { current: undefined, collapsed: false, drawer: false, branch: undefined, user: undefined, canSwitch: false, notifications: undefined },
+    { current: undefined, collapsed: false, drawer: false, branch: undefined, user: undefined, canSwitch: false },
 );
 
 const emit = defineEmits<{ toggle: []; navigate: []; signOut: []; switchUser: []; help: [] }>();
@@ -172,18 +171,6 @@ const linkBase =
         </div>
 
         <div class="mt-auto flex flex-col gap-0.5 pt-3">
-            <UTooltip v-if="notifications" text="Notifications" :disabled="!collapsed" :content="{ side: 'right' }">
-                <Link
-                    :href="notifications.route"
-                    :class="[linkBase, 'h-[34px] border-transparent font-medium text-default hover:bg-elevated', collapsed ? 'justify-center' : '']"
-                    :aria-label="collapsed ? 'Notifications' : undefined"
-                    @click="emit('navigate')"
-                >
-                    <UIcon name="i-solar-bell-bold-duotone" class="size-[17px] shrink-0 text-muted" aria-hidden="true" />
-                    <span v-if="!collapsed">Notifications</span>
-                    <span v-if="notifications.count && !collapsed" class="ms-auto rounded-full bg-bad px-1.5 text-[10.5px] leading-[17px] font-semibold text-on-primary">{{ notifications.count }}</span>
-                </Link>
-            </UTooltip>
             <UTooltip text="Help" :disabled="!collapsed" :content="{ side: 'right' }">
                 <button
                     type="button"
