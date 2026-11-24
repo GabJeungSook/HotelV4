@@ -40,7 +40,7 @@ final class DayFigures
 {
     public const ROOM_KINDS = [LineKind::Room, LineKind::Extension, LineKind::TransferDifference];
 
-    public const OTHER_KINDS = [LineKind::FoodDrink, LineKind::Amenity, LineKind::Damage, LineKind::ForfeitedDeposit];
+    public const OTHER_KINDS = [LineKind::FoodDrink, LineKind::Amenity, LineKind::Damage, LineKind::EventHall, LineKind::ForfeitedDeposit];
 
     public const PRODUCT_KINDS = [LineKind::FoodDrink, LineKind::Amenity, LineKind::Damage];
 

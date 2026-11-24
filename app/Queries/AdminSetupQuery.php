@@ -19,6 +19,8 @@ use App\Models\Discount;
 use App\Models\ExpenseCategory;
 use App\Models\ExtensionRate;
 use App\Models\Floor;
+use App\Models\Hall;
+use App\Models\HallPackage;
 use App\Models\Product;
 use App\Models\ProductIngredient;
 use App\Models\Rate;
@@ -167,6 +169,34 @@ final class AdminSetupQuery
     }
 
     /**
+     * Event halls and their packages (DATABASE_SCHEMA §4.14): the Setup → Halls screen.
+     *
+     * @return array<string, mixed>
+     */
+    public function halls(Branch $branch): array
+    {
+        return [
+            'halls' => Hall::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->orderBy('name')->get()
+                ->map(fn (Hall $h): array => [
+                    'id' => $h->id,
+                    'name' => $h->name,
+                    'capacity' => $h->capacity,
+                    'base_rate_amount' => $h->base_rate_amount?->centavos(),
+                    'is_active' => $h->is_active,
+                ])->values()->all(),
+            'packages' => HallPackage::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->orderBy('name')->get()
+                ->map(fn (HallPackage $p): array => [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'kind' => $p->kind->value,
+                    'pricing' => $p->pricing->value,
+                    'unit_amount' => $p->unit_amount?->centavos(),
+                    'is_active' => $p->is_active,
+                ])->values()->all(),
+        ];
+    }
+
+    /**
      * Branch settings (46): every group, the shifts and the reason lists.
      *
      * @return array<string, mixed>
@@ -212,6 +242,7 @@ final class AdminSetupQuery
                 'kiosk_hold_minutes' => (int) $branch->kiosk_hold_minutes,
                 'reservations_enabled' => $branch->reservations_enabled,
                 'reservation_release_minutes' => (int) $branch->reservation_release_minutes,
+                'event_hall_enabled' => $branch->event_hall_enabled,
                 'pos_enabled' => $branch->pos_enabled,
                 'housekeeping_enabled' => $branch->housekeeping_enabled,
                 'cleaning_deadline_minutes' => (int) $branch->cleaning_deadline_minutes,

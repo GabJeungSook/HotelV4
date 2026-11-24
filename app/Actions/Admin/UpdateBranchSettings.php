@@ -38,7 +38,7 @@ final class UpdateBranchSettings
         'money' => ['deposit_enabled', 'deposit_name', 'deposit_amount', 'lost_key_amount', 'lost_remote_amount', 'payment_methods'],
         'shifts' => ['max_frontdesks_per_shift', 'shift_overdue_warn_minutes', 'shift_stale_block_minutes'],
         'modules' => [
-            'kiosk_enabled', 'kiosk_hold_minutes', 'reservations_enabled', 'reservation_release_minutes',
+            'kiosk_enabled', 'kiosk_hold_minutes', 'reservations_enabled', 'reservation_release_minutes', 'event_hall_enabled',
             'pos_enabled', 'housekeeping_enabled', 'cleaning_deadline_minutes', 'cleaning_target_minutes', 'cleaning_urgent_minutes',
         ],
         'vat' => ['vat_enabled', 'vat_rate_percent', 'tin', 'registered_name'],

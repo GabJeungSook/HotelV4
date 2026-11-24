@@ -83,7 +83,7 @@ it('has the 37 shift report sales and the three roll-forwards balancing', functi
     expect($t['sales']['room'] + $t['sales']['discount'])->toBe(1435000)
         ->and(array_intersect_key($t['sales'], array_flip(['extension', 'transfer_difference', 'food_drink', 'amenity', 'damage', 'forfeited_deposit'])))
         ->toEqual(['extension' => 190000, 'transfer_difference' => 15000, 'food_drink' => 138000, 'amenity' => 18000, 'damage' => 20000, 'forfeited_deposit' => 0])
-        ->and($t['sales_counts'])->toEqual(['room' => 27, 'extension' => 7, 'transfer_difference' => 1, 'food_drink' => 41, 'amenity' => 6, 'damage' => 2]);
+        ->and($t['sales_counts'])->toEqual(['room' => 27, 'extension' => 7, 'transfer_difference' => 1, 'food_drink' => 41, 'amenity' => 6, 'damage' => 2, 'event_hall' => 0]);
 
     $g = $t['guests'];
     expect([$g['forwarded_in'], $g['checked_in'], $g['checked_out'], $g['forwarded_out']])->toBe([19, 27, 23, 23])

@@ -86,6 +86,7 @@ class HandleInertiaRequests extends Middleware
                 'reservations_enabled' => $branch->reservations_enabled,
                 'pos_enabled' => $branch->pos_enabled,
                 'housekeeping_enabled' => $branch->housekeeping_enabled,
+                'event_hall_enabled' => $branch->event_hall_enabled,
             ],
         ];
     }

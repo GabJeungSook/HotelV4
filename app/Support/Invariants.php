@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Enums\HallBookingStatus;
 use App\Enums\LineKind;
 use App\Enums\PaymentKind;
 use App\Enums\RoomStatus;
@@ -34,7 +35,38 @@ final class Invariants
             ...self::closedShiftTotalsHold(),
             ...self::businessDaysAgree(),
             ...self::forwardedChainHolds(),
+            ...self::completedHallBookingsAreSettled(),
         ];
+    }
+
+    /**
+     * 9. Every completed hall booking has balance 0 and deposit held 0 (the hall equivalent of #4).
+     *
+     * @return list<string>
+     */
+    public static function completedHallBookingsAreSettled(): array
+    {
+        $rows = DB::table('hall_bookings')
+            ->where('hall_bookings.status', HallBookingStatus::Completed->value)
+            ->selectRaw('hall_bookings.code,
+                COALESCE((SELECT SUM(fl.amount) FROM folio_lines fl WHERE fl.hall_booking_id = hall_bookings.id), 0)
+              - COALESCE((SELECT SUM(pa.amount) FROM payment_allocations pa JOIN folio_lines f2 ON f2.id = pa.folio_line_id WHERE f2.hall_booking_id = hall_bookings.id), 0) AS balance,
+                COALESCE((SELECT SUM(CASE WHEN p.kind = ? THEN -p.amount ELSE p.amount END) FROM payments p WHERE p.hall_booking_id = hall_bookings.id AND p.deposit_type IS NOT NULL), 0) AS held', [PaymentKind::DepositApplied->value])
+            ->get();
+
+        $problems = [];
+
+        foreach ($rows as $row) {
+            if ((int) $row->balance !== 0) {
+                $problems[] = "9. Hall booking {$row->code} is completed with a balance of {$row->balance}.";
+            }
+
+            if ((int) $row->held !== 0) {
+                $problems[] = "9. Hall booking {$row->code} is completed with a deposit of {$row->held} still held.";
+            }
+        }
+
+        return $problems;
     }
 
     /**

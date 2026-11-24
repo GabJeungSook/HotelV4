@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\BoardController;
+use App\Http\Controllers\HallBookingController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ShiftController;
@@ -61,6 +62,15 @@ Route::middleware(['auth', 'pin.set', 'role:frontdesk,supervisor'])->group(funct
             Route::get('/reservations/{stay}', [ReservationController::class, 'show'])->whereNumber('stay')->name('reservations.show');
             Route::post('/reservations/{stay}/cancel', [ReservationController::class, 'cancel'])->whereNumber('stay')->name('reservations.cancel');
             Route::post('/reservations/{stay}/refund', [ReservationController::class, 'refund'])->whereNumber('stay')->name('reservations.refund');
+        });
+
+        // Function halls (DATABASE_SCHEMA §4.14): book a hall, take the deposit, complete or cancel.
+        Route::middleware('module:event_hall_enabled')->group(function (): void {
+            Route::get('/halls', [HallBookingController::class, 'index'])->name('halls.index');
+            Route::post('/halls', [HallBookingController::class, 'store'])->name('halls.store');
+            Route::post('/halls/{booking}/deposit', [HallBookingController::class, 'deposit'])->whereNumber('booking')->name('halls.deposit');
+            Route::post('/halls/{booking}/complete', [HallBookingController::class, 'complete'])->whereNumber('booking')->name('halls.complete');
+            Route::post('/halls/{booking}/cancel', [HallBookingController::class, 'cancel'])->whereNumber('booking')->name('halls.cancel');
         });
 
         // POS (19) and stock (20), APP_FLOW §4.13–4.14: only where the branch sells products.

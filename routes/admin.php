@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\HallController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RateController;
 use App\Http\Controllers\Admin\RoomController;
@@ -48,4 +49,13 @@ Route::middleware(['auth', 'pin.set', 'role:admin,owner', EnsureBranchOpened::cl
     Route::get('/products', [ProductController::class, 'index'])->name('admin.products');
     Route::post('/products', [ProductController::class, 'store'])->name('admin.products.store');
     Route::put('/products/{product}', [ProductController::class, 'update'])->whereNumber('product')->name('admin.products.update');
+
+    // Event halls and packages (DATABASE_SCHEMA §4.14), when the branch has the module on.
+    Route::middleware('module:event_hall_enabled')->group(function (): void {
+        Route::get('/halls', [HallController::class, 'index'])->name('admin.halls');
+        Route::post('/halls', [HallController::class, 'store'])->name('admin.halls.store');
+        Route::put('/halls/{hall}', [HallController::class, 'update'])->whereNumber('hall')->name('admin.halls.update');
+        Route::post('/hall-packages', [HallController::class, 'storePackage'])->name('admin.hall-packages.store');
+        Route::put('/hall-packages/{package}', [HallController::class, 'updatePackage'])->whereNumber('package')->name('admin.hall-packages.update');
+    });
 });

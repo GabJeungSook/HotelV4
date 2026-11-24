@@ -225,6 +225,17 @@ Screens built from shared components without their own mockup frame (listed in A
 | Stale shift | A shift more than `shift_stale_block_minutes` (default 240) past its defined end refuses new payments and charges (`ShiftStale`) until it is closed. The warning bar (54) appears from `shift_overdue_warn_minutes`. |
 | Kept from Homi's own design | One shared drawer per shift, the count at every shift change, and the incoming front desk accepting the drawer by PIN. Euphoria's remit-everything, one-close-per-day model is not used: a hotel runs 24 hours and holds guest deposits in the drawer. |
 
+### 4.13 Event halls (`HallLedger`, DATABASE_SCHEMA §4.17)
+
+A hall booking is a **third ledger owner** (`folio_lines.hall_booking_id` / `payments.hall_booking_id`), so its money flows through the shift ledger and reports unchanged. `HallLedger` mirrors `StayLedger` but writes `hall_booking_id`; the room money path is untouched.
+
+| Rule | Detail |
+|---|---|
+| Pricing | A booking's quote is its `hall_booking_items`: per-pax lines are `pax × unit`, flat lines are `quantity × unit`. Amounts are negotiated but never ₱0; integer centavos via `Money`. No `PricingService` (halls aren't room rates). |
+| Availability | One `ReserveHall` action, one transaction, lock order shift → hall → booking. The slot `[start_at, end_at)` must not overlap another `reserved`/`completed` booking of the hall (`HallQuery::overlaps`, app-level like room reservations); end must be after start. |
+| Money | Reserve takes a guest `deposit_in` on the open shift. Complete posts one `event_hall` folio line per item, applies the held deposit (`deposit_applied`) and collects the balance; a remaining balance refuses (`BalanceNotZero`). Cancel refunds (`deposit_refund`) or forfeits (`forfeited_deposit` line) the deposit with a supervisor PIN (`approvals.action = 'cancel_hall_booking'`). |
+| Reports | Hall revenue is an `event_hall` sales line in the shift/Z/daily reports and counts in `DayFigures::OTHER_KINDS` so gross = room + other holds. Invariant #9 (`completedHallBookingsAreSettled`) checks a completed booking has balance 0 and 0 deposit held. |
+
 ## 5. Data requirements
 
 | Topic | Requirement |

@@ -440,6 +440,16 @@ Each requirement is testable and cites its screen. Formulas are in [TRD](TRD.md)
 | FR18.4 | A signed-in user sees "Dashboard" instead of "Staff sign in"; it opens their role home. | 59 |
 | FR18.5 | The page shows no availability, takes no bookings and shows no staff, guest or sales data. | 59 |
 
+### F19 Event / function halls
+
+| ID | Requirement | Screens |
+|---|---|---|
+| FR19.1 | A branch can switch on **Event halls** in Settings (off by default). When off, the module is hidden from the menus and its routes refuse. | 46 |
+| FR19.2 | Admin manages halls (name, capacity, a reference rate, active) and a package catalog — venue, food, host or other items, priced per pax or flat — in Setup → Event halls. | 46 |
+| FR19.3 | Front desk books a hall for a **time slot** (date, start and end time), for a customer and a headcount, built from a quote of per-pax and flat items (packages or custom lines); amounts are negotiable but never ₱0. A booking that **overlaps** another live booking of the same hall is refused. | — |
+| FR19.4 | A deposit may be taken when booking and topped up later; the money lands in the open shift's cash. **Completing** a booking posts its items as event-hall revenue, applies the deposit and collects the balance. **Cancelling** (with a supervisor PIN) refunds or forfeits the deposit. | — |
+| FR19.5 | Hall revenue and its cash appear in the shift, Z and daily reports as an **Event hall** line, in the shift's cash count, and in the dashboards' sales — like any other sale. Balance and deposits are derived from the ledgers, never stored. | 37, 37b, 38 |
+
 ## 7. Non-functional requirements
 
 Detail lives in the TRD; this table states the targets the product is accepted against.

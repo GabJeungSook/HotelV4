@@ -109,13 +109,13 @@ final class ReportService
         $ofKind = fn (LineKind $kind): Collection => $lines->where('kind', $kind);
 
         $sales = [];
-        foreach (['room', 'extension', 'transfer_difference', 'food_drink', 'amenity', 'damage', 'forfeited_deposit', 'discount'] as $kind) {
+        foreach (['room', 'extension', 'transfer_difference', 'food_drink', 'amenity', 'damage', 'event_hall', 'forfeited_deposit', 'discount'] as $kind) {
             $sales[$kind] = $sum($ofKind(LineKind::from($kind)));
         }
         $sales['total'] = $sum($lines);
 
         $counts = [];
-        foreach (['room', 'extension', 'transfer_difference', 'food_drink', 'amenity', 'damage'] as $kind) {
+        foreach (['room', 'extension', 'transfer_difference', 'food_drink', 'amenity', 'damage', 'event_hall'] as $kind) {
             $counts[$kind] = $ofKind(LineKind::from($kind))->whereNull('reversal_of_id')->reject(fn (FolioLine $l): bool => $lines->contains('reversal_of_id', $l->id))->count();
         }
 

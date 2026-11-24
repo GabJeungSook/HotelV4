@@ -151,11 +151,11 @@ trait ShiftReaders
         $checks = [];
 
         $sales = [];
-        foreach (['room' => 'Room', 'extension' => 'Extension', 'transfer_difference' => 'Transfer difference', 'food_drink' => 'Food & drinks', 'amenity' => 'Amenities', 'damage' => 'Damages', 'forfeited_deposit' => 'Forfeited deposits'] as $kind => $label) {
+        foreach (['room' => 'Room', 'extension' => 'Extension', 'transfer_difference' => 'Transfer difference', 'food_drink' => 'Food & drinks', 'amenity' => 'Amenities', 'damage' => 'Damages', 'event_hall' => 'Event hall', 'forfeited_deposit' => 'Forfeited deposits'] as $kind => $label) {
             // Room is shown net of its discounts (37, 37c); the discounts are named on 37b.
             $amount = $kind === 'room' ? $i('sales.room') + $i('sales.discount') : $i("sales.{$kind}");
 
-            if ($kind === 'forfeited_deposit' && $amount === 0) {
+            if (in_array($kind, ['event_hall', 'forfeited_deposit'], true) && $amount === 0) {
                 continue;
             }
 

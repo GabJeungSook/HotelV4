@@ -60,6 +60,7 @@ final class BranchSettingsRequest extends FormRequest
             'kiosk_hold_minutes' => ['sometimes', 'required', 'integer', 'between:1,120'],
             'reservations_enabled' => $flag,
             'reservation_release_minutes' => $minutes,
+            'event_hall_enabled' => $flag,
             'pos_enabled' => $flag,
             'housekeeping_enabled' => $flag,
             'cleaning_deadline_minutes' => $minutes,

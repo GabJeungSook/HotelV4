@@ -19,6 +19,7 @@ enum ApprovalAction: string
     case ChangeShiftPeriod = 'change_shift_period';
     case ApproveVariance = 'approve_variance';
     case ReasonRequiresManager = 'reason_requires_manager';
+    case CancelHallBooking = 'cancel_hall_booking';
 
     public function label(): string
     {
@@ -35,6 +36,7 @@ enum ApprovalAction: string
             self::ChangeShiftPeriod => 'Change shift period',
             self::ApproveVariance => 'Approve variance',
             self::ReasonRequiresManager => 'Reason needs a manager',
+            self::CancelHallBooking => 'Cancel hall booking',
         };
     }
 }

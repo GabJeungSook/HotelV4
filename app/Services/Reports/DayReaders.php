@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\DB;
 trait DayReaders
 {
     /** The category rows of 38 (and 37): room is net of its discounts. */
-    private const DAILY_ROWS = ['room' => 'Room', 'extension' => 'Extension', 'transfer_difference' => 'Transfer difference', 'food_drink' => 'Food & drinks', 'amenity' => 'Amenities', 'damage' => 'Damages', 'forfeited_deposit' => 'Forfeited deposits'];
+    private const DAILY_ROWS = ['room' => 'Room', 'extension' => 'Extension', 'transfer_difference' => 'Transfer difference', 'food_drink' => 'Food & drinks', 'amenity' => 'Amenities', 'damage' => 'Damages', 'event_hall' => 'Event hall', 'forfeited_deposit' => 'Forfeited deposits'];
 
     /**
      * Daily sales (38) for a day (one column per shift), a week (one per day) or a month (one per

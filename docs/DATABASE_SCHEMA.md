@@ -1121,6 +1121,81 @@ CREATE TABLE daily_report_lines (
 - A ledger model's `created` hook marks `summary_days.dirty_at` for the row's business date; today is always treated as dirty.
 - Closed-shift reports (37, 37b, 37c, 38, 38b) do **not** read these tables. They read `shift_sessions.totals`, `shift_forwarded_stays` and `day_closings`. Summary tables are for dashboards and stats only.
 
+### 4.17 Event halls (version 1.2)
+
+The function-hall module, gated by `branches.event_hall_enabled`. A **hall booking is a third money-ledger owner**: `folio_lines` and `payments` gain a nullable `hall_booking_id`, their owner CHECK becomes `stay_id IS NOT NULL OR pos_order_id IS NOT NULL OR hall_booking_id IS NOT NULL`, and `folio_lines.kind` gains `event_hall`. Front desk books; admin manages halls and packages.
+
+```sql
+CREATE TABLE halls (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  branch_id BIGINT UNSIGNED NOT NULL,
+  name VARCHAR(60) NOT NULL,
+  capacity INT UNSIGNED NOT NULL DEFAULT 0,
+  base_rate_amount BIGINT NULL,                 -- a reference rate only; bookings are quoted from items
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
+  UNIQUE KEY halls_branch_name_unique (branch_id, name),
+  CONSTRAINT halls_branch_fk FOREIGN KEY (branch_id) REFERENCES branches(id),
+  CONSTRAINT halls_rate_chk CHECK (base_rate_amount IS NULL OR base_rate_amount > 0)
+);
+
+CREATE TABLE hall_packages (                    -- the customizable catalog a booking is built from
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  branch_id BIGINT UNSIGNED NOT NULL,
+  name VARCHAR(60) NOT NULL,
+  kind ENUM('venue','food','host','other') NOT NULL,
+  pricing ENUM('per_pax','flat') NOT NULL,
+  unit_amount BIGINT NOT NULL,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
+  UNIQUE KEY hall_packages_branch_name_unique (branch_id, name),
+  CONSTRAINT hall_packages_branch_fk FOREIGN KEY (branch_id) REFERENCES branches(id),
+  CONSTRAINT hall_packages_amount_chk CHECK (unit_amount > 0)
+);
+
+CREATE TABLE hall_bookings (                     -- reserved → completed / cancelled; overlap barred in app code
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  branch_id BIGINT UNSIGNED NOT NULL,
+  hall_id BIGINT UNSIGNED NOT NULL,
+  code VARCHAR(24) NOT NULL,
+  status ENUM('reserved','completed','cancelled') NOT NULL DEFAULT 'reserved',
+  customer_name VARCHAR(120) NOT NULL,
+  customer_mobile VARCHAR(20) NULL,
+  event_date DATE NOT NULL,
+  start_at TIMESTAMP NOT NULL, end_at TIMESTAMP NOT NULL,   -- UTC; a time slot
+  pax INT UNSIGNED NOT NULL DEFAULT 0,
+  quoted_amount BIGINT NOT NULL DEFAULT 0,       -- Σ item amounts; balance/deposit derived from the ledgers
+  reserve_shift_id BIGINT UNSIGNED NULL, complete_shift_id BIGINT UNSIGNED NULL,
+  cancel_reason VARCHAR(255) NULL,
+  created_by BIGINT UNSIGNED NOT NULL,
+  idempotency_key VARCHAR(64) NULL,
+  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
+  UNIQUE KEY hall_bookings_idempotency_unique (idempotency_key),
+  -- FKs to branches, halls, shift_sessions (×2), users
+  CONSTRAINT hall_bookings_time_chk CHECK (end_at > start_at),
+  CONSTRAINT hall_bookings_cancel_chk CHECK ((status = 'cancelled') = (cancel_reason IS NOT NULL)),
+  CONSTRAINT hall_bookings_complete_chk CHECK (status <> 'completed' OR complete_shift_id IS NOT NULL)
+);
+
+CREATE TABLE hall_booking_items (                -- the quote lines; editable config while reserved
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  branch_id BIGINT UNSIGNED NOT NULL,
+  hall_booking_id BIGINT UNSIGNED NOT NULL,
+  hall_package_id BIGINT UNSIGNED NULL,          -- NULL for a custom line
+  label VARCHAR(120) NOT NULL,
+  pricing ENUM('per_pax','flat') NOT NULL,
+  quantity INT NOT NULL DEFAULT 1,               -- pax for per_pax, else a count
+  unit_amount BIGINT NOT NULL, amount BIGINT NOT NULL,
+  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
+  -- FKs to branches, hall_bookings (cascade), hall_packages
+  CONSTRAINT hall_booking_items_amount_chk CHECK (amount = quantity * unit_amount AND quantity > 0 AND unit_amount > 0)
+);
+```
+
+- **Overlap is enforced in app code** (`HallQuery::overlaps`, like room reservations), not by an index — future, non-overlapping slots can't use a unique.
+- Lifecycle (§8.14): **reserve** writes the booking + items and a guest `deposit_in`; **complete** posts one `event_hall` folio line per item, applies the held deposit (`deposit_applied`) and collects the balance; **cancel** refunds (`deposit_refund`) or forfeits (a `forfeited_deposit` line) the deposit with a supervisor PIN. Invariant #9 checks a completed booking is settled.
+- Hall revenue reaches reports via `shift_session_id` + the `event_hall` kind, like any other sale; `DayFigures::OTHER_KINDS` includes it so gross = room + other stays exact.
+
 ## 5. Seed data
 
 `DatabaseSeeder` runs these in order. All sample data is made up.
@@ -1183,6 +1258,10 @@ File names use the prefix `2026_11_12_` plus a running number so they sort in de
 | 2026_11_24_000001 | `add_sellable_to_products_table` | `products.sellable`; relaxes `products_price_chk` so a non-sold supply may have price 0 (Gab, 24 Nov 2026) |
 | 2026_11_24_000002 | `create_product_ingredients_table` | `product_ingredients` — the meal recipe (bill of materials) |
 | 2026_11_24_000003 | `add_floor_and_room_rates` | `rates.floor_id`/`room_id` (nullable `room_type_id`, scope CHECK, functional unique); `branches.floor_room_rates_enabled` (Gab, 24 Nov 2026) |
+| 2026_11_24_000004 | `create_halls_table` | `halls`, `hall_packages` — event-hall module config (Gab, 24 Nov 2026) |
+| 2026_11_24_000005 | `create_hall_bookings_table` | `hall_bookings`, `hall_booking_items` — a booking and its quote lines |
+| 2026_11_24_000006 | `add_hall_booking_to_ledger` | `folio_lines`/`payments` gain `hall_booking_id` + relaxed owner CHECK; `folio_lines.kind` adds `event_hall`; `branches.event_hall_enabled` |
+| 2026_11_24_000007 | `add_cancel_hall_booking_approval` | `approvals.action` adds `cancel_hall_booking` |
 
 Generated columns and CHECK constraints are added with `DB::statement()` inside the migration, because the schema builder cannot express them.
 

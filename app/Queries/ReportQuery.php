@@ -202,7 +202,8 @@ final class ReportQuery
         [$name, $arg] = array_pad(explode(':', $figure, 2), 2, null);
         $lineKinds = [
             'room' => [LineKind::Room, LineKind::Discount], 'extension' => [LineKind::Extension], 'transfer_difference' => [LineKind::TransferDifference],
-            'food_drink' => [LineKind::FoodDrink], 'amenity' => [LineKind::Amenity], 'damage' => [LineKind::Damage], 'forfeited_deposit' => [LineKind::ForfeitedDeposit],
+            'food_drink' => [LineKind::FoodDrink], 'amenity' => [LineKind::Amenity], 'damage' => [LineKind::Damage],
+            'event_hall' => [LineKind::EventHall], 'forfeited_deposit' => [LineKind::ForfeitedDeposit],
         ];
 
         $result = match ($name) {

@@ -45,6 +45,7 @@ interface Settings {
     kiosk_hold_minutes: number;
     reservations_enabled: boolean;
     reservation_release_minutes: number;
+    event_hall_enabled: boolean;
     pos_enabled: boolean;
     housekeeping_enabled: boolean;
     cleaning_deadline_minutes: number;
@@ -104,6 +105,7 @@ const GROUP_KEYS: Record<Group, (keyof Settings)[]> = {
         'kiosk_hold_minutes',
         'reservations_enabled',
         'reservation_release_minutes',
+        'event_hall_enabled',
         'pos_enabled',
         'housekeeping_enabled',
         'cleaning_deadline_minutes',
@@ -430,6 +432,7 @@ function saveReason(): void {
                         <UFormField v-if="form.reservations_enabled" label="Release a no-show after (minutes)" :error="form.errors.reservation_release_minutes">
                             <UInput v-model.number="form.reservation_release_minutes" type="number" :min="1" class="w-28" />
                         </UFormField>
+                        <USwitch v-model="form.event_hall_enabled" label="Event halls" description="Book function halls for events, with deposits and packages. Manage halls in Setup → Event halls." />
                         <USwitch v-model="form.pos_enabled" label="POS and stock" />
                         <USwitch v-model="form.housekeeping_enabled" label="Housekeeping" description="Off: a room goes straight to Available at check-out." />
                         <div v-if="form.housekeeping_enabled" class="grid grid-cols-3 gap-3">

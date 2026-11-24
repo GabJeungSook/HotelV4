@@ -255,10 +255,10 @@ final class ZPaper
         $i = fn (string $path): int => Totals::int($t, $path);
 
         $sales = [];
-        foreach (['room' => 'Room', 'extension' => 'Extension', 'transfer_difference' => 'Transfer diff.', 'food_drink' => 'Food & drinks', 'amenity' => 'Amenities', 'damage' => 'Damages', 'forfeited_deposit' => 'Forfeited dep.'] as $key => $label) {
+        foreach (['room' => 'Room', 'extension' => 'Extension', 'transfer_difference' => 'Transfer diff.', 'food_drink' => 'Food & drinks', 'amenity' => 'Amenities', 'damage' => 'Damages', 'event_hall' => 'Event hall', 'forfeited_deposit' => 'Forfeited dep.'] as $key => $label) {
             $amount = $key === 'room' ? $i('sales.room') + $i('sales.discount') : $i("sales.{$key}");
 
-            if ($amount !== 0 || $key !== 'forfeited_deposit') {
+            if ($amount !== 0 || ! in_array($key, ['event_hall', 'forfeited_deposit'], true)) {
                 $sales[] = ['label' => $label, 'amount' => $amount];
             }
         }

@@ -158,7 +158,7 @@ trait ZTabs
             LineKind::Room, LineKind::Discount => 'room',
             LineKind::Extension => 'extend',
             LineKind::TransferDifference => 'transfer',
-            LineKind::ForfeitedDeposit => 'misc',
+            LineKind::EventHall, LineKind::ForfeitedDeposit => 'misc',
             default => $line->product?->report_group->value ?? 'misc',
         };
     }

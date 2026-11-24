@@ -24,7 +24,7 @@ final class Navigation
     private const FRONT = [Role::Frontdesk, Role::Supervisor];
 
     /** Pages of one branch: for an owner, shown only once a branch is opened. */
-    private const OPENED_BRANCH_ONLY = ['dashboard', 'attention', 'rooms', 'rates', 'products', 'users', 'settings'];
+    private const OPENED_BRANCH_ONLY = ['dashboard', 'attention', 'rooms', 'rates', 'products', 'admin-halls', 'users', 'settings'];
 
     private const BACK = [Role::Admin, Role::Backoffice, Role::Supervisor, Role::Owner];
 
@@ -51,6 +51,7 @@ final class Navigation
                 ['key' => 'reservations', 'label' => 'Reservations', 'route' => 'reservations.index', 'icon' => 'i-solar-calendar-bold-duotone', 'roles' => self::FRONT, 'module' => 'reservations_enabled', 'subtitle' => 'Bookings and their arrival times'],
                 ['key' => 'pos', 'label' => 'Point of sale', 'route' => 'pos.index', 'icon' => 'i-solar-cart-large-bold-duotone', 'roles' => self::FRONT, 'module' => 'pos_enabled', 'subtitle' => 'Sell to a room or for cash'],
                 ['key' => 'stock', 'label' => 'Stock', 'route' => 'stock.index', 'icon' => 'i-solar-box-bold-duotone', 'roles' => self::FRONT, 'module' => 'pos_enabled', 'subtitle' => 'Counts, deliveries and adjustments'],
+                ['key' => 'halls', 'label' => 'Function halls', 'route' => 'halls.index', 'icon' => 'i-solar-confetti-bold-duotone', 'roles' => self::FRONT, 'module' => 'event_hall_enabled', 'subtitle' => 'Book an event hall and take the deposit'],
             ]],
             ['layout' => 'frontdesk', 'heading' => 'Shift', 'items' => [
                 ['key' => 'shift', 'label' => 'Shift cash', 'route' => 'shift.show', 'icon' => 'i-solar-banknote-2-bold-duotone', 'roles' => self::FRONT],
@@ -67,6 +68,7 @@ final class Navigation
                 ['key' => 'rooms', 'label' => 'Rooms', 'route' => 'admin.rooms', 'icon' => 'i-solar-bed-bold-duotone', 'roles' => [Role::Admin, Role::Owner]],
                 ['key' => 'rates', 'label' => 'Rates', 'route' => 'admin.rates', 'icon' => 'i-solar-banknote-2-bold-duotone', 'roles' => [Role::Admin, Role::Owner]],
                 ['key' => 'products', 'label' => 'Products', 'route' => 'admin.products', 'icon' => 'i-solar-box-bold-duotone', 'roles' => [Role::Admin, Role::Owner]],
+                ['key' => 'admin-halls', 'label' => 'Event halls', 'route' => 'admin.halls', 'icon' => 'i-solar-confetti-bold-duotone', 'roles' => [Role::Admin, Role::Owner], 'module' => 'event_hall_enabled'],
                 ['key' => 'users', 'label' => 'Users', 'route' => 'admin.users', 'icon' => 'i-solar-user-bold-duotone', 'roles' => [Role::Admin, Role::Owner]],
                 ['key' => 'settings', 'label' => 'Settings', 'route' => 'admin.settings', 'icon' => 'i-solar-settings-bold-duotone', 'roles' => [Role::Admin, Role::Owner]],
             ]],
