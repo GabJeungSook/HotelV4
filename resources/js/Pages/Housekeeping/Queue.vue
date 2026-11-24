@@ -54,9 +54,16 @@ function start(task: Task): void {
     <PhoneLayout :title="`To clean · ${floors}`" :subtitle="subtitle" current="queue">
         <UAlert v-if="error" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="error" />
 
-        <article v-if="current" class="rounded-[10px] border border-default bg-violet-50 p-3" data-current-task>
-            <b class="text-xl leading-7 font-semibold text-highlighted tabular">Cleaning Room {{ current.room }}</b>
-            <p v-if="current.started_at" class="text-[13px] leading-[18px] text-muted">Started {{ formatDateTime(current.started_at, 'time') }} · finish it before you start another room</p>
+        <article v-if="current" class="rounded-[10px] border border-violet-line bg-violet-50 p-3.5" data-current-task>
+            <div class="flex items-center gap-3">
+                <span class="flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-violet-50 text-violet">
+                    <UIcon name="i-solar-broom-bold-duotone" class="size-6" />
+                </span>
+                <div class="min-w-0 flex-1">
+                    <b class="block text-xl leading-6 font-semibold text-highlighted tabular">Cleaning Room {{ current.room }}</b>
+                    <p v-if="current.started_at" class="text-[13px] leading-[18px] text-violet">Started {{ formatDateTime(current.started_at, 'time') }} · finish it before starting another</p>
+                </div>
+            </div>
             <UButton class="mt-3 h-12 justify-center" size="xl" block :to="route('housekeeping.show', current.id)" :label="`Back to Room ${current.room}`" />
         </article>
 

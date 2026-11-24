@@ -30,9 +30,10 @@ const subtitle = computed(() => {
 
 <template>
     <PhoneLayout title="My cleans today" :subtitle="subtitle" current="history">
-        <div class="grid grid-cols-2 gap-3">
-            <StatCard label="Average" :value="average_minutes === null ? '—' : `${average_minutes} min`" />
-            <StatCard label="Late" :value="String(late)" :tone="late > 0 ? 'bad' : undefined" />
+        <div class="grid grid-cols-3 gap-3">
+            <StatCard label="Rooms done" :value="String(count)" tone="primary" />
+            <StatCard label="Average" :value="average_minutes === null ? '—' : String(average_minutes)" :sub="average_minutes === null ? undefined : 'minutes'" />
+            <StatCard label="Late" :value="String(late)" :tone="late > 0 ? 'bad' : 'default'" />
         </div>
 
         <section class="overflow-x-auto rounded-[10px] border border-default bg-default p-4">

@@ -21,8 +21,8 @@ const over = computed(() => seconds.value > props.targetMinutes * 60);
             {{ formatDuration(seconds, 'timer') }}
         </div>
         <p class="mb-3 text-muted">Target: {{ targetMinutes }} minutes</p>
-        <div class="h-2 overflow-hidden rounded-full bg-grey-50" role="progressbar" :aria-valuenow="percent" aria-valuemin="0" aria-valuemax="100" aria-label="Time against the target">
-            <div class="h-full rounded-full bg-violet transition-[width]" :style="{ width: `${percent}%` }" />
+        <div class="h-2.5 overflow-hidden rounded-full bg-grey-50" role="progressbar" :aria-valuenow="percent" aria-valuemin="0" aria-valuemax="100" aria-label="Time against the target">
+            <div class="h-full rounded-full transition-[width]" :class="over ? 'bg-warn' : 'bg-violet'" :style="{ width: `${percent}%` }" />
         </div>
     </div>
 </template>

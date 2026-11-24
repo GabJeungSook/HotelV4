@@ -23,7 +23,7 @@ describe('TaskCard', () => {
         const next = mount(TaskCard, { props: { room: '108', waitingMinutes: 12, nextInLine: true }, global: { plugins: [ui] } });
         const later = mount(TaskCard, { props: { room: '221', waitingMinutes: 5 }, global: { plugins: [ui] } });
 
-        expect(next.classes()).toContain('opacity-55');
+        expect(next.classes()).toContain('opacity-60');
         expect(next.text()).toContain('12 m waiting');
         expect(next.get('button').attributes('disabled')).toBeDefined();
         expect(next.get('button').text()).toBe('Next in line');

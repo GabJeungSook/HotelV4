@@ -171,3 +171,52 @@ it('marks a room urgent after cleaning_urgent_minutes of waiting', function (): 
 
     expect([$row['urgent'], $row['tone'], $row['waiting_minutes']])->toBe([true, 'bad', 130]);
 });
+
+// Two roomboys on the same floor both see Room 205 at the top. They cannot both clean it: the row
+// lock in StartCleaning serialises them and the status check rejects the loser.
+it('does not let two roomboys clean the same room — the first wins', function (): void {
+    $task = ($this->leave)('205'); // floor 2, both are assigned to it
+    ($this->online)($this->dodong, $this->joy); // heartbeat after the check-out advanced the clock
+
+    ($this->start)($this->dodong, $task);
+
+    expect(fn () => ($this->start)($this->joy, $task))->toThrow(ActionRefused::class, 'no longer waiting');
+    $task->refresh();
+    expect($task->cleaned_by)->toBe($this->dodong->id)
+        ->and($task->status)->toBe(CleaningStatus::InProgress)
+        ->and(Hotel::room('205')->status)->toBe(RoomStatus::Cleaning);
+});
+
+// With several rooms waiting on one floor, the queue decides the order: oldest first, only the first
+// N startable (N = roomboys online). Once one roomboy takes the top room it leaves the queue, so the
+// other takes the next — they never collide and never skip ahead.
+it('hands the next room to the other roomboy once the first is taken', function (): void {
+    $r1 = ($this->leave)('205');
+    $r2 = ($this->leave)('206');
+    $r3 = ($this->leave)('207');
+    ($this->online)($this->dodong, $this->joy); // heartbeat after the check-outs advanced the clock
+
+    expect(app(CleaningQuery::class)->startableIds($this->dodong))->toBe([$r1->id, $r2->id]); // two online → first two
+
+    ($this->start)($this->dodong, $r1);
+
+    $joyStartable = app(CleaningQuery::class)->startableIds($this->joy);
+    expect($joyStartable)->toContain($r2->id)->not->toContain($r1->id); // r1 is gone, r2 is next
+
+    ($this->start)($this->joy, $r2);
+    expect($r2->fresh()->cleaned_by)->toBe($this->joy->id)
+        ->and($r3->fresh()->status)->toBe(CleaningStatus::Queued); // still waiting for whoever frees up first
+});
+
+// A room is only offered to roomboys assigned to its floor (Dodong 1–2, Joy 2–3).
+it('keeps a room off the queue of a roomboy not assigned to its floor', function (): void {
+    $suite = ($this->leave)('301'); // floor 3 — Joy's, not Dodong's
+    ($this->online)($this->dodong, $this->joy);
+
+    expect(collect(app(CleaningQuery::class)->queue($this->dodong)['tasks'])->pluck('room'))->not->toContain('301');
+    expect(fn () => ($this->start)($this->dodong, $suite))->toThrow(ActionRefused::class);
+
+    expect(collect(app(CleaningQuery::class)->queue($this->joy)['tasks'])->pluck('room'))->toContain('301');
+    ($this->start)($this->joy, $suite);
+    expect($suite->fresh()->cleaned_by)->toBe($this->joy->id);
+});
