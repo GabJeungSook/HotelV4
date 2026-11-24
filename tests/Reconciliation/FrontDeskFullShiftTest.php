@@ -15,6 +15,7 @@ use App\Enums\PosMode;
 use App\Enums\ReasonKind;
 use App\Enums\RoomStatus;
 use App\Enums\StayKind;
+use App\Models\CashMovement;
 use App\Models\FolioLine;
 use App\Models\Payment;
 use App\Models\Product;
@@ -50,7 +51,7 @@ beforeEach(function (): void {
 
     $this->expectedFromRows = function (int $shiftId, int $opening): int {
         $cash = (int) Payment::query()->where('shift_session_id', $shiftId)->where('method', 'cash')->sum('amount');
-        $kind = fn (string $k): int => (int) \App\Models\CashMovement::query()->where('shift_session_id', $shiftId)->where('kind', $k)->whereNull('voided_at')->sum('amount');
+        $kind = fn (string $k): int => (int) CashMovement::query()->where('shift_session_id', $shiftId)->where('kind', $k)->whereNull('voided_at')->sum('amount');
 
         return $opening + $cash - $kind('expense') - $kind('remittance') + $kind('shortage_payment');
     };
