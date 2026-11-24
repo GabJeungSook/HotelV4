@@ -39,7 +39,8 @@ watch([date, type, person], ([d, t, p]) => r.go('reports.audit', {}, { date: d, 
 const title = computed(() => `Audit trail · ${formatDateTime(`${props.report.date}T12:00:00+08:00`, 'businessDate').replace(',', '')}`);
 const people = computed(() => [{ label: 'Everyone', value: 'all' as const }, ...props.report.people.map((p) => ({ label: p.name, value: p.id }))]);
 const tone: Record<string, 'warn' | 'info' | 'bad' | 'neutral'> = { voids: 'warn', transfers: 'info', cancels: 'bad', shift: 'neutral', other: 'neutral' };
-const chip: Record<string, string> = { voids: 'Void', transfers: 'Transfer', cancels: 'Cancel', shift: 'Shift' };
+// Approval groups get a short chip; shift and other rows carry their own specific action label.
+const chip: Record<string, string> = { voids: 'Void', transfers: 'Transfer', cancels: 'Cancel' };
 </script>
 
 <template>

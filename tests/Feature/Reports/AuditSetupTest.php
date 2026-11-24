@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Admin\SaveRate;
 use App\Enums\StayKind;
+use App\Models\AuditLog;
 use App\Models\RoomType;
 use App\Services\ReportService;
 use App\Support\Money;
@@ -28,4 +29,27 @@ it('shows a rate change on the audit trail', function (): void {
     expect($rows)->not->toBeEmpty()
         ->and($rows->first()['action'])->toContain('rate')
         ->and($rows->first()['by'])->toBe('Ramil Ortega');
+});
+
+it('formats a day close on the audit trail in words, not raw JSON', function (): void {
+    $this->seed(DatabaseSeeder::class);
+    $this->freezeClock('2026-11-10 02:00:00');
+    $branch = Hotel::branch()->id;
+
+    AuditLog::query()->create([
+        'branch_id' => $branch,
+        'actor_id' => Hotel::user('ramil.ortega')->id,
+        'action' => 'day.closed',
+        'subject_type' => 'day_closing',
+        'subject_id' => 1,
+        'before_json' => null,
+        'after_json' => ['date' => '2026-11-10', 'day_z_no' => 7, 'net_sales' => 429000],
+        'created_at' => '2026-11-10 02:00:00',
+    ]);
+
+    $row = collect(app(ReportService::class)->audit($branch, '2026-11-10')['rows'])->firstWhere('action', 'Day closed');
+
+    expect($row)->not->toBeNull()
+        ->and($row['details'])->toBe('D-0007 · net ₱4,290.00')
+        ->and($row['details'])->not->toContain('{');
 });

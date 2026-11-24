@@ -528,13 +528,17 @@ trait DayReaders
                     'at' => $log->created_at->toIso8601String(),
                     'type' => in_array($log->action, ['shift.closed', 'day.closed'], true) ? 'shift' : 'other',
                     'action' => match ($log->action) {
-                        'shift.closed' => 'Shift', 'day.closed' => 'Day closed', 'reconcile.mismatch' => 'Check failed',
+                        'shift.closed' => 'Shift closed', 'day.closed' => 'Day closed', 'reconcile.mismatch' => 'Check failed',
                         'invariant.failed' => 'Check failed', default => 'PIN unlocked',
                     },
                     'details' => match ($log->action) {
                         'shift.closed' => ($shift === null ? 'Shift closed' : "{$shift->period_name} shift closed".($shift->z_no === null ? '' : ' · '.self::zNumber($shift->z_no)))
-                            .($variance === 0 ? '' : ($variance < 0 ? ' · short ' : ' · over ').'₱'.Money::ofCentavos(abs($variance))->format()),
-                        default => (string) json_encode($log->after_json, JSON_UNESCAPED_UNICODE),
+                            .($variance === 0 ? '' : ($variance < 0 ? ' · short ' : ' · over ').Money::ofCentavos(abs($variance))->format()),
+                        'day.closed' => self::dayLog($log->after_json),
+                        'reconcile.mismatch' => self::mismatchLog($log->after_json),
+                        'invariant.failed' => 'A nightly data check did not pass — see the attention list.',
+                        'pin.unlocked' => 'A computer’s PIN entry was unlocked.',
+                        default => self::scalarLog($log->after_json),
                     },
                     'by' => $names[$log->actor_id] ?? '',
                     'approved_by' => '',
@@ -559,7 +563,8 @@ trait DayReaders
                 foreach ($after as $key => $value) {
                     if (is_scalar($value) || $value === null) {
                         $old = $before[$key] ?? null;
-                        $parts[] = $key.' '.(array_key_exists($key, $before) && (is_scalar($old) || $old === null) && $old !== $value ? var_export($old, true).' → ' : '').var_export($value, true);
+                        $changed = array_key_exists($key, $before) && (is_scalar($old) || $old === null) && $old !== $value;
+                        $parts[] = self::auditKey($key).' '.($changed ? self::auditValue($key, $old).' → ' : '').self::auditValue($key, $value);
                     }
                 }
                 $rows[] = [
@@ -617,6 +622,84 @@ trait DayReaders
         }
 
         return $out;
+    }
+
+    /** A readable label for an audit field key (replaces the raw column name). */
+    private static function auditKey(string $key): string
+    {
+        return match ($key) {
+            'floor_room_rates_enabled' => 'Floor & room rates',
+            'event_hall_enabled' => 'Event halls',
+            'kiosk_enabled' => 'Kiosk',
+            'reservations_enabled' => 'Reservations',
+            'pos_enabled' => 'POS and stock',
+            'housekeeping_enabled' => 'Housekeeping',
+            'vat_enabled' => 'VAT',
+            'hourly_enabled' => 'Hourly stays',
+            'overnight_enabled' => 'Overnight stays',
+            'long_stay_enabled' => 'Long stay',
+            'stay_kind' => 'stay',
+            default => str_replace('_', ' ', $key),
+        };
+    }
+
+    /** A readable value for an audit field: money formatted, booleans as on/off, no raw quotes. */
+    private static function auditValue(string $key, mixed $value): string
+    {
+        if (str_ends_with($key, '_enabled')) {
+            return $value ? 'on' : 'off';
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'yes' : 'no';
+        }
+
+        if ($value === null) {
+            return 'none';
+        }
+
+        if (is_numeric($value) && ($key === 'amount' || str_ends_with($key, '_amount') || str_contains($key, 'price'))) {
+            return Money::ofCentavos((int) $value)->format();
+        }
+
+        return match ((string) $value) {
+            'floor_id' => 'floor',
+            'room_id' => 'room',
+            'room_type_id' => 'room type',
+            default => (string) $value,
+        };
+    }
+
+    /** "D-0054 · net ₱3,070.00" for a day.closed audit row. */
+    private static function dayLog(mixed $json): string
+    {
+        $a = is_array($json) ? $json : [];
+
+        return self::dayNumber((int) ($a['day_z_no'] ?? 0)).' · net '.Money::ofCentavos((int) ($a['net_sales'] ?? 0))->format();
+    }
+
+    /** "2 figures do not agree with the ledger" for a reconcile.mismatch audit row. */
+    private static function mismatchLog(mixed $json): string
+    {
+        $a = is_array($json) ? $json : [];
+        $n = is_array($a['differences'] ?? null) ? count($a['differences']) : 0;
+
+        return $n === 1 ? '1 figure does not agree with the ledger' : "{$n} figures do not agree with the ledger";
+    }
+
+    /** A plain fallback for any other logged action: readable key/values, never raw JSON. */
+    private static function scalarLog(mixed $json): string
+    {
+        $a = is_array($json) ? $json : [];
+        $parts = [];
+
+        foreach ($a as $key => $value) {
+            if (is_scalar($value) || $value === null) {
+                $parts[] = str_replace('_', ' ', (string) $key).' '.var_export($value, true);
+            }
+        }
+
+        return mb_substr(implode(' · ', $parts), 0, 240);
     }
 
     /**
