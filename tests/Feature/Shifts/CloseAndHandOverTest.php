@@ -22,6 +22,7 @@ use App\Exceptions\ActionRefused;
 use App\Exceptions\ApprovalRefused;
 use App\Exceptions\PinInvalid;
 use App\Models\Approval;
+use App\Models\AuditLog;
 use App\Models\CashCount;
 use App\Models\CashCountDraft;
 use App\Models\FolioLine;
@@ -61,6 +62,16 @@ it('starts the close: the shift is closing and records who started it', function
     app(CloseShift::class)->begin($this->jessa, $this->branch->id);
 
     expect($this->shift->refresh()->status)->toBe(ShiftStatus::Closing)
+        ->and(app(CurrentShift::class)->closerName($this->shift->id))->toBe('Jessa Mae');
+});
+
+it('starting the close twice is idempotent: recorded once, the first closer kept', function (): void {
+    $close = app(CloseShift::class);
+    $close->begin($this->jessa, $this->branch->id);
+    $close->begin($this->mark, $this->branch->id); // a second tap, even by the other member
+
+    expect($this->shift->refresh()->status)->toBe(ShiftStatus::Closing)
+        ->and(AuditLog::query()->where('action', CurrentShift::CLOSING_STARTED)->where('subject_id', $this->shift->id)->count())->toBe(1)
         ->and(app(CurrentShift::class)->closerName($this->shift->id))->toBe('Jessa Mae');
 });
 

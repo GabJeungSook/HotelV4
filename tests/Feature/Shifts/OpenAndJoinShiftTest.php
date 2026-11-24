@@ -15,6 +15,7 @@ use App\Models\ShiftDefinition;
 use App\Models\ShiftHandover;
 use App\Models\ShiftMember;
 use App\Models\ShiftSession;
+use App\Services\CurrentShift;
 use App\Support\Money;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Database\QueryException;
@@ -58,6 +59,15 @@ it('opens the first shift on the period running now, with the opener as member',
         ->and($shift->opening_cash->centavos())->toBe(500000)
         ->and($shift->opened_by)->toBe(Hotel::frontdesk()->id)
         ->and(ShiftMember::query()->where('shift_session_id', $shift->id)->pluck('user_id')->all())->toBe([Hotel::frontdesk()->id]);
+});
+
+it('keeps the shift open when a member signs out: logging out never closes a shift', function (): void {
+    $shift = Hotel::openShift();
+
+    $this->actingAs(Hotel::frontdesk())->post('/logout');
+
+    expect($shift->refresh()->status)->toBe(ShiftStatus::Open)
+        ->and(app(CurrentShift::class)->find($this->branch->id)?->id)->toBe($shift->id);
 });
 
 it('gives a PM shift opened after midnight the business date it started on', function (): void {
