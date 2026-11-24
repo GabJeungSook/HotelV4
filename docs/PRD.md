@@ -367,6 +367,7 @@ Each requirement is testable and cites its screen. Formulas are in [TRD](TRD.md)
 | FR13.1 | Rooms: add and edit number (letters allowed, such as 3A; unique within the branch), floor, type, area and whether the kiosk may offer it. Floors and room types are edited from tabs on the same page. | 44 |
 | FR13.2 | The admin can move a room only between Available and Maintenance. A room with a guest in it cannot be changed. | 44 |
 | FR13.3 | Rates: a price table by room type and stay option, showing only the stay options the branch has switched on. A blank cell means the option is not offered at check-in, extend and the kiosk. | 45 |
+| FR13.3a | When a branch switches on Floor & room rates (Settings), the rate table can also set a flat rate for a whole floor (every room on it, whatever the type) and a rate for a single room. A room rate wins over its floor rate, which wins over the room-type rate; a blank override falls back to the type rate. Overrides apply to the stay price (hourly, overnight, long stay); extension rates stay per branch. Off by default; pricing is by room type until it is switched on. | 45, 46 |
 | FR13.4 | Extension rates per block of hours (seeded: 3, 6, 12, 24) apply to all room types. | 45 |
 | FR13.5 | Discounts are a fixed amount or a whole percentage, can be limited to certain rates, and can be offered on the kiosk. | 45 |
 | FR13.6 | A rate or price change affects new check-ins and sales only and is logged in the audit trail. | 45, 48, 43 |

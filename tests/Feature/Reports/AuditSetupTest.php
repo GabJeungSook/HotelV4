@@ -21,7 +21,7 @@ it('shows a rate change on the audit trail', function (): void {
     $branch = Hotel::branch()->id;
     $type = RoomType::query()->where('name', 'Standard')->firstOrFail();
 
-    app(SaveRate::class)->handle(Hotel::user('ramil.ortega'), $branch, $type->id, StayKind::Hourly, 6, Money::ofPesos(380));
+    app(SaveRate::class)->handle(Hotel::user('ramil.ortega'), $branch, $type->id, null, null, StayKind::Hourly, 6, Money::ofPesos(380));
 
     $rows = collect(app(ReportService::class)->audit($branch, '2026-11-10')['rows'])->filter(fn (array $r): bool => str_starts_with($r['action'], 'Setup'));
 

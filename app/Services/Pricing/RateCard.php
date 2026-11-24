@@ -21,10 +21,17 @@ use App\Support\Money;
 final class RateCard
 {
     /**
+     * The override buckets mirror $hourly/$overnight but are keyed by floor id or room id, and are
+     * empty unless the branch turns floor & room rates on. A lookup resolves room → floor → type.
+     *
      * @param  array<int, array<int, array{id: int, amount: Money}>>  $hourly  room type id → hours → rate
      * @param  array<int, array{id: int, amount: Money}>  $overnight  room type id → rate
      * @param  array<int, Money>  $extension  hours → extension rate
      * @param  array<int, string>  $typeNames  room type id → name
+     * @param  array<int, array<int, array{id: int, amount: Money}>>  $floorHourly  floor id → hours → rate
+     * @param  array<int, array{id: int, amount: Money}>  $floorOvernight  floor id → rate
+     * @param  array<int, array<int, array{id: int, amount: Money}>>  $roomHourly  room id → hours → rate
+     * @param  array<int, array{id: int, amount: Money}>  $roomOvernight  room id → rate
      */
     public function __construct(
         public readonly array $hourly,
@@ -42,6 +49,10 @@ final class RateCard
         public readonly bool $depositEnabled = true,
         public readonly ?Money $depositAmount = null,
         public readonly string $timezone = 'Asia/Manila',
+        public readonly array $floorHourly = [],
+        public readonly array $floorOvernight = [],
+        public readonly array $roomHourly = [],
+        public readonly array $roomOvernight = [],
     ) {}
 
     /** Load the card of a branch from its rows. */
@@ -49,14 +60,22 @@ final class RateCard
     {
         $hourly = [];
         $overnight = [];
+        $floorHourly = [];
+        $floorOvernight = [];
+        $roomHourly = [];
+        $roomOvernight = [];
+        $overrides = $branch->floor_room_rates_enabled;
 
         foreach (Rate::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->get() as $rate) {
             $entry = ['id' => $rate->id, 'amount' => $rate->amount ?? Money::zero()];
+            $overnightKind = $rate->stay_kind === StayKind::Overnight;
 
-            if ($rate->stay_kind === StayKind::Overnight) {
-                $overnight[$rate->room_type_id] = $entry;
-            } else {
-                $hourly[$rate->room_type_id][$rate->hours] = $entry;
+            if ($overrides && $rate->room_id !== null) {
+                $overnightKind ? $roomOvernight[$rate->room_id] = $entry : $roomHourly[$rate->room_id][$rate->hours] = $entry;
+            } elseif ($overrides && $rate->floor_id !== null) {
+                $overnightKind ? $floorOvernight[$rate->floor_id] = $entry : $floorHourly[$rate->floor_id][$rate->hours] = $entry;
+            } elseif ($rate->room_type_id !== null) {
+                $overnightKind ? $overnight[$rate->room_type_id] = $entry : $hourly[$rate->room_type_id][$rate->hours] = $entry;
             }
         }
 
@@ -86,6 +105,10 @@ final class RateCard
             depositEnabled: $branch->deposit_enabled,
             depositAmount: $branch->deposit_amount,
             timezone: Clock::displayTimezone(),
+            floorHourly: $floorHourly,
+            floorOvernight: $floorOvernight,
+            roomHourly: $roomHourly,
+            roomOvernight: $roomOvernight,
         );
     }
 
@@ -94,16 +117,27 @@ final class RateCard
         return $this->typeNames[$roomTypeId] ?? 'this room type';
     }
 
-    /** @return array{id: int, amount: Money}|null */
-    public function hourlyRate(int $roomTypeId, int $hours): ?array
+    /**
+     * The hourly rate for a stay, most-specific-first: the room's own rate, else its floor's flat
+     * rate, else the room type's base rate. Passing no room/floor gives the type rate as before.
+     *
+     * @return array{id: int, amount: Money}|null
+     */
+    public function hourlyRate(int $roomTypeId, int $hours, ?int $roomId = null, ?int $floorId = null): ?array
     {
-        return $this->hourly[$roomTypeId][$hours] ?? null;
+        return ($roomId !== null ? ($this->roomHourly[$roomId][$hours] ?? null) : null)
+            ?? ($floorId !== null ? ($this->floorHourly[$floorId][$hours] ?? null) : null)
+            ?? $this->hourly[$roomTypeId][$hours]
+            ?? null;
     }
 
     /** @return array{id: int, amount: Money}|null */
-    public function overnightRate(int $roomTypeId): ?array
+    public function overnightRate(int $roomTypeId, ?int $roomId = null, ?int $floorId = null): ?array
     {
-        return $this->overnight[$roomTypeId] ?? null;
+        return ($roomId !== null ? ($this->roomOvernight[$roomId] ?? null) : null)
+            ?? ($floorId !== null ? ($this->floorOvernight[$floorId] ?? null) : null)
+            ?? $this->overnight[$roomTypeId]
+            ?? null;
     }
 
     public function extensionRate(int $hours): ?Money

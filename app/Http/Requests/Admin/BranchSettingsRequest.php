@@ -37,6 +37,7 @@ final class BranchSettingsRequest extends FormRequest
             'overnight_checkin_time' => ['sometimes', 'required', 'date_format:H:i'],
             'overnight_checkout_time' => ['sometimes', 'required', 'date_format:H:i'],
             'long_stay_enabled' => $flag,
+            'floor_room_rates_enabled' => $flag,
             'long_stay_max_days' => ['sometimes', 'required', 'integer', 'between:1,31'],
             'extension_rule' => ['sometimes', 'required', 'string', 'in:cycle,per_hour,block'],
             'extension_cycle_hours' => ['sometimes', 'required', 'integer', 'between:1,24'],

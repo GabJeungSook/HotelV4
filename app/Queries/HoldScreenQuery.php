@@ -78,6 +78,7 @@ final class HoldScreenQuery
             $quote = $this->pricing->quoteStay(
                 RateCard::forBranch($branch), $stay->room_type_id, $stay->stay_kind, (int) ($stay->hours ?? 1), $now,
                 $discount === null ? null : DiscountTerms::of($discount),
+                roomId: $stay->room_id, floorId: $stay->room?->floor_id,
             );
             $lines[] = ['label' => "Room · {$quote->description}", 'amount' => $quote->roomAmount->centavos()];
 

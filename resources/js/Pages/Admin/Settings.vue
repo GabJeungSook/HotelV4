@@ -26,6 +26,7 @@ interface Settings {
     overnight_checkin_time: string;
     overnight_checkout_time: string;
     long_stay_enabled: boolean;
+    floor_room_rates_enabled: boolean;
     long_stay_max_days: number;
     extension_rule: 'cycle' | 'per_hour' | 'block';
     extension_cycle_hours: number;
@@ -89,6 +90,7 @@ const GROUP_KEYS: Record<Group, (keyof Settings)[]> = {
         'overnight_checkin_time',
         'overnight_checkout_time',
         'long_stay_enabled',
+        'floor_room_rates_enabled',
         'long_stay_max_days',
         'extension_rule',
         'extension_cycle_hours',
@@ -355,6 +357,7 @@ function saveReason(): void {
                         <UFormField v-if="form.long_stay_enabled" label="Longest stay (days)" :error="form.errors.long_stay_max_days">
                             <UInput v-model.number="form.long_stay_max_days" type="number" :min="1" :max="31" class="w-28" />
                         </UFormField>
+                        <USwitch v-model="form.floor_room_rates_enabled" label="Floor &amp; room rates" description="Lets the rate table set a flat rate for a whole floor, or a rate for one room, on top of the room-type rates." />
                         <div class="grid grid-cols-2 gap-3">
                             <UFormField label="Extension pricing" :error="form.errors.extension_rule">
                                 <USelect

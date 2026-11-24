@@ -29,7 +29,7 @@ class Branch extends Model
     protected $fillable = [
         'name', 'address', 'slip_header', 'code_prefix', 'status',
         'hourly_enabled', 'overnight_enabled', 'overnight_checkin_time', 'overnight_checkout_time',
-        'long_stay_enabled', 'long_stay_max_days', 'extension_rule', 'extension_cycle_hours',
+        'long_stay_enabled', 'floor_room_rates_enabled', 'long_stay_max_days', 'extension_rule', 'extension_cycle_hours',
         'extension_per_hour_amount', 'due_soon_minutes',
         'deposit_enabled', 'deposit_name', 'deposit_amount', 'lost_key_amount', 'lost_remote_amount', 'payment_methods',
         'max_frontdesks_per_shift', 'shift_overdue_warn_minutes',
@@ -48,6 +48,7 @@ class Branch extends Model
             'hourly_enabled' => 'boolean',
             'overnight_enabled' => 'boolean',
             'long_stay_enabled' => 'boolean',
+            'floor_room_rates_enabled' => 'boolean',
             'deposit_enabled' => 'boolean',
             'kiosk_enabled' => 'boolean',
             'reservations_enabled' => 'boolean',

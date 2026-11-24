@@ -27,11 +27,14 @@ final class RateController extends AdminController
         return Inertia::render('Admin/Rates', $query->rates($this->branch()));
     }
 
-    /** One cell of the rate table; a blank amount removes the rate ("not set"). */
+    /** One cell of the rate table (type, floor or room); a blank amount removes the rate ("not set"). */
     public function update(RateRequest $request, SaveRate $save): RedirectResponse
     {
         $rate = $save->handle(
-            $this->user($request), $this->branchId(), $request->integer('room_type_id'),
+            $this->user($request), $this->branchId(),
+            $request->filled('room_type_id') ? $request->integer('room_type_id') : null,
+            $request->filled('floor_id') ? $request->integer('floor_id') : null,
+            $request->filled('room_id') ? $request->integer('room_id') : null,
             StayKind::from($request->string('stay_kind')->toString()), $request->integer('hours'), $this->amount($request),
         );
 

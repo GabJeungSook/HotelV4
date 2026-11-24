@@ -30,15 +30,17 @@ final class PricingService
 
     /**
      * @param  int  $quantity  hours (hourly), nights (overnight) or days (long stay)
+     * @param  int|null  $roomId  the concrete room, when known, so a room/floor override wins over the type rate
+     * @param  int|null  $floorId  the room's floor, for a whole-floor flat rate
      */
-    public function quoteStay(RateCard $card, int $roomTypeId, StayKind $kind, int $quantity, CarbonImmutable $checkInAt, ?DiscountTerms $discount = null): StayQuote
+    public function quoteStay(RateCard $card, int $roomTypeId, StayKind $kind, int $quantity, CarbonImmutable $checkInAt, ?DiscountTerms $discount = null, ?int $roomId = null, ?int $floorId = null): StayQuote
     {
         $type = $card->typeName($roomTypeId);
 
         [$rate, $roomAmount, $description, $checkout, $cycle] = match ($kind) {
-            StayKind::Hourly => $this->hourly($card, $roomTypeId, $type, $quantity, $checkInAt),
-            StayKind::Overnight => $this->overnight($card, $roomTypeId, $type, $quantity, $checkInAt),
-            StayKind::LongStay => $this->longStay($card, $roomTypeId, $type, $quantity, $checkInAt),
+            StayKind::Hourly => $this->hourly($card, $roomTypeId, $type, $quantity, $checkInAt, $roomId, $floorId),
+            StayKind::Overnight => $this->overnight($card, $roomTypeId, $type, $quantity, $checkInAt, $roomId, $floorId),
+            StayKind::LongStay => $this->longStay($card, $roomTypeId, $type, $quantity, $checkInAt, $roomId, $floorId),
         };
 
         $discountAmount = Money::zero();
@@ -120,20 +122,20 @@ final class PricingService
      * at the new type's rates, minus the room line plus earlier transfer differences.
      * Discounts are not re-applied; the expected check-out does not change.
      */
-    public function quoteTransfer(RateCard $card, int $newRoomTypeId, StayKind $kind, int $quantity, Money $alreadyCharged): TransferQuote
+    public function quoteTransfer(RateCard $card, int $newRoomTypeId, StayKind $kind, int $quantity, Money $alreadyCharged, ?int $roomId = null, ?int $floorId = null): TransferQuote
     {
         $type = $card->typeName($newRoomTypeId);
         $newPrice = match ($kind) {
-            StayKind::Hourly => $this->rateOrFail($card->hourlyRate($newRoomTypeId, $quantity), "{$type} {$quantity} hrs")['amount'],
-            StayKind::Overnight => $this->rateOrFail($card->overnightRate($newRoomTypeId), "{$type} overnight")['amount']->times($quantity),
-            StayKind::LongStay => $this->rateOrFail($card->hourlyRate($newRoomTypeId, 24), "{$type} long stay (24-hour rate)")['amount']->times($quantity),
+            StayKind::Hourly => $this->rateOrFail($card->hourlyRate($newRoomTypeId, $quantity, $roomId, $floorId), "{$type} {$quantity} hrs")['amount'],
+            StayKind::Overnight => $this->rateOrFail($card->overnightRate($newRoomTypeId, $roomId, $floorId), "{$type} overnight")['amount']->times($quantity),
+            StayKind::LongStay => $this->rateOrFail($card->hourlyRate($newRoomTypeId, 24, $roomId, $floorId), "{$type} long stay (24-hour rate)")['amount']->times($quantity),
         };
 
         return new TransferQuote($newPrice, $alreadyCharged, $newPrice->minus($alreadyCharged));
     }
 
     /** @return array{int, Money, string, CarbonImmutable, int} */
-    private function hourly(RateCard $card, int $typeId, string $type, int $hours, CarbonImmutable $at): array
+    private function hourly(RateCard $card, int $typeId, string $type, int $hours, CarbonImmutable $at, ?int $roomId = null, ?int $floorId = null): array
     {
         if (! $card->hourlyEnabled) {
             throw InvalidStayOption::because('Hourly stays are not sold at this branch.');
@@ -144,13 +146,13 @@ final class PricingService
         }
 
         $description = "{$type} {$hours} hrs";
-        $rate = $this->rateOrFail($card->hourlyRate($typeId, $hours), $description);
+        $rate = $this->rateOrFail($card->hourlyRate($typeId, $hours, $roomId, $floorId), $description);
 
         return [$rate['id'], $rate['amount'], $description, $at->addHours($hours), $hours];
     }
 
     /** @return array{int, Money, string, CarbonImmutable, int} */
-    private function overnight(RateCard $card, int $typeId, string $type, int $nights, CarbonImmutable $at): array
+    private function overnight(RateCard $card, int $typeId, string $type, int $nights, CarbonImmutable $at, ?int $roomId = null, ?int $floorId = null): array
     {
         if (! $card->overnightEnabled) {
             throw InvalidStayOption::because('Overnight stays are not sold at this branch.');
@@ -160,14 +162,14 @@ final class PricingService
             throw InvalidStayOption::because('An overnight stay is at least 1 night.');
         }
 
-        $rate = $this->rateOrFail($card->overnightRate($typeId), "{$type} overnight");
+        $rate = $this->rateOrFail($card->overnightRate($typeId, $roomId, $floorId), "{$type} overnight");
         $description = $nights === 1 ? "{$type} overnight" : "{$type} {$nights} nights";
 
         return [$rate['id'], $rate['amount']->times($nights), $description, $this->overnightCheckout($card, $at, $nights), 0];
     }
 
     /** @return array{int, Money, string, CarbonImmutable, int} */
-    private function longStay(RateCard $card, int $typeId, string $type, int $days, CarbonImmutable $at): array
+    private function longStay(RateCard $card, int $typeId, string $type, int $days, CarbonImmutable $at, ?int $roomId = null, ?int $floorId = null): array
     {
         if (! $card->longStayEnabled) {
             throw InvalidStayOption::because('Long stays are not sold at this branch.');
@@ -177,7 +179,7 @@ final class PricingService
             throw InvalidStayOption::because("A long stay is 1 to {$card->longStayMaxDays} days.");
         }
 
-        $rate = $this->rateOrFail($card->hourlyRate($typeId, 24), "{$type} long stay (24-hour rate)");
+        $rate = $this->rateOrFail($card->hourlyRate($typeId, 24, $roomId, $floorId), "{$type} long stay (24-hour rate)");
         $description = $days === 1 ? "{$type} long stay 1 day" : "{$type} long stay {$days} days";
 
         return [$rate['id'], $rate['amount']->times($days), $description, $at->addHours(24 * $days), 0];

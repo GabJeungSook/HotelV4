@@ -146,7 +146,7 @@ final class StayScreenQuery
 
         foreach ($quantities as $q) {
             try {
-                $quote = $this->pricing->quoteStay($card, $room->room_type_id, $kind, $q, $now);
+                $quote = $this->pricing->quoteStay($card, $room->room_type_id, $kind, $q, $now, roomId: $room->id, floorId: $room->floor_id);
             } catch (RateNotFound|InvalidStayOption) {
                 break;
             }
@@ -154,7 +154,7 @@ final class StayScreenQuery
             $byDiscount = [];
             foreach ($terms as $t) {
                 try {
-                    $byDiscount[(string) $t->id] = $this->pricing->quoteStay($card, $room->room_type_id, $kind, $q, $now, $t)->discountAmount->centavos();
+                    $byDiscount[(string) $t->id] = $this->pricing->quoteStay($card, $room->room_type_id, $kind, $q, $now, $t, roomId: $room->id, floorId: $room->floor_id)->discountAmount->centavos();
                 } catch (DiscountNotAllowed) {
                     $byDiscount[(string) $t->id] = null;
                 }
@@ -452,15 +452,18 @@ final class StayScreenQuery
         $until = $stay->expected_checkout_at !== null && $stay->expected_checkout_at->greaterThan($now) ? $stay->expected_checkout_at : $now->addMinute();
 
         // Rooms reserved for the rest of this stay are left out, as TransferRoom refuses them.
+        // With floor/room rates every room can differ, so the quote is memoised per room then;
+        // otherwise one quote per type serves all its rooms.
         foreach ($this->rooms->free($stay->branch_id, null, $stay->room_id, $now, $until) as $room) {
             $typeId = $room->room_type_id;
+            $key = $branch->floor_room_rates_enabled ? 'room:'.$room->id : 'type:'.$typeId;
 
-            if (! array_key_exists($typeId, $byType)) {
+            if (! array_key_exists($key, $byType)) {
                 try {
-                    $q = $this->pricing->quoteTransfer($card, $typeId, $stay->stay_kind, $quantity, $charged);
-                    $byType[$typeId] = ['difference' => $q->difference->centavos(), 'new_price' => $q->newPrice->centavos(), 'missing' => null];
+                    $q = $this->pricing->quoteTransfer($card, $typeId, $stay->stay_kind, $quantity, $charged, roomId: $room->id, floorId: $room->floor_id);
+                    $byType[$key] = ['difference' => $q->difference->centavos(), 'new_price' => $q->newPrice->centavos(), 'missing' => null];
                 } catch (RateNotFound $e) {
-                    $byType[$typeId] = ['difference' => null, 'new_price' => null, 'missing' => $e->userMessage()];
+                    $byType[$key] = ['difference' => null, 'new_price' => null, 'missing' => $e->userMessage()];
                 }
             }
 
@@ -469,7 +472,7 @@ final class StayScreenQuery
                 'number' => $room->number,
                 'type' => $room->roomType->name ?? '',
                 'type_id' => $typeId,
-                ...$byType[$typeId],
+                ...$byType[$key],
             ];
         }
 

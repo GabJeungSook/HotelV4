@@ -92,6 +92,44 @@ it('describes the stay for the folio line', function (): void {
     expect($this->pricing->quoteStay(card(), DELUXE, StayKind::Hourly, 12, $this->at)->description)->toBe('Deluxe 12 hrs');
 });
 
+// Floor & room rate overrides — room beats floor beats type (DATABASE_SCHEMA §4.5)
+
+function overrideCard(): RateCard
+{
+    return card([
+        'floorHourly' => [7 => [12 => ['id' => 200, 'amount' => Money::ofCentavos(60000)]]],
+        'floorOvernight' => [7 => ['id' => 201, 'amount' => Money::ofCentavos(70000)]],
+        'roomHourly' => [305 => [12 => ['id' => 202, 'amount' => Money::ofCentavos(80000)]]],
+        'roomOvernight' => [305 => ['id' => 203, 'amount' => Money::ofCentavos(85000)]],
+    ]);
+}
+
+it('prices a stay room-first, then floor, then room type', function (int $type, ?int $roomId, ?int $floorId, int $amount): void {
+    expect($this->pricing->quoteStay(overrideCard(), $type, StayKind::Hourly, 12, $this->at, roomId: $roomId, floorId: $floorId)->roomAmount->centavos())->toBe($amount);
+})->with([
+    'room override wins' => [DELUXE, 305, 7, 80000],
+    'floor flat when no room rate' => [DELUXE, 999, 7, 60000],
+    'floor flat ignores the room type' => [STANDARD, 999, 7, 60000],
+    'type rate when the floor has none' => [DELUXE, 999, 8, 65000],
+    'type rate when no room or floor is given' => [DELUXE, null, null, 65000],
+]);
+
+it('falls back to the type rate for an option the override does not set', function (): void {
+    // The overrides only set 12 h; a 6-hour stay on that room/floor still uses the Deluxe 6 h rate.
+    expect($this->pricing->quoteStay(overrideCard(), DELUXE, StayKind::Hourly, 6, $this->at, roomId: 305, floorId: 7)->roomAmount->centavos())->toBe(45000);
+});
+
+it('resolves an overnight rate room-first too', function (): void {
+    expect($this->pricing->quoteStay(overrideCard(), DELUXE, StayKind::Overnight, 1, $this->at, roomId: 305, floorId: 7)->roomAmount->centavos())->toBe(85000)
+        ->and($this->pricing->quoteStay(overrideCard(), DELUXE, StayKind::Overnight, 1, $this->at, roomId: 999, floorId: 7)->roomAmount->centavos())->toBe(70000);
+});
+
+it('prices a long stay from a room override of the 24-hour rate', function (): void {
+    $card = card(['roomHourly' => [305 => [24 => ['id' => 210, 'amount' => Money::ofCentavos(90000)]]]]);
+
+    expect($this->pricing->quoteStay($card, DELUXE, StayKind::LongStay, 3, $this->at, roomId: 305, floorId: 7)->roomAmount->centavos())->toBe(270000);
+});
+
 // Overnight 1 and 3 nights, check-in before and after midnight
 
 it('prices one night checked in before midnight to the next day check-out time', function (): void {

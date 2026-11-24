@@ -101,6 +101,7 @@ final class ConfirmKioskHold
         $quote = $this->pricing->quoteStay(
             RateCard::forBranch($branch), $locked->room_type_id, $locked->stay_kind, (int) ($locked->hours ?? $locked->nights ?? $locked->days ?? 1), $now,
             $discount === null ? null : DiscountTerms::of($discount),
+            roomId: $room->id, floorId: $room->floor_id,
         );
 
         $this->checkIn->assertTendered($quote, $locked, $method, $tendered);

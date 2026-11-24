@@ -85,7 +85,7 @@ erDiagram
 | 5 | `room_types` | 3–8 | Standard, Deluxe, Suite… (44) |
 | 6 | `rooms` | 20–300 | Rooms and their current status (4, 44) |
 | 7 | `room_status_logs` | ~40,000 | Every status change, who and why |
-| 8 | `rates` | ~15 | Price per room type and stay option (45) |
+| 8 | `rates` | ~15 | Price per stay option, scoped to a room type, a floor or a room (45) |
 | 9 | `extension_rates` | ~4 | Price per extension block (45) |
 | 10 | `discounts` | ~3 | Promo, senior, PWD (45) |
 | 11 | `discount_rate` | ~6 | Which rates a discount may be used on |
@@ -139,6 +139,7 @@ CREATE TABLE branches (
   overnight_checkin_time TIME NOT NULL DEFAULT '14:00:00',
   overnight_checkout_time TIME NOT NULL DEFAULT '12:00:00',
   long_stay_enabled TINYINT(1) NOT NULL DEFAULT 1,
+  floor_room_rates_enabled TINYINT(1) NOT NULL DEFAULT 0,  -- rates may be scoped to a floor or a room
   long_stay_max_days TINYINT UNSIGNED NOT NULL DEFAULT 31,
   extension_rule ENUM('cycle','per_hour','block') NOT NULL DEFAULT 'cycle',
   extension_cycle_hours TINYINT UNSIGNED NOT NULL DEFAULT 24,
@@ -306,16 +307,23 @@ CREATE TABLE room_status_logs (
 CREATE TABLE rates (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   branch_id BIGINT UNSIGNED NOT NULL,
-  room_type_id BIGINT UNSIGNED NOT NULL,
+  room_type_id BIGINT UNSIGNED NULL,          -- set for a base (room type) rate
+  floor_id BIGINT UNSIGNED NULL,              -- set for a whole-floor flat rate
+  room_id BIGINT UNSIGNED NULL,               -- set for a single-room rate
   stay_kind ENUM('hourly','overnight') NOT NULL,
   hours TINYINT UNSIGNED NOT NULL DEFAULT 0,  -- 6,12,18,24 for hourly; 0 for overnight
   amount BIGINT NOT NULL,
   created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
-  UNIQUE KEY rates_unique (branch_id, room_type_id, stay_kind, hours),
+  -- NULL scope ids compare distinct, so the unique folds them to 0 (a functional index).
+  UNIQUE KEY rates_scope_unique (branch_id, stay_kind, hours, (COALESCE(room_type_id,0)), (COALESCE(floor_id,0)), (COALESCE(room_id,0))),
   CONSTRAINT rates_branch_fk FOREIGN KEY (branch_id) REFERENCES branches(id),
   CONSTRAINT rates_type_fk FOREIGN KEY (room_type_id) REFERENCES room_types(id),
+  CONSTRAINT rates_floor_fk FOREIGN KEY (floor_id) REFERENCES floors(id),
+  CONSTRAINT rates_room_fk FOREIGN KEY (room_id) REFERENCES rooms(id),
   CONSTRAINT rates_amount_chk CHECK (amount > 0),
-  CONSTRAINT rates_hours_chk CHECK ((stay_kind = 'overnight' AND hours = 0) OR (stay_kind = 'hourly' AND hours BETWEEN 1 AND 24))
+  CONSTRAINT rates_hours_chk CHECK ((stay_kind = 'overnight' AND hours = 0) OR (stay_kind = 'hourly' AND hours BETWEEN 1 AND 24)),
+  -- Exactly one scope: a room type, a floor or a room.
+  CONSTRAINT rates_scope_chk CHECK (((room_type_id IS NOT NULL) + (floor_id IS NOT NULL) + (room_id IS NOT NULL)) = 1)
 );
 
 CREATE TABLE extension_rates (
@@ -355,7 +363,8 @@ CREATE TABLE discount_rate (
 ```
 
 - A missing `rates` row means the option is not sold. `PricingService` throws `RateNotFound`; it never returns 0 (screen 52).
-- A rate is "deleted" by removing the row only when no open stay quotes it; the quoted price already lives on the stay's folio line.
+- A base (room type) rate is "deleted" by removing the row only when no open stay quotes it; the quoted price already lives on the stay's folio line.
+- **Floor & room rates** (branch switch `floor_room_rates_enabled`, off by default): a rate is scoped to exactly one of a room type (base), a whole floor (flat for every room on it, whatever the type) or a single room. Pricing resolves **most-specific-first: room → floor → room type** (`RateCard`), and an unset option falls back to the type rate — so a floor/room override can always be removed. When the switch is off, overrides are not loaded and pricing is by room type as before. Overrides apply to the stay rates (hourly, overnight, and long stay via the 24-hour rate); extension rates stay per-branch and type-agnostic.
 - Long stay price = the 24-hour hourly rate × days.
 
 ### 4.6 transfer_reasons, expense_categories, floor_user
@@ -1173,6 +1182,7 @@ File names use the prefix `2026_11_12_` plus a running number so they sort in de
 | 2026_11_19_000002 | `add_idempotency_key_to_folio_lines_table` | `folio_lines.idempotency_key` (`CHAR(36) NULL`, unique): the extend form carries a UUID; a repeated key returns the first extension line |
 | 2026_11_24_000001 | `add_sellable_to_products_table` | `products.sellable`; relaxes `products_price_chk` so a non-sold supply may have price 0 (Gab, 24 Nov 2026) |
 | 2026_11_24_000002 | `create_product_ingredients_table` | `product_ingredients` — the meal recipe (bill of materials) |
+| 2026_11_24_000003 | `add_floor_and_room_rates` | `rates.floor_id`/`room_id` (nullable `room_type_id`, scope CHECK, functional unique); `branches.floor_room_rates_enabled` (Gab, 24 Nov 2026) |
 
 Generated columns and CHECK constraints are added with `DB::statement()` inside the migration, because the schema builder cannot express them.
 
@@ -1183,7 +1193,7 @@ Generated columns and CHECK constraints are added with `DB::statement()` inside 
 | `Branch` | hasMany: users, shiftDefinitions, floors, roomTypes, rooms, rates, extensionRates, discounts, products, shiftSessions, stays |
 | `User` | belongsTo branch · belongsToMany floors · hasMany shiftMemberships |
 | `Room` | belongsTo branch, floor, roomType · hasMany stays, stayRooms, cleaningTasks, statusLogs · hasOne activeStay (state held or checked_in) |
-| `Rate` | belongsTo branch, roomType · belongsToMany discounts |
+| `Rate` | belongsTo branch, roomType, floor, room · belongsToMany discounts |
 | `Stay` | belongsTo branch, room, roomType, discount, checkinShift, checkoutShift · hasMany stayRooms, folioLines, payments, cleaningTasks |
 | `FolioLine` | belongsTo stay, posOrder, product, shiftSession, room, creator · hasMany allocations · hasOne reversal · belongsTo reversalOf |
 | `Payment` | belongsTo stay, posOrder, shiftSession, creator · hasMany allocations |

@@ -14,8 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
- * Price per room type and stay option (DATABASE_SCHEMA §4.5). stay_kind is
- * hourly or overnight only (long stay is priced from the 24-hour rate).
+ * Price for one stay option (DATABASE_SCHEMA §4.5), scoped to exactly one of: a room type (the
+ * base rate), a whole floor (flat for every room on it) or a single room. stay_kind is hourly or
+ * overnight only (long stay is priced from the 24-hour rate).
  */
 class Rate extends Model
 {
@@ -24,7 +25,7 @@ class Rate extends Model
     /** @use HasFactory<RateFactory> */
     use HasFactory;
 
-    protected $fillable = ['branch_id', 'room_type_id', 'stay_kind', 'hours', 'amount'];
+    protected $fillable = ['branch_id', 'room_type_id', 'floor_id', 'room_id', 'stay_kind', 'hours', 'amount'];
 
     protected function casts(): array
     {
@@ -40,6 +41,18 @@ class Rate extends Model
     public function roomType(): BelongsTo
     {
         return $this->belongsTo(RoomType::class);
+    }
+
+    /** @return BelongsTo<Floor, $this> */
+    public function floor(): BelongsTo
+    {
+        return $this->belongsTo(Floor::class);
+    }
+
+    /** @return BelongsTo<Room, $this> */
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(Room::class);
     }
 
     /** @return BelongsToMany<Discount, $this> */

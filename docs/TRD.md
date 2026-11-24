@@ -90,6 +90,7 @@ Implemented as Laravel policies and a `role` middleware. A front desk user must 
 | `overnight`, N nights | `rates(type, overnight).amount × N` | the N-th next occurrence of `overnight_checkout_time` after check-in |
 | `long_stay`, D days (1 to `long_stay_max_days`) | `rates(type, hourly, 24).amount × D` | check-in + D × 24 hours |
 
+- `rates(type, …)` is resolved by `RateCard`. When the branch's `floor_room_rates_enabled` is on, the lookup is **most-specific-first: the room's own rate, else its floor's flat rate, else the room type's rate**; an option the override does not set falls back to the type rate. The concrete room (and its floor) is threaded into `quoteStay`/`quoteTransfer` wherever it is known (check-in, confirm-hold, transfer, the check-in screen, the kiosk's offered room). `PricingService` stays pure — `RateCard` holds the override buckets, empty when the switch is off. Extensions stay type-agnostic.
 - Discount: `fixed` subtracts `value` centavos; `percent` subtracts `round_half_up(room_amount × value / 100)`. A discount applies to the room amount only, never to the deposit, and never below ₱0. A discount limited to rates (`all_rates = 0`) is refused on other rates.
 - Missing rate → `RateNotFound`. Never ₱0.
 - Total to collect at check-in = room amount − discount + `deposit_amount` (if `deposit_enabled`).

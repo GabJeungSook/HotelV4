@@ -109,6 +109,7 @@ final class TransferRoom
             $quote = $this->pricing->quoteTransfer(
                 RateCard::forBranch(Branch::query()->findOrFail($locked->branch_id)),
                 $to->room_type_id, $locked->stay_kind, $this->quantity($locked), $charged,
+                roomId: $to->id, floorId: $to->floor_id,
             );
             $difference = $quote->difference;
 

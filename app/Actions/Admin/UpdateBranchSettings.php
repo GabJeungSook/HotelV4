@@ -32,7 +32,7 @@ final class UpdateBranchSettings
     public const GROUPS = [
         'stays' => [
             'hourly_enabled', 'overnight_enabled', 'overnight_checkin_time', 'overnight_checkout_time',
-            'long_stay_enabled', 'long_stay_max_days', 'extension_rule', 'extension_cycle_hours',
+            'long_stay_enabled', 'floor_room_rates_enabled', 'long_stay_max_days', 'extension_rule', 'extension_cycle_hours',
             'extension_per_hour_amount', 'due_soon_minutes',
         ],
         'money' => ['deposit_enabled', 'deposit_name', 'deposit_amount', 'lost_key_amount', 'lost_remote_amount', 'payment_methods'],

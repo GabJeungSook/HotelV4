@@ -22,12 +22,19 @@ interface Column {
     label: string;
 }
 
+type Cells = Record<string, { id: number; amount: number } | null>;
+
 interface Row {
     room_type_id: number;
     name: string;
     is_active: boolean;
-    cells: Record<string, { id: number; amount: number } | null>;
+    cells: Cells;
     limited: string[];
+}
+
+interface Option {
+    value: number;
+    label: string;
 }
 
 interface Discount {
@@ -45,6 +52,11 @@ interface Discount {
 const props = defineProps<{
     columns: Column[];
     rows: Row[];
+    floor_room_rates_enabled: boolean;
+    floors: Option[];
+    rooms: Option[];
+    floor_cells: Record<number, Cells>;
+    room_cells: Record<number, Cells>;
     extension: { id: number; hours: number; amount: number }[];
     discounts: Discount[];
     rate_options: { value: number; label: string }[];
@@ -74,18 +86,29 @@ function done(close: () => void): UseFormSubmitOptions {
 }
 
 // Rate cell ----------------------------------------------------------------------------------
+type Scope = 'type' | 'floor' | 'room';
 const cellOpen = ref(false);
-const cell = ref<{ row: Row; column: Column } | null>(null);
-const rateForm = useForm({ room_type_id: 0, stay_kind: 'hourly' as Column['kind'], hours: 0, amount: 0 });
+const cell = ref<{ scope: Scope; title: string; column: Column; current: { id: number; amount: number } | null } | null>(null);
+const rateForm = useForm({
+    room_type_id: null as number | null,
+    floor_id: null as number | null,
+    room_id: null as number | null,
+    stay_kind: 'hourly' as Column['kind'],
+    hours: 0,
+    amount: 0,
+});
 
-function openCell(row: Row, column: Column): void {
-    cell.value = { row, column };
+function openCell(scope: Scope, id: number, title: string, column: Column, cells: Cells): void {
+    const current = cells[column.key] ?? null;
+    cell.value = { scope, title, column, current };
     formError.value = undefined;
     rateForm.clearErrors();
-    rateForm.room_type_id = row.room_type_id;
+    rateForm.room_type_id = scope === 'type' ? id : null;
+    rateForm.floor_id = scope === 'floor' ? id : null;
+    rateForm.room_id = scope === 'room' ? id : null;
     rateForm.stay_kind = column.kind;
     rateForm.hours = column.hours;
-    rateForm.amount = row.cells[column.key]?.amount ?? 0;
+    rateForm.amount = current?.amount ?? 0;
     cellOpen.value = true;
 }
 
@@ -94,7 +117,21 @@ function saveRate(remove = false): void {
     rateForm.put(route('admin.rates.update'), done(() => (cellOpen.value = false)));
 }
 
-const cellIsSet = computed(() => (cell.value ? cell.value.row.cells[cell.value.column.key] !== null : false));
+const cellIsSet = computed(() => cell.value?.current != null);
+
+// Floor & room overrides ---------------------------------------------------------------------
+const scopeKind = ref<'floor' | 'room'>('floor');
+const scopeId = ref<number | null>(null);
+const scopeOptions = computed<Option[]>(() => (scopeKind.value === 'floor' ? props.floors : props.rooms));
+const scopeCells = computed<Cells | null>(() =>
+    scopeId.value == null ? null : (scopeKind.value === 'floor' ? props.floor_cells : props.room_cells)[scopeId.value] ?? null,
+);
+const scopeLabel = computed(() => scopeOptions.value.find((o) => o.value === scopeId.value)?.label ?? '');
+
+function pickScopeKind(kind: 'floor' | 'room'): void {
+    scopeKind.value = kind;
+    scopeId.value = null;
+}
 
 // Extension block ----------------------------------------------------------------------------
 const extOpen = ref(false);
@@ -191,12 +228,56 @@ const hourItems = Array.from({ length: 24 }, (_, i) => ({ label: `${i + 1} hrs`,
                                 :class="r.cells[c.key] ? 'text-highlighted' : 'text-bad'"
                                 :data-cell="`${r.room_type_id}-${c.key}`"
                                 :aria-label="`${r.name} ${c.label}: ${r.cells[c.key] ? formatMoney(r.cells[c.key]!.amount) : 'not set'}. Edit`"
-                                @click="openCell(r, c)"
+                                @click="openCell('type', r.room_type_id, r.name, c, r.cells)"
                             >
                                 {{ r.cells[c.key] ? formatMoney(r.cells[c.key]!.amount, 'column') : 'not set' }}
                             </button>
                         </td>
                         <td class="!whitespace-normal text-muted">{{ r.limited.length ? r.limited.join(' · ') : '—' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section v-if="floor_room_rates_enabled && rows.length" class="mt-6 rounded-card border border-default bg-default p-4">
+            <h3 class="text-[15px] font-semibold text-highlighted">Floor &amp; room rates</h3>
+            <p class="mt-1 mb-3 text-[13px] text-muted">
+                A floor rate is flat for every room on that floor; a room rate is for that one room. Both win over the room-type rate, and a blank cell falls back to the type rate.
+            </p>
+            <div class="flex flex-wrap items-end gap-3">
+                <UFormField label="Set a rate for a">
+                    <UButtonGroup>
+                        <UButton :color="scopeKind === 'floor' ? 'primary' : 'neutral'" :variant="scopeKind === 'floor' ? 'solid' : 'outline'" label="Floor" @click="pickScopeKind('floor')" />
+                        <UButton :color="scopeKind === 'room' ? 'primary' : 'neutral'" :variant="scopeKind === 'room' ? 'solid' : 'outline'" label="Room" @click="pickScopeKind('room')" />
+                    </UButtonGroup>
+                </UFormField>
+                <UFormField :label="scopeKind === 'floor' ? 'Floor' : 'Room'">
+                    <USelect v-model="scopeId" :items="scopeOptions" value-key="value" :placeholder="scopeKind === 'floor' ? 'Pick a floor' : 'Pick a room'" class="min-w-56" />
+                </UFormField>
+            </div>
+
+            <table v-if="scopeCells" class="dtable mt-4 w-full">
+                <thead>
+                    <tr>
+                        <th>{{ scopeLabel }}</th>
+                        <th v-for="c in columns" :key="c.key" class="text-right">{{ c.label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-muted">Rate</td>
+                        <td v-for="c in columns" :key="c.key" class="text-right">
+                            <button
+                                type="button"
+                                class="hm-focus num cursor-pointer rounded px-1 hover:underline"
+                                :class="scopeCells[c.key] ? 'text-highlighted' : 'text-muted'"
+                                :data-cell="`${scopeKind}-${scopeId}-${c.key}`"
+                                :aria-label="`${scopeLabel} ${c.label}: ${scopeCells[c.key] ? formatMoney(scopeCells[c.key]!.amount) : 'uses the room-type rate'}. Edit`"
+                                @click="openCell(scopeKind, scopeId!, scopeLabel, c, scopeCells!)"
+                            >
+                                {{ scopeCells[c.key] ? formatMoney(scopeCells[c.key]!.amount, 'column') : 'type rate' }}
+                            </button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -240,18 +321,30 @@ const hourItems = Array.from({ length: 24 }, (_, i) => ({ label: `${i + 1} hrs`,
         <p class="mt-4 text-[13px] text-muted">A blank rate means that option is not offered. Changing a rate affects new check-ins only; open stays keep the price they were quoted.</p>
 
         <!-- Rate cell -->
-        <UModal v-model:open="cellOpen" :title="cell ? `${cell.row.name} · ${cell.column.label}` : ''" :ui="{ content: 'max-w-[380px]' }">
+        <UModal v-model:open="cellOpen" :title="cell ? `${cell.title} · ${cell.column.label}` : ''" :ui="{ content: 'max-w-[380px]' }">
             <template #body>
                 <div class="flex flex-col gap-4">
                     <UAlert v-if="formError" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" :description="formError" data-form-error />
-                    <UFormField label="Rate" name="amount" :error="rateForm.errors.amount" help="Leave it blank to stop selling this option. It is never ₱0.">
+                    <UFormField
+                        label="Rate"
+                        name="amount"
+                        :error="rateForm.errors.amount"
+                        :help="cell?.scope === 'type' ? 'Leave it blank to stop selling this option. It is never ₱0.' : 'Leave it blank to fall back to the room-type rate. It is never ₱0.'"
+                    >
                         <MoneyInput v-model="rateForm.amount" autofocus />
                     </UFormField>
                 </div>
             </template>
             <template #footer>
                 <div class="flex w-full items-center gap-2">
-                    <UButton v-if="cellIsSet" color="error" variant="ghost" label="Remove (not set)" :loading="rateForm.processing" @click="saveRate(true)" />
+                    <UButton
+                        v-if="cellIsSet"
+                        color="error"
+                        variant="ghost"
+                        :label="cell?.scope === 'type' ? 'Remove (not set)' : 'Remove (use type rate)'"
+                        :loading="rateForm.processing"
+                        @click="saveRate(true)"
+                    />
                     <div class="ms-auto flex gap-2">
                         <UButton color="neutral" variant="ghost" label="Cancel" @click="cellOpen = false" />
                         <UButton label="Save rate" :disabled="rateForm.amount <= 0 && !cellIsSet" :loading="rateForm.processing" @click="saveRate()" />

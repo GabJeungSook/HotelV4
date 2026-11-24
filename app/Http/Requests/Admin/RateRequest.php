@@ -18,7 +18,10 @@ final class RateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'room_type_id' => ['required', 'integer'],
+            // Exactly one scope is required; which one is enforced in SaveRate.
+            'room_type_id' => ['nullable', 'integer'],
+            'floor_id' => ['nullable', 'integer'],
+            'room_id' => ['nullable', 'integer'],
             'stay_kind' => ['required', 'string', 'in:hourly,overnight'],
             'hours' => ['required', 'integer', 'between:0,24'],
             'amount' => ['nullable', 'integer', 'min:0', 'max:100000000'],

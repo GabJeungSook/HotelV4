@@ -24,10 +24,13 @@ final class KioskOffer
 {
     public function __construct(private readonly PricingService $pricing) {}
 
-    /** @return array{quote: StayQuote, discount: Discount|null} */
-    public function quote(int $branchId, RateCard $card, int $roomTypeId, StayKind $kind, int $quantity, CarbonImmutable $at): array
+    /**
+     * @param  int|null  $roomId  the concrete room offered, so its floor/room rate is priced, not the type base
+     * @return array{quote: StayQuote, discount: Discount|null}
+     */
+    public function quote(int $branchId, RateCard $card, int $roomTypeId, StayKind $kind, int $quantity, CarbonImmutable $at, ?int $roomId = null, ?int $floorId = null): array
     {
-        $best = $this->pricing->quoteStay($card, $roomTypeId, $kind, $quantity, $at);
+        $best = $this->pricing->quoteStay($card, $roomTypeId, $kind, $quantity, $at, roomId: $roomId, floorId: $floorId);
         $bestDiscount = null;
 
         $discounts = Discount::query()->withoutGlobalScopes()
@@ -39,7 +42,7 @@ final class KioskOffer
 
         foreach ($discounts as $discount) {
             try {
-                $quote = $this->pricing->quoteStay($card, $roomTypeId, $kind, $quantity, $at, DiscountTerms::of($discount));
+                $quote = $this->pricing->quoteStay($card, $roomTypeId, $kind, $quantity, $at, DiscountTerms::of($discount), roomId: $roomId, floorId: $floorId);
             } catch (DiscountNotAllowed) {
                 continue;
             }
@@ -70,14 +73,14 @@ final class KioskOffer
      * The most whole days a guest may book for long stay at the kiosk: the branch's longest stay
      * (settings), or 0 when the branch does not allow long stay or the day rate does not price.
      */
-    public function maxDays(Branch $branch, RateCard $card, int $roomTypeId, CarbonImmutable $at): int
+    public function maxDays(Branch $branch, RateCard $card, int $roomTypeId, CarbonImmutable $at, ?int $roomId = null, ?int $floorId = null): int
     {
         if (! $branch->long_stay_enabled) {
             return 0;
         }
 
         try {
-            $this->pricing->quoteStay($card, $roomTypeId, StayKind::LongStay, 1, $at);
+            $this->pricing->quoteStay($card, $roomTypeId, StayKind::LongStay, 1, $at, roomId: $roomId, floorId: $floorId);
         } catch (RateNotFound) {
             return 0;
         }

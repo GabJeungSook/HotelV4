@@ -122,7 +122,7 @@ final class HoldRoom
             throw RoomTaken::room($room->number, $room->id);
         }
 
-        ['quote' => $quote, 'discount' => $discount] = $this->offer->quote($branchId, $card, $type->id, $kind, $quantity, $now);
+        ['quote' => $quote, 'discount' => $discount] = $this->offer->quote($branchId, $card, $type->id, $kind, $quantity, $now, $room->id, $room->floor_id);
         $code = $this->numbers->next($branch);
 
         try {

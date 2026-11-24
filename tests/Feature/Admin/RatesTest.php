@@ -32,7 +32,13 @@ beforeEach(function (): void {
     $this->branchId = Hotel::branch()->id;
     $this->type = fn (string $name) => RoomType::query()->where('branch_id', $this->branchId)->where('name', $name)->firstOrFail();
     $this->rate = fn (string $type, StayKind $kind, int $hours, ?int $centavos) => app(SaveRate::class)->handle(
-        $this->admin, $this->branchId, ($this->type)($type)->id, $kind, $hours, $centavos === null ? null : Money::ofCentavos($centavos),
+        $this->admin, $this->branchId, ($this->type)($type)->id, null, null, $kind, $hours, $centavos === null ? null : Money::ofCentavos($centavos),
+    );
+    $this->floorRate = fn (int $floorId, StayKind $kind, int $hours, ?int $centavos) => app(SaveRate::class)->handle(
+        $this->admin, $this->branchId, null, $floorId, null, $kind, $hours, $centavos === null ? null : Money::ofCentavos($centavos),
+    );
+    $this->roomRate = fn (int $roomId, StayKind $kind, int $hours, ?int $centavos) => app(SaveRate::class)->handle(
+        $this->admin, $this->branchId, null, null, $roomId, $kind, $hours, $centavos === null ? null : Money::ofCentavos($centavos),
     );
     $this->find = fn (string $type, StayKind $kind, int $hours) => Rate::query()->where('room_type_id', ($this->type)($type)->id)->where('stay_kind', $kind)->where('hours', $hours)->first();
 });
@@ -94,8 +100,54 @@ it('refuses options the branch does not sell and odd hour blocks', function (): 
 it('refuses a room type of another branch', function (): void {
     $other = RoomType::factory()->create();
 
-    expect(fn () => app(SaveRate::class)->handle($this->admin, $this->branchId, $other->id, StayKind::Hourly, 6, Money::ofCentavos(10000)))
+    expect(fn () => app(SaveRate::class)->handle($this->admin, $this->branchId, $other->id, null, null, StayKind::Hourly, 6, Money::ofCentavos(10000)))
         ->toThrow(ModelNotFoundException::class);
+});
+
+it('sets a flat floor rate and a room rate once the branch switch is on', function (): void {
+    Hotel::branch()->update(['floor_room_rates_enabled' => true]);
+    $room = Hotel::room('205'); // a Deluxe room
+    $floorId = $room->floor_id;
+
+    ($this->floorRate)($floorId, StayKind::Hourly, 12, 60000);
+    ($this->roomRate)($room->id, StayKind::Hourly, 12, 80000);
+
+    $floorRate = Rate::query()->where('floor_id', $floorId)->where('stay_kind', StayKind::Hourly)->where('hours', 12)->first();
+    $roomRate = Rate::query()->where('room_id', $room->id)->where('stay_kind', StayKind::Hourly)->where('hours', 12)->first();
+
+    expect($floorRate?->amount?->centavos())->toBe(60000)
+        ->and($floorRate?->room_type_id)->toBeNull()
+        ->and($roomRate?->amount?->centavos())->toBe(80000)
+        ->and($roomRate?->room_type_id)->toBeNull()
+        ->and(AuditLog::query()->where('subject_type', 'rate')->pluck('action')->all())->toBe(['rate.created', 'rate.created']);
+});
+
+it('refuses a floor or room rate while the branch switch is off', function (): void {
+    $room = Hotel::room('205');
+
+    expect(fn () => ($this->floorRate)($room->floor_id, StayKind::Hourly, 12, 60000))->toThrow(ActionRefused::class, 'Floor & room rates are switched off');
+    expect(fn () => ($this->roomRate)($room->id, StayKind::Hourly, 12, 80000))->toThrow(ActionRefused::class, 'Floor & room rates are switched off');
+});
+
+it('refuses more than one scope on a rate', function (): void {
+    Hotel::branch()->update(['floor_room_rates_enabled' => true]);
+    $room = Hotel::room('205');
+
+    expect(fn () => app(SaveRate::class)->handle($this->admin, $this->branchId, ($this->type)('Deluxe')->id, $room->floor_id, null, StayKind::Hourly, 12, Money::ofCentavos(60000)))
+        ->toThrow(ActionRefused::class, 'exactly one');
+});
+
+it('removes a room override freely, even while a stay is in that room', function (): void {
+    Hotel::branch()->update(['floor_room_rates_enabled' => true]);
+    $room = Hotel::room('205');
+    ($this->roomRate)($room->id, StayKind::Hourly, 12, 80000);
+
+    Hotel::openShift();
+    Hotel::checkIn('205', 12, tendered: 150000);
+
+    // Unlike a type rate, an override falls back to the type, so it can always be removed.
+    expect(($this->roomRate)($room->id, StayKind::Hourly, 12, null))->toBeNull()
+        ->and(Rate::query()->where('room_id', $room->id)->exists())->toBeFalse();
 });
 
 it('sets, changes and removes an extension block with audit rows', function (): void {
@@ -155,8 +207,31 @@ it('shows the rate table (45) with "not set" as null, the extension rates and th
         ->component('Admin/Rates')
         ->where('columns', fn ($c) => collect($c)->pluck('key')->all() === ['hourly-6', 'hourly-12', 'hourly-18', 'hourly-24', 'overnight'])
         ->where('rows', fn ($rows) => collect($rows)->firstWhere('room_type_id', $suite->id)['cells']['hourly-18'] === null)
+        ->where('floor_room_rates_enabled', false)
+        ->where('floors', [])
         ->has('extension')
         ->has('discounts'));
+});
+
+it('shows the floors and rooms for overrides once the switch is on', function (): void {
+    Hotel::branch()->update(['floor_room_rates_enabled' => true]);
+    $room = Hotel::room('205');
+    ($this->roomRate)($room->id, StayKind::Hourly, 12, 80000);
+
+    $this->actingAs($this->admin)->get('/admin/rates')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->where('floor_room_rates_enabled', true)
+        ->where('floors', fn ($f) => collect($f)->isNotEmpty())
+        ->where('rooms', fn ($r) => collect($r)->contains(fn ($o) => $o['value'] === $room->id))
+        ->where('room_cells', fn ($cells) => collect($cells)->get((string) $room->id)['hourly-12']['amount'] === 80000));
+});
+
+it('saves a floor rate over HTTP', function (): void {
+    Hotel::branch()->update(['floor_room_rates_enabled' => true]);
+    $floorId = Hotel::room('205')->floor_id;
+
+    $this->actingAs($this->admin)->from('/admin/rates')->put('/admin/rates', ['floor_id' => $floorId, 'stay_kind' => 'hourly', 'hours' => 12, 'amount' => 60000])->assertRedirect('/admin/rates');
+
+    expect(Rate::query()->where('floor_id', $floorId)->where('hours', 12)->first()?->amount?->centavos())->toBe(60000);
 });
 
 it('saves and blanks a rate cell over HTTP', function (): void {

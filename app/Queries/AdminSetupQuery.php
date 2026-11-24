@@ -113,8 +113,24 @@ final class AdminSetupQuery
         $label = fn (Rate $r): string => $r->stay_kind === StayKind::Overnight ? 'Overnight' : "{$r->hours} hrs";
         $typeNames = $types->pluck('name', 'id');
 
+        // A cell map (column key → rate or null) for any scope, reused for floors and rooms.
+        $cellsFor = fn (callable $match): array => collect($columns)->mapWithKeys(function (array $c) use ($rates, $match): array {
+            $rate = $rates->first(fn (Rate $r): bool => $match($r) && $r->stay_kind->value === $c['kind'] && (int) $r->hours === $c['hours']);
+
+            return [$c['key'] => $rate === null ? null : ['id' => $rate->id, 'amount' => $rate->amount?->centavos()]];
+        })->all();
+
+        $overrides = $branch->floor_room_rates_enabled;
+        $floors = $overrides ? Floor::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->orderBy('number')->get() : collect();
+        $rooms = $overrides ? Room::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->with(['floor' => fn ($q) => $q->withoutGlobalScopes()])->orderBy('number')->get() : collect();
+
         return [
             'columns' => $columns,
+            'floor_room_rates_enabled' => $overrides,
+            'floors' => $floors->map(fn (Floor $f): array => ['value' => $f->id, 'label' => "Floor {$f->number}"])->values()->all(),
+            'rooms' => $rooms->map(fn (Room $r): array => ['value' => $r->id, 'label' => "Room {$r->number}".($r->floor === null ? '' : " · Floor {$r->floor->number}")])->values()->all(),
+            'floor_cells' => $floors->mapWithKeys(fn (Floor $f): array => [$f->id => $cellsFor(fn (Rate $r): bool => $r->floor_id === $f->id)])->all(),
+            'room_cells' => $rooms->mapWithKeys(fn (Room $r): array => [$r->id => $cellsFor(fn (Rate $rr): bool => $rr->room_id === $r->id)])->all(),
             'rows' => $types->map(fn (RoomType $t): array => [
                 'room_type_id' => $t->id,
                 'name' => $t->name,
@@ -177,6 +193,7 @@ final class AdminSetupQuery
                 'overnight_checkin_time' => substr($branch->overnight_checkin_time, 0, 5),
                 'overnight_checkout_time' => substr($branch->overnight_checkout_time, 0, 5),
                 'long_stay_enabled' => $branch->long_stay_enabled,
+                'floor_room_rates_enabled' => $branch->floor_room_rates_enabled,
                 'long_stay_max_days' => (int) $branch->long_stay_max_days,
                 'extension_rule' => $branch->extension_rule->value,
                 'extension_cycle_hours' => (int) $branch->extension_cycle_hours,

@@ -122,6 +122,7 @@ final class CheckInGuest
         $quote = $this->pricing->quoteStay(
             RateCard::forBranch($branch), $locked->room_type_id, $kind, $quantity, $now,
             $discount === null ? null : DiscountTerms::of($discount),
+            roomId: $locked->id, floorId: $locked->floor_id,
         );
 
         $this->assertNotReserved($locked, $quote->expectedCheckoutAt);
@@ -187,6 +188,7 @@ final class CheckInGuest
         $quote = $this->pricing->quoteStay(
             RateCard::forBranch($branch), $stay->room_type_id, $stay->stay_kind, (int) ($stay->hours ?? $stay->nights ?? $stay->days ?? 1), $now,
             $discount === null ? null : DiscountTerms::of($discount),
+            roomId: $locked->id, floorId: $locked->floor_id,
         );
 
         $this->assertNotReserved($locked, $quote->expectedCheckoutAt, $stay->id);

@@ -20,6 +20,7 @@ use App\Exceptions\RoomTaken;
 use App\Models\FolioLine;
 use App\Models\Payment;
 use App\Models\PaymentAllocation;
+use App\Models\Rate;
 use App\Models\RoomStatusLog;
 use App\Models\Stay;
 use App\Models\StayRoom;
@@ -52,6 +53,34 @@ function ledgerCounts(): array
         'counter' => Hotel::branch()->next_stay_number,
     ];
 }
+
+it('charges a room override over a floor rate, onto the folio line', function (): void {
+    $room = Hotel::room('205'); // Deluxe, 12 h ₱650 by type
+    Hotel::branch()->update(['floor_room_rates_enabled' => true]);
+    Rate::query()->create(['branch_id' => Hotel::branch()->id, 'floor_id' => $room->floor_id, 'stay_kind' => StayKind::Hourly, 'hours' => 12, 'amount' => Money::ofCentavos(60000)]);
+    Rate::query()->create(['branch_id' => Hotel::branch()->id, 'room_id' => $room->id, 'stay_kind' => StayKind::Hourly, 'hours' => 12, 'amount' => Money::ofCentavos(80000)]);
+
+    $stay = Hotel::checkIn('205', 12, tendered: 100000);
+
+    expect($stay->quoted_amount->centavos())->toBe(80000)
+        ->and(FolioLine::query()->where('stay_id', $stay->id)->where('kind', LineKind::Room)->sole()->amount->centavos())->toBe(80000);
+});
+
+it('uses a flat floor rate for a room on that floor', function (): void {
+    $room = Hotel::room('205'); // Deluxe, 12 h ₱650 by type
+    Hotel::branch()->update(['floor_room_rates_enabled' => true]);
+    Rate::query()->create(['branch_id' => Hotel::branch()->id, 'floor_id' => $room->floor_id, 'stay_kind' => StayKind::Hourly, 'hours' => 12, 'amount' => Money::ofCentavos(60000)]);
+
+    expect(Hotel::checkIn('205', 12, tendered: 100000)->quoted_amount->centavos())->toBe(60000);
+});
+
+it('ignores floor and room rates when the branch switch is off', function (): void {
+    $room = Hotel::room('205');
+    Rate::query()->create(['branch_id' => Hotel::branch()->id, 'floor_id' => $room->floor_id, 'stay_kind' => StayKind::Hourly, 'hours' => 12, 'amount' => Money::ofCentavos(60000)]);
+
+    // The switch is off, so the Deluxe type rate applies, not the ₱600 floor rate.
+    expect(Hotel::checkIn('205', 12, tendered: 100000)->quoted_amount->centavos())->toBe(65000);
+});
 
 it('writes the stay, the room line, the payment, the key deposit and the room status in one transaction', function (): void {
     $counter = Hotel::branch()->next_stay_number;
