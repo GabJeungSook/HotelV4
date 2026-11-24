@@ -21,7 +21,7 @@ function start(): void {
 </script>
 
 <template>
-    <KioskLayout title="Welcome" :bare="free > 0">
+    <KioskLayout title="Welcome">
         <KioskWelcome v-if="free > 0" :hotel="hotel" :rules="rules" :free="free" @start="start" />
         <NoRooms v-else @check="refresh" />
     </KioskLayout>
