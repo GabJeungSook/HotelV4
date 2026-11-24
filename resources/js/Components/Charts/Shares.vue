@@ -39,17 +39,23 @@ const parts = computed(() => {
 
     const total = kept.reduce((sum, r) => sum + r.value, 0);
 
-    return kept.map((r, i) => {
-        const percent = total > 0 ? (r.value / total) * 100 : 0;
+    // Whole-number percents that always add up to 100 (largest-remainder method), so the legend
+    // never reads 99% or 101% from rounding each share on its own.
+    const exact = kept.map((r) => (total > 0 ? (r.value / total) * 100 : 0));
+    const rounded = exact.map((p) => Math.floor(p));
+    let left = (total > 0 ? 100 : 0) - rounded.reduce((sum, f) => sum + f, 0);
+    const byRemainder = exact.map((p, i) => ({ i, frac: p - Math.floor(p) })).sort((a, b) => b.frac - a.frac);
+    for (let k = 0; k < byRemainder.length && left > 0; k++, left--) {
+        rounded[byRemainder[k].i]++;
+    }
 
-        return {
-            ...r,
-            color: r.color ?? seriesColors[i % seriesColors.length],
-            percent,
-            percentText: `${Math.round(percent)}%`,
-            valueText: props.money ? peso(r.value) : num(r.value),
-        };
-    });
+    return kept.map((r, i) => ({
+        ...r,
+        color: r.color ?? seriesColors[i % seriesColors.length],
+        percent: exact[i],
+        percentText: `${rounded[i]}%`,
+        valueText: props.money ? peso(r.value) : num(r.value),
+    }));
 });
 
 const isEmpty = computed(() => parts.value.length === 0);

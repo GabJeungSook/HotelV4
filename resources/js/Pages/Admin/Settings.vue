@@ -170,6 +170,7 @@ const summary = computed(() => ({
         ['Hourly stays', b.value.hourly_enabled ? 'On · 6, 12, 18, 24' : 'Off'],
         ['Overnight stays', b.value.overnight_enabled ? `On · ${clock(b.value.overnight_checkin_time)} to ${clock(b.value.overnight_checkout_time)}` : 'Off'],
         ['Long stay per day', b.value.long_stay_enabled ? `On · up to ${b.value.long_stay_max_days} days` : 'Off'],
+        ['Floor & room rates', b.value.floor_room_rates_enabled ? 'On' : 'Off'],
         [
             'Extension pricing',
             b.value.extension_rule === 'cycle'
@@ -190,6 +191,7 @@ const summary = computed(() => ({
     modules: [
         ['Kiosk', b.value.kiosk_enabled ? `On · hold ${b.value.kiosk_hold_minutes} min` : 'Off'],
         ['Reservations', b.value.reservations_enabled ? `On · release after ${minutes(b.value.reservation_release_minutes)}` : 'Off'],
+        ['Event halls', b.value.event_hall_enabled ? 'On' : 'Off'],
         ['POS and stock', b.value.pos_enabled ? 'On' : 'Off'],
         ['Housekeeping', b.value.housekeeping_enabled ? `On · ${minutes(b.value.cleaning_deadline_minutes)} / ${minutes(b.value.cleaning_target_minutes)}` : 'Off'],
     ],
