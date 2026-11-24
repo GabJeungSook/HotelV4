@@ -8,9 +8,17 @@ import type { BoardRoom } from '@/Components/RoomRow.vue';
 import RoomTable, { type BoardFloor, type RoomFilter } from '@/Components/RoomTable.vue';
 import { usePolling } from '@/Composables/usePolling';
 import { useShared } from '@/Composables/useShared';
+import { formatDateTime } from '@/Composables/useDateTime';
 import FrontDeskLayout from '@/Layouts/FrontDeskLayout.vue';
 import KioskHolds, { type KioskHold } from './KioskHolds.vue';
 import Skeleton from './Skeleton.vue';
+
+interface KioskType {
+    name: string;
+    queue: { number: string; fresh: boolean }[];
+    queue_count: number;
+    busy: { number: string; reason: string; free_at: string | null }[];
+}
 
 /**
  * The room board (4): one row per room, grouped by floor, from BoardQuery. The display status is
@@ -25,6 +33,7 @@ type Row = BoardRoom & { stayId: number | null };
 const props = defineProps<{
     board?: { floors: (BoardFloor & { rooms: Row[] })[]; total: number; floorOptions: { value: string; label: string }[]; now: string };
     holds: KioskHold[];
+    kioskOrder?: { enabled: boolean; types: KioskType[]; now: string };
     filters: { q: string; floor: string };
     poll: number;
     holdsPoll: number;
@@ -39,6 +48,10 @@ const now = useNow({ interval: 1000 });
 usePolling(['board'], props.poll);
 // Kiosk holds reload on their own timer, so a new hold shows on the rail without a refresh.
 usePolling(['holds'], props.holdsPoll);
+
+// Kiosk order (which rooms the kiosk will give next, and what is about to free up).
+const kioskPanel = ref(false);
+usePolling(['kioskOrder'], props.poll);
 
 /** "46 rooms on 2 floors" (mockup v6); the times tick live, so no "updates every N s" line. */
 const boardSub = computed(() => {
@@ -128,6 +141,7 @@ function open(room: BoardRoom): void {
                         <USelect v-model="floor" :items="floorItems" class="w-36" aria-label="Floor" @update:model-value="visit" />
                         <USelect v-model="sort" :items="sortItems" class="w-56" aria-label="Sort" />
                         <span class="flex-1" />
+                        <UButton v-if="kiosk" color="neutral" variant="outline" icon="i-solar-monitor-bold-duotone" label="Kiosk order" @click="kioskPanel = true" />
                         <UButton icon="i-solar-add-square-linear" label="Walk-in check-in" @click="tab = 'vacant'" />
                     </div>
 
@@ -159,5 +173,50 @@ function open(room: BoardRoom): void {
                 </div>
             </aside>
         </div>
+
+        <!-- Kiosk order: the rooms the kiosk will give next, per type, and what is about to free up. -->
+        <USlideover v-model:open="kioskPanel" title="Kiosk order" description="The rooms the kiosk offers next, and what is about to free up." :ui="{ content: 'max-w-[460px]' }">
+            <template #body>
+                <Deferred data="kioskOrder">
+                    <template #fallback><div class="py-8 text-center text-sm text-muted">Loading…</div></template>
+
+                    <div v-if="!kioskOrder || kioskOrder.types.length === 0" class="py-8">
+                        <EmptyState icon="i-solar-monitor-bold-duotone" title="Nothing to show" text="No kiosk-sellable room types yet." />
+                    </div>
+                    <div v-else class="flex flex-col gap-5">
+                        <section v-for="t in kioskOrder.types" :key="t.name">
+                            <div class="mb-2 flex items-center justify-between">
+                                <h3 class="text-sm font-semibold text-highlighted">{{ t.name }}</h3>
+                                <span class="rounded-label px-1.5 text-xs tabular" :class="t.queue_count ? 'bg-ok-50 text-ok' : 'bg-grey-50 text-muted'">{{ t.queue_count }} available</span>
+                            </div>
+
+                            <div v-if="t.queue.length" class="flex flex-wrap gap-1.5">
+                                <span
+                                    v-for="(r, i) in t.queue"
+                                    :key="r.number"
+                                    class="inline-flex items-center gap-1 rounded-control border px-2 py-1 text-[13px] font-medium tabular"
+                                    :class="i === 0 ? 'border-primary-line bg-primary-50 text-primary-ink' : 'border-default bg-default text-highlighted'"
+                                >
+                                    <span>{{ r.number }}</span>
+                                    <span v-if="i === 0" class="text-[10px] font-semibold uppercase tracking-wide text-primary">Next</span>
+                                    <span v-else-if="r.fresh" class="text-[10px] text-muted">fresh</span>
+                                </span>
+                            </div>
+                            <p v-else class="text-[13px] text-bad">None available on the kiosk right now.</p>
+
+                            <ul v-if="t.busy.length" class="mt-2 flex flex-col gap-1 border-t border-default pt-2">
+                                <li v-for="b in t.busy" :key="b.number" class="flex items-center justify-between text-[13px]">
+                                    <span class="tabular text-muted">Room {{ b.number }}</span>
+                                    <span class="text-muted">
+                                        {{ b.reason }}<template v-if="b.free_at"> · free after {{ formatDateTime(b.free_at, 'time') }}</template>
+                                    </span>
+                                </li>
+                            </ul>
+                        </section>
+                        <p class="text-xs text-muted">"Next" is the room the kiosk gives first; a fresh room has not been used yet. Occupied rooms return to the kiosk once they check out and are cleaned.</p>
+                    </div>
+                </Deferred>
+            </template>
+        </USlideover>
     </FrontDeskLayout>
 </template>

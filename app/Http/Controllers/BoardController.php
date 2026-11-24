@@ -9,6 +9,7 @@ use App\Models\Stay;
 use App\Models\User;
 use App\Queries\BoardQuery;
 use App\Queries\HoldScreenQuery;
+use App\Queries\KioskOrderQuery;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,7 +22,7 @@ use Inertia\Response;
  */
 final class BoardController extends Controller
 {
-    public function index(Request $request, BoardQuery $board, HoldScreenQuery $holds): Response|RedirectResponse
+    public function index(Request $request, BoardQuery $board, HoldScreenQuery $holds, KioskOrderQuery $kioskOrder): Response|RedirectResponse
     {
         /** @var User $user */
         $user = $request->user();
@@ -39,6 +40,7 @@ final class BoardController extends Controller
         return Inertia::render('Board/Index', [
             'board' => Inertia::defer(fn (): array => $board->forBranch((int) $user->branch_id, $q, $floor)),
             'holds' => fn (): array => $holds->holds((int) $user->branch_id),
+            'kioskOrder' => Inertia::defer(fn (): array => $kioskOrder->forBranch((int) $user->branch_id)),
             'filters' => ['q' => $q, 'floor' => $floor],
             'poll' => config('hotel.polling.board'),
             'holdsPoll' => config('hotel.polling.kiosk_holds'),
