@@ -284,38 +284,38 @@ const hourItems = Array.from({ length: 24 }, (_, i) => ({ label: `${i + 1} hrs`,
         </section>
 
         <h3 class="mt-6 mb-2 text-[15px] font-semibold text-highlighted">Extension rates (all room types)</h3>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap items-stretch gap-2.5">
             <UButton
                 v-for="e in extension"
                 :key="e.id"
                 color="neutral"
                 variant="outline"
-                class="flex-col items-start gap-0"
+                class="min-h-[56px] min-w-[104px] flex-col items-start justify-center gap-0.5 px-4"
                 :aria-label="`${e.hours} hours extension ${formatMoney(e.amount)}. Edit`"
                 @click="openExtension(e)"
             >
-                <span class="font-semibold text-highlighted">{{ e.hours }} hrs</span>
-                <small class="num text-muted">{{ formatMoney(e.amount, 'tile') }}</small>
+                <span class="text-[14px] font-semibold text-highlighted">{{ e.hours }} hrs</span>
+                <small class="num text-[12.5px] text-muted">{{ formatMoney(e.amount, 'tile') }}</small>
             </UButton>
-            <UButton color="neutral" variant="outline" class="border-dashed" icon="i-solar-add-square-linear" label="Add" @click="openExtension(null)" />
+            <UButton color="neutral" variant="outline" class="min-h-[56px] border-dashed px-4" icon="i-solar-add-square-linear" label="Add" @click="openExtension(null)" />
         </div>
 
         <h3 class="mt-6 mb-2 text-[15px] font-semibold text-highlighted">Discounts</h3>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap items-stretch gap-2.5">
             <UButton
                 v-for="d in discounts"
                 :key="d.id"
                 color="neutral"
                 variant="outline"
-                class="flex-col items-start gap-0"
+                class="min-h-[56px] min-w-[104px] flex-col items-start justify-center gap-0.5 px-4"
                 :class="d.is_active ? '' : 'opacity-60'"
                 :aria-label="`${d.name} ${discountValue(d)}. Edit`"
                 @click="openDiscount(d)"
             >
-                <span class="font-semibold text-highlighted">{{ d.name }}</span>
-                <small class="num text-muted">{{ discountValue(d) }}{{ d.is_active ? '' : ' · off' }}</small>
+                <span class="text-[14px] font-semibold text-highlighted">{{ d.name }}</span>
+                <small class="num text-[12.5px] text-muted">{{ discountValue(d) }}{{ d.is_active ? '' : ' · off' }}</small>
             </UButton>
-            <UButton color="neutral" variant="outline" class="border-dashed" icon="i-solar-add-square-linear" label="Add" @click="openDiscount(null)" />
+            <UButton color="neutral" variant="outline" class="min-h-[56px] border-dashed px-4" icon="i-solar-add-square-linear" label="Add" @click="openDiscount(null)" />
         </div>
 
         <p class="mt-4 text-[13px] text-muted">A blank rate means that option is not offered. Changing a rate affects new check-ins only; open stays keep the price they were quoted.</p>

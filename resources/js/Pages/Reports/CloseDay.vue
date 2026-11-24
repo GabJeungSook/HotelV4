@@ -11,7 +11,7 @@ import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
 import { useReport } from '@/Composables/useReport';
-import { shortName, useShared } from '@/Composables/useShared';
+import { useShared } from '@/Composables/useShared';
 import BackOfficeLayout from '@/Layouts/BackOfficeLayout.vue';
 
 /**
@@ -111,7 +111,7 @@ function print(): void {
                         <tr v-for="s in day.shifts" :key="s.id">
                             <td>
                                 {{ s.period_name }} · <span class="num">{{ z(s.z_no) }}</span>
-                                <div class="text-xs text-muted">{{ s.members.map(shortName).join(', ') }}</div>
+                                <div class="text-xs text-muted">{{ s.members.join(', ') }}</div>
                             </td>
                             <td class="r">{{ s.net_sales === null ? '—' : m(s.net_sales) }}</td>
                             <td class="r" :class="s.short < 0 ? '!text-bad' : ''">{{ m(s.short) }}</td>

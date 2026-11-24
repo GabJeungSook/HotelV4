@@ -254,7 +254,7 @@ const canAddRoom = computed(() => props.floors.length > 0 && props.types.some((t
                                 <StatusLabel v-if="!r.is_active" class="ms-1" tone="neutral" label="Off" />
                             </td>
                             <td>{{ r.is_kiosk_enabled ? 'Yes' : '—' }}</td>
-                            <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" label="Edit" @click="openRoom(r)" /></td>
+                            <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" icon="i-solar-pen-2-linear" label="Edit" @click="openRoom(r)" /></td>
                         </tr>
                     </tbody>
                 </table>
@@ -285,7 +285,7 @@ const canAddRoom = computed(() => props.floors.length > 0 && props.types.some((t
                         <td class="num">{{ f.number }}</td>
                         <td class="text-highlighted">{{ f.label }}</td>
                         <td class="num text-right">{{ f.rooms }}</td>
-                        <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" label="Edit" @click="openFloor(f)" /></td>
+                        <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" icon="i-solar-pen-2-linear" label="Edit" @click="openFloor(f)" /></td>
                     </tr>
                 </tbody>
             </table>
@@ -310,7 +310,7 @@ const canAddRoom = computed(() => props.floors.length > 0 && props.types.some((t
                         <td class="!whitespace-normal text-muted">{{ t.description || '—' }}</td>
                         <td class="num text-right">{{ t.rooms }}</td>
                         <td>{{ t.is_active ? 'Yes' : 'No' }}</td>
-                        <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" label="Edit" @click="openType(t)" /></td>
+                        <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" icon="i-solar-pen-2-linear" label="Edit" @click="openType(t)" /></td>
                     </tr>
                 </tbody>
             </table>

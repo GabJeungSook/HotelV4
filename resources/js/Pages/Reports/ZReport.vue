@@ -14,7 +14,6 @@ import PersonPill from '@/Components/PersonPill.vue';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
 import { useReport } from '@/Composables/useReport';
-import { shortName } from '@/Composables/useShared';
 import BackOfficeLayout from '@/Layouts/BackOfficeLayout.vue';
 
 /**
@@ -228,7 +227,7 @@ function print(): void {
                             <td>{{ time(t.due_at) }}</td>
                             <td>{{ time(t.started_at) }}</td>
                             <td>{{ time(t.finished_at) }}</td>
-                            <td><PersonPill v-if="t.by" :name="shortName(t.by)" /><span v-else class="text-muted">—</span></td>
+                            <td><PersonPill v-if="t.by" :name="t.by" /><span v-else class="text-muted">—</span></td>
                             <td>
                                 <StatusLabel v-if="t.is_late" tone="bad" label="Late" />
                                 <StatusLabel v-else-if="t.status !== 'done'" tone="violet" :label="t.status === 'in_progress' ? 'Cleaning' : 'Waiting'" />
@@ -307,7 +306,7 @@ function print(): void {
                             <td>{{ time(e.occurred_at) }}</td>
                             <td>{{ e.category ?? kindLabel[e.kind] }}</td>
                             <td class="!whitespace-normal">{{ e.note }}<template v-if="e.voided"> · voided: {{ e.void_reason }}</template></td>
-                            <td><PersonPill :name="shortName(e.by)" /></td>
+                            <td><PersonPill :name="e.by" /></td>
                             <td class="r">{{ formatMoney(e.amount, 'column') }}</td>
                         </tr>
                     </tbody>

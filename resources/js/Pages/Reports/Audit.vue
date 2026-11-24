@@ -11,7 +11,6 @@ import StatusLabel from '@/Components/StatusLabel.vue';
 import PersonPill from '@/Components/PersonPill.vue';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { useReport } from '@/Composables/useReport';
-import { shortName } from '@/Composables/useShared';
 import BackOfficeLayout from '@/Layouts/BackOfficeLayout.vue';
 
 /**
@@ -82,7 +81,7 @@ const chip: Record<string, string> = { voids: 'Void', transfers: 'Transfer', can
                         <td>{{ formatDateTime(row.at, 'time') }}</td>
                         <td><StatusLabel :tone="tone[row.type] ?? 'neutral'" :label="chip[row.type] ?? row.action" /></td>
                         <td class="!whitespace-normal">{{ row.details }}</td>
-                        <td><PersonPill v-if="row.by" :name="shortName(row.by)" /><span v-else class="text-muted">—</span></td>
+                        <td><PersonPill v-if="row.by" :name="row.by" /><span v-else class="text-muted">—</span></td>
                         <td><PersonPill v-if="row.approved_by" :name="row.approved_by" /><span v-else class="text-muted">—</span></td>
                     </tr>
                 </tbody>

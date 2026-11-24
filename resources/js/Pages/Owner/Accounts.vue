@@ -105,7 +105,7 @@ function save(): void {
                         <td><span class="text-[12.5px]" :class="roleText.owner">Superadmin</span></td>
                         <td>{{ a.last_seen_at ? formatDateTime(a.last_seen_at, 'dayTime') : '—' }}</td>
                         <td><StatusLabel :tone="a.is_active ? 'ok' : 'neutral'" :label="a.is_active ? 'Active' : 'Deactivated'" /></td>
-                        <td class="text-right"><UButton color="neutral" variant="outline" size="sm" label="Edit" @click="edit(a)" /></td>
+                        <td class="text-right"><UButton color="neutral" variant="outline" size="sm" icon="i-solar-pen-2-linear" label="Edit" @click="edit(a)" /></td>
                     </tr>
                 </tbody>
             </table>

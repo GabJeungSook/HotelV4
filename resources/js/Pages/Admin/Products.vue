@@ -186,12 +186,12 @@ const valid = computed(() => {
                 <tbody>
                     <tr v-for="p in products" :key="p.id" :data-product="p.name" :class="p.is_active ? '' : 'text-dimmed'">
                         <td class="text-highlighted">{{ p.name }}</td>
-                        <td>{{ p.category }}</td>
+                        <td><span class="font-medium text-info">{{ p.category }}</span></td>
                         <td class="num text-right">{{ formatMoney(p.price_amount, 'column') }}</td>
-                        <td>{{ p.tracks_stock ? 'Yes' : 'No' }}</td>
+                        <td><span :class="p.tracks_stock ? 'font-medium text-ok' : 'text-muted'">{{ p.tracks_stock ? 'Yes' : 'No' }}</span></td>
                         <td class="num text-right">{{ p.tracks_stock ? p.low_stock_at : '—' }}</td>
-                        <td>{{ p.is_active ? 'Yes' : 'No' }}</td>
-                        <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" label="Edit" @click="edit(p)" /></td>
+                        <td><span :class="p.is_active ? 'font-medium text-ok' : 'font-medium text-bad'">{{ p.is_active ? 'Yes' : 'No' }}</span></td>
+                        <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" icon="i-solar-pen-2-linear" label="Edit" @click="edit(p)" /></td>
                     </tr>
                 </tbody>
             </table>

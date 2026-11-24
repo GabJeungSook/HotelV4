@@ -508,7 +508,7 @@ function saveReason(): void {
                                 <StatusLabel v-if="!r.is_active" label="Off" />
                                 <span v-if="!r.needs_note && !r.needs_manager && r.is_active" class="text-muted">—</span>
                             </td>
-                            <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" label="Edit" @click="openReason(r)" /></td>
+                            <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" icon="i-solar-pen-2-linear" label="Edit" @click="openReason(r)" /></td>
                         </tr>
                     </tbody>
                 </table>

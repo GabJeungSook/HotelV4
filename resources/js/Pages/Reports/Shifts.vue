@@ -13,7 +13,6 @@ import ShiftCalendar, { type CalendarBand, type CalendarDay } from '@/Components
 import StatusLabel from '@/Components/StatusLabel.vue';
 import { formatDateRange, formatDateTime } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
-import { shortName } from '@/Composables/useShared';
 import BackOfficeLayout from '@/Layouts/BackOfficeLayout.vue';
 import type { Tone } from '@/types/ui';
 
@@ -87,7 +86,13 @@ const statusItems = [
 
 const z = (n: number | null) => (n === null ? '—' : `Z-${String(n).padStart(4, '0')}`);
 const day = (d: string) => formatDateTime(`${d}T12:00:00+08:00`, 'businessDate').replace(/ \d{4}$/, '');
-const periodTone = (name: string, i: number): Tone => (i % 2 === 0 ? 'primary' : 'violet');
+const periodTone = (name: string, i: number): Tone => {
+    const u = name.toUpperCase();
+    if (u.includes('AM')) return 'primary'; // blue
+    if (u.includes('PM')) return 'warn'; // amber
+
+    return i % 2 === 0 ? 'primary' : 'warn';
+};
 const periodIndex = (name: string) => Math.max(0, props.options.periods.indexOf(name));
 
 function state(row: Row): { label: string; tone: Tone } {
@@ -104,7 +109,7 @@ function state(row: Row): { label: string; tone: Tone } {
         return { label: 'Short', tone: 'warn' };
     }
 
-    return { label: 'Closed', tone: 'neutral' };
+    return { label: 'Closed', tone: 'bad' };
 }
 
 function times(row: Row): string {
@@ -176,7 +181,7 @@ const filtered = computed(() => !!(props.filters.period || props.filters.desk ||
                             <td class="!whitespace-nowrap">{{ day(row.business_date) }}</td>
                             <td><StatusLabel :tone="periodTone(row.period_name, periodIndex(row.period_name))" :label="row.period_name" /></td>
                             <td class="!whitespace-nowrap">
-                                <PersonPill v-if="row.members.length" :name="shortName(row.members[0])" :extra="row.members.length > 1 ? `+${row.members.length - 1}` : undefined" />
+                                <PersonPill v-if="row.members.length" :name="row.members[0]" :extra="row.members.length > 1 ? `+${row.members.length - 1}` : undefined" />
                                 <span v-else class="text-muted">—</span>
                             </td>
                             <td class="mn !whitespace-nowrap">{{ times(row) }}</td>

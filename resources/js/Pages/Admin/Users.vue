@@ -166,7 +166,7 @@ const isMe = computed(() => editing.value !== null && editing.value.id === me.va
                         <td :class="u.pin === false ? 'text-bad' : ''">{{ u.pin === null ? '—' : u.pin ? 'Set' : 'Not set' }}</td>
                         <td>{{ u.floors.length ? u.floors.join(', ') : '—' }}</td>
                         <td><StatusLabel :tone="u.is_active ? 'ok' : 'neutral'" :label="u.is_active ? 'Active' : 'Deactivated'" /></td>
-                        <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" label="Edit" @click="edit(u)" /></td>
+                        <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" icon="i-solar-pen-2-linear" label="Edit" @click="edit(u)" /></td>
                     </tr>
                 </tbody>
             </table>
