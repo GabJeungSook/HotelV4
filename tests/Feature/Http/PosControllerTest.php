@@ -57,8 +57,11 @@ it('shows the POS with products, stock states, occupied rooms and this shift’s
         ->component('Pos/Index')
         ->where('products', fn ($products) => collect($products)->firstWhere('name', 'Coke 1.5 L')['stock'] === 0
             && collect($products)->firstWhere('name', 'Chips')['low'] === true
-            && collect($products)->where('name', 'Broken glass')->isEmpty())
-        ->where('categories', ['Amenities', 'Drinks', 'Snacks', 'Toiletries'])
+            && collect($products)->where('name', 'Broken glass')->isEmpty()
+            // a meal shows how many it can be made; a supply is not sold at the counter
+            && collect($products)->firstWhere('name', 'Tocilog')['stock'] === 100
+            && collect($products)->where('name', 'Meal plate')->isEmpty())
+        ->where('categories', ['Amenities', 'Drinks', 'Meals', 'Short orders', 'Snacks', 'Toiletries'])
         ->where('rooms.0.room', '205')
         ->has('sales', 1)
         ->where('sales.0.amount', 18500)

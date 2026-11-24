@@ -778,15 +778,35 @@ CREATE TABLE products (
   report_group ENUM('foods','drinks','misc') NOT NULL,   -- column on the Z-report (37b)
   outlet ENUM('frontdesk','kitchen','pub') NOT NULL DEFAULT 'frontdesk',
   price_amount BIGINT NOT NULL,
-  tracks_stock TINYINT(1) NOT NULL DEFAULT 1,
+  sellable TINYINT(1) NOT NULL DEFAULT 1,     -- shown on the counter / sold directly; 0 for a supply used only inside a meal
+  tracks_stock TINYINT(1) NOT NULL DEFAULT 1, -- a meal (one with product_ingredients) is 0: it keeps no own stock
   stock_on_hand INT NOT NULL DEFAULT 0,
-  low_stock_at INT NOT NULL DEFAULT 0,
+  low_stock_at INT NOT NULL DEFAULT 0,        -- for a meal, the "warn when fewer than N can be made" level
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
   UNIQUE KEY products_branch_name_unique (branch_id, name),
   CONSTRAINT products_branch_fk FOREIGN KEY (branch_id) REFERENCES branches(id),
-  CONSTRAINT products_price_chk CHECK (price_amount > 0),
+  CONSTRAINT products_price_chk CHECK (price_amount >= 0 AND (sellable = 0 OR price_amount > 0)),  -- a supply may have no price; anything sold is > 0
   CONSTRAINT products_stock_chk CHECK (stock_on_hand >= 0)
+);
+
+-- The recipe (bill of materials): selling a meal (product_id) deducts `quantity` of each ingredient
+-- (ingredient_id) from its own stock. Flat (an ingredient is a raw stock item, never itself a meal)
+-- and editable config — replaced on save, not appended.
+CREATE TABLE product_ingredients (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  branch_id BIGINT UNSIGNED NOT NULL,
+  product_id BIGINT UNSIGNED NOT NULL,        -- the meal
+  ingredient_id BIGINT UNSIGNED NOT NULL,     -- the stock item it consumes
+  quantity INT NOT NULL,                       -- whole units per one meal
+  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
+  UNIQUE KEY product_ingredients_unique (product_id, ingredient_id),
+  KEY product_ingredients_product_idx (product_id),
+  CONSTRAINT product_ingredients_branch_fk FOREIGN KEY (branch_id) REFERENCES branches(id),
+  CONSTRAINT product_ingredients_product_fk FOREIGN KEY (product_id) REFERENCES products(id),
+  CONSTRAINT product_ingredients_ingredient_fk FOREIGN KEY (ingredient_id) REFERENCES products(id),
+  CONSTRAINT product_ingredients_qty_chk CHECK (quantity > 0),
+  CONSTRAINT product_ingredients_self_chk CHECK (product_id <> ingredient_id)
 );
 
 CREATE TABLE product_price_logs (
@@ -849,6 +869,7 @@ CREATE TABLE stock_movements (
 ```
 
 - `products.stock_on_hand` is a cache of the latest `balance_after`; both are written in the same transaction under a row lock on the product.
+- A **meal** is a product with `product_ingredients` rows and `tracks_stock = 0`: it keeps no stock of its own. Selling it writes a `sale` movement against each ingredient (all tied to the meal's folio line); a void writes a `sale_reversal` for each **recorded** sale movement of that line, so it restores exactly what was taken even if the recipe later changed. A meal's POS availability is `min(ingredient.stock_on_hand / recipe qty)`.
 - `outlet` exists so kitchen and pub screens can be added later without a schema change. Version 1 only uses `frontdesk`.
 
 ### 4.14 cleaning_tasks
@@ -1148,6 +1169,10 @@ File names use the prefix `2026_11_12_` plus a running number so they sort in de
 | 000031 | `create_summary_tables` | `summary_days`, `daily_summaries`, `hourly_sales_summaries`, `daily_payment_summaries`, `daily_report_lines` |
 | 000032 | `add_idempotency_key_to_payments_table` | `payments.idempotency_key` (`CHAR(36) NULL`, unique `payments_idempotency_unique`): the take payment form (11) carries a UUID; a repeated key returns the first payment (Gab, 12 Nov 2026) |
 | 000033 | `add_must_change_password_to_users_table` | `users.must_change_password` (`TINYINT(1) NOT NULL DEFAULT 0`): a temporary password must be replaced at first sign-in (Gab, 16 Nov 2026) |
+| 2026_11_19_000001 | `add_html_to_print_logs_format` | `print_logs.format` gains `html` (exportable Z-report) |
+| 2026_11_19_000002 | `add_idempotency_key_to_folio_lines_table` | `folio_lines.idempotency_key` (`CHAR(36) NULL`, unique): the extend form carries a UUID; a repeated key returns the first extension line |
+| 2026_11_24_000001 | `add_sellable_to_products_table` | `products.sellable`; relaxes `products_price_chk` so a non-sold supply may have price 0 (Gab, 24 Nov 2026) |
+| 2026_11_24_000002 | `create_product_ingredients_table` | `product_ingredients` — the meal recipe (bill of materials) |
 
 Generated columns and CHECK constraints are added with `DB::statement()` inside the migration, because the schema builder cannot express them.
 
@@ -1163,7 +1188,8 @@ Generated columns and CHECK constraints are added with `DB::statement()` inside 
 | `FolioLine` | belongsTo stay, posOrder, product, shiftSession, room, creator · hasMany allocations · hasOne reversal · belongsTo reversalOf |
 | `Payment` | belongsTo stay, posOrder, shiftSession, creator · hasMany allocations |
 | `ShiftSession` | belongsTo branch, definition, opener, closer · hasMany members, folioLines, payments, cashMovements, forwardedStays, stockMovements · hasOne cashCount, handoverOut, handoverIn |
-| `Product` | belongsTo branch · hasMany stockMovements, priceLogs |
+| `Product` | belongsTo branch · hasMany stockMovements, priceLogs, ingredients (`ProductIngredient`, the recipe) |
+| `ProductIngredient` | belongsTo branch, product, ingredient (`Product`) |
 | `PosOrder` | belongsTo branch, shiftSession, stay · hasMany folioLines, payments |
 | `CleaningTask` | belongsTo branch, room, stay, cleaner |
 
@@ -1215,9 +1241,9 @@ Same as 8.1 from step 1, except the stay already exists: lock it, fail with `Hol
 
 ### 8.3 Add charges (`AddCharges`, screen 10; also POS room charge, 19)
 
-1. Lock open shift; lock stay (`state` must be `checked_in`); lock each product by id.
-2. For each item: fail with `InsufficientStock` if `tracks_stock` and `stock_on_hand < qty`.
-3. Insert `pos_orders` (mode `room_charge`), `folio_lines` (kind from product), `stock_movements` (kind `sale`), update `products.stock_on_hand`.
+1. Lock open shift; lock stay (`state` must be `checked_in`); lock the items **and every ingredient they consume**, in one query by id ascending (read the recipes unlocked first to know the ids).
+2. For each item: deduct what it consumes — a plain product deducts itself; a **meal** deducts each `product_ingredients` row × qty. Fail with `InsufficientStock` if any stock item is short (the whole sale rolls back).
+3. Insert `pos_orders` (mode `room_charge`), one `folio_lines` per item (kind from product; the meal's own price), the `stock_movements` (kind `sale`, one per ingredient for a meal — all tied to the meal's folio line), update each `products.stock_on_hand`. Ingredient movements carry no money.
 4. Optionally continue into 8.4 in the same transaction ("Add and take payment now").
 
 ### 8.4 Take payment (`TakePayment`, screen 11)

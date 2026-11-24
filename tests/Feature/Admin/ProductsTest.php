@@ -28,7 +28,8 @@ beforeEach(function (): void {
     $this->branchId = Hotel::branch()->id;
     $this->data = fn (array $over = []): array => [
         'name' => 'Calamansi juice', 'kind' => ProductKind::FoodDrink, 'category' => 'Drinks', 'report_group' => ReportGroup::Drinks,
-        'outlet' => Outlet::Frontdesk, 'price_amount' => Money::ofCentavos(4000), 'tracks_stock' => true, 'low_stock_at' => 6, 'is_active' => true, ...$over,
+        'outlet' => Outlet::Frontdesk, 'price_amount' => Money::ofCentavos(4000), 'sellable' => true, 'tracks_stock' => true,
+        'low_stock_at' => 6, 'is_active' => true, 'ingredients' => [], ...$over,
     ];
     $this->save = fn (?int $id, array $data) => app(SaveProduct::class)->handle($this->admin, $this->branchId, $id, $data);
 });
@@ -99,5 +100,24 @@ it('adds and edits a product over HTTP', function (): void {
     expect($tea->fresh()?->price_amount?->centavos())->toBe(4500)
         ->and(ProductPriceLog::query()->count())->toBe(1);
 
-    $this->post('/admin/products', [...$form, 'price_amount' => 0])->assertSessionHasErrors('price_amount');
+    // A ₱0 price on a product sold at the counter is refused by the action; nothing is saved.
+    $this->from('/admin/products')->post('/admin/products', [...$form, 'name' => 'Free juice', 'price_amount' => 0])->assertRedirect('/admin/products');
+    expect(Product::query()->where('name', 'Free juice')->exists())->toBeFalse();
+});
+
+it('saves a meal with a recipe and a supply with no price', function (): void {
+    $spoon = ($this->save)(null, ($this->data)(['name' => 'Spoon', 'kind' => ProductKind::Amenity, 'category' => 'Supplies', 'report_group' => ReportGroup::Misc, 'price_amount' => Money::zero(), 'sellable' => false]));
+    $egg = Hotel::product('Egg');
+
+    $meal = ($this->save)(null, ($this->data)([
+        'name' => 'Silog', 'category' => 'Meals', 'report_group' => ReportGroup::Foods, 'price_amount' => Money::ofCentavos(12000),
+        'ingredients' => [['ingredient_id' => $egg->id, 'quantity' => 2], ['ingredient_id' => $spoon->id, 'quantity' => 1]],
+    ]));
+
+    expect($spoon->sellable)->toBeFalse()
+        ->and($spoon->price_amount?->centavos())->toBe(0)
+        ->and($meal->tracks_stock)->toBeFalse()
+        ->and($meal->ingredients()->count())->toBe(2)
+        // a meal cannot contain itself, and an ingredient must keep stock
+        ->and(fn () => ($this->save)($meal->id, ($this->data)(['name' => 'Silog', 'ingredients' => [['ingredient_id' => $meal->id, 'quantity' => 1]]])))->toThrow(ActionRefused::class, 'cannot contain itself');
 });

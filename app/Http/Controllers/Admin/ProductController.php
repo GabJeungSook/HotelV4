@@ -40,7 +40,7 @@ final class ProductController extends AdminController
         return $this->saved("{$saved->name} saved.");
     }
 
-    /** @return array{name: string, kind: ProductKind, category: string, report_group: ReportGroup, outlet: Outlet, price_amount: Money, tracks_stock: bool, low_stock_at: int, is_active: bool} */
+    /** @return array{name: string, kind: ProductKind, category: string, report_group: ReportGroup, outlet: Outlet, price_amount: Money, sellable: bool, tracks_stock: bool, low_stock_at: int, is_active: bool, ingredients: list<array{ingredient_id: int, quantity: int}>} */
     private function data(Request $request): array
     {
         return [
@@ -50,9 +50,14 @@ final class ProductController extends AdminController
             'report_group' => ReportGroup::from($request->string('report_group')->toString()),
             'outlet' => Outlet::tryFrom($request->string('outlet')->toString()) ?? Outlet::Frontdesk,
             'price_amount' => Money::ofCentavos($request->integer('price_amount')),
+            'sellable' => $request->has('sellable') ? $request->boolean('sellable') : true,
             'tracks_stock' => $request->boolean('tracks_stock'),
             'low_stock_at' => $request->integer('low_stock_at'),
             'is_active' => $request->boolean('is_active'),
+            'ingredients' => array_values(array_map(
+                static fn (array $row): array => ['ingredient_id' => (int) ($row['ingredient_id'] ?? 0), 'quantity' => (int) ($row['quantity'] ?? 0)],
+                array_filter((array) $request->input('ingredients', []), 'is_array'),
+            )),
         ];
     }
 }

@@ -11,6 +11,7 @@ use App\Models\FolioLine;
 use App\Models\Payment;
 use App\Models\PosOrder;
 use App\Models\Product;
+use App\Models\ProductIngredient;
 use App\Models\Rate;
 use App\Models\ShiftSession;
 use App\Models\Stay;
@@ -71,6 +72,7 @@ it('rejects a row that breaks a CHECK constraint', function (string $model, arra
     'guest name under 3 letters' => [Stay::class, ['guest_name' => 'Al'], 'stays_name_chk'],
     'product at ₱0' => [Product::class, ['price_amount' => 0], 'products_price_chk'],
     'negative stock on hand' => [Product::class, ['stock_on_hand' => -1], 'products_stock_chk'],
+    'recipe line of 0' => [ProductIngredient::class, ['quantity' => 0], 'product_ingredients_qty_chk'],
     'room charge without a stay' => [PosOrder::class, ['mode' => 'room_charge'], 'pos_orders_mode_chk'],
     'folio line without stay or order' => [FolioLine::class, ['stay_id' => null], 'folio_lines_owner_chk'],
     'folio line with wrong maths' => [FolioLine::class, ['amount' => 1], 'folio_lines_math_chk'],
@@ -99,6 +101,7 @@ it('has every CHECK constraint of the schema in the database', function (): void
         'cash_movements_cat_chk', 'cash_movements_void_chk', 'discounts_value_chk', 'extension_rates_chk',
         'folio_lines_math_chk', 'folio_lines_owner_chk', 'folio_lines_reversal_chk', 'payments_deposit_chk',
         'payments_method_chk', 'payments_owner_chk', 'payments_ref_chk', 'payments_sign_chk', 'pos_orders_mode_chk',
+        'product_ingredients_qty_chk', 'product_ingredients_self_chk',
         'products_price_chk', 'products_stock_chk', 'rates_amount_chk', 'rates_hours_chk', 'shift_sessions_closed_chk',
         'shift_sessions_variance_chk', 'stays_hold_chk', 'stays_in_chk', 'stays_name_chk', 'stays_out_chk',
         'stock_movements_balance_chk', 'stock_movements_note_chk', 'users_owner_branch_chk',

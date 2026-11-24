@@ -277,6 +277,8 @@ Each requirement is testable and cites its screen. Formulas are in [TRD](TRD.md)
 | FR8.7 | The stock screen shows, per product for the open shift: opening, in, sold, wastage and on hand, where on hand = opening + in − sold − wastage. Each number opens the movements behind it. Low and out-of-stock products are flagged. | 20 |
 | FR8.8 | "Receive stock" records a delivery. Wastage needs a note. Stock on hand can never go below zero. | 20 |
 | FR8.9 | The POS and stock module can be switched off per branch; its screens then disappear from the menus. | 46 |
+| FR8.10 | A product can be a **meal** made from a recipe of other stock items (whole-unit quantities, flat). Selling it deducts each ingredient from its own stock; a void puts each back. A meal keeps no stock of its own, and its availability is how many it can still be made from its ingredients. | 19, 48 |
+| FR8.11 | A stock item can be a **supply** that is not sold on its own (`sellable` off, no price), used only inside a meal's recipe; it is counted and received on the stock screen but never shown on the counter. An ingredient may also be sold directly (e.g. extra egg). | 19, 20, 48 |
 
 ### F9 Housekeeping
 

@@ -96,12 +96,15 @@ final class VoidSale
                 return $order;
             }
 
-            $productIds = array_values(array_unique(array_filter(array_map(static fn (FolioLine $l): ?int => $l->product_id, $lines))));
-            sort($productIds);
-            $products = Product::query()->withoutGlobalScopes()->whereIn('id', $productIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $lineIds = array_map(static fn (FolioLine $l): int => $l->id, $lines);
+            $lineProductIds = array_filter(array_map(static fn (FolioLine $l): ?int => $l->product_id, $lines));
+            // Lock the reversal lines' products and every stock item the sale took out (a meal → its ingredients), by id.
+            $lockIds = array_values(array_unique([...$this->stays->reversibleProductIds($lineIds), ...$lineProductIds]));
+            sort($lockIds);
+            $products = Product::query()->withoutGlobalScopes()->whereIn('id', $lockIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
 
             $paidOn = [];
-            foreach (PaymentAllocation::query()->whereIn('folio_line_id', array_map(static fn (FolioLine $l): int => $l->id, $lines))->get() as $allocation) {
+            foreach (PaymentAllocation::query()->whereIn('folio_line_id', $lineIds)->get() as $allocation) {
                 $paidOn[$allocation->folio_line_id] = ($paidOn[$allocation->folio_line_id] ?? Money::zero())->plus($allocation->amount ?? Money::zero());
             }
 
@@ -119,7 +122,7 @@ final class VoidSale
                     $refundTotal = $refundTotal->plus($paid);
                 }
 
-                $this->stays->stockBack($shift, $product, $line->quantity, $reversal, $by);
+                $this->stays->stockBackForLine($shift, $line, $reversal, $by, $products);
             }
 
             if ($refundTotal->isPositive()) {

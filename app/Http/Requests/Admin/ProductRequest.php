@@ -23,10 +23,15 @@ final class ProductRequest extends FormRequest
             'category' => ['required', 'string', 'max:30'],
             'report_group' => ['required', 'string', 'in:foods,drinks,misc'],
             'outlet' => ['nullable', 'string', 'in:frontdesk,kitchen,pub'],
-            'price_amount' => ['required', 'integer', 'min:1', 'max:100000000'],
+            // 0 is allowed for a supply that is not sold; the action requires > 0 when sellable.
+            'price_amount' => ['required', 'integer', 'min:0', 'max:100000000'],
+            'sellable' => ['sometimes', 'boolean'],
             'tracks_stock' => ['required', 'boolean'],
             'low_stock_at' => ['nullable', 'integer', 'min:0', 'max:99999'],
             'is_active' => ['required', 'boolean'],
+            'ingredients' => ['sometimes', 'array'],
+            'ingredients.*.ingredient_id' => ['required', 'integer'],
+            'ingredients.*.quantity' => ['required', 'integer', 'min:1', 'max:9999'],
         ];
     }
 }

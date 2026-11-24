@@ -27,7 +27,7 @@ class Product extends Model
 
     protected $fillable = [
         'branch_id', 'name', 'kind', 'category', 'report_group', 'outlet',
-        'price_amount', 'tracks_stock', 'stock_on_hand', 'low_stock_at', 'is_active',
+        'price_amount', 'sellable', 'tracks_stock', 'stock_on_hand', 'low_stock_at', 'is_active',
     ];
 
     protected function casts(): array
@@ -37,6 +37,7 @@ class Product extends Model
             'report_group' => ReportGroup::class,
             'outlet' => Outlet::class,
             'price_amount' => Money::class,
+            'sellable' => 'boolean',
             'tracks_stock' => 'boolean',
             'is_active' => 'boolean',
             'created_at' => 'immutable_datetime',
@@ -54,5 +55,12 @@ class Product extends Model
     public function priceLogs(): HasMany
     {
         return $this->hasMany(ProductPriceLog::class);
+    }
+
+    /** The recipe: the stock items this product consumes when sold. A product with rows here is a meal. */
+    /** @return HasMany<ProductIngredient, $this> */
+    public function ingredients(): HasMany
+    {
+        return $this->hasMany(ProductIngredient::class);
     }
 }

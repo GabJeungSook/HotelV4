@@ -14,6 +14,7 @@ use App\Models\Product;
 use App\Models\ShiftSession;
 use App\Models\Stay;
 use App\Models\User;
+use App\Services\Recipe;
 
 /**
  * Props of the POS (19) and stock (20) screens. Prices come from the product rows; the server
@@ -25,6 +26,7 @@ final class PosScreenQuery
     public function __construct(
         private readonly StayScreenQuery $stays,
         private readonly ReportQuery $reports,
+        private readonly Recipe $recipe,
     ) {}
 
     /** @return array<string, mixed> */
@@ -32,8 +34,10 @@ final class PosScreenQuery
     {
         $products = Product::query()
             ->where('is_active', true)
+            ->where('sellable', true)
             ->where('outlet', 'frontdesk')
             ->where('kind', '!=', ProductKind::Damage)
+            ->with(['ingredients.ingredient' => fn ($q) => $q->withoutGlobalScopes()])
             ->orderBy('name')
             ->get();
 
@@ -47,13 +51,12 @@ final class PosScreenQuery
             ->values();
 
         return [
-            'products' => array_values($products->map(static fn (Product $p): array => [
+            'products' => array_values($products->map(fn (Product $p): array => [
                 'id' => $p->id,
                 'name' => $p->name,
                 'category' => $p->category,
                 'price' => $p->price_amount?->centavos() ?? 0,
-                'stock' => $p->tracks_stock ? $p->stock_on_hand : null,
-                'low' => $p->tracks_stock && $p->stock_on_hand > 0 && $p->stock_on_hand <= $p->low_stock_at,
+                ...$this->recipe->availability($p),
             ])->all()),
             'categories' => array_values($categories),
             'rooms' => array_values($stays->map(static fn (Stay $s): array => [

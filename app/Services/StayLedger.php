@@ -19,10 +19,12 @@ use App\Models\PosOrder;
 use App\Models\Product;
 use App\Models\ShiftSession;
 use App\Models\Stay;
+use App\Models\StockMovement;
 use App\Models\User;
 use App\Queries\StayQuery;
 use App\Support\Clock;
 use App\Support\Money;
+use Illuminate\Support\Collection;
 
 /**
  * The steps that several stay actions share (TRD §3.2: shared steps live in services). Every
@@ -65,7 +67,8 @@ final class StayLedger
             'pos_order_id' => $order !== null ? $order->id : $reversalOf?->pos_order_id,
             'room_id' => $reversalOf !== null ? $reversalOf->room_id : $stay->room_id,
             'kind' => $kind,
-            'product_id' => $product?->id,
+            // A reversal with no product passed still mirrors the line it voids (e.g. a meal line).
+            'product_id' => $product !== null ? $product->id : $reversalOf?->product_id,
             'description' => mb_substr($description, 0, 120),
             'quantity' => $quantity,
             'unit_amount' => $unit,
@@ -282,13 +285,14 @@ final class StayLedger
     {
         usort($lines, static fn (FolioLine $a, FolioLine $b): int => $a->id <=> $b->id);
 
-        $productIds = array_values(array_unique(array_filter(array_map(static fn (FolioLine $l): ?int => $l->product_id, $lines))));
-        sort($productIds);
-        $products = $productIds === [] ? collect() : Product::query()->withoutGlobalScopes()
-            ->whereIn('id', $productIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+        $lineIds = array_map(static fn (FolioLine $l): int => $l->id, $lines);
+        // Lock the stock items these lines actually took out (a meal line → its ingredients), by id.
+        $lockIds = $this->reversibleProductIds($lineIds);
+        $products = $lockIds === [] ? collect() : Product::query()->withoutGlobalScopes()
+            ->whereIn('id', $lockIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
 
         $paidOn = [];
-        foreach (PaymentAllocation::query()->whereIn('folio_line_id', array_map(static fn (FolioLine $l): int => $l->id, $lines))->get() as $allocation) {
+        foreach (PaymentAllocation::query()->whereIn('folio_line_id', $lineIds)->get() as $allocation) {
             $paidOn[$allocation->folio_line_id] = ($paidOn[$allocation->folio_line_id] ?? Money::zero())->plus($allocation->amount ?? Money::zero());
         }
 
@@ -296,10 +300,9 @@ final class StayLedger
         $refundTotal = Money::zero();
 
         foreach ($lines as $line) {
-            $product = $line->product_id === null ? null : $products->get($line->product_id);
             $reversal = $this->line(
                 $shift, $stay, $by, $line->kind, 'Void: '.$line->description, $line->unit_amount ?? Money::zero(), -$line->quantity,
-                $product, reversalOf: $line, reversalReason: $reason, approvalId: $approvalId,
+                reversalOf: $line, reversalReason: $reason, approvalId: $approvalId,
             );
 
             $paid = $paidOn[$line->id] ?? Money::zero();
@@ -309,9 +312,7 @@ final class StayLedger
                 $refundTotal = $refundTotal->plus($paid);
             }
 
-            if ($product !== null) {
-                $this->stockBack($shift, $product, $line->quantity, $reversal, $by);
-            }
+            $this->stockBackForLine($shift, $line, $reversal, $by, $products);
         }
 
         if (! $refundTotal->isPositive()) {
@@ -338,11 +339,53 @@ final class StayLedger
         $this->moveStock($shift, $product, StockMovementKind::Sale, -$quantity, $line, $by);
     }
 
-    /** Stock back for a reversed line (stock_movements kind sale_reversal). */
-    public function stockBack(ShiftSession $shift, Product $product, int $quantity, FolioLine $reversal, User $by): void
+    /**
+     * The stock items a set of sold lines took out — to lock before reversing. Read from the
+     * recorded `sale` movements, so a meal line resolves to its ingredients. Ascending ids (§8).
+     *
+     * @param  list<int>  $lineIds
+     * @return list<int>
+     */
+    public function reversibleProductIds(array $lineIds): array
     {
-        if ($product->tracks_stock && $quantity > 0) {
-            $this->moveStock($shift, $product, StockMovementKind::SaleReversal, $quantity, $reversal, $by);
+        if ($lineIds === []) {
+            return [];
+        }
+
+        return StockMovement::query()
+            ->whereIn('folio_line_id', $lineIds)
+            ->where('kind', StockMovementKind::Sale)
+            ->orderBy('product_id')
+            ->pluck('product_id')
+            ->map(static fn (mixed $id): int => (int) $id)
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Put back exactly what a sold line took out, from its recorded `sale` movements (one for a
+     * plain product, several for a meal). The caller must have locked those products. Reversing
+     * from the movements — not the product's current recipe — is correct even if the recipe or
+     * tracks_stock changed since the sale.
+     *
+     * @param  Collection<int, Product>  $lockedProducts  keyed by id
+     */
+    public function stockBackForLine(ShiftSession $shift, FolioLine $soldLine, FolioLine $reversal, User $by, Collection $lockedProducts): void
+    {
+        $movements = StockMovement::query()
+            ->where('folio_line_id', $soldLine->id)
+            ->where('kind', StockMovementKind::Sale)
+            ->orderBy('id')
+            ->get();
+
+        foreach ($movements as $movement) {
+            $product = $lockedProducts->get($movement->product_id);
+
+            if ($product !== null) {
+                $this->moveStock($shift, $product, StockMovementKind::SaleReversal, abs((int) $movement->quantity), $reversal, $by);
+            }
         }
     }
 

@@ -60,7 +60,7 @@ it('seeds the discounts, lists, reasons and products', function (): void {
         ->and(ExpenseCategory::query()->count())->toBe(8)
         ->and(Reason::query()->count())->toBe(24)
         ->and(Product::query()->get()->countBy(fn (Product $p): string => $p->kind->value)->all())
-        ->toBe(['food_drink' => 17, 'amenity' => 3, 'damage' => 3]);
+        ->toBe(['food_drink' => 23, 'amenity' => 5, 'damage' => 3]);
 });
 
 it('seeds 1 owner and 11 branch users with the right roles', function (): void {

@@ -31,6 +31,7 @@ use App\Models\User;
 use App\Services\Pricing\DiscountTerms;
 use App\Services\Pricing\RateCard;
 use App\Services\PricingService;
+use App\Services\Recipe;
 use App\Support\Clock;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
@@ -47,6 +48,7 @@ final class StayScreenQuery
         private readonly PricingService $pricing,
         private readonly StayQuery $stays,
         private readonly RoomQuery $rooms,
+        private readonly Recipe $recipe,
     ) {}
 
     /**
@@ -338,16 +340,17 @@ final class StayScreenQuery
     {
         return array_values(Product::query()
             ->where('is_active', true)
+            ->where('sellable', true)
             ->where('outlet', 'frontdesk')
+            ->with(['ingredients.ingredient' => fn ($q) => $q->withoutGlobalScopes()])
             ->orderBy('name')
             ->get()
-            ->map(static fn (Product $p): array => [
+            ->map(fn (Product $p): array => [
                 'id' => $p->id,
                 'name' => $p->name,
                 'kind' => $p->kind->value,
                 'price' => $p->price_amount?->centavos() ?? 0,
-                'stock' => $p->tracks_stock ? $p->stock_on_hand : null,
-                'low' => $p->tracks_stock && $p->stock_on_hand > 0 && $p->stock_on_hand <= $p->low_stock_at,
+                ...$this->recipe->availability($p),
             ])
             ->all());
     }

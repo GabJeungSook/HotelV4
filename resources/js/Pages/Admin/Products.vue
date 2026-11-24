@@ -19,6 +19,11 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
  */
 type Kind = 'food_drink' | 'amenity' | 'damage';
 
+interface RecipeLine {
+    ingredient_id: number;
+    quantity: number;
+}
+
 interface ProductRow {
     id: number;
     name: string;
@@ -27,10 +32,12 @@ interface ProductRow {
     report_group: 'foods' | 'drinks' | 'misc';
     outlet: string;
     price_amount: number;
+    sellable: boolean;
     tracks_stock: boolean;
     stock_on_hand: number;
     low_stock_at: number;
     is_active: boolean;
+    ingredients: RecipeLine[];
 }
 
 const props = defineProps<{
@@ -38,6 +45,7 @@ const props = defineProps<{
     counts: Record<Kind, number>;
     products: ProductRow[];
     categories: string[];
+    stock_products: { id: number; name: string }[];
 }>();
 
 const kind = ref<Kind>(props.kind);
@@ -71,6 +79,7 @@ function done(close: () => void): UseFormSubmitOptions {
 
 const open = ref(false);
 const editing = ref<ProductRow | null>(null);
+const isMeal = ref(false);
 const form = useForm({
     name: '',
     kind: 'food_drink' as Kind,
@@ -78,9 +87,20 @@ const form = useForm({
     report_group: 'drinks' as ProductRow['report_group'],
     outlet: 'frontdesk',
     price_amount: 0,
+    sellable: true,
     tracks_stock: true,
     low_stock_at: 0,
     is_active: true,
+    ingredients: [] as { ingredient_id: number | null; quantity: number }[],
+});
+
+// Stock items that can be an ingredient of the product being edited (not itself).
+const ingredientOptions = computed(() => props.stock_products.filter((p) => p.id !== editing.value?.id).map((p) => ({ label: p.name, value: p.id })));
+
+watch(isMeal, (on) => {
+    if (on && form.ingredients.length === 0) {
+        form.ingredients.push({ ingredient_id: null, quantity: 1 });
+    }
 });
 
 function edit(row: ProductRow | null): void {
@@ -93,19 +113,41 @@ function edit(row: ProductRow | null): void {
     form.report_group = row?.report_group ?? defaultGroup(kind.value);
     form.outlet = row?.outlet ?? 'frontdesk';
     form.price_amount = row?.price_amount ?? 0;
+    form.sellable = row?.sellable ?? true;
     form.tracks_stock = row?.tracks_stock ?? kind.value === 'food_drink';
     form.low_stock_at = row?.low_stock_at ?? 0;
     form.is_active = row?.is_active ?? true;
+    form.ingredients = (row?.ingredients ?? []).map((r) => ({ ingredient_id: r.ingredient_id, quantity: r.quantity }));
+    isMeal.value = (row?.ingredients.length ?? 0) > 0;
     open.value = true;
 }
 
+const recipe = computed(() => form.ingredients.filter((r): r is { ingredient_id: number; quantity: number } => r.ingredient_id !== null));
+
 function save(): void {
     const row = editing.value;
-    form.submit(row ? 'put' : 'post', row ? route('admin.products.update', row.id) : route('admin.products.store'), done(() => (open.value = false)));
+    form.transform((data) => ({
+        ...data,
+        sellable: isMeal.value ? true : data.sellable,
+        tracks_stock: isMeal.value ? false : data.tracks_stock,
+        ingredients: isMeal.value ? recipe.value : [],
+    })).submit(row ? 'put' : 'post', row ? route('admin.products.update', row.id) : route('admin.products.store'), done(() => (open.value = false)));
 }
 
 const priceChanged = computed(() => editing.value !== null && form.price_amount !== editing.value.price_amount);
-const valid = computed(() => form.name.trim() !== '' && form.category.trim() !== '' && form.price_amount > 0);
+const valid = computed(() => {
+    if (form.name.trim() === '' || form.category.trim() === '') {
+        return false;
+    }
+
+    if (isMeal.value) {
+        const ids = recipe.value.map((r) => r.ingredient_id);
+
+        return form.price_amount > 0 && ids.length >= 1 && new Set(ids).size === ids.length && recipe.value.every((r) => r.quantity >= 1);
+    }
+
+    return !form.sellable || form.price_amount > 0;
+});
 </script>
 
 <template>
@@ -183,8 +225,24 @@ const valid = computed(() => form.name.trim() !== '' && form.category.trim() !==
                             <USelect v-model="form.report_group" :items="Object.entries(groupLabel).map(([value, label]) => ({ value, label }))" class="w-full" />
                         </UFormField>
                     </div>
-                    <USwitch v-model="form.tracks_stock" label="Count stock" :description="editing && form.tracks_stock ? `${editing.stock_on_hand} on hand. Stock moves on the Stock screen.` : undefined" />
-                    <UFormField v-if="form.tracks_stock" label="Low-stock warning at" :error="form.errors.low_stock_at">
+                    <USwitch v-model="form.sellable" label="Sold at the counter" description="Turn off for a supply (spoon, plate) that is only used inside a meal, never sold on its own." />
+                    <USwitch v-if="form.kind === 'food_drink'" v-model="isMeal" label="Made from ingredients" description="A meal keeps no stock of its own; selling it uses up its ingredients." />
+
+                    <div v-if="isMeal" class="rounded-card border border-default bg-muted p-3">
+                        <p class="mb-2 text-xs font-medium text-muted">Used up per one {{ form.name.trim() || 'meal' }}</p>
+                        <div class="flex flex-col gap-2">
+                            <div v-for="(line, i) in form.ingredients" :key="i" class="flex items-center gap-2">
+                                <USelect v-model="line.ingredient_id" :items="ingredientOptions" placeholder="Pick a stock item" class="flex-1" />
+                                <UInput v-model.number="line.quantity" type="number" inputmode="numeric" :min="1" class="w-20" aria-label="Quantity" />
+                                <UButton icon="i-solar-trash-bin-trash-linear" color="neutral" variant="ghost" :aria-label="`Remove ingredient ${i + 1}`" @click="form.ingredients.splice(i, 1)" />
+                            </div>
+                        </div>
+                        <UButton class="mt-2" size="sm" color="neutral" variant="outline" icon="i-solar-add-circle-linear" label="Add ingredient" @click="form.ingredients.push({ ingredient_id: null, quantity: 1 })" />
+                        <p v-if="form.errors.ingredients" class="mt-1 text-xs text-bad">{{ form.errors.ingredients }}</p>
+                    </div>
+
+                    <USwitch v-if="!isMeal" v-model="form.tracks_stock" label="Count stock" :description="editing && form.tracks_stock ? `${editing.stock_on_hand} on hand. Stock moves on the Stock screen.` : undefined" />
+                    <UFormField v-if="isMeal || form.tracks_stock" :label="isMeal ? 'Low when fewer than this can be made' : 'Low-stock warning at'" :error="form.errors.low_stock_at">
                         <UInput v-model.number="form.low_stock_at" type="number" inputmode="numeric" :min="0" class="w-28" />
                     </UFormField>
                     <USwitch v-model="form.is_active" label="On sale" />

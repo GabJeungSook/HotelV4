@@ -15,6 +15,7 @@ use App\Models\Stay;
 use App\Models\User;
 use App\Services\CurrentShift;
 use App\Services\PosOrderNumber;
+use App\Services\Recipe;
 use App\Services\StayLedger;
 use App\Support\Clock;
 use App\Support\DuplicateKey;
@@ -38,6 +39,7 @@ final class AddCharges
         private readonly StayLedger $ledger,
         private readonly Transaction $transaction,
         private readonly PosOrderNumber $orderNumber,
+        private readonly Recipe $recipe,
     ) {}
 
     /**
@@ -73,17 +75,24 @@ final class AddCharges
                 }
 
                 ksort($items);
+                $itemIds = array_keys($items);
+                $recipes = $this->recipe->load($itemIds);
+
+                // Lock the items and every ingredient they consume, in one ascending-id query (§8).
                 $products = Product::query()->withoutGlobalScopes()
                     ->where('branch_id', $locked->branch_id)
-                    ->whereIn('id', array_keys($items))
-                    ->where('is_active', true)
+                    ->whereIn('id', $this->recipe->lockIds($itemIds, $recipes))
                     ->orderBy('id')
                     ->lockForUpdate()
                     ->get()
                     ->keyBy('id');
 
-                if ($products->count() !== count($items)) {
-                    throw ActionRefused::because('One of the items is no longer sold.');
+                foreach ($itemIds as $id) {
+                    $item = $products->get($id);
+
+                    if ($item === null || ! $item->is_active || ! $item->sellable) {
+                        throw ActionRefused::because('One of the items is no longer sold.');
+                    }
                 }
 
                 $total = Money::zero();
@@ -111,7 +120,10 @@ final class AddCharges
                         $shift, $locked, $by, LineKind::from($product->kind->value), $product->name,
                         $product->price_amount ?? Money::zero(), $qty, $product, $order,
                     );
-                    $this->ledger->stockOut($shift, $product, $qty, $line, $by);
+
+                    foreach ($this->recipe->deductions($product, $qty, $recipes) as [$componentId, $componentQty]) {
+                        $this->ledger->stockOut($shift, $products[$componentId], $componentQty, $line, $by);
+                    }
                 }
 
                 if ($payWith !== null) {

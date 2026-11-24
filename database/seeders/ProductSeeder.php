@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Enums\ProductKind;
 use App\Enums\ReportGroup;
 use App\Models\Product;
+use App\Models\ProductIngredient;
 use App\Support\Money;
 use Illuminate\Database\Seeder;
 
@@ -14,9 +15,33 @@ use Illuminate\Database\Seeder;
  * 17 food & drinks, 3 amenities, 3 damages (prices in pesos). Lost key and lost
  * remote are priced from the branch settings, not products. Stock levels are the
  * opening stock; the demo shift writes the movements that follow.
+ *
+ * Plus a short-order kitchen to show recipes (DATABASE_SCHEMA §4.13): ingredients sold on their
+ * own too (rice, egg…), supplies that are never sold (spoon, plate — sellable = 0, no price), and
+ * meals (tocilog, hotsilog — no own stock) that deduct their ingredients when sold.
  */
 class ProductSeeder extends Seeder
 {
+    /** Stock items that are also sold on their own (e.g. extra egg): name, category, group, pesos, stock, low at. */
+    public const INGREDIENTS = [
+        ['Rice', 'Short orders', ReportGroup::Foods, 15, 200, 40],
+        ['Egg', 'Short orders', ReportGroup::Foods, 15, 200, 40],
+        ['Tocino', 'Short orders', ReportGroup::Foods, 45, 100, 20],
+        ['Hotdog', 'Short orders', ReportGroup::Foods, 40, 100, 20],
+    ];
+
+    /** Stock items never sold on their own (supplies): name, stock, low at. */
+    public const SUPPLIES = [
+        ['Plastic spoon & fork', 300, 50],
+        ['Meal plate', 150, 30],
+    ];
+
+    /** Meals (no own stock), each the price in pesos and its recipe [component name => quantity]. */
+    public const MEALS = [
+        'Tocilog' => [120, ['Rice' => 1, 'Tocino' => 1, 'Egg' => 1, 'Plastic spoon & fork' => 1, 'Meal plate' => 1]],
+        'Hotsilog' => [110, ['Rice' => 1, 'Hotdog' => 2, 'Egg' => 1, 'Plastic spoon & fork' => 1, 'Meal plate' => 1]],
+    ];
+
     /** @var list<array{0: string, 1: ProductKind, 2: string, 3: ReportGroup, 4: int, 5: int, 6: int}> name, kind, category, group, pesos, stock, low at */
     public const PRODUCTS = [
         ['Cup noodles', ProductKind::FoodDrink, 'Snacks', ReportGroup::Foods, 45, 30, 8],
@@ -60,6 +85,60 @@ class ProductSeeder extends Seeder
                 'stock_on_hand' => $stock,
                 'low_stock_at' => $lowAt,
             ]);
+        }
+
+        $id = []; // name => product id, to wire recipes
+
+        foreach (self::INGREDIENTS as [$name, $category, $group, $pesos, $stock, $lowAt]) {
+            $id[$name] = Product::query()->create([
+                'branch_id' => $branchId,
+                'name' => $name,
+                'kind' => ProductKind::FoodDrink,
+                'category' => $category,
+                'report_group' => $group,
+                'price_amount' => Money::ofPesos($pesos),
+                'tracks_stock' => true,
+                'stock_on_hand' => $stock,
+                'low_stock_at' => $lowAt,
+            ])->id;
+        }
+
+        foreach (self::SUPPLIES as [$name, $stock, $lowAt]) {
+            $id[$name] = Product::query()->create([
+                'branch_id' => $branchId,
+                'name' => $name,
+                'kind' => ProductKind::Amenity,
+                'category' => 'Supplies',
+                'report_group' => ReportGroup::Misc,
+                'price_amount' => Money::ofPesos(0),
+                'sellable' => false,
+                'tracks_stock' => true,
+                'stock_on_hand' => $stock,
+                'low_stock_at' => $lowAt,
+            ])->id;
+        }
+
+        foreach (self::MEALS as $name => [$pesos, $recipe]) {
+            $meal = Product::query()->create([
+                'branch_id' => $branchId,
+                'name' => $name,
+                'kind' => ProductKind::FoodDrink,
+                'category' => 'Meals',
+                'report_group' => ReportGroup::Foods,
+                'price_amount' => Money::ofPesos($pesos),
+                'tracks_stock' => false,
+                'stock_on_hand' => 0,
+                'low_stock_at' => 5,
+            ]);
+
+            foreach ($recipe as $component => $quantity) {
+                ProductIngredient::query()->create([
+                    'branch_id' => $branchId,
+                    'product_id' => $meal->id,
+                    'ingredient_id' => $id[$component],
+                    'quantity' => $quantity,
+                ]);
+            }
         }
     }
 }

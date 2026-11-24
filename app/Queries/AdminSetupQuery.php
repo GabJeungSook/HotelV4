@@ -20,6 +20,7 @@ use App\Models\ExpenseCategory;
 use App\Models\ExtensionRate;
 use App\Models\Floor;
 use App\Models\Product;
+use App\Models\ProductIngredient;
 use App\Models\Rate;
 use App\Models\Reason;
 use App\Models\Room;
@@ -255,7 +256,7 @@ final class AdminSetupQuery
      */
     public function products(Branch $branch, ProductKind $kind): array
     {
-        $all = Product::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->orderBy('category')->orderBy('name')->get();
+        $all = Product::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->with('ingredients')->orderBy('category')->orderBy('name')->get();
 
         return [
             'kind' => $kind->value,
@@ -268,12 +269,16 @@ final class AdminSetupQuery
                 'report_group' => $p->report_group->value,
                 'outlet' => $p->outlet->value,
                 'price_amount' => $p->price_amount?->centavos() ?? 0,
+                'sellable' => $p->sellable,
                 'tracks_stock' => $p->tracks_stock,
                 'stock_on_hand' => $p->stock_on_hand,
                 'low_stock_at' => $p->low_stock_at,
                 'is_active' => $p->is_active,
+                'ingredients' => $p->ingredients->map(static fn (ProductIngredient $r): array => ['ingredient_id' => $r->ingredient_id, 'quantity' => $r->quantity])->values()->all(),
             ])->values()->all(),
             'categories' => $all->pluck('category')->unique()->sort()->values()->all(),
+            // Stock-keeping products of the branch, pickable as ingredients in a recipe.
+            'stock_products' => $all->where('tracks_stock', true)->map(static fn (Product $p): array => ['id' => $p->id, 'name' => $p->name])->values()->all(),
         ];
     }
 

@@ -184,3 +184,48 @@ it('refuses to void a sale of an earlier shift; the old shift is unchanged', fun
 
     expect(Hotel::product('Chips')->stock_on_hand)->toBe(9);
 });
+
+/*
+| Meals (recipes): Tocilog ₱120 = 1 Rice + 1 Tocino + 1 Egg + 1 spoon + 1 plate. Selling a meal
+| takes each ingredient out of its own stock; the meal keeps none. A void puts every one back.
+*/
+
+it('sells a meal: one folio line, every ingredient taken out, the meal keeps no stock of its own', function (): void {
+    $order = ($this->sell)(($this->items)(['Tocilog' => 2]), 30000);
+    $line = FolioLine::query()->where('pos_order_id', $order->id)->whereNull('reversal_of_id')->sole();
+
+    expect($order->total_amount->centavos())->toBe(24000) // 2 × ₱120
+        ->and($line->description)->toBe('Tocilog')
+        ->and(Hotel::product('Rice')->stock_on_hand)->toBe(198)
+        ->and(Hotel::product('Tocino')->stock_on_hand)->toBe(98)
+        ->and(Hotel::product('Egg')->stock_on_hand)->toBe(198)
+        ->and(Hotel::product('Plastic spoon & fork')->stock_on_hand)->toBe(298)
+        ->and(Hotel::product('Meal plate')->stock_on_hand)->toBe(148)
+        ->and(Hotel::product('Tocilog')->stock_on_hand)->toBe(0)
+        // five ingredient movements, all pinned to the one meal line; the meal has none of its own
+        ->and(StockMovement::query()->where('folio_line_id', $line->id)->where('kind', StockMovementKind::Sale)->count())->toBe(5)
+        ->and(StockMovement::query()->where('product_id', Hotel::product('Tocilog')->id)->count())->toBe(0);
+});
+
+it('refuses a meal when an ingredient is short and rolls the whole sale back', function (): void {
+    ($this->sell)(($this->items)(['Egg' => 199]), 300000); // leave a single egg
+
+    expect(Hotel::product('Egg')->stock_on_hand)->toBe(1)
+        ->and(fn () => ($this->sell)(($this->items)(['Tocilog' => 2]), 30000))->toThrow(InsufficientStock::class, 'Egg is out of stock (1 left)')
+        ->and(Hotel::product('Rice')->stock_on_hand)->toBe(200)  // nothing deducted
+        ->and(Hotel::product('Egg')->stock_on_hand)->toBe(1);
+});
+
+it('voids a meal sale: puts every ingredient back', function (): void {
+    $order = ($this->sell)(($this->items)(['Tocilog' => 1]), 20000);
+    expect(Hotel::product('Rice')->stock_on_hand)->toBe(199);
+
+    app(VoidSale::class)->handle(Hotel::frontdesk(), $order, Hotel::reason(ReasonKind::VoidLine, 'Typed wrong amount'), Hotel::supervisor(), Hotel::PIN, Hotel::device());
+
+    expect(Hotel::product('Rice')->stock_on_hand)->toBe(200)
+        ->and(Hotel::product('Tocino')->stock_on_hand)->toBe(100)
+        ->and(Hotel::product('Egg')->stock_on_hand)->toBe(200)
+        ->and(Hotel::product('Plastic spoon & fork')->stock_on_hand)->toBe(300)
+        ->and(Hotel::product('Meal plate')->stock_on_hand)->toBe(150)
+        ->and(StockMovement::query()->where('kind', StockMovementKind::SaleReversal)->count())->toBe(5);
+});

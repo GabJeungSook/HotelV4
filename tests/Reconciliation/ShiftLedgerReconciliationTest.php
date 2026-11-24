@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Actions\Pos\CompleteSale;
 use App\Actions\Stays\ExtendStay;
 use App\Enums\CashMovementKind;
 use App\Enums\PaymentMethod;
+use App\Enums\PosMode;
 use App\Models\CashMovement;
 use App\Models\FolioLine;
 use App\Models\Payment;
+use App\Models\StockMovement;
 use App\Services\CashMath;
 use App\Services\CurrentShift;
 use App\Services\ReportService;
@@ -107,4 +110,21 @@ it('chains the grand total and Z number to the running sum of sales across shift
         ->and($b->grand_total_before->centavos())->toBe($a->grand_total_after->centavos())
         ->and($a->grand_total_after->centavos())->toBe($a->grand_total_before->centavos() + $a->totals['sales']['total'])
         ->and($b->grand_total_after->centavos())->toBe($b->grand_total_before->centavos() + $b->totals['sales']['total']);
+});
+
+it('reconciles a meal sale: its revenue is one folio line and the ingredient movements carry no money', function (): void {
+    $shift = Hotel::openShift($this->jessa, 500000);
+    app(CompleteSale::class)->handle($this->jessa, $this->branch->id, PosMode::WalkIn, [Hotel::product('Tocilog')->id => 1], (string) Str::uuid(), Money::ofCentavos(20000));
+
+    // The meal deducted its ingredients, but no stock movement carries money.
+    expect(StockMovement::query()->where('shift_session_id', $shift->id)->count())->toBeGreaterThan(0)
+        ->and(StockMovement::query()->getConnection()->getSchemaBuilder()->hasColumn('stock_movements', 'amount'))->toBeFalse();
+
+    Hotel::closeAndHandOver($this->mark);
+    $shift->refresh();
+
+    // The meal's ₱120 is the shift's sales, equal to the sum of the folio lines, and recompute agrees.
+    expect($shift->totals['sales']['total'])->toBe(12000)
+        ->and($shift->totals['sales']['total'])->toBe((int) FolioLine::query()->where('shift_session_id', $shift->id)->sum('amount'))
+        ->and(app(ReportService::class)->recompute($shift)['sales'])->toEqual($shift->totals['sales']);
 });
