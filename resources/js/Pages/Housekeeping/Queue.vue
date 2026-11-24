@@ -32,9 +32,10 @@ const props = defineProps<{
     online: number;
     tasks: Task[];
     current: { id: number; room: string; started_at: string | null } | null;
+    others: { room: string | null; by: string; started_at: string | null }[];
 }>();
 
-const { refresh } = usePolling(['tasks', 'online', 'current'], 20);
+const { refresh } = usePolling(['tasks', 'online', 'current', 'others'], 20);
 // Browser Back restores this page from history with old props (a room started meanwhile would
 // still offer "Start cleaning"), so ask the server again as soon as the page is shown.
 onMounted(refresh);
@@ -67,6 +68,18 @@ function start(task: Task): void {
             <UButton class="mt-3 h-12 justify-center" size="xl" block :to="route('housekeeping.show', current.id)" :label="`Back to Room ${current.room}`" />
         </article>
 
+        <section v-if="others.length" class="rounded-[10px] border border-default bg-default p-3" data-others-cleaning>
+            <p class="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-muted">
+                <UIcon name="i-solar-broom-bold-duotone" class="size-4 text-violet" />Being cleaned now
+            </p>
+            <ul class="flex flex-col gap-1.5">
+                <li v-for="o in others" :key="`${o.room}-${o.by}`" class="flex items-center justify-between gap-2 text-[13px]">
+                    <span class="font-medium text-highlighted tabular">Room {{ o.room }}</span>
+                    <span class="truncate text-muted">{{ o.by }}<template v-if="o.started_at"> · {{ formatDateTime(o.started_at, 'time') }}</template></span>
+                </li>
+            </ul>
+        </section>
+
         <TaskCard
             v-for="t in tasks"
             :key="t.id"
@@ -82,7 +95,7 @@ function start(task: Task): void {
         />
 
         <EmptyState
-            v-if="!tasks.length && !current"
+            v-if="!tasks.length && !current && !others.length"
             class="mt-16"
             icon="i-solar-broom-bold-duotone"
             title="All rooms are clean"

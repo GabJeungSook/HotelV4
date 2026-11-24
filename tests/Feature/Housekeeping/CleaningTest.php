@@ -208,6 +208,31 @@ it('hands the next room to the other roomboy once the first is taken', function 
         ->and($r3->fresh()->status)->toBe(CleaningStatus::Queued); // still waiting for whoever frees up first
 });
 
+// A roomboy can see which rooms others are cleaning on their shared floors (read-only awareness),
+// but not their own, and not rooms on floors they are not assigned to.
+it('shows a roomboy the rooms others are cleaning on the same floor', function (): void {
+    $shared = ($this->leave)('205'); // floor 2 — Dodong and Joy
+    ($this->online)($this->joy);
+    ($this->start)($this->joy, $shared);
+
+    $others = app(CleaningQuery::class)->queue($this->dodong)['others'];
+    expect($others)->toHaveCount(1)
+        ->and($others[0]['room'])->toBe('205')
+        ->and($others[0]['by'])->toBe($this->joy->name)
+        ->and($others[0]['started_at'])->not->toBeNull();
+
+    // A roomboy does not see their own in-progress room in "others".
+    expect(collect(app(CleaningQuery::class)->queue($this->joy)['others'])->pluck('room'))->not->toContain('205');
+});
+
+it('does not show an in-progress room on a floor the roomboy is not assigned to', function (): void {
+    $suite = ($this->leave)('301'); // floor 3 — Joy's, not Dodong's
+    ($this->online)($this->joy);
+    ($this->start)($this->joy, $suite);
+
+    expect(app(CleaningQuery::class)->queue($this->dodong)['others'])->toBe([]);
+});
+
 // A room is only offered to roomboys assigned to its floor (Dodong 1–2, Joy 2–3).
 it('keeps a room off the queue of a roomboy not assigned to its floor', function (): void {
     $suite = ($this->leave)('301'); // floor 3 — Joy's, not Dodong's

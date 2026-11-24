@@ -120,7 +120,33 @@ final class CleaningQuery
                 'room' => $current->room()->value('number'),
                 'started_at' => $current->started_at?->toIso8601String(),
             ],
+            'others' => $this->othersInProgress($user),
         ];
+    }
+
+    /**
+     * Rooms being cleaned right now by other roomboys on the user's floors (read-only awareness, so
+     * nobody walks into a room a colleague is already in).
+     *
+     * @return list<array{room: string|null, by: string, started_at: string|null}>
+     */
+    public function othersInProgress(User $user): array
+    {
+        return CleaningTask::query()
+            ->select('cleaning_tasks.*', 'users.name as cleaner_name')
+            ->join('rooms', 'rooms.id', '=', 'cleaning_tasks.room_id')
+            ->join('users', 'users.id', '=', 'cleaning_tasks.cleaned_by')
+            ->where('cleaning_tasks.status', CleaningStatus::InProgress)
+            ->where('cleaning_tasks.cleaned_by', '!=', $user->id)
+            ->whereIn('rooms.floor_id', $this->floorIds($user))
+            ->orderBy('cleaning_tasks.started_at')
+            ->with('room')
+            ->get()
+            ->map(fn (CleaningTask $t): array => [
+                'room' => $t->room?->number,
+                'by' => (string) $t->getAttribute('cleaner_name'),
+                'started_at' => $t->started_at?->toIso8601String(),
+            ])->all();
     }
 
     /**
