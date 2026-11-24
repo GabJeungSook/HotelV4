@@ -695,7 +695,7 @@ trait DayReaders
 
         foreach ($a as $key => $value) {
             if (is_scalar($value) || $value === null) {
-                $parts[] = str_replace('_', ' ', (string) $key).' '.var_export($value, true);
+                $parts[] = self::auditKey((string) $key).' '.self::auditValue((string) $key, $value);
             }
         }
 
