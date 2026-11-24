@@ -35,7 +35,7 @@ it('has a model for every table of the schema', function (): void {
 
     $modelTables = collect(allModels())->map(fn (string $class): string => (new $class)->getTable())->sort()->values()->all();
 
-    expect($modelTables)->toBe($tables)->and($tables)->toHaveCount(42);
+    expect($modelTables)->toBe($tables)->and($tables)->toHaveCount(46);
 });
 
 it('scopes every model whose table has branch_id NOT NULL, and no other', function (): void {

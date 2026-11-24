@@ -13,6 +13,7 @@ enum LineKind: string
     case FoodDrink = 'food_drink';
     case Amenity = 'amenity';
     case Damage = 'damage';
+    case EventHall = 'event_hall';
     case Discount = 'discount';
     case ForfeitedDeposit = 'forfeited_deposit';
 
@@ -25,6 +26,7 @@ enum LineKind: string
             self::FoodDrink => 'Food & drinks',
             self::Amenity => 'Amenities',
             self::Damage => 'Damages',
+            self::EventHall => 'Event hall',
             self::Discount => 'Discount',
             self::ForfeitedDeposit => 'Forfeited deposit',
         };

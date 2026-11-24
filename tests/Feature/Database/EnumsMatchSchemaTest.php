@@ -11,6 +11,9 @@ use App\Enums\CleaningTrigger;
 use App\Enums\DepositType;
 use App\Enums\DiscountKind;
 use App\Enums\ExtensionRule;
+use App\Enums\HallBookingStatus;
+use App\Enums\HallPackageKind;
+use App\Enums\HallPricing;
 use App\Enums\LineKind;
 use App\Enums\Outlet;
 use App\Enums\PaymentKind;
@@ -63,6 +66,10 @@ $enumColumns = [
     'print_logs.format' => PrintFormat::class,
     'daily_payment_summaries.method' => PaymentMethod::class,
     'daily_report_lines.section' => ReportSection::class,
+    'hall_packages.kind' => HallPackageKind::class,
+    'hall_packages.pricing' => HallPricing::class,
+    'hall_bookings.status' => HallBookingStatus::class,
+    'hall_booking_items.pricing' => HallPricing::class,
 ];
 
 /** @return list<string> */

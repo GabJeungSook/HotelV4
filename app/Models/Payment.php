@@ -28,7 +28,7 @@ class Payment extends Model
     public const UPDATED_AT = null;
 
     protected $fillable = [
-        'branch_id', 'shift_session_id', 'stay_id', 'pos_order_id', 'kind', 'method', 'deposit_type',
+        'branch_id', 'shift_session_id', 'stay_id', 'pos_order_id', 'hall_booking_id', 'kind', 'method', 'deposit_type',
         'amount', 'tendered_amount', 'change_amount', 'reference_no', 'reversal_of_id', 'approval_id',
         'note', 'idempotency_key', 'created_by', 'occurred_at', 'created_at',
     ];
@@ -57,6 +57,12 @@ class Payment extends Model
     public function posOrder(): BelongsTo
     {
         return $this->belongsTo(PosOrder::class);
+    }
+
+    /** @return BelongsTo<HallBooking, $this> */
+    public function hallBooking(): BelongsTo
+    {
+        return $this->belongsTo(HallBooking::class);
     }
 
     /** @return BelongsTo<ShiftSession, $this> */

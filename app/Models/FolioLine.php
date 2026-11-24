@@ -30,7 +30,7 @@ class FolioLine extends Model
     public const UPDATED_AT = null;
 
     protected $fillable = [
-        'branch_id', 'shift_session_id', 'stay_id', 'pos_order_id', 'room_id', 'kind', 'product_id',
+        'branch_id', 'shift_session_id', 'stay_id', 'pos_order_id', 'hall_booking_id', 'room_id', 'kind', 'product_id',
         'description', 'quantity', 'unit_amount', 'amount', 'reversal_of_id', 'reversal_reason',
         'approval_id', 'created_by', 'occurred_at', 'created_at', 'idempotency_key',
     ];
@@ -56,6 +56,12 @@ class FolioLine extends Model
     public function posOrder(): BelongsTo
     {
         return $this->belongsTo(PosOrder::class);
+    }
+
+    /** @return BelongsTo<HallBooking, $this> */
+    public function hallBooking(): BelongsTo
+    {
+        return $this->belongsTo(HallBooking::class);
     }
 
     /** @return BelongsTo<Product, $this> */

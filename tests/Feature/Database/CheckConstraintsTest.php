@@ -100,7 +100,9 @@ it('has every CHECK constraint of the schema in the database', function (): void
     expect($names)->toBe([
         'branches_amounts_chk', 'branches_methods_chk', 'cash_counts_total_chk', 'cash_movements_amount_chk',
         'cash_movements_cat_chk', 'cash_movements_void_chk', 'discounts_value_chk', 'extension_rates_chk',
-        'folio_lines_math_chk', 'folio_lines_owner_chk', 'folio_lines_reversal_chk', 'payments_deposit_chk',
+        'folio_lines_math_chk', 'folio_lines_owner_chk', 'folio_lines_reversal_chk',
+        'hall_booking_items_amount_chk', 'hall_bookings_cancel_chk', 'hall_bookings_complete_chk', 'hall_bookings_time_chk',
+        'hall_packages_amount_chk', 'halls_rate_chk', 'payments_deposit_chk',
         'payments_method_chk', 'payments_owner_chk', 'payments_ref_chk', 'payments_sign_chk', 'pos_orders_mode_chk',
         'product_ingredients_qty_chk', 'product_ingredients_self_chk',
         'products_price_chk', 'products_stock_chk', 'rates_amount_chk', 'rates_hours_chk', 'rates_scope_chk', 'shift_sessions_closed_chk',
