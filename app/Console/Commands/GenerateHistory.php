@@ -381,7 +381,8 @@ final class GenerateHistory extends Command
         }
         $close->begin($by, $bid);
         $expected = $close->expected($shift);
-        $close->count($by, $bid, ['coins' => $expected->centavos()]);
+        // Works whether the branch counts by denomination (pieces) or by total — both are this amount.
+        $close->count($by, $bid, ['coins' => $expected->centavos()], total: $expected);
         $close->result($by, $bid);
         app(HandOverShift::class)->toReceiver($by, $bid, $receiver, '1234', $expected, (string) Str::uuid(), 'Shift handover');
     }
