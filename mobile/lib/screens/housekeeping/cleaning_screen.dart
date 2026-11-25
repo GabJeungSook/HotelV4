@@ -31,7 +31,8 @@ class _CleaningScreenState extends State<CleaningScreen> {
   Future<void> _load() async {
     try {
       final data = await _api.task(widget.taskId);
-      if (mounted) setState(() => _task = data);
+      // task() returns { task: {room, type, …}, target_minutes, checklist }.
+      if (mounted) setState(() => _task = data['task'] as Map<String, dynamic>);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
     } finally {
@@ -97,7 +98,7 @@ class _CleaningScreenState extends State<CleaningScreen> {
                       Text('Room ${_task?['room']} · ${_task?['type'] ?? ''}',
                           style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 8),
-                      Text(_task?['detail'] as String? ?? '', style: Theme.of(context).textTheme.bodyMedium),
+                      Text('Tidy the room, then mark it ready.', style: Theme.of(context).textTheme.bodyMedium),
                       const Spacer(),
                       FilledButton.icon(
                         onPressed: _busy ? null : () => _finish(ready: true),
