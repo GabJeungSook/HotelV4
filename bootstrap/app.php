@@ -26,6 +26,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -56,7 +57,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // Domain errors become the screen's dialog or inline alert (SYSTEM_DESIGN §8). They are
         // expected refusals, not faults, so they are not written to the error log.
         $exceptions->dontReport(DomainException::class);
-        $exceptions->render(fn (DomainException $e, Request $request) => app(DomainErrorResponse::class)->toResponse($e, $request));
+        $exceptions->render(function (DomainException $e, Request $request) {
+            $handler = app(DomainErrorResponse::class);
+
+            // The mobile API gets the refusal as JSON; the web keeps its dialog/redirect.
+            return $request->expectsJson() && ! $request->header('X-Inertia')
+                ? $handler->json($e)
+                : $handler->toResponse($e, $request);
+        });
 
         // Every logged error carries who, where and the request id (TRD §8).
         $exceptions->context(fn (): array => [

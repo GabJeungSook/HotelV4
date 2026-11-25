@@ -16,6 +16,7 @@ use App\Exceptions\ShiftClosing;
 use App\Exceptions\ShiftStale;
 use App\Models\Room;
 use App\Queries\RoomQuery;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -83,6 +84,37 @@ final class DomainErrorResponse
         Inertia::flash('error', $error);
 
         return redirect()->back(fallback: route('home'));
+    }
+
+    /**
+     * The same refusal as JSON, for the mobile API (no screen, no session). The web path above is
+     * unchanged; the status mirrors what each refusal means to a client.
+     */
+    public function json(DomainException $e): JsonResponse
+    {
+        $payload = ['code' => self::code($e), 'message' => $e->userMessage()];
+
+        if ($e instanceof RoomTaken || $e instanceof RoomNotAvailable) {
+            $payload = [...$payload, 'code' => 'room_taken', ...$this->conflict($e->roomId)];
+        }
+
+        if ($e instanceof PinInvalid) {
+            $payload['tries_left'] = $e->triesLeft;
+            $payload['must_sign_in'] = $e->mustSignIn;
+        }
+
+        return response()->json($payload, self::status($e));
+    }
+
+    private static function status(DomainException $e): int
+    {
+        return match (true) {
+            $e instanceof RoomTaken, $e instanceof RoomNotAvailable,
+            $e instanceof ShiftClosing, $e instanceof ShiftStale,
+            $e instanceof ShiftAlreadyOpen, $e instanceof NoOpenShift => 409,
+            $e instanceof PinLocked => 423,
+            default => 422,
+        };
     }
 
     /**

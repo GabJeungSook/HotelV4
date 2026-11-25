@@ -27,7 +27,7 @@ function allModels(): array
 }
 
 it('has a model for every table of the schema', function (): void {
-    $laravel = ['cache', 'cache_locks', 'failed_jobs', 'job_batches', 'jobs', 'migrations', 'password_reset_tokens', 'sessions'];
+    $laravel = ['cache', 'cache_locks', 'failed_jobs', 'job_batches', 'jobs', 'migrations', 'password_reset_tokens', 'personal_access_tokens', 'sessions'];
     $pivots = ['discount_rate', 'floor_user'];
 
     $tables = collect(DB::select('SELECT table_name AS name FROM information_schema.tables WHERE table_schema = DATABASE()'))

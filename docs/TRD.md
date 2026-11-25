@@ -37,6 +37,7 @@
 | `@iconify-json/lucide` | The Lucide icon set bundled locally, so no icon is fetched at runtime |
 | `@vueuse/core`, `date-fns` | Colour mode, timers, date helpers |
 | `barryvdh/laravel-dompdf` | PDF export of the Z-report and other reports |
+| `laravel/sanctum` ^4 | Bearer-token auth for the native mobile apps' JSON API (kiosk tablet, roomboy phone); `routes/api.php` only |
 | `qrcode` (npm) | QR on kiosk hold screen (30) |
 | Geist and Geist Mono font files (one-time source: `@fontsource/geist`, `@fontsource/geist-mono`; ASSETS §1.1 says why not `@fontsource/geist-sans`) | The woff2 files are copied into `resources/fonts/` and committed (ASSETS §1); the packages are not kept in `package.json` |
 | `pestphp/pest` ^4, `pestphp/pest-plugin-laravel` ^4 | Tests |
