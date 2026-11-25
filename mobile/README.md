@@ -14,20 +14,24 @@ These were chosen to keep moving while unattended; all are easy to revise:
 ## Status
 
 - Networking + auth + roomboy flow (queue → start → finish, ready/problem) are **implemented**.
-- Kiosk is **implemented end to end**: welcome → pick room & hours → offer (price breakdown + name/mobile) → hold → held (code + QR + countdown). Long-stay (day) bookings are the one remaining kiosk addition; hourly is done.
-- **Verification:** `flutter analyze` is clean (Flutter 3.50 / Dart 3.14). Not yet run on a device — needs platform folders + an Android/iOS SDK (see below).
+- Kiosk is **implemented end to end**, hourly **and** long-stay: welcome → pick room & hours/days → offer (price breakdown + name/mobile) → hold → held (code + QR + countdown).
+- **Platform folders** (android/, ios/) are committed, so it builds from a clone. web/desktop are generated on demand.
+- **Verification:** `flutter analyze` clean (only Flutter 3.50's `material_ui` info), `flutter test` green (4 unit tests), and a `flutter build web --release` compiles the whole app. Not yet run on a physical device.
 
 ## Run it
 
 ```bash
 cd mobile
 flutter pub get
-flutter analyze          # static check (no device needed)
+flutter analyze          # static check
+flutter test             # unit tests
 
 # Point at your dev server. On the Android emulator, 10.0.2.2 = the host machine.
 # On a real device, use the server's LAN IP (e.g. http://192.168.1.10:8000).
 flutter run --dart-define=HOMI_API_BASE=http://10.0.2.2:8000
 ```
+
+One-time, per machine: `flutter doctor --android-licenses` (accept the Android SDK licenses) before the first Android build. iOS builds need a Mac with Xcode.
 
 Sign in with a **kiosk** or **housekeeper** account (e.g. the seeded `kiosk-gensan-1` / `dodong.lumayag`, password `password` on a dev build). Other roles are refused by the API.
 
