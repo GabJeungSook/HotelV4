@@ -33,6 +33,7 @@ use Tests\Support\Hotel;
 beforeEach(function (): void {
     $this->seed(DatabaseSeeder::class);
     $this->freezeClock('2026-11-12 11:00:00'); // 7:00 PM in Manila, AM shift (ends 8:00 PM)
+    Hotel::branch()->update(['denomination_count_enabled' => true]); // these cover the by-denomination count
     $this->shift = Hotel::openShift();
     $this->device = (string) Str::uuid();
     $this->actingAs(Hotel::frontdesk())->withUnencryptedCookie(EnsureDeviceKey::COOKIE, $this->device);
@@ -210,7 +211,7 @@ it('saves the count draft as JSON and restores the pieces on reload; the confirm
 });
 
 it('validates the count and refuses a count before the close is started', function (): void {
-    $this->post('/shift/close', ['step' => 'count'])->assertSessionHasErrors('pieces');
+    $this->post('/shift/close', ['step' => 'count', 'counted' => 'not-a-number'])->assertSessionHasErrors('counted');
     $this->post('/shift/close', ['step' => 'count', 'pieces' => ['coins' => 100]]);
     expect(session('inertia.flash_data.error.code'))->toBe('action_refused')->and(CashCount::query()->count())->toBe(0);
     $this->post('/shift/close', ['step' => 'jump'])->assertSessionHasErrors('step');

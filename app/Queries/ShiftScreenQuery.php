@@ -254,6 +254,7 @@ final class ShiftScreenQuery
             ->all();
 
         return [
+            'by_denomination' => Branch::query()->withoutGlobalScopes()->findOrFail($shift->branch_id)->denomination_count_enabled,
             'bills' => CashPieces::bills(),
             'pieces' => $draft === null ? null : CashPieces::normalize($draft->denominations),
             'counted_by' => $viewer->name,

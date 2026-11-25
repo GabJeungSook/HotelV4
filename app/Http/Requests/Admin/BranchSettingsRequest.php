@@ -51,6 +51,7 @@ final class BranchSettingsRequest extends FormRequest
             'lost_remote_amount' => $money,
             'payment_methods' => ['sometimes', 'array', 'min:1'],
             'payment_methods.*' => ['string', 'in:cash,gcash,card'],
+            'denomination_count_enabled' => $flag,
             // shifts
             'max_frontdesks_per_shift' => ['sometimes', 'required', 'integer', 'between:1,10'],
             'shift_overdue_warn_minutes' => $minutes,

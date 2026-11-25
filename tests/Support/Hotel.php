@@ -162,7 +162,9 @@ final class Hotel
         $close = app(CloseShift::class);
         $branchId = self::branch()->id;
         $close->begin($by, $branchId);
-        $close->count($by, $branchId, ['coins' => self::expectedCash()->centavos() + $offset]);
+        // Works whether the branch counts by denomination (pieces) or by total: both are this amount.
+        $amount = self::expectedCash()->centavos() + $offset;
+        $close->count($by, $branchId, ['coins' => $amount], total: Money::ofCentavos($amount));
         $variance = $offset === 0 ? null : self::reason(ReasonKind::Variance, 'Wrong change given');
 
         return $close->result($by, $branchId, $variance, $offset === 0 ? null : 'Gave wrong change');

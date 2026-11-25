@@ -235,6 +235,7 @@ final class AdminSetupQuery
                 'lost_key_amount' => $money($branch->lost_key_amount),
                 'lost_remote_amount' => $money($branch->lost_remote_amount),
                 'payment_methods' => $branch->payment_methods->map(fn (PaymentMethod $m): string => $m->value)->values()->all(),
+                'denomination_count_enabled' => $branch->denomination_count_enabled,
                 'max_frontdesks_per_shift' => (int) $branch->max_frontdesks_per_shift,
                 'shift_overdue_warn_minutes' => (int) $branch->shift_overdue_warn_minutes,
                 'shift_stale_block_minutes' => (int) $branch->shift_stale_block_minutes,

@@ -53,6 +53,7 @@ beforeEach(function (): void {
     $this->seed(DatabaseSeeder::class);
     $this->freezeClock('2026-11-12 11:00:00'); // 7:00 PM in Manila, AM shift (ends 8:00 PM)
     $this->branch = Hotel::branch();
+    $this->branch->update(['denomination_count_enabled' => true]); // this suite exercises the by-denomination count
     $this->jessa = Hotel::frontdesk();
     $this->mark = Hotel::user('mark.sumagaysay');
     $this->shift = Hotel::openShift($this->jessa);

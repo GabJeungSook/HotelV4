@@ -25,7 +25,10 @@ final class CloseShiftRequest extends FormRequest
         return match ($this->input('step')) {
             'count' => [
                 'step' => ['required'],
-                'pieces' => ['required', 'array'],
+                // Denomination mode sends pieces; total mode sends one counted total. CloseShift
+                // picks the one the branch uses and ignores the other.
+                'pieces' => ['sometimes', 'array'],
+                'counted' => ['sometimes', 'integer', 'min:0', 'max:100000000'],
                 'witness_id' => ['nullable', 'integer'],
             ],
             'result' => [

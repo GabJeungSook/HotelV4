@@ -42,7 +42,7 @@ const error = computed(() => (flash.value.error && !['pin_invalid', 'pin_locked'
         <UAlert
             v-if="step > 1 && closing_by"
             class="mb-4"
-            color="info"
+            color="neutral"
             variant="subtle"
             icon="i-solar-lock-bold-duotone"
             :description="`${closing_by} started the close. Payments, charges and cash entries of the ${period.period_name} shift are paused.`"

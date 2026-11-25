@@ -188,7 +188,8 @@ final class ShiftController extends Controller
             case 'count':
                 $pieces = $request->input('pieces');
                 $witness = $request->filled('witness_id') ? User::query()->find($request->integer('witness_id')) : null;
-                $close->count($user, $branchId, is_array($pieces) ? $pieces : [], $witness);
+                $total = $request->filled('counted') ? Money::ofCentavos($request->integer('counted')) : null;
+                $close->count($user, $branchId, is_array($pieces) ? $pieces : [], $witness, $total);
 
                 return redirect()->route('shift.close');
 

@@ -35,7 +35,7 @@ final class UpdateBranchSettings
             'long_stay_enabled', 'floor_room_rates_enabled', 'long_stay_max_days', 'extension_rule', 'extension_cycle_hours',
             'extension_per_hour_amount', 'due_soon_minutes',
         ],
-        'money' => ['deposit_enabled', 'deposit_name', 'deposit_amount', 'lost_key_amount', 'lost_remote_amount', 'payment_methods'],
+        'money' => ['deposit_enabled', 'deposit_name', 'deposit_amount', 'lost_key_amount', 'lost_remote_amount', 'payment_methods', 'denomination_count_enabled'],
         'shifts' => ['max_frontdesks_per_shift', 'shift_overdue_warn_minutes', 'shift_stale_block_minutes'],
         'modules' => [
             'kiosk_enabled', 'kiosk_hold_minutes', 'reservations_enabled', 'reservation_release_minutes', 'event_hall_enabled',

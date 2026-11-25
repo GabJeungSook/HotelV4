@@ -94,11 +94,16 @@ final class CloseShift
     /**
      * Confirm the count (23). A second confirm returns the saved count and changes nothing.
      *
-     * @param  array<array-key, mixed>  $pieces  pieces per bill and "coins"; any total is ignored
+     * The branch decides how the drawer is counted (branches.denomination_count_enabled): by
+     * denomination (the pieces are added up, any total sent is ignored) or by a single counted
+     * total (the pieces are ignored). Either way one cash_counts row holds the counted total.
+     *
+     * @param  array<array-key, mixed>  $pieces  pieces per bill and "coins", for denomination mode
+     * @param  Money|null  $total  the counted total, for total mode
      */
-    public function count(User $by, int $branchId, array $pieces, ?User $witness = null): CashCount
+    public function count(User $by, int $branchId, array $pieces, ?User $witness = null, ?Money $total = null): CashCount
     {
-        return $this->transaction->run(function () use ($by, $branchId, $pieces, $witness): CashCount {
+        return $this->transaction->run(function () use ($by, $branchId, $pieces, $witness, $total): CashCount {
             $shift = $this->closing($branchId);
             $saved = CashCount::query()->where('shift_session_id', $shift->id)->first();
 
@@ -111,12 +116,24 @@ final class CloseShift
                 throw ActionRefused::because('Pick another person of this branch as witness.');
             }
 
-            $normalized = CashPieces::normalize($pieces);
+            $branch = Branch::query()->withoutGlobalScopes()->findOrFail($branchId);
+
+            if ($branch->denomination_count_enabled) {
+                $denominations = CashPieces::normalize($pieces);
+                $counted = CashPieces::total($denominations);
+            } else {
+                if ($total === null || $total->isNegative()) {
+                    throw ActionRefused::because('Type the counted cash total.');
+                }
+
+                $denominations = [];
+                $counted = $total;
+            }
 
             $count = CashCount::query()->create([
                 'shift_session_id' => $shift->id,
-                'denominations' => $normalized,
-                'total_cash' => CashPieces::total($normalized),
+                'denominations' => $denominations,
+                'total_cash' => $counted,
                 'counted_by' => $by->id,
                 'witness_id' => $witness?->id,
                 'created_at' => $this->clock->now(),

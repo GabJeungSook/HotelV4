@@ -38,6 +38,7 @@ interface Settings {
     lost_key_amount: number;
     lost_remote_amount: number;
     payment_methods: string[];
+    denomination_count_enabled: boolean;
     max_frontdesks_per_shift: number;
     shift_overdue_warn_minutes: number;
     shift_stale_block_minutes: number;
@@ -98,7 +99,7 @@ const GROUP_KEYS: Record<Group, (keyof Settings)[]> = {
         'extension_per_hour_amount',
         'due_soon_minutes',
     ],
-    money: ['deposit_enabled', 'deposit_name', 'deposit_amount', 'lost_key_amount', 'lost_remote_amount', 'payment_methods'],
+    money: ['deposit_enabled', 'deposit_name', 'deposit_amount', 'lost_key_amount', 'lost_remote_amount', 'payment_methods', 'denomination_count_enabled'],
     shifts: ['max_frontdesks_per_shift', 'shift_overdue_warn_minutes', 'shift_stale_block_minutes'],
     modules: [
         'kiosk_enabled',
@@ -186,6 +187,7 @@ const summary = computed(() => ({
         ['Deposit name', b.value.deposit_name],
         ['Lost key / lost remote', `${formatMoney(b.value.lost_key_amount, 'tile')} / ${formatMoney(b.value.lost_remote_amount, 'tile')}`],
         ['Payment methods', b.value.payment_methods.map((m) => methodLabel.value[m] ?? m).join(' · ')],
+        ['Shift cash count', b.value.denomination_count_enabled ? 'By denomination' : 'Total only'],
         ['Discounts', `${props.active_discounts} active`],
     ],
     modules: [
@@ -407,6 +409,7 @@ function saveReason(): void {
                                 />
                             </div>
                         </UFormField>
+                        <USwitch v-model="form.denomination_count_enabled" label="Count cash by denomination at close" description="Off: the front desk types one counted total — faster. On: they type the pieces of each bill and the coins, and the system adds them up." />
                     </template>
 
                     <template v-else-if="group === 'shifts'">
