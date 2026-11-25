@@ -8,13 +8,12 @@ import MoneyRow from '@/Components/MoneyRow.vue';
 import type { PaymentMethodOption } from '@/Components/PaymentFields.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import TotalRow from '@/Components/TotalRow.vue';
-import PageHeader from '@/Components/PageHeader.vue';
 import { useConfirmDialog } from '@/Composables/useConfirmDialog';
 import { formatDateTime, formatDuration } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
 import { shortName, useShared } from '@/Composables/useShared';
 import FrontDeskLayout from '@/Layouts/FrontDeskLayout.vue';
-import type { Tone } from '@/types/ui';
+import { type Tone, toneFill, toneTextClass } from '@/types/ui';
 import AddCharge, { type Product } from './AddCharge.vue';
 import AddDeposit from './AddDeposit.vue';
 import TakePayment from './TakePayment.vue';
@@ -89,6 +88,9 @@ const timeChip = computed(() => {
 
 const statusTone: Record<Line['status'], Tone> = { paid: 'ok', unpaid: 'warn', reversed: 'neutral' };
 const statusText: Record<Line['status'], string> = { paid: 'Paid', unpaid: 'Unpaid', reversed: 'Reversed' };
+
+// Newest first, so the latest charge or payment is at the top of the account.
+const orderedLines = computed(() => [...props.lines].sort((a, b) => (b.at ?? '').localeCompare(a.at ?? '')));
 
 // Sheets.
 const adding = ref(false);
@@ -197,16 +199,27 @@ function lineMenu(line: Line) {
 
 <template>
     <FrontDeskLayout current="board" :title="`Room ${stay.room ?? ''} · ${stay.guest_name}`">
-        <PageHeader>
-            <template #status><StatusLabel :tone="stateLabel.tone" :label="stateLabel.label" /></template>
-            <StatusLabel v-if="timeChip" :tone="timeChip.tone" :label="timeChip.label" />
-        </PageHeader>
-        <p class="mb-4 text-[13px] text-muted">
-            {{ stay.type }} · in {{ formatDateTime(stay.checked_in_at, 'auto', stay.now) }} ·
-            <template v-if="stay.checked_out_at">left {{ formatDateTime(stay.checked_out_at, 'auto', stay.now) }}</template>
-            <template v-else>expected out {{ formatDateTime(stay.expected_checkout_at, 'auto', stay.now) }}</template>
-            · stay {{ stay.code }}<template v-if="stay.guest_mobile"> · {{ stay.guest_mobile }}</template><template v-if="stay.plate_number"> · {{ stay.plate_number }}</template>
-        </p>
+        <div class="mb-5 flex flex-wrap items-center gap-x-2.5 gap-y-2 text-sm">
+            <span class="inline-flex items-center gap-1.5 font-semibold" :class="toneTextClass[stateLabel.tone]">
+                <span class="size-2 rounded-full" :style="{ backgroundColor: toneFill[stateLabel.tone] }" aria-hidden="true" />{{ stateLabel.label }}
+            </span>
+            <span v-if="timeChip" class="inline-flex items-center gap-1.5 font-semibold" :class="toneTextClass[timeChip.tone]">
+                <span class="size-2 rounded-full" :style="{ backgroundColor: toneFill[timeChip.tone] }" aria-hidden="true" />{{ timeChip.label }}
+            </span>
+            <span class="mx-0.5 h-4 w-px bg-(--hm-line-strong)" aria-hidden="true" />
+            <span class="font-semibold text-highlighted">{{ stay.type }}</span>
+            <span class="text-dimmed">·</span>
+            <span class="text-default">In {{ formatDateTime(stay.checked_in_at, 'auto', stay.now) }}</span>
+            <span class="text-dimmed">·</span>
+            <span class="text-default">
+                <template v-if="stay.checked_out_at">Left {{ formatDateTime(stay.checked_out_at, 'auto', stay.now) }}</template>
+                <template v-else>Out {{ formatDateTime(stay.expected_checkout_at, 'auto', stay.now) }}</template>
+            </span>
+            <span class="text-dimmed">·</span>
+            <span class="text-muted">{{ stay.code }}</span>
+            <template v-if="stay.guest_mobile"><span class="text-dimmed">·</span><span class="text-default">{{ stay.guest_mobile }}</span></template>
+            <template v-if="stay.plate_number"><span class="text-dimmed">·</span><span class="text-default">{{ stay.plate_number }}</span></template>
+        </div>
 
         <div class="grid grid-cols-[minmax(0,1fr)_300px] gap-4 max-[900px]:grid-cols-1">
             <section class="overflow-x-auto rounded-card border border-default bg-default p-4">
@@ -220,7 +233,7 @@ function lineMenu(line: Line) {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="line in lines" :key="line.id" :data-line="line.id">
+                        <tr v-for="line in orderedLines" :key="line.id" :data-line="line.id">
                             <td>
                                 <span :class="line.status === 'reversed' && !line.is_reversal ? 'text-muted line-through' : 'text-highlighted'">{{ line.description }}</span>
                                 <span class="block text-[13px] text-muted">{{ formatDateTime(line.at, 'auto', stay.now) }} · {{ line.by }}</span>

@@ -7,11 +7,11 @@ import PinPad from '../PinPad.vue';
 const endedAt = '2026-11-11T12:00:00Z';
 
 describe('OverdueBar', () => {
-    it('reminds the team in amber that everything still goes to the late shift', () => {
+    it('reminds the team in red that everything still goes to the late shift', () => {
         const wrapper = mount(OverdueBar, { props: { periodName: 'AM', endedAt }, global: { plugins: [ui] } });
 
         expect(wrapper.attributes('data-blocked')).toBe('false');
-        expect(wrapper.classes()).toContain('bg-warn-50');
+        expect(wrapper.classes()).toContain('bg-bad-50');
         expect(wrapper.text()).toContain('The AM shift should have ended at 8:00 PM. You can keep working, and everything still goes to the AM shift.');
     });
 

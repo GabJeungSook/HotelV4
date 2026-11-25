@@ -62,7 +62,7 @@ const shiftChip = computed<{ label: string; tone: Tone; closable?: boolean } | u
     }
 
     if (s.overdue) {
-        return { label: `${s.period_name} shift · ${formatDuration(s.minutes_past_end, 'min')} over`, tone: 'warn', closable: true };
+        return { label: `${s.period_name} shift · ${formatDuration(s.minutes_past_end, 'min')} over`, tone: 'bad', closable: true };
     }
 
     return { label: `${s.period_name} shift · ${formatDateTime(`${s.business_date}T12:00:00+08:00`, 'shiftDate')}`, tone: 'ok', closable: true };

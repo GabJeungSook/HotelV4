@@ -4,9 +4,9 @@ import { formatDateTime } from '@/Composables/useDateTime';
 
 /**
  * Shift running late (54, DESIGN_SYSTEM §5.2). Rendered by FrontDeskLayout once the shared
- * `shift` prop says the shift is `shift_overdue_warn_minutes` past its defined end. Amber while
- * the team can keep working; red once it is past `shift_stale_block_minutes` and payments and
- * charges are refused. It cannot be dismissed; "Close shift" opens close step 1 (22).
+ * `shift` prop says the shift is `shift_overdue_warn_minutes` past its defined end. Red so the desk
+ * sees it at once; a solid red once it is past `shift_stale_block_minutes` and payments and charges
+ * are refused. It cannot be dismissed; "Close shift" opens close step 1 (22).
  */
 const props = withDefaults(defineProps<{ periodName: string; endedAt: string; blocked?: boolean; minutesPast?: number; closable?: boolean }>(), {
     blocked: false,
@@ -27,7 +27,7 @@ const text = computed(() =>
 <template>
     <div
         class="no-print flex items-center justify-between gap-3 px-4 py-2 text-[13px] leading-[18px] font-semibold"
-        :class="blocked ? 'bg-bad-50 text-bad' : 'bg-warn-50 text-warn'"
+        :class="blocked ? 'bg-bad-50 text-bad border-l-4 border-l-bad' : 'bg-bad-50 text-bad'"
         role="status"
         data-overdue-bar
         :data-blocked="blocked ? 'true' : 'false'"
