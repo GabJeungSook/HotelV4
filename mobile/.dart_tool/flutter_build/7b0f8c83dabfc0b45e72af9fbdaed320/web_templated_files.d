@@ -1,0 +1,1 @@
+ C:\\Users\\User\\Documents\\GitHub\\HotelV4\\mobile\\build\\web\\flutter_bootstrap.js C:\\Users\\User\\Documents\\GitHub\\HotelV4\\mobile\\build\\web\\index.html:  C:\\Users\\User\\Documents\\GitHub\\HotelV4\\mobile\\web\\index.html
