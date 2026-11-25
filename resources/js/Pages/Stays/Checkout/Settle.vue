@@ -54,7 +54,7 @@ const claimTile = computed({ get: () => (claimed.value === null ? null : claimed
             <div class="flex flex-col gap-1.5">
                 <MoneyRow :label="`${settle.deposit_name} deposit held`" :amount="settle.key_held" />
                 <MoneyRow v-if="settle.guest_held > 0" label="Guest deposit held" :amount="settle.guest_held" />
-                <MoneyRow label="Less charges for missing items" :amount="settle.less_damages" />
+                <MoneyRow v-if="settle.less_damages > 0" label="Less charges for missing items" :amount="-settle.less_damages" tone="bad" />
             </div>
             <TotalRow label="Return to guest" :amount="settle.return" />
             <OptionTiles v-if="settle.return > 0" v-model="claimTile" class="mt-4" :options="depositTiles" :columns="1" label="Deposit" />
