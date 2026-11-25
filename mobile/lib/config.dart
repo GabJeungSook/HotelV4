@@ -12,7 +12,4 @@ class Config {
     'HOMI_API_BASE',
     defaultValue: 'http://10.0.2.2:8000',
   );
-
-  /// The Homi brand blue (DESIGN_SYSTEM §2).
-  static const int brandBlue = 0xFF009EF5;
 }

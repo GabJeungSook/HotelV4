@@ -6,9 +6,11 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../api/api_client.dart';
 import '../../api/kiosk_api.dart';
 import '../../state/auth_store.dart';
+import '../../theme.dart';
 import '../../util/money.dart';
+import '../../widgets/homi.dart';
 
-/// Kiosk "room held" (screen 30): the code and its QR, the amount to pay at the
+/// Kiosk "room held" (screen 30): the code with its QR, the amount to pay at the
 /// desk, and a countdown until the hold expires.
 class HeldScreen extends StatefulWidget {
   const HeldScreen({super.key, required this.auth, required this.code});
@@ -79,62 +81,95 @@ class _HeldScreenState extends State<HeldScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(child: Text(_error!))
-              : _content(),
+              ? Center(child: Text(_error!, style: const TextStyle(color: HomiColors.muted)))
+              : Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: ListView(padding: const EdgeInsets.all(24), children: _content()),
+                  ),
+                ),
     );
   }
 
-  Widget _content() {
+  List<Widget> _content() {
     final hold = _hold!;
     final expired = _left == Duration.zero;
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        Center(
-          child: Text(
-            hold['room'] == null ? 'Your code' : 'Room ${hold['room']}',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+    final soon = !expired && _left.inMinutes < 2;
+
+    return [
+      Center(
+        child: Column(
+          children: [
+            const Icon(Icons.check_circle, color: HomiColors.ok, size: 40),
+            const SizedBox(height: 10),
+            Text(hold['room'] == null ? 'Room held' : 'Room ${hold['room']} is held for you',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: HomiColors.ink, fontWeight: FontWeight.w600, fontSize: 20)),
+          ],
         ),
-        const SizedBox(height: 16),
-        Center(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+      ),
+      const SizedBox(height: 20),
+      HomiCard(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const Text('Show this at the front desk',
+                style: TextStyle(color: HomiColors.muted, fontSize: 13)),
+            const SizedBox(height: 16),
+            QrImageView(
+              data: hold['code'] as String,
+              size: 200,
+              backgroundColor: Colors.white,
+              eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: HomiColors.ink),
+              dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: HomiColors.ink),
             ),
-            child: QrImageView(data: hold['code'] as String, size: 200),
-          ),
+            const SizedBox(height: 16),
+            SelectableText(
+              hold['code'] as String,
+              style: const TextStyle(
+                fontFamily: 'GeistMono',
+                color: HomiColors.ink, fontSize: 22, fontWeight: FontWeight.w600, letterSpacing: 2,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 16),
-        Center(
-          child: SelectableText(
-            hold['code'] as String,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(letterSpacing: 2),
-          ),
+      ),
+      const SizedBox(height: 20),
+      Center(
+        child: Column(
+          children: [
+            const Text('Pay at the desk', style: TextStyle(color: HomiColors.muted, fontSize: 13)),
+            const SizedBox(height: 4),
+            Text(pesos(hold['amount'] as int),
+                style: const TextStyle(color: HomiColors.ink, fontWeight: FontWeight.w600, fontSize: 30, fontFeatures: tabular)),
+          ],
         ),
-        const SizedBox(height: 24),
-        Center(child: Text('Pay at the desk', style: Theme.of(context).textTheme.bodyMedium)),
-        Center(child: Text(pesos(hold['amount'] as int), style: Theme.of(context).textTheme.headlineMedium)),
-        const SizedBox(height: 24),
-        Center(
-          child: Text(
-            expired ? 'This hold has expired.' : 'Hold expires in $_countdown',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: expired ? Theme.of(context).colorScheme.error : null,
-                ),
-          ),
+      ),
+      const SizedBox(height: 16),
+      Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.schedule, size: 16, color: expired || soon ? HomiColors.warn : HomiColors.muted),
+            const SizedBox(width: 6),
+            Text(
+              expired ? 'This hold has expired' : 'Hold expires in $_countdown',
+              style: TextStyle(
+                color: expired || soon ? HomiColors.warn : HomiColors.muted,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                fontFeatures: tabular,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 32),
-        FilledButton(
-          onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Text('Done'),
-          ),
-        ),
-      ],
-    );
+      ),
+      const SizedBox(height: 28),
+      FilledButton(
+        style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
+        onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
+        child: const Text('Done', style: TextStyle(fontSize: 16)),
+      ),
+    ];
   }
 }

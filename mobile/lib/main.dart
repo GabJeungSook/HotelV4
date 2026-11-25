@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'config.dart';
 import 'screens/housekeeping/queue_screen.dart';
 import 'screens/kiosk/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'state/auth_store.dart';
+import 'theme.dart';
 
 void main() {
   runApp(const HomiApp());
@@ -34,14 +34,10 @@ class _HomiAppState extends State<HomiApp> {
 
   @override
   Widget build(BuildContext context) {
-    const brand = Color(Config.brandBlue);
     return MaterialApp(
       title: 'Homi',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: brand),
-        useMaterial3: true,
-      ),
+      theme: HomiTheme.light(),
       home: ListenableBuilder(
         listenable: _auth,
         builder: (context, _) {

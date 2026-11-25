@@ -4,11 +4,13 @@ import 'package:uuid/uuid.dart';
 import '../../api/api_client.dart';
 import '../../api/kiosk_api.dart';
 import '../../state/auth_store.dart';
+import '../../theme.dart';
 import '../../util/money.dart';
+import '../../widgets/homi.dart';
 import 'held_screen.dart';
 
-/// Kiosk "your name" + the offer (screen 29): the price breakdown for the chosen
-/// type and hours, the guest's name and optional mobile, then Hold my room.
+/// Kiosk "your name" + the offer (screen 29): the price for the chosen type and
+/// stay, the guest's name and optional mobile, then Hold my room.
 class OfferScreen extends StatefulWidget {
   const OfferScreen({
     super.key,
@@ -31,7 +33,6 @@ class _OfferScreenState extends State<OfferScreen> {
   late final KioskApi _api = KioskApi(ApiClient(), widget.auth.token!);
   final _name = TextEditingController();
   final _mobile = TextEditingController();
-  // One key per visit to this screen, so a double-tap on Hold cannot double-book.
   final String _idempotencyKey = const Uuid().v4();
 
   Map<String, dynamic>? _offer;
@@ -82,17 +83,11 @@ class _OfferScreenState extends State<OfferScreen> {
         idempotencyKey: _idempotencyKey,
       );
       if (!mounted) return;
-      final code = res['code'] as String;
       Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (_) => HeldScreen(auth: widget.auth, code: code),
+        builder: (_) => HeldScreen(auth: widget.auth, code: res['code'] as String),
       ));
     } on ApiException catch (e) {
-      if (mounted) {
-        setState(() {
-          _holding = false;
-          _error = e.message; // e.g. "room taken" (409) or a validation message
-        });
-      }
+      if (mounted) setState(() { _holding = false; _error = e.message; });
     }
   }
 
@@ -103,65 +98,92 @@ class _OfferScreenState extends State<OfferScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _offer == null
-              ? Center(child: Text(_error ?? 'That option is not available.'))
-              : _form(),
+              ? Center(child: Text(_error ?? 'That option is not available.', style: const TextStyle(color: HomiColors.muted)))
+              : Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: ListView(padding: const EdgeInsets.all(20), children: _form()),
+                  ),
+                ),
     );
   }
 
-  Widget _form() {
+  List<Widget> _form() {
     final offer = _offer!;
     final discount = offer['discount'] as Map<String, dynamic>?;
     final deposit = offer['deposit'] as Map<String, dynamic>;
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        Text('${offer['type']['name']} · ${offer['stay_label']}', style: Theme.of(context).textTheme.titleLarge),
-        if (offer['room'] is Map)
-          Text((offer['room'] as Map)['label'] as String? ?? '', style: Theme.of(context).textTheme.bodyMedium),
-        const SizedBox(height: 16),
-        _row('Room', offer['room_amount'] as int),
-        if (discount != null) _row(discount['name'] as String, -(discount['amount'] as int)),
-        _row(deposit['name'] as String? ?? 'Deposit', deposit['amount'] as int),
-        const Divider(height: 24),
-        _row('To pay at the desk', offer['total'] as int, bold: true),
-        const SizedBox(height: 24),
-        if (_error != null) ...[
-          Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-          const SizedBox(height: 12),
-        ],
-        TextField(
-          controller: _name,
-          decoration: const InputDecoration(labelText: 'Your name', border: OutlineInputBorder()),
-          textCapitalization: TextCapitalization.words,
+    return [
+      Text('${offer['type']['name']} · ${offer['stay_label']}',
+          style: const TextStyle(color: HomiColors.ink, fontWeight: FontWeight.w600, fontSize: 22)),
+      if (offer['room'] is Map)
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text((offer['room'] as Map)['label'] as String? ?? '',
+              style: const TextStyle(color: HomiColors.muted, fontSize: 14)),
         ),
+      const SizedBox(height: 20),
+      HomiCard(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            _row('Room', pesos(offer['room_amount'] as int)),
+            if (discount != null) ...[
+              const SizedBox(height: 10),
+              _row(discount['name'] as String, '−${pesos(discount['amount'] as int)}', amountColor: HomiColors.ok),
+            ],
+            const SizedBox(height: 10),
+            _row(deposit['name'] as String? ?? 'Deposit', pesos(deposit['amount'] as int)),
+            const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Divider(height: 1, color: HomiColors.line)),
+            _row('To pay at the desk', pesos(offer['total'] as int), bold: true),
+          ],
+        ),
+      ),
+      const SizedBox(height: 24),
+      if (_error != null) ...[
+        Text(_error!, style: const TextStyle(color: HomiColors.bad, fontSize: 13.5)),
         const SizedBox(height: 12),
-        TextField(
-          controller: _mobile,
-          decoration: const InputDecoration(labelText: 'Mobile (optional)', border: OutlineInputBorder(), hintText: '09xx xxx xxxx'),
-          keyboardType: TextInputType.phone,
-        ),
-        const SizedBox(height: 24),
-        FilledButton(
-          onPressed: _holding ? null : _hold,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: _holding
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Hold my room'),
-          ),
-        ),
       ],
-    );
+      TextField(
+        controller: _name,
+        decoration: const InputDecoration(labelText: 'Your name', prefixIcon: Icon(Icons.person_outline, color: HomiColors.faint)),
+        textCapitalization: TextCapitalization.words,
+      ),
+      const SizedBox(height: 14),
+      TextField(
+        controller: _mobile,
+        decoration: const InputDecoration(
+          labelText: 'Mobile (optional)',
+          hintText: '0917 555 0142',
+          prefixIcon: Icon(Icons.phone_outlined, color: HomiColors.faint),
+        ),
+        keyboardType: TextInputType.phone,
+      ),
+      const SizedBox(height: 24),
+      FilledButton(
+        style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
+        onPressed: _holding ? null : _hold,
+        child: _holding
+            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+            : const Text('Hold my room', style: TextStyle(fontSize: 16)),
+      ),
+    ];
   }
 
-  Widget _row(String label, int amount, {bool bold = false}) {
-    final style = bold ? Theme.of(context).textTheme.titleMedium : Theme.of(context).textTheme.bodyLarge;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [Text(label, style: style), Text(pesos(amount), style: style)],
-      ),
+  Widget _row(String label, String amount, {bool bold = false, Color? amountColor}) {
+    final labelStyle = TextStyle(
+      color: bold ? HomiColors.ink : HomiColors.text,
+      fontSize: bold ? 16 : 14.5,
+      fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
+    );
+    final amountStyle = TextStyle(
+      color: amountColor ?? (bold ? HomiColors.ink : HomiColors.text),
+      fontSize: bold ? 20 : 14.5,
+      fontWeight: FontWeight.w600,
+      fontFeatures: tabular,
+    );
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [Text(label, style: labelStyle), Text(amount, style: amountStyle)],
     );
   }
 }

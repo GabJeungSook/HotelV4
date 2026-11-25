@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import '../../api/api_client.dart';
 import '../../api/housekeeping_api.dart';
 import '../../state/auth_store.dart';
+import '../../theme.dart';
+import '../../widgets/homi.dart';
 import 'cleaning_screen.dart';
 
-/// The roomboy's queue: rooms waiting to be cleaned, newest-urgent first. Tap a
-/// startable room to begin; an in-progress room jumps straight to the cleaning screen.
+/// The roomboy's queue: rooms waiting to be cleaned, most urgent first. Tap a
+/// startable room to begin; an in-progress room opens the cleaning screen.
 class HousekeepingQueueScreen extends StatefulWidget {
   const HousekeepingQueueScreen({super.key, required this.auth});
 
@@ -45,94 +47,213 @@ class _HousekeepingQueueScreenState extends State<HousekeepingQueueScreen> {
 
   Future<void> _open(int taskId, {required bool alreadyStarted}) async {
     try {
-      if (!alreadyStarted) {
-        await _api.start(taskId);
-      }
+      if (!alreadyStarted) await _api.start(taskId);
     } on ApiException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-      await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+        await _load();
+      }
       return;
     }
     if (!mounted) return;
     await Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => CleaningScreen(auth: widget.auth, taskId: taskId),
     ));
-    await _load(); // refresh after finishing
+    await _load();
   }
 
   @override
   Widget build(BuildContext context) {
-    final tasks = (_data?['tasks'] as List<dynamic>? ?? const []).cast<Map<String, dynamic>>();
-    final current = _data?['current'] as Map<String, dynamic>?;
+    final name = _data?['user_name'] as String? ?? 'Housekeeping';
+    final floors = _data?['floors'] as String?;
+    final online = _data?['online'] as int?;
+    final sub = [if (floors != null) floors, if (online != null) '$online on duty'].join(' · ');
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_data?['user_name'] as String? ?? 'Housekeeping'),
+        toolbarHeight: 64,
+        titleSpacing: 12,
+        leading: Padding(padding: const EdgeInsets.only(left: 16), child: Center(child: InitialsAvatar(name: name))),
+        leadingWidth: 60,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(name, style: const TextStyle(color: HomiColors.ink, fontWeight: FontWeight.w600, fontSize: 16)),
+            if (sub.isNotEmpty)
+              Text(sub, style: const TextStyle(color: HomiColors.muted, fontSize: 12.5)),
+          ],
+        ),
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loading ? null : _load),
           IconButton(icon: const Icon(Icons.logout), onPressed: widget.auth.logout),
+          const SizedBox(width: 4),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _load,
-        child: _buildBody(tasks, current),
-      ),
+      body: RefreshIndicator(onRefresh: _load, child: _body()),
     );
   }
 
-  Widget _buildBody(List<Map<String, dynamic>> tasks, Map<String, dynamic>? current) {
+  Widget _body() {
+    final tasks = (_data?['tasks'] as List<dynamic>? ?? const []).cast<Map<String, dynamic>>();
+    final current = _data?['current'] as Map<String, dynamic>?;
+
     if (_loading && _data == null) {
       return const Center(child: CircularProgressIndicator());
     }
     if (_error != null) {
-      return ListView(children: [
-        const SizedBox(height: 80),
-        Center(child: Text(_error!)),
-        const SizedBox(height: 12),
-        Center(child: FilledButton(onPressed: _load, child: const Text('Try again'))),
-      ]);
+      return _ErrorState(message: _error!, onRetry: _load);
+    }
+    if (tasks.isEmpty && current == null) {
+      return const _EmptyState();
     }
 
     return ListView(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       children: [
-        if (current != null)
-          Card(
-            color: Theme.of(context).colorScheme.secondaryContainer,
-            child: ListTile(
-              leading: const Icon(Icons.cleaning_services),
-              title: Text('Room ${current['room']} — in progress'),
-              subtitle: const Text('Tap to finish'),
-              onTap: () => _open(current['id'] as int, alreadyStarted: true),
+        if (current != null) ...[
+          HomiCard(
+            topEdge: HomiColors.violet,
+            onTap: () => _open(current['id'] as int, alreadyStarted: true),
+            child: Row(
+              children: [
+                Container(
+                  width: 40, height: 40,
+                  decoration: BoxDecoration(color: HomiColors.violet50, borderRadius: BorderRadius.circular(9)),
+                  child: const Icon(Icons.cleaning_services_outlined, color: HomiColors.violet, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Room ${current['room']}',
+                          style: const TextStyle(color: HomiColors.ink, fontWeight: FontWeight.w600, fontSize: 15.5)),
+                      const SizedBox(height: 3),
+                      const StatusText(label: 'Cleaning now · tap to finish', color: HomiColors.violet),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: HomiColors.faint),
+              ],
             ),
           ),
-        if (tasks.isEmpty && current == null)
-          const Padding(
-            padding: EdgeInsets.only(top: 80),
-            child: Center(child: Text('Nothing to clean right now.')),
-          ),
-        for (final t in tasks) _taskTile(t),
+          const SizedBox(height: 20),
+        ],
+        if (tasks.isNotEmpty) ...[
+          const _SectionLabel('To clean'),
+          const SizedBox(height: 10),
+          for (final t in tasks) ...[_taskCard(t), const SizedBox(height: 10)],
+        ],
       ],
     );
   }
 
-  Widget _taskTile(Map<String, dynamic> t) {
+  Widget _taskCard(Map<String, dynamic> t) {
     final urgent = t['urgent'] == true;
     final startable = t['startable'] == true;
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: urgent ? Theme.of(context).colorScheme.errorContainer : null,
-          child: Text('${t['room']}'),
+    final tone = t['tone'] as String?;
+    final (Color, String)? status = urgent
+        ? (HomiColors.bad, 'Urgent')
+        : tone == 'warn'
+            ? (HomiColors.warn, 'Waiting')
+            : null;
+
+    return HomiCard(
+      onTap: startable ? () => _open(t['id'] as int, alreadyStarted: false) : null,
+      child: Opacity(
+        opacity: startable ? 1 : 0.55,
+        child: Row(
+          children: [
+            _roomTile('${t['room']}', urgent: urgent),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text('Room ${t['room']}',
+                          style: const TextStyle(color: HomiColors.ink, fontWeight: FontWeight.w600, fontSize: 15.5)),
+                      Text('  ·  ${t['type']}', style: const TextStyle(color: HomiColors.muted, fontSize: 13.5)),
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Text(t['detail'] as String? ?? '',
+                      style: const TextStyle(color: HomiColors.muted, fontSize: 12.5)),
+                  if (status != null) ...[
+                    const SizedBox(height: 6),
+                    StatusText(label: status.$2, color: status.$1),
+                  ],
+                ],
+              ),
+            ),
+            if (startable)
+              const Icon(Icons.chevron_right, color: HomiColors.faint)
+            else
+              const Text('Next', style: TextStyle(color: HomiColors.faint, fontSize: 12.5, fontWeight: FontWeight.w500)),
+          ],
         ),
-        title: Text('Room ${t['room']} · ${t['type']}'),
-        subtitle: Text(t['detail'] as String? ?? ''),
-        trailing: startable
-            ? const Icon(Icons.chevron_right)
-            : Text('next', style: Theme.of(context).textTheme.labelSmall),
-        enabled: startable,
-        onTap: startable ? () => _open(t['id'] as int, alreadyStarted: false) : null,
       ),
     );
   }
+
+  Widget _roomTile(String number, {required bool urgent}) {
+    return Container(
+      width: 44, height: 44,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: urgent ? HomiColors.bad50 : HomiColors.hover,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(number,
+          style: TextStyle(
+            color: urgent ? HomiColors.bad : HomiColors.text,
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+            fontFeatures: tabular,
+          )),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.text);
+  final String text;
+  @override
+  Widget build(BuildContext context) => Text(
+        text.toUpperCase(),
+        style: const TextStyle(color: HomiColors.faint, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+      );
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+  @override
+  Widget build(BuildContext context) => ListView(
+        children: const [
+          SizedBox(height: 120),
+          Icon(Icons.check_circle_outline, size: 44, color: Color(0xFFB3BAC6)),
+          SizedBox(height: 12),
+          Center(child: Text('All clear', style: TextStyle(color: HomiColors.ink, fontWeight: FontWeight.w600, fontSize: 16))),
+          SizedBox(height: 4),
+          Center(child: Text('No rooms to clean right now.', style: TextStyle(color: HomiColors.muted))),
+        ],
+      );
+}
+
+class _ErrorState extends StatelessWidget {
+  const _ErrorState({required this.message, required this.onRetry});
+  final String message;
+  final VoidCallback onRetry;
+  @override
+  Widget build(BuildContext context) => ListView(
+        padding: const EdgeInsets.all(24),
+        children: [
+          const SizedBox(height: 100),
+          Center(child: Text(message, textAlign: TextAlign.center, style: const TextStyle(color: HomiColors.muted))),
+          const SizedBox(height: 16),
+          Center(child: SizedBox(width: 160, child: FilledButton(onPressed: onRetry, child: const Text('Try again')))),
+        ],
+      );
 }

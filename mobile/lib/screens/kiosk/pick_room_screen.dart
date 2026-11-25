@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import '../../api/api_client.dart';
 import '../../api/kiosk_api.dart';
 import '../../state/auth_store.dart';
+import '../../theme.dart';
 import '../../util/money.dart';
+import '../../widgets/homi.dart';
 import 'offer_screen.dart';
 
-/// Kiosk "room and hours" (screen 28): each room type with its hourly options.
-/// Picking an option goes to the offer. Long-stay is a later addition.
+/// Kiosk "room and hours" (screen 28): each room type with its hourly and
+/// whole-day options. Picking an option goes to the offer.
 class PickRoomScreen extends StatefulWidget {
   const PickRoomScreen({super.key, required this.auth});
 
@@ -30,10 +32,6 @@ class _PickRoomScreenState extends State<PickRoomScreen> {
   }
 
   Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
     try {
       final data = await _api.rooms();
       final types = (data['types'] as List<dynamic>? ?? const []).cast<Map<String, dynamic>>();
@@ -47,12 +45,7 @@ class _PickRoomScreenState extends State<PickRoomScreen> {
 
   void _pick(Map<String, dynamic> type, {required String kind, required int quantity}) {
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => OfferScreen(
-        auth: widget.auth,
-        roomTypeId: type['id'] as int,
-        kind: kind,
-        quantity: quantity,
-      ),
+      builder: (_) => OfferScreen(auth: widget.auth, roomTypeId: type['id'] as int, kind: kind, quantity: quantity),
     ));
   }
 
@@ -63,10 +56,15 @@ class _PickRoomScreenState extends State<PickRoomScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(child: Text(_error!))
-              : ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [for (final t in _types) _typeCard(t)],
+              ? Center(child: Text(_error!, style: const TextStyle(color: HomiColors.muted)))
+              : Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 680),
+                    child: ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [for (final t in _types) ...[_typeCard(t), const SizedBox(height: 16)]],
+                    ),
+                  ),
                 ),
     );
   }
@@ -78,61 +76,106 @@ class _PickRoomScreenState extends State<PickRoomScreen> {
     final maxDays = longStay?['max_days'] as int? ?? 0;
     final perDay = longStay?['per_day'] as int? ?? 0;
     final dayChoices = [1, 2, 3, 5, 7, 14, 30].where((d) => d <= maxDays).toList();
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(child: Text(t['name'] as String? ?? '', style: Theme.of(context).textTheme.titleLarge)),
-                if (full)
-                  Chip(
-                    label: const Text('Full'),
-                    backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                  ),
-              ],
-            ),
-            if ((t['description'] as String?)?.isNotEmpty ?? false) ...[
-              const SizedBox(height: 4),
-              Text(t['description'] as String, style: Theme.of(context).textTheme.bodyMedium),
+
+    return HomiCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(t['name'] as String? ?? '',
+                    style: const TextStyle(color: HomiColors.ink, fontWeight: FontWeight.w600, fontSize: 19)),
+              ),
+              if (full) const StatusText(label: 'Full', color: HomiColors.muted),
             ],
-            const SizedBox(height: 12),
-            if (full)
-              Text('No rooms free right now.', style: Theme.of(context).textTheme.bodySmall)
-            else ...[
-              if (options.isNotEmpty)
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final o in options)
-                      ActionChip(
-                        label: Text('${o['hours']}h · ${pesos(o['amount'] as int)}'),
-                        onPressed: () => _pick(t, kind: 'hourly', quantity: o['hours'] as int),
-                      ),
-                  ],
-                ),
-              if (dayChoices.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Text('Long stay', style: Theme.of(context).textTheme.labelLarge),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final d in dayChoices)
-                      ActionChip(
-                        label: Text('${d}d · ${pesos(perDay * d)}'),
-                        onPressed: () => _pick(t, kind: 'long_stay', quantity: d),
-                      ),
-                  ],
-                ),
-              ],
+          ),
+          if ((t['description'] as String?)?.isNotEmpty ?? false) ...[
+            const SizedBox(height: 4),
+            Text(t['description'] as String, style: const TextStyle(color: HomiColors.muted, fontSize: 13.5)),
+          ],
+          if (full) ...[
+            const SizedBox(height: 14),
+            const Text('No rooms free right now.', style: TextStyle(color: HomiColors.faint, fontSize: 13)),
+          ] else ...[
+            if (options.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _groupLabel('By the hour'),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10, runSpacing: 10,
+                children: [
+                  for (final o in options)
+                    _OptionTile(
+                      top: '${o['hours']} hrs',
+                      price: pesos(o['amount'] as int),
+                      onTap: () => _pick(t, kind: 'hourly', quantity: o['hours'] as int),
+                    ),
+                ],
+              ),
+            ],
+            if (dayChoices.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _groupLabel('Long stay'),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10, runSpacing: 10,
+                children: [
+                  for (final d in dayChoices)
+                    _OptionTile(
+                      top: d == 1 ? '1 day' : '$d days',
+                      price: pesos(perDay * d),
+                      onTap: () => _pick(t, kind: 'long_stay', quantity: d),
+                    ),
+                ],
+              ),
             ],
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _groupLabel(String text) => Text(
+        text.toUpperCase(),
+        style: const TextStyle(color: HomiColors.faint, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+      );
+}
+
+/// A tappable rate tile: the stay length over its price, bordered, that fills
+/// with the select tint on press.
+class _OptionTile extends StatelessWidget {
+  const _OptionTile({required this.top, required this.price, required this.onTap});
+
+  final String top;
+  final String price;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: HomiColors.card,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        highlightColor: HomiColors.primary50,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: HomiColors.lineStrong),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(top, style: const TextStyle(color: HomiColors.ink, fontWeight: FontWeight.w600, fontSize: 15)),
+              const SizedBox(height: 2),
+              Text(price, style: const TextStyle(color: HomiColors.muted, fontSize: 13.5, fontFeatures: tabular)),
+            ],
+          ),
         ),
       ),
     );
