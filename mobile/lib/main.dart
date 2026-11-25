@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/housekeeping/queue_screen.dart';
+import 'screens/housekeeping/roomboy_shell.dart';
 import 'screens/kiosk/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'state/auth_store.dart';
@@ -52,7 +52,7 @@ class _HomiAppState extends State<HomiApp> {
           if (user.isKiosk) {
             return KioskWelcomeScreen(auth: _auth);
           }
-          return HousekeepingQueueScreen(auth: _auth);
+          return RoomboyShell(auth: _auth);
         },
       ),
     );

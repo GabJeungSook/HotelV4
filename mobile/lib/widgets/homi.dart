@@ -99,6 +99,44 @@ class StatusText extends StatelessWidget {
   }
 }
 
+/// A small stat tile for the "My cleans" summary: a value over a label, with an
+/// optional tone that colours the value.
+class StatTile extends StatelessWidget {
+  const StatTile({super.key, required this.label, required this.value, this.sub, this.valueColor});
+
+  final String label;
+  final String value;
+  final String? sub;
+  final Color? valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return HomiCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label.toUpperCase(),
+              style: const TextStyle(color: HomiColors.faint, fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(value,
+                  style: TextStyle(color: valueColor ?? HomiColors.ink, fontSize: 24, fontWeight: FontWeight.w600, fontFeatures: tabular)),
+              if (sub != null) ...[
+                const SizedBox(width: 4),
+                Text(sub!, style: const TextStyle(color: HomiColors.muted, fontSize: 12)),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// A round initials avatar in one of the design system's soft tones, picked
 /// stably from the name.
 class InitialsAvatar extends StatelessWidget {

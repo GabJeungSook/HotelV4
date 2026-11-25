@@ -4,6 +4,7 @@ import '../../api/api_client.dart';
 import '../../api/housekeeping_api.dart';
 import '../../state/auth_store.dart';
 import '../../theme.dart';
+import '../../util/fmt.dart';
 import '../../widgets/homi.dart';
 import 'cleaning_screen.dart';
 
@@ -97,6 +98,7 @@ class _HousekeepingQueueScreenState extends State<HousekeepingQueueScreen> {
   Widget _body() {
     final tasks = (_data?['tasks'] as List<dynamic>? ?? const []).cast<Map<String, dynamic>>();
     final current = _data?['current'] as Map<String, dynamic>?;
+    final others = (_data?['others'] as List<dynamic>? ?? const []).cast<Map<String, dynamic>>();
 
     if (_loading && _data == null) {
       return const Center(child: CircularProgressIndicator());
@@ -104,7 +106,7 @@ class _HousekeepingQueueScreenState extends State<HousekeepingQueueScreen> {
     if (_error != null) {
       return _ErrorState(message: _error!, onRetry: _load);
     }
-    if (tasks.isEmpty && current == null) {
+    if (tasks.isEmpty && current == null && others.isEmpty) {
       return const _EmptyState();
     }
 
@@ -130,11 +132,44 @@ class _HousekeepingQueueScreenState extends State<HousekeepingQueueScreen> {
                       Text('Room ${current['room']}',
                           style: const TextStyle(color: HomiColors.ink, fontWeight: FontWeight.w600, fontSize: 15.5)),
                       const SizedBox(height: 3),
-                      const StatusText(label: 'Cleaning now · tap to finish', color: HomiColors.violet),
+                      StatusText(
+                        label: current['started_at'] == null
+                            ? 'Cleaning now · tap to finish'
+                            : 'Started ${timeOf(current['started_at'] as String?)} · tap to finish',
+                        color: HomiColors.violet,
+                      ),
                     ],
                   ),
                 ),
                 const Icon(Icons.chevron_right, color: HomiColors.faint),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+        if (others.isNotEmpty) ...[
+          const _SectionLabel('Others cleaning'),
+          const SizedBox(height: 10),
+          HomiCard(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            child: Column(
+              children: [
+                for (final o in others)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text('Room ${o['room']}',
+                              style: const TextStyle(color: HomiColors.text, fontSize: 14, fontWeight: FontWeight.w500)),
+                        ),
+                        Text(
+                          '${o['by']}${o['started_at'] != null ? ' · ${timeOf(o['started_at'] as String?)}' : ''}',
+                          style: const TextStyle(color: HomiColors.muted, fontSize: 12.5),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),

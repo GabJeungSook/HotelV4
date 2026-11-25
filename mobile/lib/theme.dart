@@ -138,6 +138,18 @@ class HomiTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(color: HomiColors.primary),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: HomiColors.card,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: HomiColors.primary50,
+        height: 64,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith((s) => IconThemeData(
+            color: s.contains(WidgetState.selected) ? HomiColors.primaryInk : HomiColors.muted, size: 22)),
+        labelTextStyle: WidgetStateProperty.resolveWith((s) => TextStyle(
+            fontFamily: 'Geist', fontSize: 12, fontWeight: FontWeight.w600,
+            color: s.contains(WidgetState.selected) ? HomiColors.primaryInk : HomiColors.muted)),
+      ),
     );
   }
 

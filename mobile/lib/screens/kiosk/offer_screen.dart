@@ -122,6 +122,35 @@ class _OfferScreenState extends State<OfferScreen> {
               style: const TextStyle(color: HomiColors.muted, fontSize: 14)),
         ),
       const SizedBox(height: 20),
+      if (discount != null) ...[
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: HomiColors.accent50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFF2D7A8)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.local_offer_outlined, size: 20, color: HomiColors.accent),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(discount['name'] as String,
+                        style: const TextStyle(color: HomiColors.accent, fontWeight: FontWeight.w600, fontSize: 14.5)),
+                    if ((discount['text'] as String?)?.isNotEmpty ?? false)
+                      Text(discount['text'] as String, style: const TextStyle(color: HomiColors.muted, fontSize: 12.5)),
+                  ],
+                ),
+              ),
+              const StatusText(label: 'Applied', color: HomiColors.ok),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
       HomiCard(
         padding: const EdgeInsets.all(20),
         child: Column(

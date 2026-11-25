@@ -61,8 +61,16 @@ class _PickRoomScreenState extends State<PickRoomScreen> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 680),
                     child: ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: [for (final t in _types) ...[_typeCard(t), const SizedBox(height: 16)]],
+                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+                      children: [
+                        const Text('Choose your room',
+                            style: TextStyle(color: HomiColors.ink, fontSize: 30, fontWeight: FontWeight.w600, letterSpacing: -0.8)),
+                        const SizedBox(height: 4),
+                        const Text('Pick a type, then how long you will stay.',
+                            style: TextStyle(color: HomiColors.muted, fontSize: 15)),
+                        const SizedBox(height: 20),
+                        for (final t in _types) ...[_typeCard(t), const SizedBox(height: 16)],
+                      ],
                     ),
                   ),
                 ),
@@ -94,6 +102,17 @@ class _PickRoomScreenState extends State<PickRoomScreen> {
           if ((t['description'] as String?)?.isNotEmpty ?? false) ...[
             const SizedBox(height: 4),
             Text(t['description'] as String, style: const TextStyle(color: HomiColors.muted, fontSize: 13.5)),
+          ],
+          if (!full && t['room'] is Map) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.meeting_room_outlined, size: 15, color: HomiColors.ok),
+                const SizedBox(width: 5),
+                Text('${(t['room'] as Map)['label']} ready',
+                    style: const TextStyle(color: HomiColors.ok, fontSize: 12.5, fontWeight: FontWeight.w500)),
+              ],
+            ),
           ],
           if (full) ...[
             const SizedBox(height: 14),
