@@ -42,7 +42,7 @@ const claimTile = computed({ get: () => (claimed.value === null ? null : claimed
             <h2 class="mb-3 text-base font-semibold text-highlighted">Bill</h2>
             <div class="flex flex-col gap-1.5">
                 <MoneyRow label="Total charges" :amount="settle.charges" />
-                <MoneyRow v-if="settle.damages > 0" label="of which damages and missing items" :amount="settle.damages" />
+                <p v-if="settle.damages > 0" class="-mt-1 text-[12px] text-muted">Includes {{ formatMoney(settle.damages) }} for damages and missing items</p>
                 <MoneyRow label="Already paid" :amount="settle.paid" />
             </div>
             <TotalRow label="Balance due" :amount="settle.balance" :tone="settle.balance > 0 ? 'bad' : 'ok'" />
