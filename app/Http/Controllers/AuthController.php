@@ -13,12 +13,14 @@ use App\Exceptions\ActionRefused;
 use App\Http\Middleware\EnsureDeviceKey;
 use App\Http\Requests\SignInRequest;
 use App\Http\Requests\SwitchUserRequest;
+use App\Models\AuditLog;
 use App\Models\Branch;
 use App\Models\User;
 use App\Queries\ShiftQuery;
 use App\Queries\TodayQuery;
 use App\Support\Clock;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,6 +75,7 @@ final class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
         $request->session()->put('homi.signed_in_at', $clock->now()->toIso8601String());
+        $this->logAuth($user, 'auth.login', $clock);
 
         $response = redirect()->route('home');
 
@@ -84,9 +87,10 @@ final class AuthController extends Controller
         return $response;
     }
 
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, Clock $clock): RedirectResponse
     {
         // Signing out never touches the shift, the drawer or the members (APP_FLOW §6 case 12).
+        $this->logAuth($request->user(), 'auth.logged_out', $clock);
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -117,8 +121,27 @@ final class AuthController extends Controller
         Auth::login($target);
         $request->session()->regenerate();
         $request->session()->put('homi.signed_in_at', $clock->now()->toIso8601String());
+        $this->logAuth($target, 'auth.switched', $clock);
         Inertia::flash('toast', ['type' => 'success', 'message' => "Signed on as {$target->name}."]);
 
         return redirect()->back(fallback: route('home'));
+    }
+
+    /** One audit_logs row for a sign-in, sign-out or switch, so it shows on the activity log. */
+    private function logAuth(?Authenticatable $user, string $action, Clock $clock): void
+    {
+        if (! $user instanceof User) {
+            return;
+        }
+
+        AuditLog::query()->create([
+            'branch_id' => $user->branch_id,
+            'actor_id' => $user->id,
+            'action' => $action,
+            'subject_type' => 'user',
+            'subject_id' => $user->id,
+            'after_json' => null,
+            'created_at' => $clock->now(),
+        ]);
     }
 }

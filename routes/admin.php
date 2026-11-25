@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Admin\HallController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RateController;
@@ -13,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 
 // Branch setup (TRD §4.1, APP_FLOW §2): screens 44–48. Admin of the branch; owner who opened it.
 Route::middleware(['auth', 'pin.set', 'role:admin,owner', EnsureBranchOpened::class])->prefix('admin')->group(function (): void {
+    // Activity log: every action of a business day for this branch.
+    Route::get('/activity', [ActivityController::class, 'index'])->name('admin.activity');
+
     // Rooms (44), with the floors and room types tabs.
     Route::get('/rooms', [RoomController::class, 'index'])->name('admin.rooms');
     Route::post('/rooms', [RoomController::class, 'store'])->name('admin.rooms.store');

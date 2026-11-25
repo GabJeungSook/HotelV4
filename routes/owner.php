@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Owner\AccountController;
 use App\Http\Controllers\Owner\BranchController;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +15,9 @@ Route::middleware(['auth', 'pin.set', 'role:owner'])->prefix('owner')->name('own
     Route::post('/branches/close', [BranchController::class, 'close'])->name('branches.close');
     Route::post('/branches/{branch}/open', [BranchController::class, 'open'])->whereNumber('branch')->name('branches.open');
     Route::patch('/branches/{branch}', [BranchController::class, 'update'])->whereNumber('branch')->name('branches.update');
+
+    // Activity log across every active branch.
+    Route::get('/activity', [ActivityController::class, 'all'])->name('activity');
 
     Route::get('/accounts', [AccountController::class, 'index'])->name('accounts');
     Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');

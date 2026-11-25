@@ -24,7 +24,7 @@ final class Navigation
     private const FRONT = [Role::Frontdesk, Role::Supervisor];
 
     /** Pages of one branch: for an owner, shown only once a branch is opened. */
-    private const OPENED_BRANCH_ONLY = ['dashboard', 'attention', 'rooms', 'rates', 'products', 'admin-halls', 'users', 'settings'];
+    private const OPENED_BRANCH_ONLY = ['dashboard', 'attention', 'activity', 'rooms', 'rates', 'products', 'admin-halls', 'users', 'settings'];
 
     private const BACK = [Role::Admin, Role::Backoffice, Role::Supervisor, Role::Owner];
 
@@ -59,6 +59,7 @@ final class Navigation
             ['layout' => 'owner', 'heading' => 'Overview', 'items' => [
                 ['key' => 'owner', 'label' => 'Dashboard', 'route' => 'owner.dashboard', 'icon' => 'i-solar-chart-2-bold-duotone', 'roles' => [Role::Owner]],
                 ['key' => 'branches', 'label' => 'Branches', 'route' => 'owner.branches.index', 'icon' => 'i-solar-buildings-2-bold-duotone', 'roles' => [Role::Owner]],
+                ['key' => 'activity-all', 'label' => 'Activity log', 'route' => 'owner.activity', 'icon' => 'i-solar-clipboard-list-bold-duotone', 'roles' => [Role::Owner], 'subtitle' => 'Every action, across all branches'],
             ]],
             ['layout' => 'backoffice', 'heading' => 'Overview', 'items' => [
                 ['key' => 'dashboard', 'label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'i-solar-chart-2-bold-duotone', 'roles' => [Role::Admin, Role::Backoffice, Role::Supervisor, Role::Owner]],
@@ -71,6 +72,7 @@ final class Navigation
                 ['key' => 'admin-halls', 'label' => 'Event halls', 'route' => 'admin.halls', 'icon' => 'i-solar-confetti-bold-duotone', 'roles' => [Role::Admin, Role::Owner], 'module' => 'event_hall_enabled'],
                 ['key' => 'users', 'label' => 'Users', 'route' => 'admin.users', 'icon' => 'i-solar-user-bold-duotone', 'roles' => [Role::Admin, Role::Owner]],
                 ['key' => 'settings', 'label' => 'Settings', 'route' => 'admin.settings', 'icon' => 'i-solar-settings-bold-duotone', 'roles' => [Role::Admin, Role::Owner]],
+                ['key' => 'activity', 'label' => 'Activity log', 'route' => 'admin.activity', 'icon' => 'i-solar-clipboard-list-bold-duotone', 'roles' => [Role::Admin], 'subtitle' => 'Every action taken in this branch'],
             ]],
             ['layout' => 'backoffice', 'heading' => 'Reports', 'items' => [
                 ['key' => 'reports', 'label' => 'Report hub', 'route' => 'reports.index', 'icon' => 'i-solar-list-bold-duotone', 'roles' => self::BACK, 'parent' => 'reports-menu'],

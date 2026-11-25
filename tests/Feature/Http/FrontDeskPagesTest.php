@@ -235,14 +235,14 @@ it('builds the navigation on the server from the role and the pages that exist',
 
     $adminNav = $this->actingAs(Hotel::user('ramil.ortega'))->get('/dashboard')->viewData('page')['props']['nav'];
     expect(collect($adminNav)->pluck('items')->flatten(1)->pluck('key')->all())
-        ->toBe(['dashboard', 'attention', 'rooms', 'rates', 'products', 'users', 'settings', 'reports-menu', 'stats']);
+        ->toBe(['dashboard', 'attention', 'rooms', 'rates', 'products', 'users', 'settings', 'activity', 'reports-menu', 'stats']);
     // Reports fold under one parent in the sidebar (mockup v6): the hub, shift reports and daily sales for an admin.
     $reports = collect($adminNav)->pluck('items')->flatten(1)->firstWhere('key', 'reports-menu');
     expect(collect($reports['children'])->pluck('key')->all())->toBe(['reports', 'shift-reports', 'daily']);
 
     // An owner gets a branch's own pages only after opening it (DESIGN_SYSTEM §6.1).
     $ownerNav = $this->actingAs(Hotel::user('ramon.alvarez'))->get('/owner')->viewData('page')['props']['nav'];
-    expect(collect($ownerNav)->pluck('items')->flatten(1)->pluck('key')->all())->toBe(['owner', 'branches', 'reports-menu', 'stats', 'owners']);
+    expect(collect($ownerNav)->pluck('items')->flatten(1)->pluck('key')->all())->toBe(['owner', 'branches', 'activity-all', 'reports-menu', 'stats', 'owners']);
     // Branch comparison (the owner summary) folds under Reports, not as a top-level overview page.
     $ownerReports = collect($ownerNav)->pluck('items')->flatten(1)->firstWhere('key', 'reports-menu');
     expect(collect($ownerReports['children'])->pluck('key')->all())->toBe(['reports', 'summary', 'shift-reports', 'daily']);
