@@ -232,7 +232,12 @@ final class GenerateHistory extends Command
     {
         $bid = $branch->id;
         app(CurrentBranch::class)->set($bid);
-        $branch->update(['housekeeping_enabled' => true]); // checkouts create real cleaning tasks
+        // Give the two demo branches different settings: GenSan counts cash by denomination at close,
+        // Koronadal types the total only — so both close paths are exercised across the history.
+        $branch->update([
+            'housekeeping_enabled' => true, // checkouts create real cleaning tasks
+            'denomination_count_enabled' => $branch->code_prefix !== 'KOR',
+        ]);
         $people = User::query()->where('branch_id', $bid)->where('role', Role::Frontdesk)->whereNotNull('pin_hash')->orderBy('id')->take(2)->get()->all();
         $sellable = Product::query()->where('branch_id', $bid)->where('kind', ProductKind::FoodDrink)->where('is_active', true)->where('tracks_stock', true)->get();
         $expenseCat = ExpenseCategory::query()->where('branch_id', $bid)->first();
