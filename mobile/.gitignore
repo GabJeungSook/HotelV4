@@ -1,0 +1,18 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+.packages
+*.iml
+.idea/
+
+# Generated platform folders (run `flutter create . --platforms=android,ios` locally)
+/android/
+/ios/
+/linux/
+/macos/
+/windows/
+/web/
+
+# Keep pubspec.lock committed for app reproducibility (not ignored).
