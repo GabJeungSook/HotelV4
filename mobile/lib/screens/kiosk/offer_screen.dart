@@ -116,7 +116,8 @@ class _OfferScreenState extends State<OfferScreen> {
       padding: const EdgeInsets.all(20),
       children: [
         Text('${offer['type']['name']} · ${offer['stay_label']}', style: Theme.of(context).textTheme.titleLarge),
-        if (offer['room'] != null) Text('Room ${offer['room']}', style: Theme.of(context).textTheme.bodyMedium),
+        if (offer['room'] is Map)
+          Text((offer['room'] as Map)['label'] as String? ?? '', style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 16),
         _row('Room', offer['room_amount'] as int),
         if (discount != null) _row(discount['name'] as String, -(discount['amount'] as int)),
