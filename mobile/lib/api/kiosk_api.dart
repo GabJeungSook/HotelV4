@@ -21,14 +21,16 @@ class KioskApi {
 
   Future<Map<String, dynamic>> hold({
     required int roomTypeId,
-    required int hours,
+    required String kind, // 'hourly' | 'long_stay'
+    required int quantity, // hours for hourly, days for long stay
     required String guestName,
     required String idempotencyKey,
     String? guestMobile,
   }) {
     return _api.post('/api/kiosk/hold', token: _token, body: {
       'room_type_id': roomTypeId,
-      'hours': hours,
+      'kind': kind,
+      if (kind == 'long_stay') 'days': quantity else 'hours': quantity,
       'guest_name': guestName,
       'idempotency_key': idempotencyKey,
       if (guestMobile != null && guestMobile.isNotEmpty) 'guest_mobile': guestMobile,

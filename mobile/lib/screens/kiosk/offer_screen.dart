@@ -75,7 +75,8 @@ class _OfferScreenState extends State<OfferScreen> {
     try {
       final res = await _api.hold(
         roomTypeId: widget.roomTypeId,
-        hours: widget.quantity,
+        kind: widget.kind,
+        quantity: widget.quantity,
         guestName: _name.text.trim(),
         guestMobile: _mobile.text.trim(),
         idempotencyKey: _idempotencyKey,

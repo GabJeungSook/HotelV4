@@ -45,13 +45,13 @@ class _PickRoomScreenState extends State<PickRoomScreen> {
     }
   }
 
-  void _pick(Map<String, dynamic> type, int hours) {
+  void _pick(Map<String, dynamic> type, {required String kind, required int quantity}) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => OfferScreen(
         auth: widget.auth,
         roomTypeId: type['id'] as int,
-        kind: 'hourly',
-        quantity: hours,
+        kind: kind,
+        quantity: quantity,
       ),
     ));
   }
@@ -74,6 +74,10 @@ class _PickRoomScreenState extends State<PickRoomScreen> {
   Widget _typeCard(Map<String, dynamic> t) {
     final full = t['full'] == true;
     final options = (t['options'] as List<dynamic>? ?? const []).cast<Map<String, dynamic>>();
+    final longStay = t['long_stay'] as Map<String, dynamic>?;
+    final maxDays = longStay?['max_days'] as int? ?? 0;
+    final perDay = longStay?['per_day'] as int? ?? 0;
+    final dayChoices = [1, 2, 3, 5, 7, 14, 30].where((d) => d <= maxDays).toList();
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
@@ -98,18 +102,36 @@ class _PickRoomScreenState extends State<PickRoomScreen> {
             const SizedBox(height: 12),
             if (full)
               Text('No rooms free right now.', style: Theme.of(context).textTheme.bodySmall)
-            else
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final o in options)
-                    ActionChip(
-                      label: Text('${o['hours']}h · ${pesos(o['amount'] as int)}'),
-                      onPressed: () => _pick(t, o['hours'] as int),
-                    ),
-                ],
-              ),
+            else ...[
+              if (options.isNotEmpty)
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final o in options)
+                      ActionChip(
+                        label: Text('${o['hours']}h · ${pesos(o['amount'] as int)}'),
+                        onPressed: () => _pick(t, kind: 'hourly', quantity: o['hours'] as int),
+                      ),
+                  ],
+                ),
+              if (dayChoices.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text('Long stay', style: Theme.of(context).textTheme.labelLarge),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final d in dayChoices)
+                      ActionChip(
+                        label: Text('${d}d · ${pesos(perDay * d)}'),
+                        onPressed: () => _pick(t, kind: 'long_stay', quantity: d),
+                      ),
+                  ],
+                ),
+              ],
+            ],
           ],
         ),
       ),
