@@ -84,11 +84,17 @@ function onBlur(): void {
 }
 
 function fillExact(): void {
-    if (props.due !== undefined) {
-        model.value = props.due;
-        text.value = display(props.due);
-        input.value?.focus();
+    if (props.due === undefined) {
+        return;
     }
+
+    // Focus first so onFocus runs against the old value; writing model.value only emits to the
+    // parent and does not update the local ref until it syncs back (Vue defineModel), so onFocus
+    // would otherwise re-read the stale 0 and wipe the field. With focused already true, the model
+    // watcher leaves our text alone when the new value arrives.
+    input.value?.focus();
+    model.value = props.due;
+    text.value = sanitize(formatMoney(props.due, 'csv'));
 }
 
 const invalid = computed(() => Boolean(props.error));

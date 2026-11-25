@@ -60,13 +60,15 @@ describe('MoneyInput', () => {
         expect(wrapper.text()).toContain('₱');
     });
 
-    it('fills the amount due with "Exact"', async () => {
+    it('fills the amount due with "Exact" — emits it and shows it in the field', async () => {
         const wrapper = mountInput({ due: 80000 });
         const exact = wrapper.findAll('button').find((b) => b.text() === 'Exact');
 
         await exact!.trigger('click');
 
         expect(emitted(wrapper).at(-1)).toBe(80000);
+        // The field must actually show the amount — focusing after the fill must not wipe it.
+        expect((wrapper.find('input').element as HTMLInputElement).value).toBe('800.00');
     });
 
     it('caps at max', async () => {
