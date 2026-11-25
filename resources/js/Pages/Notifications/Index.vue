@@ -1,7 +1,7 @@
 <!-- No mockup number: the notification bell and this list were added on request (sibling of 49). -->
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { computed, onMounted } from 'vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import { formatDateTime } from '@/Composables/useDateTime';
 import { type NotificationItem, useShared } from '@/Composables/useShared';
@@ -32,6 +32,9 @@ const layout = computed(
 );
 
 const meta = (kind: string) => notificationMeta[kind] ?? notificationFallback;
+
+// Viewing the full list counts as reading it: clear the bell badge until something new appears.
+onMounted(() => router.post(route('notifications.seen'), {}, { preserveScroll: true, preserveState: true }));
 </script>
 
 <template>

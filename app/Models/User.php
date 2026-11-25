@@ -27,7 +27,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'branch_id', 'name', 'username', 'password', 'must_change_password', 'pin_hash', 'role',
-        'is_active', 'failed_logins', 'locked_until', 'last_seen_at',
+        'is_active', 'failed_logins', 'locked_until', 'last_seen_at', 'notifications_seen_at',
     ];
 
     protected $hidden = [
@@ -46,6 +46,7 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'locked_until' => 'immutable_datetime',
             'last_seen_at' => 'immutable_datetime',
+            'notifications_seen_at' => 'immutable_datetime',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
         ];

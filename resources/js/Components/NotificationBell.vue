@@ -15,20 +15,19 @@ const { props: shared } = useShared();
 
 const feed = computed(() => shared.value.notifications);
 const items = computed(() => feed.value?.items ?? []);
-const count = computed(() => feed.value?.count ?? 0);
-const badge = computed(() => (count.value > 9 ? '9+' : String(count.value)));
+const count = computed(() => feed.value?.count ?? 0); // total open, for the panel header
+const unread = computed(() => feed.value?.unread ?? 0); // new since last opened, for the badge
+const badge = computed(() => (unread.value > 9 ? '9+' : String(unread.value)));
 
 const open = ref(false);
 
-function refresh(): void {
-    router.reload({ only: ['notifications'], preserveScroll: true, preserveState: true });
-}
-
+// Opening the bell marks the feed seen and refreshes it, so the badge clears and only items that
+// appear afterwards raise it again.
 function onToggle(value: boolean): void {
     open.value = value;
 
     if (value) {
-        refresh();
+        router.post(route('notifications.seen'), {}, { preserveScroll: true, preserveState: true });
     }
 }
 
@@ -40,11 +39,11 @@ const meta = (kind: string) => notificationMeta[kind] ?? notificationFallback;
         <button
             type="button"
             class="hm-focus relative grid size-[34px] shrink-0 place-items-center rounded-lg border border-default bg-default text-muted hover:bg-elevated"
-            :aria-label="count > 0 ? `Notifications, ${count} open` : 'Notifications'"
+            :aria-label="unread > 0 ? `Notifications, ${unread} new` : 'Notifications'"
         >
             <UIcon name="i-solar-bell-bold-duotone" class="size-4" aria-hidden="true" />
             <span
-                v-if="count > 0"
+                v-if="unread > 0"
                 class="absolute -top-1.5 -right-1.5 grid h-[17px] min-w-[17px] place-items-center rounded-full bg-bad px-1 text-[10px] leading-none font-semibold text-on-primary ring-2 ring-default"
             >{{ badge }}</span>
         </button>

@@ -28,7 +28,8 @@ export interface NotificationItem {
 }
 
 export interface NotificationFeed {
-    count: number;
+    count: number; // total open items (panel header)
+    unread: number; // items new since the bell was last opened (the badge)
     items: NotificationItem[];
     href: string;
 }

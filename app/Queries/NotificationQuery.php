@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\AttentionList;
 use App\Services\CurrentBranch;
 use App\Support\Clock;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -54,6 +55,24 @@ final class NotificationQuery
     public function for(User $viewer): array
     {
         return $this->feed($viewer, $this->branchIds($viewer));
+    }
+
+    /**
+     * How many feed items appeared after the user last opened the bell — the unread badge count.
+     * Before the bell has ever been opened, everything is unread. A persistent item with no
+     * timestamp (e.g. low stock) is counted only until that first open, so the badge can reach zero.
+     *
+     * @param  list<Item>  $feed
+     */
+    public static function unread(array $feed, ?CarbonImmutable $seenAt): int
+    {
+        if ($seenAt === null) {
+            return count($feed);
+        }
+
+        $cutoff = $seenAt->toIso8601String();
+
+        return count(array_filter($feed, static fn (array $i): bool => $i['since'] !== null && $i['since'] > $cutoff));
     }
 
     /**
@@ -163,7 +182,8 @@ final class NotificationQuery
                 'severity' => 'normal',
                 'title' => "Room {$room} due out soon",
                 'detail' => $stay->guest_name.' · out '.$this->time($stay->expected_checkout_at).' · in '.$minutes.' min',
-                'since' => null,
+                // Appeared when the room entered the due-soon window — used for the unread badge.
+                'since' => $stay->expected_checkout_at?->subMinutes($branch->due_soon_minutes)->toIso8601String(),
                 'since_text' => "in {$minutes} min",
                 'href' => route('stays.show', $stay->id, false),
             ];
@@ -185,7 +205,7 @@ final class NotificationQuery
                 'severity' => $minutes <= 5 ? 'high' : 'normal',
                 'title' => 'Kiosk hold to confirm'.($room === null ? '' : " · Room {$room}"),
                 'detail' => 'A guest booked at the kiosk · hold expires in '.$minutes.' min',
-                'since' => null,
+                'since' => $stay->created_at?->toIso8601String(),
                 'since_text' => "in {$minutes} min",
                 'href' => route('stays.confirm', $stay->id, false),
             ];
@@ -199,7 +219,7 @@ final class NotificationQuery
                 'severity' => 'normal',
                 'title' => "Room {$room} has an unpaid balance",
                 'detail' => $stay->guest_name.' · settle before check-out',
-                'since' => null,
+                'since' => $stay->checked_in_at?->toIso8601String(),
                 'since_text' => '—',
                 'href' => route('stays.show', $stay->id, false),
             ];

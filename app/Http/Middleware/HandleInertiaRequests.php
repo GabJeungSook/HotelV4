@@ -107,7 +107,7 @@ class HandleInertiaRequests extends Middleware
         ];
     }
 
-    /** @return array{count: int, items: list<array<string, mixed>>, href: string}|null */
+    /** @return array{count: int, unread: int, items: list<array<string, mixed>>, href: string}|null */
     private function notifications(mixed $user): ?array
     {
         if (! $user instanceof User || ! in_array($user->role, [Role::Frontdesk, Role::Supervisor, Role::Backoffice, Role::Admin, Role::Owner], true)) {
@@ -117,7 +117,8 @@ class HandleInertiaRequests extends Middleware
         $feed = app(NotificationQuery::class)->for($user);
 
         return [
-            'count' => count($feed),
+            'count' => count($feed), // total open items — the panel header ("N open")
+            'unread' => NotificationQuery::unread($feed, $user->notifications_seen_at), // the bell badge
             'items' => array_slice($feed, 0, 8),
             'href' => route('notifications', absolute: false),
         ];

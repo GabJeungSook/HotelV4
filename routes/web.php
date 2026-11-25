@@ -38,6 +38,10 @@ Route::middleware(['auth', 'pin.set'])->group(function (): void {
     Route::get('/notifications', [NotificationController::class, 'index'])
         ->middleware('role:frontdesk,supervisor,backoffice,admin,owner')
         ->name('notifications');
+    // Opening the bell or the list marks the feed seen, so the badge clears until something new appears.
+    Route::post('/notifications/seen', [NotificationController::class, 'seen'])
+        ->middleware('role:frontdesk,supervisor,backoffice,admin,owner')
+        ->name('notifications.seen');
 });
 
 // Component gallery (ROADMAP phase 1), local only: every Nuxt UI component we use, every

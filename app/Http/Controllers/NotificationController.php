@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Queries\NotificationQuery;
 use App\Support\Clock;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,5 +28,15 @@ final class NotificationController extends Controller
             'rows' => fn (): array => $feed->for($user),
             'at' => $clock->now()->toIso8601String(),
         ]);
+    }
+
+    /** Mark the feed seen (bell opened or list viewed): the badge counts only items newer than this. */
+    public function seen(Request $request, Clock $clock): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $user->forceFill(['notifications_seen_at' => $clock->now()])->save();
+
+        return back();
     }
 }
