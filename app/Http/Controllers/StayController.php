@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\Reports\LogPrint;
 use App\Actions\Stays\AddCharges;
+use App\Actions\Stays\AddDeposit;
 use App\Actions\Stays\CancelStay;
 use App\Actions\Stays\CheckInGuest;
 use App\Actions\Stays\CheckOutGuest;
@@ -24,6 +25,7 @@ use App\Enums\StayState;
 use App\Exceptions\ActionRefused;
 use App\Http\Middleware\EnsureDeviceKey;
 use App\Http\Requests\AddChargesRequest;
+use App\Http\Requests\AddDepositRequest;
 use App\Http\Requests\CancelStayRequest;
 use App\Http\Requests\CheckInGuestRequest;
 use App\Http\Requests\CheckOutGuestRequest;
@@ -214,7 +216,7 @@ final class StayController extends Controller
             $payNow && $request->boolean('keep_change'),
         );
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => $payNow ? 'Charge added and paid.' : 'Charge added to the folio.']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => $payNow ? 'Charge added and paid.' : 'Charge added to the account.']);
 
         return redirect()->route('stays.show', $stay);
     }
@@ -235,6 +237,24 @@ final class StayController extends Controller
 
         $change = $payment->change_amount;
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Payment saved.'.($change !== null && $change->isPositive() ? ' Change '.$change->format() : '')]);
+
+        return redirect()->route('stays.show', $stay);
+    }
+
+    public function deposit(AddDepositRequest $request, Stay $stay, AddDeposit $addDeposit): RedirectResponse
+    {
+        Gate::authorize('update', $stay);
+
+        $addDeposit->handle(
+            $this->user($request),
+            $stay,
+            PaymentMethod::from($request->string('method')->toString()),
+            Money::ofCentavos($request->integer('amount')),
+            $request->filled('reference_no') ? $request->string('reference_no')->trim()->toString() : null,
+            idempotencyKey: $request->string('idempotency_key')->toString(),
+        );
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Deposit added to the guest account.']);
 
         return redirect()->route('stays.show', $stay);
     }

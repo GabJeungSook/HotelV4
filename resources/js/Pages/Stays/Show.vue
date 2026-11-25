@@ -16,6 +16,7 @@ import { shortName, useShared } from '@/Composables/useShared';
 import FrontDeskLayout from '@/Layouts/FrontDeskLayout.vue';
 import type { Tone } from '@/types/ui';
 import AddCharge, { type Product } from './AddCharge.vue';
+import AddDeposit from './AddDeposit.vue';
 import TakePayment from './TakePayment.vue';
 
 /**
@@ -92,6 +93,7 @@ const statusText: Record<Line['status'], string> = { paid: 'Paid', unpaid: 'Unpa
 // Sheets.
 const adding = ref(false);
 const paying = ref(false);
+const depositing = ref(false);
 const pendingCharge = ref<{ items: Record<string, number>; total: number; key: string } | null>(null);
 
 function openPayment(): void {
@@ -251,10 +253,12 @@ function lineMenu(line: Line) {
                     </div>
                     <TotalRow label="Balance due" :amount="summary.balance" :tone="summary.balance > 0 ? 'bad' : 'ok'" />
                     <MoneyRow class="mt-3" label="Deposit held" :amount="summary.deposit_held" />
+                    <MoneyRow v-if="summary.guest_deposit > 0" label="Guest deposit" :amount="summary.guest_deposit" />
                 </section>
                 <template v-if="inHouse">
                     <UButton block label="Take payment" :disabled="summary.balance <= 0" @click="openPayment" />
                     <UButton block color="neutral" variant="outline" icon="i-solar-add-square-linear" label="Add charge" @click="adding = true" />
+                    <UButton block color="neutral" variant="outline" icon="i-solar-wallet-money-linear" label="Add deposit" @click="depositing = true" />
                     <div class="grid grid-cols-2 gap-2">
                         <UButton block color="neutral" variant="outline" label="Extend" @click="router.visit(route('stays.extend', stay.id))" />
                         <UButton block color="neutral" variant="outline" label="Transfer" @click="router.visit(route('stays.transfer', stay.id))" />
@@ -267,6 +271,7 @@ function lineMenu(line: Line) {
         </div>
 
         <AddCharge v-model:open="adding" :stay-id="stay.id" :products="products" @pay-now="payWithCharge" />
+        <AddDeposit v-model:open="depositing" :stay-id="stay.id" :room="stay.room" :methods="methods" />
         <TakePayment
             v-model:open="paying"
             :stay-id="stay.id"

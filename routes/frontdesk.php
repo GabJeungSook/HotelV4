@@ -44,6 +44,7 @@ Route::middleware(['auth', 'pin.set', 'role:frontdesk,supervisor'])->group(funct
         Route::post('/stays/{stay}/release', [StayController::class, 'release'])->name('stays.release');
         Route::post('/stays/{stay}/charges', [StayController::class, 'charge'])->name('stays.charge');
         Route::post('/stays/{stay}/payments', [StayController::class, 'pay'])->name('stays.pay');
+        Route::post('/stays/{stay}/deposit', [StayController::class, 'deposit'])->name('stays.deposit');
         Route::post('/stays/{stay}/lines/{line}/void', [StayController::class, 'void'])->name('stays.void');
         Route::post('/stays/{stay}/cancel', [StayController::class, 'cancel'])->name('stays.cancel');
         Route::get('/stays/{stay}/extend', [StayController::class, 'extend'])->name('stays.extend');
