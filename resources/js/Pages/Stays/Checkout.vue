@@ -81,7 +81,7 @@ function checkOut(): void {
         <form v-else-if="step === 1" @submit.prevent="answered && next()">
             <Returns v-model:key-returned="key" v-model:remote-returned="remote" v-model:damages="damages" :lost="screen.lost ?? { key: 0, remote: 0 }" :products="screen.damage_products ?? []" />
             <div class="mt-4 flex justify-end gap-2">
-                <UButton color="neutral" variant="ghost" label="Back to folio" @click="router.visit(route('stays.show', screen.stay.id))" />
+                <UButton color="neutral" variant="ghost" label="Back to account" @click="router.visit(route('stays.show', screen.stay.id))" />
                 <UButton label="Next: settle" :disabled="!answered" :loading="loading" type="submit" />
             </div>
         </form>

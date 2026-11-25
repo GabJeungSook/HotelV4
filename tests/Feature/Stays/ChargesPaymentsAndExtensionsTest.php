@@ -172,7 +172,7 @@ it('refuses a second payment row with the same idempotency key in the database',
 
 it('refuses a payment when nothing is due', function (): void {
     ($this->pay)(PaymentMethod::Cash, 1000);
-})->throws(ActionRefused::class, 'There is nothing to pay on this folio.');
+})->throws(ActionRefused::class, 'There is nothing to pay on this account.');
 
 it('extends within the cycle: extension line, later check-out, more cycle hours', function (): void {
     $line = app(ExtendStay::class)->handle(Hotel::frontdesk(), $this->stay, 6);

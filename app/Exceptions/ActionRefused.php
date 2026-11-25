@@ -22,7 +22,7 @@ final class ActionRefused extends DomainException
 
     public static function nothingToPay(): self
     {
-        return new self('There is nothing to pay on this folio.');
+        return new self('There is nothing to pay on this account.');
     }
 
     public static function methodNotAccepted(string $method): self

@@ -83,7 +83,7 @@ onMounted(() => setTimeout(printSlip, 300));
             <div class="no-print flex flex-col gap-2">
                 <UButton block icon="i-solar-printer-2-bold-duotone" label="Print again" :loading="log.printing.value" @click="printSlip" />
                 <UAlert v-if="log.error.value" color="error" variant="subtle" :description="log.error.value" />
-                <UButton block color="neutral" variant="outline" label="Open guest folio" @click="router.visit(route('stays.show', stay.id))" />
+                <UButton block color="neutral" variant="outline" label="Open guest account" @click="router.visit(route('stays.show', stay.id))" />
                 <UButton block color="neutral" variant="ghost" label="Back to room board" @click="router.visit(route('board'))" />
             </div>
         </div>

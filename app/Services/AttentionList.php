@@ -102,7 +102,7 @@ final class AttentionList
                 ($s->room === null ? '' : 'Room '.$s->room->number.' · ').$s->guest_name.' · expected out '.$this->time($s->expected_checkout_at),
                 $s->expected_checkout_at,
                 $canOpen ? route('stays.show', $s->id, false) : route('admin.exceptions', absolute: false),
-                ['label' => 'Open folio', 'type' => 'link', 'id' => $s->id],
+                ['label' => 'Open account', 'type' => 'link', 'id' => $s->id],
                 $branch->id,
             ))->values()->all();
     }

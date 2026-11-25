@@ -173,7 +173,7 @@ function approve(payload: { approver_id: number; pin: string }): void {
                 </p>
                 <PaymentFields v-if="difference > 0" v-model="pay" class="mt-3" :methods="methods" :due="difference" :allow-keep-change="false" :errors="form.errors" />
                 <UButton class="mt-5" size="xl" block icon="i-solar-lock-bold-duotone" label="Transfer — needs approval" :disabled="!ready" type="submit" />
-                <UButton class="mt-2" block color="neutral" variant="ghost" label="Back to folio" @click="router.visit(route('stays.show', stay.id))" />
+                <UButton class="mt-2" block color="neutral" variant="ghost" label="Back to account" @click="router.visit(route('stays.show', stay.id))" />
             </section>
         </form>
         <ApprovalPin

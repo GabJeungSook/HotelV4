@@ -145,7 +145,7 @@ const pageError = computed(() => (!approving.value && flash.value.error && flash
 async function voidSale(s: Sale): Promise<void> {
     const result = await confirm({
         title: `Void sale ${s.order_no}?`,
-        description: `**${s.items}** (${formatMoney(s.amount)}) is reversed${s.mode === 'walk_in' ? ', the cash is refunded' : ' on the guest folio'} and the stock goes back on the shelf.`,
+        description: `**${s.items}** (${formatMoney(s.amount)}) is reversed${s.mode === 'walk_in' ? ', the cash is refunded' : ' on the guest account'} and the stock goes back on the shelf.`,
         confirmLabel: 'Void sale',
         cancelLabel: 'Keep sale',
         confirmColor: 'error',
@@ -280,7 +280,7 @@ function actions(s: Sale) {
                         <b class="num text-highlighted">{{ formatMoney(change) }}</b>
                     </div>
                 </template>
-                <UFormField v-else class="mt-3" label="Occupied room" name="stay_id" :error="form.errors.stay_id" help="Added unpaid to the guest's folio.">
+                <UFormField v-else class="mt-3" label="Occupied room" name="stay_id" :error="form.errors.stay_id" help="Added unpaid to the guest's account.">
                     <USelect v-model="form.stay_id" :items="roomItems" placeholder="Pick a room" class="w-full" :disabled="!rooms.length" />
                 </UFormField>
 

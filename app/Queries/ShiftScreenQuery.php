@@ -202,7 +202,7 @@ final class ShiftScreenQuery
         $occupied = count($inHouse);
         $unpaid = count(array_filter($inHouse, static fn (array $s): bool => $s['unpaid']->isPositive()));
         $rows[] = ['tone' => 'info', 'label' => 'Note', 'text' => $occupied === 1 ? '1 room occupied' : "{$occupied} rooms occupied"];
-        $rows[] = ['tone' => 'info', 'label' => 'Note', 'text' => $unpaid === 1 ? '1 folio has unpaid lines' : "{$unpaid} folios have unpaid lines"];
+        $rows[] = ['tone' => 'info', 'label' => 'Note', 'text' => $unpaid === 1 ? '1 account has unpaid lines' : "{$unpaid} accounts have unpaid lines"];
 
         $uncleaned = Room::query()->withoutGlobalScopes()->where('branch_id', $shift->branch_id)->where('status', RoomStatus::Uncleaned)->count();
         $cleaning = Room::query()->withoutGlobalScopes()->where('branch_id', $shift->branch_id)->where('status', RoomStatus::Cleaning)->count();

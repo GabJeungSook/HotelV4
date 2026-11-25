@@ -107,11 +107,11 @@ function save(payNow: boolean): void {
                     <MoneyRow v-for="p in option?.parts ?? []" :key="p.label" :label="p.label" :amount="p.amount" />
                 </div>
                 <TotalRow label="Total" :amount="option?.amount ?? null" />
-                <MoneyRow v-if="balance > 0" class="mt-2" label="Already unpaid on the folio" :amount="balance" />
+                <MoneyRow v-if="balance > 0" class="mt-2" label="Already unpaid on the account" :amount="balance" />
                 <PaymentFields v-model="pay" class="mt-4" :methods="methods" :due="(option?.amount ?? 0) + balance" :errors="form.errors" />
                 <UButton class="mt-5" size="xl" block label="Extend and take payment" :disabled="!option || option.disabled || pay.amount <= 0" :loading="form.processing" type="submit" />
                 <UButton class="mt-2" block color="neutral" variant="outline" label="Extend, pay later" :disabled="!option || option.disabled || form.processing" @click="save(false)" />
-                <UButton class="mt-2" block color="neutral" variant="ghost" label="Back to folio" @click="router.visit(route('stays.show', stay.id))" />
+                <UButton class="mt-2" block color="neutral" variant="ghost" label="Back to account" @click="router.visit(route('stays.show', stay.id))" />
             </section>
         </form>
     </FrontDeskLayout>

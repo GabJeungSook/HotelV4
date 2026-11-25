@@ -280,7 +280,7 @@ function approve(payload: { approver_id: number; pin: string }): void {
 
                     <div class="mt-5 flex flex-wrap gap-2">
                         <UButton v-if="detail.can_check_in" label="Check in" @click="checkIn(detail)" />
-                        <UButton v-if="detail.stay_id" color="neutral" variant="outline" label="Open guest folio" @click="router.visit(route('stays.show', detail.stay_id))" />
+                        <UButton v-if="detail.stay_id" color="neutral" variant="outline" label="Open guest account" @click="router.visit(route('stays.show', detail.stay_id))" />
                         <UButton v-if="detail.can_cancel" color="error" variant="outline" label="Cancel reservation" @click="settle('cancel')" />
                         <UButton v-if="detail.can_settle" color="neutral" variant="outline" label="Settle money paid ahead" @click="settle('refund')" />
                     </div>

@@ -126,7 +126,7 @@ function payNow(): void {
         <template #footer>
             <div class="flex w-full flex-col gap-2">
                 <TotalRow :label="`${pieces} ${pieces === 1 ? 'item' : 'items'}`" :amount="total" />
-                <UButton block label="Add to folio" :disabled="pieces === 0" :loading="form.processing" @click="addToFolio" />
+                <UButton block label="Add to account" :disabled="pieces === 0" :loading="form.processing" @click="addToFolio" />
                 <UButton block color="neutral" variant="outline" label="Add and take payment now" :disabled="pieces === 0 || form.processing" @click="payNow" />
             </div>
         </template>

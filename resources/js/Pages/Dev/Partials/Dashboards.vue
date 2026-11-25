@@ -52,7 +52,7 @@ const branchKpis = [
     { label: 'Sales today', value: formatMoney(942000, 'whole'), sub: '8% vs yesterday by this time', trend: 'up' as const },
     { label: 'Occupancy now', value: '50%', sub: '23 of 46 rooms' },
     { label: 'In / out today', value: '14 / 10', sub: '19 from last night' },
-    { label: 'Unpaid balances', value: formatMoney(11500, 'whole'), sub: '1 folio' },
+    { label: 'Unpaid balances', value: formatMoney(11500, 'whole'), sub: '1 account' },
 ];
 const roomsNow = [
     { name: 'Vacant', value: 14, color: toneFill.ok },
@@ -66,7 +66,7 @@ const hours = Array.from({ length: 12 }, (_, i) => 8 + i);
 const hourSales = [180200, 265000, 196100, 137800, 0, 0, 0, 0, 0, 0, 0, 0];
 const hourPeak = computed(() => peakOf(hourSales));
 const branchAttention: AttentionRow[] = [
-    { severity: 'high', title: 'Room 117 overdue 42 min', detail: 'Dennis Abella · open folio', route: '#dash' },
+    { severity: 'high', title: 'Room 117 overdue 42 min', detail: 'Dennis Abella · open account', route: '#dash' },
     { severity: 'normal', title: 'Coke 1.5 L is out of stock', detail: 'Chips low: 4 left', route: '#dash' },
     { severity: 'normal', title: 'Liza Gonzaga has no PIN', detail: 'She cannot join a shift', route: '#dash' },
 ];

@@ -40,7 +40,7 @@ function next(): void {
                         <td>
                             <div class="flex items-center justify-between gap-2">
                                 <span>{{ row.text }}</span>
-                                <UButton v-if="row.stay_id" size="xs" color="neutral" variant="outline" label="Open folio" @click="router.visit(route('stays.show', row.stay_id))" />
+                                <UButton v-if="row.stay_id" size="xs" color="neutral" variant="outline" label="Open account" @click="router.visit(route('stays.show', row.stay_id))" />
                             </div>
                         </td>
                     </tr>

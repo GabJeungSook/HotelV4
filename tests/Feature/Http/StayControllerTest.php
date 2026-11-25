@@ -222,7 +222,7 @@ it('validates the payment form and refuses a payment when nothing is due', funct
     $this->post("/stays/{$stay->id}/payments", ['method' => 'gcash', 'amount' => 100, 'idempotency_key' => (string) Str::uuid()])->assertSessionHasErrors('reference_no');
 
     $this->post("/stays/{$stay->id}/payments", ['method' => 'cash', 'amount' => 100, 'idempotency_key' => (string) Str::uuid()]);
-    expect(session('inertia.flash_data.error.message'))->toBe('There is nothing to pay on this folio.');
+    expect(session('inertia.flash_data.error.message'))->toBe('There is nothing to pay on this account.');
 });
 
 it('sends the folio sheets what they need: products, reasons, approvers and the cancel preview', function (): void {

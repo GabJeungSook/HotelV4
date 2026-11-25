@@ -80,7 +80,7 @@ function save(): void {
                         <TotalRow label="Total" :amount="5000" />
                         <div class="flex justify-end gap-2">
                             <UButton color="neutral" variant="outline" label="Add and take payment now" />
-                            <UButton label="Add to folio" @click="sheetOpen = false" />
+                            <UButton label="Add to account" @click="sheetOpen = false" />
                         </div>
                     </div>
                 </template>
