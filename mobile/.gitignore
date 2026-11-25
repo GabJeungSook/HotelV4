@@ -7,12 +7,11 @@ build/
 *.iml
 .idea/
 
-# Generated platform folders (run `flutter create . --platforms=android,ios` locally)
-/android/
-/ios/
+# android/ and ios/ ARE tracked (real target config); their own .gitignore files
+# exclude local build noise (local.properties, .gradle, Pods, …).
+
+# Non-target platforms (regenerate with `flutter create . --platforms=…` if needed)
+/web/
 /linux/
 /macos/
 /windows/
-/web/
-
-# Keep pubspec.lock committed for app reproducibility (not ignored).
