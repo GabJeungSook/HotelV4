@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Actions\Auth\ApproveByPin;
+use App\Enums\ApprovalAction;
 use App\Models\AuditLog;
 use App\Queries\ActivityQuery;
 use App\Support\Clock;
@@ -38,6 +40,19 @@ it('gathers check-ins, payments and audit logs into one day feed', function (): 
         ->toContain('Payment taken')
         ->toContain('Signed in')
         ->and($feed[0]['by'])->not->toBe(''); // the actor's name is resolved
+});
+
+it('shows supervisor-PIN approvals with who did it and whose PIN approved it', function (): void {
+    app(ApproveByPin::class)->handle(
+        Hotel::supervisor(), Hotel::PIN, Hotel::device(), $this->jessa, $this->branch->id,
+        ApprovalAction::VoidLine, 'folio_line', 1, 'Wrong charge', 'Void · Coke ₱45',
+    );
+
+    $row = collect(app(ActivityQuery::class)->feed([$this->branch->id], $this->today))->firstWhere('action', 'Void line');
+
+    expect($row)->not->toBeNull()
+        ->and($row['by'])->toBe($this->jessa->name)                                 // who did it
+        ->and($row['detail'])->toContain('PIN approved by '.Hotel::supervisor()->name); // whose PIN
 });
 
 it('filters the feed by person', function (): void {

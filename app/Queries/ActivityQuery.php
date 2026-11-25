@@ -7,6 +7,7 @@ namespace App\Queries;
 use App\Enums\CashMovementKind;
 use App\Enums\PaymentKind;
 use App\Enums\PosMode;
+use App\Models\Approval;
 use App\Models\AuditLog;
 use App\Models\Branch;
 use App\Models\CashMovement;
@@ -73,6 +74,20 @@ final class ActivityQuery
             ->when($userId !== null, fn ($q) => $q->where('actor_id', $userId))
             ->orderBy('id')->get()
             ->each(fn (AuditLog $l) => $add('audit-'.$l->id, $l->created_at, $l->actor_id, $l->branch_id, self::auditLabel($l->action), self::auditDetail($l)));
+
+        // Supervisor-PIN approvals (void, cancel, transfer, force close, redo count, …): who did it,
+        // and whose PIN approved it — so a PIN used without permission is on the record.
+        Approval::query()->withoutGlobalScopes()->whereIn('branch_id', $branchIds)->whereBetween('created_at', [$start, $end])
+            ->when($userId !== null, fn ($q) => $q->where(fn ($w) => $w->where('requested_by', $userId)->orWhere('approved_by', $userId)))
+            ->get()
+            ->each(fn (Approval $a) => $add(
+                'approval-'.$a->id,
+                $a->created_at,
+                $a->requested_by,
+                $a->branch_id,
+                $a->action->label(),
+                'PIN approved by '.(string) ($names[$a->approved_by] ?? '—').($a->summary ? ' · '.$a->summary : ''),
+            ));
 
         // Check-ins and check-outs.
         Stay::query()->withoutGlobalScopes()->whereIn('branch_id', $branchIds)->whereBetween('checked_in_at', [$start, $end])
