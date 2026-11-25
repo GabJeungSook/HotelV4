@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../api/api_client.dart';
 import '../../api/kiosk_api.dart';
 import '../../state/auth_store.dart';
+import 'pick_room_screen.dart';
 
 /// Kiosk welcome (screen 27): the hotel name, the house rules and how many rooms
-/// are free. The pick-room → offer → hold → held flow is the next step; the
-/// KioskApi already exposes rooms(), offer(), hold() and held() for it.
+/// are free, then into the pick-room → offer → hold → held booking flow.
 class KioskWelcomeScreen extends StatefulWidget {
   const KioskWelcomeScreen({super.key, required this.auth});
 
@@ -85,8 +85,11 @@ class _KioskWelcomeScreenState extends State<KioskWelcomeScreen> {
                       ),
                     const SizedBox(height: 32),
                     FilledButton(
-                      // The booking flow (pick room → hold) is the next step.
-                      onPressed: free == null || (free is int && free == 0) ? null : () {},
+                      onPressed: free == null || (free is int && free == 0)
+                          ? null
+                          : () => Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => PickRoomScreen(auth: widget.auth),
+                              )),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
                         child: Text('Get a room'),

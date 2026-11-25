@@ -14,8 +14,8 @@ These were chosen to keep moving while unattended; all are easy to revise:
 ## Status
 
 - Networking + auth + roomboy flow (queue → start → finish, ready/problem) are **implemented**.
-- Kiosk **welcome** is implemented; the pick-room → offer → hold → held flow is the next step (the `KioskApi` wrapper already exposes every endpoint for it).
-- **Verification:** see the commit notes — whether `flutter analyze` has been run depends on the SDK being installed on the build machine. If it hasn't, run the two commands below before trusting it.
+- Kiosk is **implemented end to end**: welcome → pick room & hours → offer (price breakdown + name/mobile) → hold → held (code + QR + countdown). Long-stay (day) bookings are the one remaining kiosk addition; hourly is done.
+- **Verification:** `flutter analyze` is clean (Flutter 3.50 / Dart 3.14). Not yet run on a device — needs platform folders + an Android/iOS SDK (see below).
 
 ## Run it
 
@@ -53,7 +53,7 @@ lib/
 
 ## Next steps
 
-- Kiosk booking flow: pick room/hours → `offer` → `hold` → `held` (QR of the code).
+- Kiosk long-stay (per-day) bookings alongside the hourly flow.
 - Offline queue for housekeeping (spotty room wifi) and push notifications for new cleanings (Phase 3).
 - Platform scaffolding (`flutter create . --platforms=android,ios` here) and app icons/splash.
 - CI: `flutter analyze` + `flutter test` on the `mobile/` path.
