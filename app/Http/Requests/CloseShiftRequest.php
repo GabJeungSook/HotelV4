@@ -12,7 +12,7 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 final class CloseShiftRequest extends FormRequest
 {
-    public const STEPS = ['begin', 'not_yet', 'count', 'result', 'handover', 'without_handover'];
+    public const STEPS = ['begin', 'not_yet', 'count', 'reopen_count', 'result', 'handover', 'without_handover'];
 
     public function authorize(): bool
     {
@@ -30,6 +30,11 @@ final class CloseShiftRequest extends FormRequest
                 'pieces' => ['sometimes', 'array'],
                 'counted' => ['sometimes', 'integer', 'min:0', 'max:100000000'],
                 'witness_id' => ['nullable', 'integer'],
+            ],
+            'reopen_count' => [
+                'step' => ['required'],
+                'approver_id' => ['required', 'integer'],
+                'pin' => ['required', 'string', 'digits:4'],
             ],
             'result' => [
                 'step' => ['required'],

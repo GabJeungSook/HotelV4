@@ -32,6 +32,7 @@ use App\Models\ShiftHandover;
 use App\Models\ShiftMember;
 use App\Models\ShiftSession;
 use App\Queries\ShiftQuery;
+use App\Queries\ShiftScreenQuery;
 use App\Services\CashMath;
 use App\Services\CurrentShift;
 use App\Support\Money;
@@ -110,6 +111,39 @@ it('keeps the count draft between saves and deletes it when the count is confirm
     $close->count($this->jessa, $this->branch->id, $draft->denominations);
     expect(CashCountDraft::query()->count())->toBe(0);
     expect(fn () => app(SaveCountDraft::class)->handle($this->jessa, $this->branch->id, ['100000' => 1]))->toThrow(ActionRefused::class);
+});
+
+it('reopens the count with a supervisor PIN so a typo can be re-entered', function (): void {
+    $close = app(CloseShift::class);
+    $close->begin($this->jessa, $this->branch->id);
+    $close->count($this->jessa, $this->branch->id, ['100000' => 9]); // typo: ₱900,000
+    $close->result($this->jessa, $this->branch->id, Hotel::reason(ReasonKind::Variance, 'Wrong change given'), 'Typo in the count');
+
+    $close->reopenCount($this->jessa, $this->branch->id, Hotel::supervisor(), Hotel::PIN, Hotel::device());
+
+    expect(CashCount::query()->where('shift_session_id', $this->shift->id)->count())->toBe(0)
+        ->and($this->shift->refresh()->expected_cash)->toBeNull()
+        ->and($this->shift->counted_cash)->toBeNull()
+        ->and(app(ShiftScreenQuery::class)->step($this->shift))->toBe(2)
+        ->and(Approval::query()->where('action', ApprovalAction::RedoCount)->count())->toBe(1)
+        ->and(AuditLog::query()->where('action', 'shift.count_reopened')->count())->toBe(1);
+
+    // The count can be entered again cleanly.
+    $again = $close->count($this->jessa, $this->branch->id, ['coins' => 2000]);
+    expect($again->total_cash?->centavos())->toBe(2000);
+});
+
+it('refuses to reopen the count before one exists, or on a wrong PIN', function (): void {
+    $close = app(CloseShift::class);
+    $close->begin($this->jessa, $this->branch->id);
+
+    expect(fn () => $close->reopenCount($this->jessa, $this->branch->id, Hotel::supervisor(), Hotel::PIN, Hotel::device()))
+        ->toThrow(ActionRefused::class);
+
+    $close->count($this->jessa, $this->branch->id, ['coins' => 1000]);
+    expect(fn () => $close->reopenCount($this->jessa, $this->branch->id, Hotel::supervisor(), '0000', Hotel::device()))
+        ->toThrow(PinInvalid::class);
+    expect(CashCount::query()->where('shift_session_id', $this->shift->id)->count())->toBe(1); // nothing removed
 });
 
 it('lets "Not yet" reopen the shift only before the count is saved', function (): void {

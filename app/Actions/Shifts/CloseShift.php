@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Shifts;
 
+use App\Actions\Auth\ApproveByPin;
+use App\Enums\ApprovalAction;
 use App\Enums\ReasonKind;
 use App\Enums\Role;
 use App\Enums\ShiftStatus;
@@ -27,6 +29,7 @@ use App\Support\Clock;
 use App\Support\Money;
 use App\Support\ReasonText;
 use App\Support\Transaction;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Close the shift, steps 1 to 3 and the freeze (screens 22–24, APP_FLOW §4.16,
@@ -50,6 +53,7 @@ final class CloseShift
         private readonly CashMath $cash,
         private readonly ReportService $reports,
         private readonly StayQuery $stays,
+        private readonly ApproveByPin $approveByPin,
         private readonly Clock $clock,
         private readonly Transaction $transaction,
     ) {}
@@ -86,6 +90,45 @@ final class CloseShift
             CashCountDraft::query()->where('shift_session_id', $shift->id)->delete();
             $shift->update(['status' => ShiftStatus::Open]);
             $this->audit($by, $shift, 'shift.closing_stopped');
+
+            return $shift;
+        });
+    }
+
+    /**
+     * Reopen the blind count with a supervisor PIN (24), so a mistyped count can be entered again
+     * before the shift is handed over. This is the one allowed removal of a cash_counts row: it is
+     * pre-freeze and never used downstream yet, a supervisor approves it by PIN, and the audit trail
+     * keeps the old counted total and who approved it. The wizard then shows the count step again.
+     */
+    public function reopenCount(User $by, int $branchId, User $approver, string $pin, string $deviceKey): ShiftSession
+    {
+        return $this->transaction->run(function () use ($by, $branchId, $approver, $pin, $deviceKey): ShiftSession {
+            $shift = $this->closing($branchId);
+            $count = CashCount::query()->where('shift_session_id', $shift->id)->first()
+                ?? throw ActionRefused::because('There is no count to redo yet.');
+
+            $label = "{$shift->period_name} shift · ".$shift->business_date->toDateString();
+
+            $this->approveByPin->handle(
+                $approver, $pin, $deviceKey, $by, $branchId,
+                ApprovalAction::RedoCount, 'shift_session', $shift->id,
+                'Redo cash count', "Redo count · {$label} · was ".($count->total_cash ?? Money::zero())->format(),
+            );
+
+            $this->audit($by, $shift, 'shift.count_reopened', ['was' => $count->total_cash?->centavos() ?? 0]);
+
+            // Remove the mistaken count and its draft and clear the result so the wizard returns to
+            // the count step. The audit row above is the lasting record of what was removed.
+            DB::table('cash_counts')->where('shift_session_id', $shift->id)->delete();
+            CashCountDraft::query()->where('shift_session_id', $shift->id)->delete();
+            $shift->update([
+                'expected_cash' => null,
+                'counted_cash' => null,
+                'variance_amount' => null,
+                'variance_reason_id' => null,
+                'variance_note' => null,
+            ]);
 
             return $shift;
         });

@@ -20,6 +20,7 @@ enum ApprovalAction: string
     case ApproveVariance = 'approve_variance';
     case ReasonRequiresManager = 'reason_requires_manager';
     case CancelHallBooking = 'cancel_hall_booking';
+    case RedoCount = 'redo_count';
 
     public function label(): string
     {
@@ -37,6 +38,7 @@ enum ApprovalAction: string
             self::ApproveVariance => 'Approve variance',
             self::ReasonRequiresManager => 'Reason needs a manager',
             self::CancelHallBooking => 'Cancel hall booking',
+            self::RedoCount => 'Redo cash count',
         };
     }
 }

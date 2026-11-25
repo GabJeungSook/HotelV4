@@ -171,8 +171,8 @@ final class ShiftScreenQuery
         return match ($step) {
             1 => [...$base, 'check' => $this->check($shift), 'papers' => $this->papers($shift)],
             2 => [...$base, 'count' => $this->countForm($shift, $viewer)],
-            3 => [...$base, 'result' => $this->result($shift)],
-            default => [...$base, 'result' => $this->result($shift), 'handover' => $this->handover($shift, $viewer)],
+            3 => [...$base, 'result' => $this->result($shift, $viewer)],
+            default => [...$base, 'result' => $this->result($shift, $viewer), 'handover' => $this->handover($shift, $viewer)],
         };
     }
 
@@ -276,7 +276,7 @@ final class ShiftScreenQuery
      *
      * @return array<string, mixed>
      */
-    public function result(ShiftSession $shift): array
+    public function result(ShiftSession $shift, User $viewer): array
     {
         $count = CashCount::query()->with('counter')->where('shift_session_id', $shift->id)->firstOrFail();
         $payments = Payment::query()->withoutGlobalScopes()->where('shift_session_id', $shift->id)->where('method', PaymentMethod::Cash)->get();
@@ -312,6 +312,8 @@ final class ShiftScreenQuery
             'variance' => $this->cash->variance($counted, $expected)->centavos(),
             'counted_by' => ['id' => $count->counted_by, 'name' => $count->counter->name ?? ''],
             'reasons' => $this->screens->reasons(ReasonKind::Variance),
+            // Approvers for the supervisor PIN to reopen the count; the counter cannot approve.
+            'approvers' => array_values(array_filter($this->screens->approvers($shift->branch_id, $viewer), static fn (array $a): bool => $a['id'] !== $count->counted_by)),
             'saved' => $shift->expected_cash === null ? null : [
                 'reason_id' => $shift->variance_reason_id,
                 'note' => $shift->variance_note,

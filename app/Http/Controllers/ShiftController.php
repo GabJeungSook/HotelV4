@@ -199,6 +199,14 @@ final class ShiftController extends Controller
 
                 return redirect()->route('shift.close');
 
+            case 'reopen_count':
+                $recountApprover = User::query()->where('is_active', true)->find($request->integer('approver_id'))
+                    ?? throw ActionRefused::because('Choose who approves.');
+                $close->reopenCount($user, $branchId, $recountApprover, $request->string('pin')->toString(), EnsureDeviceKey::of($request));
+                Inertia::flash('toast', ['type' => 'info', 'message' => 'Count reopened. Enter the cash again.']);
+
+                return redirect()->route('shift.close');
+
             case 'handover':
                 $closing = $this->openShift($user)->id;
                 $receiver = User::query()->where('is_active', true)->find($request->integer('receiver_id'))
