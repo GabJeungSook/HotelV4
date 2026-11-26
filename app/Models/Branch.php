@@ -28,12 +28,12 @@ class Branch extends Model
 
     protected $fillable = [
         'name', 'address', 'slip_header', 'code_prefix', 'status',
-        'hourly_enabled', 'overnight_enabled', 'overnight_checkin_time', 'overnight_checkout_time',
+        'hourly_enabled', 'hourly_blocks', 'overnight_enabled', 'overnight_checkin_time', 'overnight_checkout_time',
         'long_stay_enabled', 'floor_room_rates_enabled', 'long_stay_max_days', 'extension_rule', 'extension_cycle_hours',
         'extension_per_hour_amount', 'due_soon_minutes',
         'deposit_enabled', 'deposit_name', 'deposit_amount', 'lost_key_amount', 'lost_remote_amount', 'payment_methods', 'denomination_count_enabled',
         'max_frontdesks_per_shift', 'shift_overdue_warn_minutes',
-        'kiosk_enabled', 'kiosk_hold_minutes', 'reservations_enabled', 'reservation_release_minutes', 'event_hall_enabled',
+        'kiosk_enabled', 'kiosk_hold_minutes', 'kiosk_checkout_enabled', 'reservations_enabled', 'reservation_release_minutes', 'event_hall_enabled',
         'pos_enabled', 'housekeeping_enabled', 'cleaning_deadline_minutes', 'cleaning_target_minutes', 'cleaning_urgent_minutes',
         'house_rules', 'next_stay_number', 'next_pos_number', 'next_z_number', 'next_day_z_number',
         'shift_stale_block_minutes', 'vat_enabled', 'vat_rate_percent', 'tin', 'registered_name', 'welcome_enabled',
@@ -45,6 +45,7 @@ class Branch extends Model
             'status' => BranchStatus::class,
             'extension_rule' => ExtensionRule::class,
             'payment_methods' => AsEnumCollection::of(PaymentMethod::class),
+            'hourly_blocks' => 'array',
             'hourly_enabled' => 'boolean',
             'overnight_enabled' => 'boolean',
             'long_stay_enabled' => 'boolean',
@@ -52,6 +53,7 @@ class Branch extends Model
             'deposit_enabled' => 'boolean',
             'denomination_count_enabled' => 'boolean',
             'kiosk_enabled' => 'boolean',
+            'kiosk_checkout_enabled' => 'boolean',
             'reservations_enabled' => 'boolean',
             'event_hall_enabled' => 'boolean',
             'pos_enabled' => 'boolean',
@@ -65,6 +67,22 @@ class Branch extends Model
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
         ];
+    }
+
+    /** The hourly rate blocks a branch sells when none is set yet. */
+    public const DEFAULT_HOURLY_BLOCKS = [6, 12, 18, 24];
+
+    /**
+     * The hourly rate blocks this branch sells, as sorted, de-duplicated hours (1–24).
+     *
+     * @return list<int>
+     */
+    public function hourlyBlocks(): array
+    {
+        $blocks = array_values(array_unique(array_map('intval', $this->hourly_blocks ?? self::DEFAULT_HOURLY_BLOCKS)));
+        sort($blocks);
+
+        return array_values(array_filter($blocks, static fn (int $h): bool => $h >= 1 && $h <= 24));
     }
 
     /** @return HasMany<User, $this> */

@@ -54,6 +54,7 @@ Route::middleware(['auth', 'pin.set', 'role:frontdesk,supervisor'])->group(funct
         Route::post('/stays/{stay}/transfer', [StayController::class, 'transferStore'])->name('stays.transfer.store');
         Route::post('/stays/{stay}/print', [StayController::class, 'slipPrint'])->name('stays.print');
         Route::get('/stays/{stay}/checkout', [StayController::class, 'checkout'])->name('stays.checkout');
+        Route::post('/stays/{stay}/checkout/request', [StayController::class, 'requestCheckout'])->name('stays.checkout.request');
         Route::post('/stays/{stay}/checkout', [StayController::class, 'checkoutStore'])->name('stays.checkout.store');
 
         // Reservations (57, 58 and the detail sheet), APP_FLOW §4.19 and §8.1.

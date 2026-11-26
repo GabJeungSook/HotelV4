@@ -48,7 +48,7 @@ final class BoardQuery
                 ->orWhere(fn ($q) => $q->where('state', StayState::Reserved)->whereNotNull('room_id')
                     ->whereBetween('arrival_at', [$local->startOfDay()->utc(), $local->endOfDay()->utc()])))
             ->orderBy('arrival_at')
-            ->get(['id', 'room_id', 'state', 'guest_name', 'expected_checkout_at', 'hold_expires_at', 'arrival_at']);
+            ->get(['id', 'room_id', 'state', 'guest_name', 'expected_checkout_at', 'hold_expires_at', 'arrival_at', 'checkout_requested_at']);
         $stays = $all->filter(fn (Stay $s): bool => $s->state !== StayState::Reserved)->keyBy('room_id');
         $reserved = $all->filter(fn (Stay $s): bool => $s->state === StayState::Reserved)->unique('room_id')->keyBy('room_id');
 
@@ -115,6 +115,7 @@ final class BoardQuery
             'minutes' => null,
             'holdSeconds' => null,
             'balance' => null,
+            'checkoutRequested' => false,
         ];
 
         if ($stay !== null && $stay->state === StayState::CheckedIn) {
@@ -127,7 +128,8 @@ final class BoardQuery
             $balance = $balances[$stay->id] ?? 0;
 
             return [...$row, 'status' => $status, 'guest' => $stay->guest_name, 'stayId' => $stay->id,
-                'dueOutAt' => $stay->expected_checkout_at?->toIso8601String(), 'minutes' => $left, 'balance' => $balance > 0 ? $balance : null];
+                'dueOutAt' => $stay->expected_checkout_at?->toIso8601String(), 'minutes' => $left, 'balance' => $balance > 0 ? $balance : null,
+                'checkoutRequested' => $stay->checkout_requested_at !== null];
         }
 
         if ($stay !== null && $stay->state === StayState::Held) {

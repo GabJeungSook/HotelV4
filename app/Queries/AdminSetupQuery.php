@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Queries;
 
 use App\Actions\Admin\SaveListReason;
-use App\Actions\Admin\SaveRate;
 use App\Actions\Admin\SaveUser;
 use App\Enums\PaymentMethod;
 use App\Enums\ProductKind;
@@ -100,7 +99,7 @@ final class AdminSetupQuery
         $columns = [];
 
         if ($branch->hourly_enabled) {
-            foreach (SaveRate::HOURS as $h) {
+            foreach ($branch->hourlyBlocks() as $h) {
                 $columns[] = ['key' => "hourly-{$h}", 'kind' => StayKind::Hourly->value, 'hours' => $h, 'label' => "{$h} hrs"];
             }
         }
@@ -220,6 +219,7 @@ final class AdminSetupQuery
             'branch' => [
                 'name' => $branch->name,
                 'hourly_enabled' => $branch->hourly_enabled,
+                'hourly_blocks' => $branch->hourlyBlocks(),
                 'overnight_enabled' => $branch->overnight_enabled,
                 'overnight_checkin_time' => substr($branch->overnight_checkin_time, 0, 5),
                 'overnight_checkout_time' => substr($branch->overnight_checkout_time, 0, 5),
@@ -242,6 +242,7 @@ final class AdminSetupQuery
                 'shift_stale_block_minutes' => (int) $branch->shift_stale_block_minutes,
                 'kiosk_enabled' => $branch->kiosk_enabled,
                 'kiosk_hold_minutes' => (int) $branch->kiosk_hold_minutes,
+                'kiosk_checkout_enabled' => $branch->kiosk_checkout_enabled,
                 'reservations_enabled' => $branch->reservations_enabled,
                 'reservation_release_minutes' => (int) $branch->reservation_release_minutes,
                 'event_hall_enabled' => $branch->event_hall_enabled,

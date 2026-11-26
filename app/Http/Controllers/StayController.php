@@ -13,6 +13,7 @@ use App\Actions\Stays\CheckOutGuest;
 use App\Actions\Stays\ConfirmKioskHold;
 use App\Actions\Stays\ExtendStay;
 use App\Actions\Stays\ReleaseKioskHold;
+use App\Actions\Stays\RequestKioskCheckout;
 use App\Actions\Stays\ResolveHeldDiscount;
 use App\Actions\Stays\TakePayment;
 use App\Actions\Stays\TransferRoom;
@@ -35,6 +36,7 @@ use App\Http\Requests\ExtendStayRequest;
 use App\Http\Requests\TakePaymentRequest;
 use App\Http\Requests\TransferRoomRequest;
 use App\Http\Requests\VoidLineRequest;
+use App\Models\Branch;
 use App\Models\Discount;
 use App\Models\FolioLine;
 use App\Models\Reason;
@@ -388,9 +390,26 @@ final class StayController extends Controller
         $key = $request->has('key') ? $request->boolean('key') : null;
         $remote = $request->has('remote') ? $request->boolean('remote') : null;
 
+        // When kiosk checkout is on, the guest must have requested first (from the kiosk, or the
+        // desk starts it here). The page shows a "start checkout" step until that flag is set.
+        $checkoutEnabled = (bool) Branch::query()->whereKey($stay->branch_id)->value('kiosk_checkout_enabled');
+
         return Inertia::render('Stays/Checkout', [
             'screen' => fn (): array => $this->screens->checkout($stay, $key, $remote, $this->quantities($request->array('damages'))),
+            'gate' => ['enabled' => $checkoutEnabled, 'requested' => $stay->checkout_requested_at !== null],
         ]);
+    }
+
+    /**
+     * The desk starts the checkout for a guest who did not use the kiosk (walk-up). Flags the stay
+     * so it joins the checkout-requests sheet and the desk can settle; same screen reloads ready.
+     */
+    public function requestCheckout(Request $request, Stay $stay, RequestKioskCheckout $action): RedirectResponse
+    {
+        Gate::authorize('update', $stay);
+        $action->byDesk($this->user($request), $stay);
+
+        return redirect()->route('stays.checkout', $stay);
     }
 
     public function checkoutStore(CheckOutGuestRequest $request, Stay $stay, CheckOutGuest $checkOut): RedirectResponse

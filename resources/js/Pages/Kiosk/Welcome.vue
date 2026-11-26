@@ -11,18 +11,22 @@ import NoRooms from './NoRooms.vue';
  * any type it shows "All rooms are taken" (31) and returns to 27 by itself when one opens up. A
  * failed reload makes the layout show the offline screen (31b).
  */
-const props = defineProps<{ hotel: string; rules: string[]; free: number; poll: number }>();
+const props = defineProps<{ hotel: string; rules: string[]; free: number; checkout: boolean; poll: number }>();
 
 const { refresh } = usePolling(['free', 'rules'], props.poll);
 
 function start(): void {
     router.visit(route('kiosk.start'));
 }
+
+function checkout(): void {
+    router.visit(route('kiosk.checkout'));
+}
 </script>
 
 <template>
     <KioskLayout title="Welcome">
-        <KioskWelcome v-if="free > 0" :hotel="hotel" :rules="rules" :free="free" @start="start" />
+        <KioskWelcome v-if="free > 0" :hotel="hotel" :rules="rules" :free="free" :checkout="checkout" @start="start" @checkout="checkout" />
         <NoRooms v-else @check="refresh" />
     </KioskLayout>
 </template>

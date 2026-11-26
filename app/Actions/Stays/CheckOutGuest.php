@@ -82,6 +82,13 @@ final class CheckOutGuest
             }
 
             $branch = Branch::query()->findOrFail($locked->branch_id);
+
+            // When the branch runs kiosk checkout, a guest is only checked out after a request —
+            // from the kiosk, or started by the desk (RequestKioskCheckout::byDesk). No direct checkout.
+            if ($branch->kiosk_checkout_enabled && $locked->checkout_requested_at === null) {
+                throw ActionRefused::because('Kiosk checkout is on: ask the guest to check out at the kiosk, or start the checkout from the board first.');
+            }
+
             $damageLines = [];
 
             foreach ([[$keyReturned, 'Lost key', $branch->lost_key_amount], [$remoteReturned, 'Lost remote', $branch->lost_remote_amount]] as [$returned, $label, $amount]) {

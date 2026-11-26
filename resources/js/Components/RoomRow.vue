@@ -25,6 +25,8 @@ export interface BoardRoom {
     holdSeconds?: number | null;
     /** Unpaid balance in centavos. */
     balance?: number | null;
+    /** The guest asked to check out at the kiosk; the desk still finalises it. */
+    checkoutRequested?: boolean;
 }
 
 const props = withDefaults(defineProps<{ room: BoardRoom; now?: string | number | Date }>(), { now: () => Date.now() });
@@ -120,6 +122,10 @@ const accessibleName = computed(() => {
         parts.push(`balance ${formatMoney(props.room.balance)}`);
     }
 
+    if (props.room.checkoutRequested) {
+        parts.push('checkout requested at kiosk');
+    }
+
     return parts.join(', ');
 });
 
@@ -147,9 +153,14 @@ function open(): void {
         <td class="w-16 py-[9px] ps-5 pe-2 text-[13px] font-semibold tabular" :class="room.status === 'blocked' ? 'text-muted' : 'text-highlighted'">{{ room.number }}</td>
         <td class="px-2 py-2.5 whitespace-nowrap">{{ room.type }}</td>
         <td class="px-2 py-2.5"><StatusLabel :tone="status.tone" :label="status.label" /></td>
-        <td class="max-w-[17rem] truncate px-2 py-[7px]" :class="room.reservedAt && !room.guest ? 'text-muted' : ''">
-            <PersonPill v-if="room.guest" :name="room.guest" />
-            <template v-else>{{ guestText }}</template>
+        <td class="max-w-[17rem] px-2 py-[7px]" :class="room.reservedAt && !room.guest ? 'text-muted' : ''">
+            <div class="flex items-center gap-2">
+                <span class="min-w-0 truncate">
+                    <PersonPill v-if="room.guest" :name="room.guest" />
+                    <template v-else>{{ guestText }}</template>
+                </span>
+                <StatusLabel v-if="room.checkoutRequested" tone="info" label="Checkout requested" class="shrink-0" />
+            </div>
         </td>
         <td class="px-2 py-2.5 whitespace-nowrap tabular">{{ dueOut }}</td>
         <td

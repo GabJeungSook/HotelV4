@@ -6,8 +6,12 @@ namespace App\Actions\Admin;
 
 use App\Enums\ExtensionRule;
 use App\Enums\PaymentMethod;
+use App\Enums\StayKind;
+use App\Enums\StayState;
 use App\Exceptions\ActionRefused;
 use App\Models\Branch;
+use App\Models\Rate;
+use App\Models\Stay;
 use App\Models\User;
 use App\Services\AuditTrail;
 use App\Support\Money;
@@ -31,14 +35,14 @@ final class UpdateBranchSettings
     /** @var array<string, list<string>> */
     public const GROUPS = [
         'stays' => [
-            'hourly_enabled', 'overnight_enabled', 'overnight_checkin_time', 'overnight_checkout_time',
+            'hourly_enabled', 'hourly_blocks', 'overnight_enabled', 'overnight_checkin_time', 'overnight_checkout_time',
             'long_stay_enabled', 'floor_room_rates_enabled', 'long_stay_max_days', 'extension_rule', 'extension_cycle_hours',
             'extension_per_hour_amount', 'due_soon_minutes',
         ],
         'money' => ['deposit_enabled', 'deposit_name', 'deposit_amount', 'lost_key_amount', 'lost_remote_amount', 'payment_methods', 'denomination_count_enabled'],
         'shifts' => ['max_frontdesks_per_shift', 'shift_overdue_warn_minutes', 'shift_stale_block_minutes'],
         'modules' => [
-            'kiosk_enabled', 'kiosk_hold_minutes', 'reservations_enabled', 'reservation_release_minutes', 'event_hall_enabled',
+            'kiosk_enabled', 'kiosk_hold_minutes', 'kiosk_checkout_enabled', 'reservations_enabled', 'reservation_release_minutes', 'event_hall_enabled',
             'pos_enabled', 'housekeeping_enabled', 'cleaning_deadline_minutes', 'cleaning_target_minutes', 'cleaning_urgent_minutes',
         ],
         'vat' => ['vat_enabled', 'vat_rate_percent', 'tin', 'registered_name'],
@@ -78,6 +82,11 @@ final class UpdateBranchSettings
             $merged = [...array_map(self::plain(...), $branch->only($allowed)), ...$after];
             $this->refuse($merged);
 
+            if (array_key_exists('hourly_blocks', $after)) {
+                $oldBlocks = is_array($before['hourly_blocks'] ?? null) ? $before['hourly_blocks'] : [];
+                $this->syncHourlyBlocks($branch, $oldBlocks, is_array($after['hourly_blocks']) ? $after['hourly_blocks'] : []);
+            }
+
             [$old, $new] = AuditTrail::diff($before, $after);
 
             if ($new === []) {
@@ -91,11 +100,53 @@ final class UpdateBranchSettings
         });
     }
 
+    /**
+     * When an hour block is dropped, its rates are removed so the kiosk and front desk stop
+     * offering it (both read the rate table). Refused if an open stay still quotes that hour — it
+     * can be dropped once those stays are checked out or cancelled.
+     *
+     * @param  list<int>  $old
+     * @param  list<int>  $new
+     */
+    private function syncHourlyBlocks(Branch $branch, array $old, array $new): void
+    {
+        $removed = array_values(array_diff(array_map('intval', $old), array_map('intval', $new)));
+
+        if ($removed === []) {
+            return;
+        }
+
+        $inUse = Stay::query()->withoutGlobalScopes()
+            ->where('branch_id', $branch->id)
+            ->whereIn('state', [StayState::Reserved, StayState::Held, StayState::CheckedIn])
+            ->where('stay_kind', StayKind::Hourly)
+            ->whereIn('hours', $removed)
+            ->pluck('hours')->map(fn ($h): int => (int) $h)->unique()->sort()->values()->all();
+
+        if ($inUse !== []) {
+            throw ActionRefused::because('These hour blocks are in use by open stays: '.implode(', ', $inUse).'. Drop them once those stays are checked out or cancelled.');
+        }
+
+        Rate::query()->withoutGlobalScopes()
+            ->where('branch_id', $branch->id)
+            ->where('stay_kind', StayKind::Hourly)
+            ->whereIn('hours', $removed)
+            ->delete();
+    }
+
     /** @param  array<string, mixed>  $s */
     private function refuse(array $s): void
     {
         if (! $s['hourly_enabled'] && ! $s['overnight_enabled'] && ! $s['long_stay_enabled']) {
             throw ActionRefused::because('Switch on at least one kind of stay: hourly, overnight or long stay.');
+        }
+
+        if ($s['hourly_enabled'] && (! is_array($s['hourly_blocks']) || $s['hourly_blocks'] === [])) {
+            throw ActionRefused::because('Add at least one hourly block (for example 6 hours), or switch hourly stays off.');
+        }
+
+        if ($s['hourly_enabled'] && $s['long_stay_enabled'] && is_array($s['hourly_blocks']) && ! in_array(24, $s['hourly_blocks'], true)) {
+            throw ActionRefused::because('Long stay is priced from the 24-hour rate, so keep a 24-hour block while long stay is on.');
         }
 
         if (! is_array($s['payment_methods']) || $s['payment_methods'] === []) {
@@ -113,6 +164,13 @@ final class UpdateBranchSettings
 
     private static function normalise(string $key, mixed $value): mixed
     {
+        if ($key === 'hourly_blocks') {
+            $blocks = array_values(array_unique(array_map('intval', (array) $value)));
+            sort($blocks);
+
+            return array_values(array_filter($blocks, static fn (int $h): bool => $h >= 1 && $h <= 24));
+        }
+
         if (str_ends_with($key, '_enabled')) {
             return filter_var($value, FILTER_VALIDATE_BOOLEAN);
         }

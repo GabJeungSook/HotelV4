@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\Stays\HoldRoom;
+use App\Actions\Stays\RequestKioskCheckout;
 use App\Enums\StayKind;
+use App\Http\Requests\KioskCheckoutRequest;
 use App\Http\Requests\KioskHoldRequest;
 use App\Models\Branch;
 use App\Models\Stay;
@@ -93,6 +95,37 @@ final class KioskController extends Controller
         $stay = Stay::query()->where('code', $code)->where('source', 'kiosk')->firstOrFail();
 
         return Inertia::render('Kiosk/Held', ['hold' => $this->screens->held($stay)]);
+    }
+
+    /** Kiosk checkout (reference: HotelV2): enter room + code, review the bill, request checkout. */
+    public function checkout(Request $request): Response
+    {
+        return Inertia::render('Kiosk/Checkout', ['bill' => null, 'room_number' => '', 'code' => '']);
+    }
+
+    /** Look up the stay by room + code and show its bill; a bad match flashes an error (handled). */
+    public function checkoutLookup(KioskCheckoutRequest $request, RequestKioskCheckout $checkout): Response
+    {
+        $stay = $checkout->find((int) $this->user($request)->branch_id, $request->string('room_number')->toString(), $request->string('code')->toString());
+
+        return Inertia::render('Kiosk/Checkout', [
+            'bill' => $this->screens->checkoutBill($stay),
+            'room_number' => $request->string('room_number')->toString(),
+            'code' => mb_strtoupper(trim($request->string('code')->toString())),
+        ]);
+    }
+
+    /** Flag the stay as checkout-requested; the front desk finalises it. */
+    public function checkoutConfirm(KioskCheckoutRequest $request, RequestKioskCheckout $checkout): RedirectResponse
+    {
+        $checkout->handle($this->user($request), $request->string('room_number')->toString(), $request->string('code')->toString());
+
+        return redirect()->route('kiosk.checkout.done');
+    }
+
+    public function checkoutDone(): Response
+    {
+        return Inertia::render('Kiosk/CheckoutDone');
     }
 
     private function branch(Request $request): Branch

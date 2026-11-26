@@ -28,8 +28,8 @@ use App\Support\Transaction;
  *   it; a long stay quotes the 24-hour rate. A floor/room override can always be removed — pricing
  *   simply falls back to the floor, then the type.
  * - Floor and room overrides require the branch's Floor & room rates switch to be on.
- * - Only the options the branch sells (46) can be set: hourly 6, 12, 18, 24 when hourly stays
- *   are on, overnight when overnight stays are on.
+ * - Only the options the branch sells (46) can be set: an hour block in the branch's hourly_blocks
+ *   when hourly stays are on, overnight when overnight stays are on.
  *
  * One transaction with its audit_logs row: 'rate.created', 'rate.updated' or 'rate.removed'.
  * Open stays keep the price they were quoted, which lives on their folio line.
@@ -149,8 +149,8 @@ final class SaveRate
             throw ActionRefused::because('Overnight stays are switched off for this branch. Switch them on in Settings first.');
         }
 
-        if ($kind === StayKind::Hourly && ! in_array($hours, self::HOURS, true)) {
-            throw ActionRefused::because('Hourly rates are for 6, 12, 18 or 24 hours.');
+        if ($kind === StayKind::Hourly && ! in_array($hours, $branch->hourlyBlocks(), true)) {
+            throw ActionRefused::because('That hour block is not offered by this branch. Add it in Settings → Hourly stays first.');
         }
     }
 

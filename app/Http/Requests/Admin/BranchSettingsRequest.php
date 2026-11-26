@@ -33,6 +33,8 @@ final class BranchSettingsRequest extends FormRequest
             'group' => ['required', 'string', 'in:'.implode(',', array_keys(UpdateBranchSettings::GROUPS))],
             // stays
             'hourly_enabled' => $flag,
+            'hourly_blocks' => ['sometimes', 'array'],
+            'hourly_blocks.*' => ['integer', 'between:1,24'],
             'overnight_enabled' => $flag,
             'overnight_checkin_time' => ['sometimes', 'required', 'date_format:H:i'],
             'overnight_checkout_time' => ['sometimes', 'required', 'date_format:H:i'],
@@ -59,6 +61,7 @@ final class BranchSettingsRequest extends FormRequest
             // modules
             'kiosk_enabled' => $flag,
             'kiosk_hold_minutes' => ['sometimes', 'required', 'integer', 'between:1,120'],
+            'kiosk_checkout_enabled' => $flag,
             'reservations_enabled' => $flag,
             'reservation_release_minutes' => $minutes,
             'event_hall_enabled' => $flag,

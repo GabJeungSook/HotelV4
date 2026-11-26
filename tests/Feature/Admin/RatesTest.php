@@ -90,7 +90,7 @@ it('refuses options the branch does not sell and odd hour blocks', function (): 
     Hotel::branch()->update(['overnight_enabled' => false]);
 
     expect(fn () => ($this->rate)('Suite', StayKind::Overnight, 0, 99000))->toThrow(ActionRefused::class, 'Overnight stays are switched off');
-    expect(fn () => ($this->rate)('Suite', StayKind::Hourly, 3, 20000))->toThrow(ActionRefused::class, '6, 12, 18 or 24 hours');
+    expect(fn () => ($this->rate)('Suite', StayKind::Hourly, 3, 20000))->toThrow(ActionRefused::class, 'not offered by this branch');
     expect(fn () => ($this->rate)('Suite', StayKind::LongStay, 0, 20000))->toThrow(ActionRefused::class, 'long stay is priced');
 
     Hotel::branch()->update(['hourly_enabled' => false, 'overnight_enabled' => true]);
@@ -167,7 +167,7 @@ it('sets, changes and removes an extension block with audit rows', function (): 
 it('adds a percent discount limited to some rates, and edits it', function (): void {
     $six = ($this->find)('Standard', StayKind::Hourly, 6);
     $twelve = ($this->find)('Standard', StayKind::Hourly, 12);
-    $data = ['name' => 'Birthday', 'kind' => DiscountKind::Percent, 'value' => 10, 'all_rates' => false, 'kiosk_enabled' => true, 'is_vat_exempt' => false, 'is_active' => true];
+    $data = ['name' => 'Birthday', 'kind' => DiscountKind::Percent, 'value' => 10, 'all_rates' => false, 'kiosk_enabled' => true, 'needs_id' => false, 'is_vat_exempt' => false, 'is_active' => true];
 
     $discount = app(SaveDiscount::class)->handle($this->admin, $this->branchId, null, $data, [$six->id]);
     expect($discount->rates()->pluck('rates.id')->all())->toBe([$six->id]);
@@ -181,7 +181,7 @@ it('adds a percent discount limited to some rates, and edits it', function (): v
 });
 
 it('refuses a bad discount', function (array $over, array $rates, string $message): void {
-    $data = ['name' => 'Bad', 'kind' => DiscountKind::Fixed, 'value' => 5000, 'all_rates' => true, 'kiosk_enabled' => false, 'is_vat_exempt' => false, 'is_active' => true, ...$over];
+    $data = ['name' => 'Bad', 'kind' => DiscountKind::Fixed, 'value' => 5000, 'all_rates' => true, 'kiosk_enabled' => false, 'needs_id' => false, 'is_vat_exempt' => false, 'is_active' => true, ...$over];
 
     expect(fn () => app(SaveDiscount::class)->handle($this->admin, $this->branchId, null, $data, $rates))->toThrow(ActionRefused::class, $message);
     expect(Discount::query()->where('name', 'Bad')->exists())->toBeFalse();
@@ -193,7 +193,7 @@ it('refuses a bad discount', function (array $over, array $rates, string $messag
 
 it('refuses to limit a discount to another branch’s rate', function (): void {
     $other = Rate::factory()->create();
-    $data = ['name' => 'Sneaky', 'kind' => DiscountKind::Fixed, 'value' => 5000, 'all_rates' => false, 'kiosk_enabled' => false, 'is_vat_exempt' => false, 'is_active' => true];
+    $data = ['name' => 'Sneaky', 'kind' => DiscountKind::Fixed, 'value' => 5000, 'all_rates' => false, 'kiosk_enabled' => false, 'needs_id' => false, 'is_vat_exempt' => false, 'is_active' => true];
 
     expect(fn () => app(SaveDiscount::class)->handle($this->admin, $this->branchId, null, $data, [$other->id]))->toThrow(ActionRefused::class, 'Pick the rates');
 });

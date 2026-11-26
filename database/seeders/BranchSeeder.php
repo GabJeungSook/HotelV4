@@ -20,6 +20,7 @@ class BranchSeeder extends Seeder
             'code_prefix' => DemoBranch::PREFIX,
             'status' => BranchStatus::Active,
             'hourly_enabled' => true,
+            'hourly_blocks' => [6, 12, 18, 24],
             'overnight_enabled' => true,
             'deposit_enabled' => true,
             'deposit_amount' => 20000,

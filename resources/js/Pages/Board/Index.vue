@@ -10,6 +10,7 @@ import { usePolling } from '@/Composables/usePolling';
 import { useShared } from '@/Composables/useShared';
 import { formatDateTime } from '@/Composables/useDateTime';
 import FrontDeskLayout from '@/Layouts/FrontDeskLayout.vue';
+import CheckoutRequests, { type CheckoutRequest } from './CheckoutRequests.vue';
 import KioskHolds, { type KioskHold } from './KioskHolds.vue';
 import Skeleton from './Skeleton.vue';
 
@@ -33,6 +34,8 @@ type Row = BoardRoom & { stayId: number | null };
 const props = defineProps<{
     board?: { floors: (BoardFloor & { rooms: Row[] })[]; total: number; floorOptions: { value: string; label: string }[]; now: string };
     holds: KioskHold[];
+    checkoutEnabled: boolean;
+    checkoutRequests: CheckoutRequest[];
     kioskOrder?: { enabled: boolean; types: KioskType[]; now: string };
     filters: { q: string; floor: string };
     poll: number;
@@ -41,13 +44,16 @@ const props = defineProps<{
 
 const { flash, props: shared } = useShared();
 const liveHolds = computed(() => props.holds.filter((h) => !h.expired).length);
-const kiosk = computed(() => !!shared.value.branch?.modules?.kiosk_enabled || props.holds.length > 0);
+const holdsVisible = computed(() => !!shared.value.branch?.modules?.kiosk_enabled || props.holds.length > 0);
+const kiosk = computed(() => holdsVisible.value || props.checkoutEnabled);
 // The countdown runs live off this clock (one 1 s tick for the whole board, no per-row timers);
 // the server reload below only keeps the data fresh (new check-ins, housekeeping) in the background.
 const now = useNow({ interval: 1000 });
 usePolling(['board'], props.poll);
 // Kiosk holds reload on their own timer, so a new hold shows on the rail without a refresh.
 usePolling(['holds'], props.holdsPoll);
+// Checkout requests reload live too, so a guest's kiosk request appears on the rail at once.
+usePolling(['checkoutRequests'], props.holdsPoll);
 
 // Kiosk order (which rooms the kiosk will give next, and what is about to free up).
 const kioskPanel = ref(false);
@@ -158,8 +164,8 @@ function open(room: BoardRoom): void {
                 </Deferred>
             </div>
 
-            <aside v-if="kiosk" class="order-first w-full lg:order-last lg:w-[320px] lg:shrink-0">
-                <div class="rounded-card border border-default bg-default lg:sticky lg:top-4">
+            <aside v-if="kiosk" class="order-first w-full space-y-4 lg:order-last lg:top-4 lg:w-[320px] lg:shrink-0 lg:self-start lg:sticky">
+                <div v-if="holdsVisible" class="rounded-card border border-default bg-default">
                     <div class="flex items-center justify-between gap-2 border-b border-default px-4 py-3">
                         <div class="flex items-center gap-2">
                             <UIcon name="i-solar-monitor-bold-duotone" class="size-5 text-primary" />
@@ -169,6 +175,19 @@ function open(room: BoardRoom): void {
                     </div>
                     <div class="max-h-[calc(100vh-11rem)] overflow-y-auto p-4">
                         <KioskHolds :holds="holds" />
+                    </div>
+                </div>
+
+                <div v-if="checkoutEnabled" class="rounded-card border border-default bg-default">
+                    <div class="flex items-center justify-between gap-2 border-b border-default px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <UIcon name="i-solar-logout-3-bold-duotone" class="size-5 text-info" />
+                            <h2 class="text-sm font-semibold text-highlighted">Checkout requests</h2>
+                        </div>
+                        <span v-if="checkoutRequests.length" class="rounded-label bg-info-50 px-1.5 text-xs text-info tabular">{{ checkoutRequests.length }}</span>
+                    </div>
+                    <div class="max-h-[calc(100vh-11rem)] overflow-y-auto p-4">
+                        <CheckoutRequests :requests="checkoutRequests" />
                     </div>
                 </div>
             </aside>

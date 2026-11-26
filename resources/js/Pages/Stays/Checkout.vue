@@ -24,9 +24,18 @@ const props = defineProps<{
         settle?: Settlement;
         methods?: PaymentMethodOption[];
     };
+    /** Kiosk checkout: when on, the guest must have requested before the desk can settle. */
+    gate: { enabled: boolean; requested: boolean };
 }>();
 
 const { flash } = useShared();
+const starting = ref(false);
+// With kiosk checkout on, settling is gated until a request exists (from the kiosk, or started here).
+const needsRequest = computed(() => props.gate.enabled && !props.gate.requested && !props.screen.done);
+
+function startCheckout(): void {
+    router.post(route('stays.checkout.request', props.screen.stay.id), {}, { onStart: () => (starting.value = true), onFinish: () => (starting.value = false) });
+}
 const step = ref<1 | 2>(1);
 const key = ref<boolean | null>(null);
 const remote = ref<boolean | null>(null);
@@ -78,6 +87,24 @@ function checkOut(): void {
         <template v-if="screen.done">
             <Done :stay-id="screen.stay.id" :room="screen.stay.room" :guest="screen.stay.guest_name" :code="screen.stay.code" :done="screen.done" />
         </template>
+
+        <!-- Kiosk checkout on: the guest hasn't requested yet. The desk can start it for a walk-up. -->
+        <div v-else-if="needsRequest" class="rounded-card border border-default bg-default p-6">
+            <div class="flex items-start gap-3">
+                <UIcon name="i-solar-logout-3-bold-duotone" class="mt-0.5 size-6 shrink-0 text-info" />
+                <div>
+                    <h2 class="text-base font-semibold text-highlighted">Waiting for the guest to check out at the kiosk</h2>
+                    <p class="mt-1 text-sm text-muted">
+                        This branch runs kiosk checkout, so the guest checks out at the lobby kiosk first and the request appears on the board. If the guest came straight to the desk, start the checkout here.
+                    </p>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end gap-2">
+                <UButton color="neutral" variant="ghost" label="Back to account" @click="router.visit(route('stays.show', screen.stay.id))" />
+                <UButton label="Start checkout" icon="i-solar-logout-3-linear" :loading="starting" @click="startCheckout" />
+            </div>
+        </div>
+
         <form v-else-if="step === 1" @submit.prevent="answered && next()">
             <Returns v-model:key-returned="key" v-model:remote-returned="remote" v-model:damages="damages" :lost="screen.lost ?? { key: 0, remote: 0 }" :products="screen.damage_products ?? []" />
             <div class="mt-4 flex justify-end gap-2">

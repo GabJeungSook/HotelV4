@@ -31,7 +31,7 @@ class Stay extends Model
         'branch_id', 'code', 'state', 'source', 'room_id', 'room_type_id',
         'guest_name', 'guest_mobile', 'plate_number',
         'stay_kind', 'hours', 'nights', 'days', 'discount_id', 'discount_unverified', 'quoted_amount',
-        'arrival_at', 'hold_expires_at', 'checked_in_at', 'expected_checkout_at', 'checked_out_at',
+        'arrival_at', 'hold_expires_at', 'checked_in_at', 'expected_checkout_at', 'checked_out_at', 'checkout_requested_at',
         'cycle_hours_used', 'checkin_shift_id', 'checkout_shift_id', 'checked_in_by', 'checked_out_by',
         'closed_reason', 'idempotency_key',
     ];
@@ -49,6 +49,7 @@ class Stay extends Model
             'checked_in_at' => 'immutable_datetime',
             'expected_checkout_at' => 'immutable_datetime',
             'checked_out_at' => 'immutable_datetime',
+            'checkout_requested_at' => 'immutable_datetime',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
         ];

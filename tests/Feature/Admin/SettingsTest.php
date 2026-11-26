@@ -3,18 +3,23 @@
 declare(strict_types=1);
 
 use App\Actions\Admin\SaveListReason;
+use App\Actions\Admin\SaveRate;
 use App\Actions\Admin\SaveShiftDefinition;
 use App\Actions\Admin\UpdateBranchSettings;
 use App\Enums\PaymentMethod;
 use App\Enums\ReasonKind;
+use App\Enums\StayKind;
 use App\Exceptions\ActionRefused;
 use App\Exceptions\InvalidStayOption;
 use App\Models\AuditLog;
 use App\Models\Branch;
 use App\Models\ExpenseCategory;
+use App\Models\Rate;
 use App\Models\Reason;
+use App\Models\RoomType;
 use App\Models\ShiftDefinition;
 use App\Models\TransferReason;
+use App\Support\Money;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -53,6 +58,42 @@ it('writes no audit row when nothing changed', function (): void {
     ($this->update)(['deposit_amount' => 20000]);
 
     expect(AuditLog::query()->where('action', 'settings.updated')->count())->toBe(0);
+});
+
+it('manages the hourly blocks: a new block can be priced, and dropping one clears its rates', function (): void {
+    $type = RoomType::query()->where('name', 'Standard')->firstOrFail();
+    $has3h = fn (): bool => Rate::query()->where('branch_id', $this->branchId)->where('stay_kind', StayKind::Hourly)->where('hours', 3)->exists();
+
+    // 3 h is not offered by default, so a 3-hour rate is refused.
+    expect(fn () => app(SaveRate::class)->handle($this->admin, $this->branchId, $type->id, null, null, StayKind::Hourly, 3, Money::ofPesos(250)))
+        ->toThrow(ActionRefused::class, 'not offered by this branch');
+
+    // Offer a 3-hour block → the 3-hour rate now saves.
+    ($this->update)(['hourly_blocks' => [3, 6, 12, 18, 24]]);
+    app(SaveRate::class)->handle($this->admin, $this->branchId, $type->id, null, null, StayKind::Hourly, 3, Money::ofPesos(250));
+    expect($has3h())->toBeTrue()
+        ->and(Hotel::branch()->hourlyBlocks())->toBe([3, 6, 12, 18, 24]);
+
+    // Drop the 3-hour block → its rates are cleared, so nothing offers it any more.
+    ($this->update)(['hourly_blocks' => [6, 12, 18, 24]]);
+    expect($has3h())->toBeFalse()
+        ->and(Hotel::branch()->hourlyBlocks())->toBe([6, 12, 18, 24]);
+});
+
+it('refuses dropping an hour block an open stay is still using', function (): void {
+    Hotel::openShift();
+    Hotel::checkIn('101', 6); // a 6-hour stay
+
+    expect(fn () => ($this->update)(['hourly_blocks' => [12, 18, 24]]))->toThrow(ActionRefused::class, 'in use by open stays');
+    expect(Rate::query()->where('branch_id', $this->branchId)->where('stay_kind', StayKind::Hourly)->where('hours', 6)->exists())->toBeTrue();
+});
+
+it('keeps the 24-hour block while long stay is on', function (): void {
+    expect(fn () => ($this->update)(['hourly_blocks' => [6, 12, 18]]))->toThrow(ActionRefused::class, '24-hour rate');
+});
+
+it('refuses hourly stays on with no blocks', function (): void {
+    expect(fn () => ($this->update)(['hourly_blocks' => []]))->toThrow(ActionRefused::class, 'at least one hourly block');
 });
 
 it('saves the modules, the stale-shift limit, the VAT block and the slip settings', function (): void {

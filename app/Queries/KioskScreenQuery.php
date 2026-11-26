@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Queries;
 
+use App\Enums\DepositType;
 use App\Enums\StayKind;
 use App\Enums\StayState;
 use App\Exceptions\RateNotFound;
@@ -31,6 +32,7 @@ final class KioskScreenQuery
         private readonly RoomQuery $rooms,
         private readonly RoomRotation $rotation,
         private readonly KioskOffer $offer,
+        private readonly StayQuery $stays,
     ) {}
 
     /**
@@ -50,8 +52,65 @@ final class KioskScreenQuery
             'hotel' => $branch->name,
             'rules' => self::rules((string) $branch->house_rules),
             'free' => $free,
+            'checkout' => $branch->kiosk_checkout_enabled,
             'poll' => (int) config('hotel.polling.kiosk_availability'),
         ];
+    }
+
+    /**
+     * The bill the guest reviews before requesting checkout at the kiosk (reference: HotelV2): the
+     * room and stay, what is still to settle, and the deposit the desk will return. Read-only.
+     *
+     * @return array<string, mixed>
+     */
+    public function checkoutBill(Stay $stay): array
+    {
+        $room = $stay->room_id === null ? null : Room::query()->withoutGlobalScopes()->find($stay->room_id);
+        $folio = $this->stays->folio($stay->id);
+
+        // Every charge and extra on the stay, so the guest sees what they've paid and still owe.
+        $lines = array_map(static fn (array $l): array => [
+            'label' => $l['description'] !== '' ? $l['description'] : ucwords(str_replace('_', ' ', $l['kind']->value)),
+            'amount' => $l['amount']->centavos(),
+            'status' => $l['status'], // paid · unpaid · reversed
+        ], $folio['lines']);
+
+        $deposit = $this->stays->depositHeld($stay->id, DepositType::Key)->centavos() + $this->stays->depositHeld($stay->id, DepositType::Guest)->centavos();
+
+        return [
+            'code' => $stay->code,
+            'room' => $room?->number,
+            'guest_name' => $stay->guest_name,
+            'checked_in_at' => $stay->checked_in_at?->toIso8601String(),
+            'expected_checkout_at' => $stay->expected_checkout_at?->toIso8601String(),
+            'lines' => $lines,
+            'balance' => $folio['balance_due']->centavos(),
+            'deposit' => $deposit,
+            'already_requested' => $stay->checkout_requested_at !== null,
+        ];
+    }
+
+    /**
+     * Pending kiosk checkout requests for the front desk (the realtime sheet on the board): each
+     * checked-in stay that asked to check out, oldest request first, with its bill.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function checkoutRequests(int $branchId): array
+    {
+        return array_map(function (Stay $stay): array {
+            $room = $stay->room_id === null ? null : Room::query()->withoutGlobalScopes()->find($stay->room_id);
+
+            return [
+                'id' => $stay->id,
+                'code' => $stay->code,
+                'room' => $room?->number,
+                'guest' => $stay->guest_name,
+                'balance' => $this->stays->balanceDue($stay->id)->centavos(),
+                'deposit' => $this->stays->depositHeld($stay->id, DepositType::Key)->centavos() + $this->stays->depositHeld($stay->id, DepositType::Guest)->centavos(),
+                'requested_at' => $stay->checkout_requested_at?->toIso8601String(),
+            ];
+        }, $this->stays->checkoutRequests($branchId));
     }
 
     /**

@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\StayState;
+use App\Models\Branch;
 use App\Models\Stay;
 use App\Models\User;
 use App\Queries\BoardQuery;
 use App\Queries\HoldScreenQuery;
 use App\Queries\KioskOrderQuery;
+use App\Queries\KioskScreenQuery;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,10 +24,11 @@ use Inertia\Response;
  */
 final class BoardController extends Controller
 {
-    public function index(Request $request, BoardQuery $board, HoldScreenQuery $holds, KioskOrderQuery $kioskOrder): Response|RedirectResponse
+    public function index(Request $request, BoardQuery $board, HoldScreenQuery $holds, KioskOrderQuery $kioskOrder, KioskScreenQuery $kiosk): Response|RedirectResponse
     {
         /** @var User $user */
         $user = $request->user();
+        $branchId = (int) $user->branch_id;
         $q = mb_substr(trim($request->string('q')->toString()), 0, 40);
         $floor = $request->string('floor')->toString();
 
@@ -37,10 +40,14 @@ final class BoardController extends Controller
             }
         }
 
+        $checkoutEnabled = (bool) Branch::query()->whereKey($branchId)->value('kiosk_checkout_enabled');
+
         return Inertia::render('Board/Index', [
-            'board' => Inertia::defer(fn (): array => $board->forBranch((int) $user->branch_id, $q, $floor)),
-            'holds' => fn (): array => $holds->holds((int) $user->branch_id),
-            'kioskOrder' => Inertia::defer(fn (): array => $kioskOrder->forBranch((int) $user->branch_id)),
+            'board' => Inertia::defer(fn (): array => $board->forBranch($branchId, $q, $floor)),
+            'holds' => fn (): array => $holds->holds($branchId),
+            'checkoutEnabled' => $checkoutEnabled,
+            'checkoutRequests' => fn (): array => $checkoutEnabled ? $kiosk->checkoutRequests($branchId) : [],
+            'kioskOrder' => Inertia::defer(fn (): array => $kioskOrder->forBranch($branchId)),
             'filters' => ['q' => $q, 'floor' => $floor],
             'poll' => config('hotel.polling.board'),
             'holdsPoll' => config('hotel.polling.kiosk_holds'),

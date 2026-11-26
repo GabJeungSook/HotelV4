@@ -224,6 +224,24 @@ final class StayQuery
     }
 
     /**
+     * Checked-in stays that have requested checkout at the kiosk, oldest request first — the
+     * front desk's realtime checkout-requests sheet.
+     *
+     * @return list<Stay>
+     */
+    public function checkoutRequests(int $branchId): array
+    {
+        return Stay::query()->withoutGlobalScopes()
+            ->with(['room' => fn ($q) => $q->withoutGlobalScopes()])
+            ->where('branch_id', $branchId)
+            ->where('state', StayState::CheckedIn)
+            ->whereNotNull('checkout_requested_at')
+            ->orderBy('checkout_requested_at')
+            ->get()
+            ->all();
+    }
+
+    /**
      * Reservations of the branch by arrival (57, DATABASE_SCHEMA §7), with the room and type.
      *
      * @param  list<StayState>  $states

@@ -8,11 +8,12 @@ import HomiLogo from './HomiLogo.vue';
  * content rises in once each time the screen mounts after idle; all motion stops under reduced
  * motion.
  */
-withDefaults(defineProps<{ hotel: string; rules: string[]; free: number; photos?: { src: string; srcset?: string }[] }>(), {
+withDefaults(defineProps<{ hotel: string; rules: string[]; free: number; checkout?: boolean; photos?: { src: string; srcset?: string }[] }>(), {
+    checkout: false,
     photos: () => [{ src: '/images/photos/lobby.jpg', srcset: '/images/photos/lobby-1200.jpg 1200w, /images/photos/lobby.jpg 2000w' }],
 });
 
-defineEmits<{ start: [] }>();
+defineEmits<{ start: []; checkout: [] }>();
 </script>
 
 <template>
@@ -63,6 +64,16 @@ defineEmits<{ start: [] }>();
             Start booking
             <UIcon name="i-solar-alt-arrow-right-linear" class="size-8" aria-hidden="true" />
         </button>
-        <p class="hm-up mt-4 text-center text-xl text-dimmed [animation-delay:0.5s]">or tap anywhere to begin</p>
+        <button
+            v-if="checkout"
+            type="button"
+            class="hm-up hm-focus mt-4 flex h-[72px] w-full items-center justify-center gap-3 rounded-card border border-default bg-default text-[24px] font-medium text-default transition-colors hover:bg-elevated [animation-delay:0.55s]"
+            data-test="kiosk-checkout"
+            @click.stop="$emit('checkout')"
+        >
+            <UIcon name="i-solar-logout-3-linear" class="size-7" aria-hidden="true" />
+            Already staying? Check out
+        </button>
+        <p class="hm-up mt-4 text-center text-xl text-dimmed [animation-delay:0.6s]">or tap anywhere to begin</p>
     </div>
 </template>
