@@ -31,3 +31,6 @@ yarn-error.log
 /.nuxt-ui
 /auto-imports.d.ts
 /components.d.ts
+
+# Mobile app lives in its own repo (homi-mobile); never track it here
+/mobile/
