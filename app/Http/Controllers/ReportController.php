@@ -376,6 +376,19 @@ final class ReportController extends Controller
         return Inertia::render('Reports/Approvals', ['report' => $report]);
     }
 
+    /** Expenses (new): cash expenses by category over a range, or its CSV. */
+    public function expenses(ReportRequest $request): Response|HttpResponse
+    {
+        $branch = $this->branch($request);
+        $report = $this->reports->expenses($branch->id, $request->businessDate($this->clock->localDate()), (string) $request->query('range', 'day'));
+
+        if ($request->query('export') === 'csv') {
+            return $this->export->table($this->screens->expensesTables($report), $this->user($request), $branch->id, null, "expenses-{$report['from']}-{$report['to']}.csv");
+        }
+
+        return Inertia::render('Reports/Expenses', ['report' => $report]);
+    }
+
     /** The branch of this request: the user's own, or for an owner `?branch=`, the opened one, or the first. */
     private function branch(Request $request): Branch
     {

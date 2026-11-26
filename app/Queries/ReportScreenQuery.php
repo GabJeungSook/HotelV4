@@ -334,4 +334,32 @@ final class ReportScreenQuery
             ], $r['rows']),
         ]];
     }
+
+    /**
+     * CSV for the expenses report: totals by category, then every expense.
+     *
+     * @param  array<string, mixed>  $r
+     * @return list<array<string, mixed>>
+     */
+    public function expensesTables(array $r): array
+    {
+        return [
+            [
+                'title' => "Expenses by category {$r['from']} to {$r['to']}",
+                'columns' => ['Category', 'Count', 'Amount'],
+                'rows' => array_map(fn (array $c): array => [(string) $c['category'], (string) $c['count'], number_format(((int) $c['amount']) / 100, 2)], $r['by_category']),
+            ],
+            [
+                'title' => 'Every expense',
+                'columns' => ['Time', 'Category', 'Note', 'By', 'Amount'],
+                'rows' => array_map(fn (array $m): array => [
+                    CarbonImmutable::parse((string) $m['at'])->setTimezone(Clock::displayTimezone())->format('Y-m-d H:i'),
+                    (string) $m['category'],
+                    (string) $m['note'],
+                    (string) $m['by'],
+                    number_format(((int) $m['amount']) / 100, 2),
+                ], $r['rows']),
+            ],
+        ];
+    }
 }

@@ -26,6 +26,7 @@ const cards = computed(() => [
     { title: 'Guest movements', text: 'A log of arrivals, departures, extensions, transfers + guest mix', href: route('reports.guests'), icon: 'i-solar-users-group-rounded-bold-duotone', tile: 'bg-teal-50 text-teal' },
     { title: 'Housekeeping', text: 'Cleans, time taken, late rooms', href: route('reports.housekeeping'), icon: 'i-solar-broom-bold-duotone', tile: 'bg-clay-50 text-clay' },
     { title: 'Inventory', text: 'Stock in, sold, wastage, on hand', href: route('reports.inventory'), icon: 'i-solar-box-bold-duotone', tile: 'bg-warn-50 text-warn' },
+    { title: 'Expenses', text: 'Cash expenses by category, over any range', href: route('reports.expenses'), icon: 'i-solar-bill-list-bold-duotone', tile: 'bg-clay-50 text-clay' },
     { title: 'Audit trail', text: 'Voids, cancels, transfers, approvals', href: route('reports.audit'), icon: 'i-solar-lock-bold-duotone', tile: 'bg-grey-50 text-muted' },
     { title: 'Approvals & overrides', text: 'Who approved what, when and why, over any range', href: route('reports.approvals'), icon: 'i-solar-shield-check-bold-duotone', tile: 'bg-violet-50 text-violet' },
 ]);

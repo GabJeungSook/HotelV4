@@ -30,6 +30,7 @@ Route::middleware(['auth', 'pin.set', 'role:backoffice,supervisor,admin,owner'])
     Route::get('/guests', [ReportController::class, 'guests'])->name('guests');
     Route::get('/occupancy', [ReportController::class, 'occupancy'])->name('occupancy');
     Route::get('/housekeeping', [ReportController::class, 'housekeeping'])->name('housekeeping');
+    Route::get('/expenses', [ReportController::class, 'expenses'])->name('expenses');
     Route::get('/inventory', [ReportController::class, 'inventory'])->name('inventory');
     Route::get('/audit', [ReportController::class, 'audit'])->name('audit');
     Route::get('/approvals', [ReportController::class, 'approvals'])->name('approvals');

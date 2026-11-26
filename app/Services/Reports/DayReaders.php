@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Reports;
 
 use App\Enums\ApprovalAction;
+use App\Enums\CashMovementKind;
 use App\Enums\CleaningStatus;
 use App\Enums\LineKind;
 use App\Enums\PaymentMethod;
@@ -14,7 +15,9 @@ use App\Enums\StayState;
 use App\Models\Approval;
 use App\Models\AuditLog;
 use App\Models\Branch;
+use App\Models\CashMovement;
 use App\Models\CleaningTask;
+use App\Models\ExpenseCategory;
 use App\Models\FolioLine;
 use App\Models\Payment;
 use App\Models\PaymentAllocation;
@@ -544,6 +547,62 @@ trait DayReaders
             'to' => end($days),
             'type' => $type,
             'counts' => $counts,
+            'rows' => $rows,
+        ];
+    }
+
+    /**
+     * Expenses (new report): cash expenses over a day, week or month, grouped by category and
+     * listed newest first, excluding voided ones. Read-only from cash_movements.
+     *
+     * @return array<string, mixed>
+     */
+    public function expenses(int $branchId, string $date, string $range = 'day'): array
+    {
+        $days = BusinessDay::range($date, $range);
+        [$start] = $this->days->window($branchId, $days[0]);
+        [, $end] = $this->days->window($branchId, end($days));
+
+        $names = User::query()->withoutGlobalScopes()->where('branch_id', $branchId)->pluck('name', 'id');
+        $categories = ExpenseCategory::query()->withoutGlobalScopes()->where('branch_id', $branchId)->pluck('name', 'id');
+
+        $moves = CashMovement::query()->withoutGlobalScopes()->where('branch_id', $branchId)
+            ->where('kind', CashMovementKind::Expense)->whereNull('voided_at')
+            ->whereBetween('occurred_at', [$start, $end])->orderByDesc('occurred_at')->get();
+
+        $rows = [];
+        $byCat = [];
+        $total = 0;
+        foreach ($moves as $m) {
+            $cat = (string) ($categories[$m->expense_category_id] ?? 'Uncategorised');
+            $amount = $m->amount?->centavos() ?? 0;
+            $total += $amount;
+            $byCat[$cat] ??= ['count' => 0, 'amount' => 0];
+            $byCat[$cat]['count']++;
+            $byCat[$cat]['amount'] += $amount;
+            $rows[] = [
+                'at' => $m->occurred_at->toIso8601String(),
+                'category' => $cat,
+                'amount' => $amount,
+                'note' => (string) ($m->note ?? ''),
+                'by' => (string) ($names[$m->created_by] ?? ''),
+            ];
+        }
+
+        $byCategory = [];
+        foreach ($byCat as $cat => $v) {
+            $byCategory[] = ['category' => $cat, 'count' => $v['count'], 'amount' => $v['amount']];
+        }
+        usort($byCategory, static fn (array $a, array $b): int => $b['amount'] <=> $a['amount']);
+
+        return [
+            'date' => $date,
+            'range' => $range,
+            'from' => $days[0],
+            'to' => end($days),
+            'total' => $total,
+            'count' => count($rows),
+            'by_category' => $byCategory,
             'rows' => $rows,
         ];
     }
