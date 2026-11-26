@@ -312,4 +312,26 @@ final class ReportScreenQuery
             ],
         ];
     }
+
+    /**
+     * CSV for the approvals & overrides report.
+     *
+     * @param  array<string, mixed>  $r
+     * @return list<array<string, mixed>>
+     */
+    public function approvalsTables(array $r): array
+    {
+        return [[
+            'title' => "Approvals and overrides {$r['from']} to {$r['to']}",
+            'columns' => ['Time', 'Action', 'Requested by', 'Approved by', 'Reason', 'Details'],
+            'rows' => array_map(fn (array $a): array => [
+                CarbonImmutable::parse((string) $a['at'])->setTimezone(Clock::displayTimezone())->format('Y-m-d H:i'),
+                (string) $a['action'],
+                (string) $a['requester'],
+                (string) $a['approver'],
+                (string) $a['reason'],
+                (string) $a['details'],
+            ], $r['rows']),
+        ]];
+    }
 }

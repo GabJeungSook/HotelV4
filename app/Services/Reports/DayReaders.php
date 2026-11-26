@@ -492,6 +492,62 @@ trait DayReaders
         ];
     }
 
+    /**
+     * Approvals & overrides (new report): every supervisor-approved action (voids, cancels,
+     * transfers, shift overrides and the rest) over a day, week or month, with who asked, who
+     * approved and why. Newest first; filterable by kind. Read-only from the approvals table.
+     *
+     * @return array<string, mixed>
+     */
+    public function approvals(int $branchId, string $date, string $range = 'day', string $type = 'all'): array
+    {
+        $days = BusinessDay::range($date, $range);
+        [$start] = $this->days->window($branchId, $days[0]);
+        [, $end] = $this->days->window($branchId, end($days));
+
+        $groups = [
+            'void' => [ApprovalAction::VoidLine, ApprovalAction::VoidCashMovement, ApprovalAction::VoidSale],
+            'cancel' => [ApprovalAction::CancelStay, ApprovalAction::CancelReservation, ApprovalAction::RefundNoShow],
+            'transfer' => [ApprovalAction::Transfer],
+            'shift' => [ApprovalAction::ForceCloseShift, ApprovalAction::CloseWithoutHandover, ApprovalAction::ChangeShiftPeriod, ApprovalAction::ApproveVariance],
+        ];
+        $names = User::query()->withoutGlobalScopes()->where('branch_id', $branchId)->pluck('name', 'id');
+
+        $counts = ['void' => 0, 'cancel' => 0, 'transfer' => 0, 'shift' => 0, 'other' => 0];
+        $rows = [];
+
+        $approvals = Approval::query()->withoutGlobalScopes()->where('branch_id', $branchId)
+            ->whereBetween('created_at', [$start, $end])->orderByDesc('created_at')->get();
+
+        foreach ($approvals as $a) {
+            $group = collect($groups)->search(fn (array $actions): bool => in_array($a->action, $actions, true)) ?: 'other';
+            $counts[$group]++;
+            $rows[] = [
+                'at' => $a->created_at->toIso8601String(),
+                'group' => $group,
+                'action' => $a->action->label(),
+                'requester' => (string) ($names[$a->requested_by] ?? ''),
+                'approver' => (string) ($names[$a->approved_by] ?? ''),
+                'reason' => (string) ($a->reason ?? ''),
+                'details' => (string) ($a->summary ?? ''),
+            ];
+        }
+
+        if ($type !== 'all') {
+            $rows = array_values(array_filter($rows, static fn (array $r): bool => $r['group'] === $type));
+        }
+
+        return [
+            'date' => $date,
+            'range' => $range,
+            'from' => $days[0],
+            'to' => end($days),
+            'type' => $type,
+            'counts' => $counts,
+            'rows' => $rows,
+        ];
+    }
+
     /** The stay-option label for a movement (e.g. "6 hrs", "overnight", "3 days"). */
     private static function stayOption(Stay $s): string
     {

@@ -27,6 +27,7 @@ const cards = computed(() => [
     { title: 'Housekeeping', text: 'Cleans, time taken, late rooms', href: route('reports.housekeeping'), icon: 'i-solar-broom-bold-duotone', tile: 'bg-clay-50 text-clay' },
     { title: 'Inventory', text: 'Stock in, sold, wastage, on hand', href: route('reports.inventory'), icon: 'i-solar-box-bold-duotone', tile: 'bg-warn-50 text-warn' },
     { title: 'Audit trail', text: 'Voids, cancels, transfers, approvals', href: route('reports.audit'), icon: 'i-solar-lock-bold-duotone', tile: 'bg-grey-50 text-muted' },
+    { title: 'Approvals & overrides', text: 'Who approved what, when and why, over any range', href: route('reports.approvals'), icon: 'i-solar-shield-check-bold-duotone', tile: 'bg-violet-50 text-violet' },
 ]);
 
 const day = computed(() => formatDateTime(`${props.check.date}T12:00:00+08:00`, 'date').replace(/ \d{4}$/, ''));

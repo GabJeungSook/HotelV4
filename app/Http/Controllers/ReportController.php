@@ -357,6 +357,25 @@ final class ReportController extends Controller
         return Inertia::render('Reports/Guests', ['report' => $report]);
     }
 
+    /** Approvals & overrides (new): every supervisor-approved action over a range, or its CSV. */
+    public function approvals(ReportRequest $request): Response|HttpResponse
+    {
+        $branch = $this->branch($request);
+        $type = (string) $request->query('type', 'all');
+        $report = $this->reports->approvals(
+            $branch->id,
+            $request->businessDate($this->clock->localDate()),
+            (string) $request->query('range', 'day'),
+            in_array($type, ['void', 'cancel', 'transfer', 'shift'], true) ? $type : 'all',
+        );
+
+        if ($request->query('export') === 'csv') {
+            return $this->export->table($this->screens->approvalsTables($report), $this->user($request), $branch->id, null, "approvals-{$report['from']}-{$report['to']}.csv");
+        }
+
+        return Inertia::render('Reports/Approvals', ['report' => $report]);
+    }
+
     /** The branch of this request: the user's own, or for an owner `?branch=`, the opened one, or the first. */
     private function branch(Request $request): Branch
     {
