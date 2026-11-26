@@ -44,6 +44,7 @@ interface Discount {
     value: number;
     all_rates: boolean;
     kiosk_enabled: boolean;
+    needs_id: boolean;
     is_vat_exempt: boolean;
     is_active: boolean;
     rate_ids: number[];
@@ -161,6 +162,7 @@ const discForm = useForm({
     value: 0,
     all_rates: true,
     kiosk_enabled: false,
+    needs_id: false,
     is_vat_exempt: false,
     is_active: true,
     rate_ids: [] as number[],
@@ -175,6 +177,7 @@ function openDiscount(d: Discount | null): void {
     discForm.value = d?.value ?? 0;
     discForm.all_rates = d?.all_rates ?? true;
     discForm.kiosk_enabled = d?.kiosk_enabled ?? false;
+    discForm.needs_id = d?.needs_id ?? false;
     discForm.is_vat_exempt = d?.is_vat_exempt ?? false;
     discForm.is_active = d?.is_active ?? true;
     discForm.rate_ids = [...(d?.rate_ids ?? [])];
@@ -408,7 +411,13 @@ const hourItems = Array.from({ length: 24 }, (_, i) => ({ label: `${i + 1} hrs`,
                     <UFormField v-if="!discForm.all_rates" label="Only these rates" name="rate_ids" :error="discForm.errors.rate_ids">
                         <USelectMenu v-model="discForm.rate_ids" :items="rate_options" value-key="value" multiple placeholder="Pick rates" class="w-full" />
                     </UFormField>
-                    <USwitch v-model="discForm.kiosk_enabled" label="Offered on the kiosk" />
+                    <USwitch v-model="discForm.kiosk_enabled" label="Offered on the kiosk" description="A promo applies automatically. A guest-ticked discount (below) is offered as a toggle on the chosen rate." />
+                    <USwitch
+                        v-if="discForm.kiosk_enabled"
+                        v-model="discForm.needs_id"
+                        label="Guests tick it (needs ID)"
+                        description="Shown on the kiosk as a toggle the guest ticks (senior citizen, PWD). It applies to the bill, then the front desk verifies the ID and can revoke it. Off: the discount applies automatically."
+                    />
                     <USwitch v-model="discForm.is_vat_exempt" label="VAT-exempt (senior citizen, PWD)" />
                     <USwitch v-model="discForm.is_active" label="Active" />
                 </div>

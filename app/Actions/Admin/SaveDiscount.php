@@ -19,7 +19,7 @@ use App\Support\Transaction;
  * is switched off, never deleted. One transaction with its audit_logs row
  * ('discount.created', 'discount.updated').
  *
- * @phpstan-type DiscountData array{name: string, kind: DiscountKind, value: int, all_rates: bool, kiosk_enabled: bool, is_vat_exempt: bool, is_active: bool}
+ * @phpstan-type DiscountData array{name: string, kind: DiscountKind, value: int, all_rates: bool, kiosk_enabled: bool, needs_id: bool, is_vat_exempt: bool, is_active: bool}
  */
 final class SaveDiscount
 {
@@ -73,6 +73,7 @@ final class SaveDiscount
                 'value' => $data['value'],
                 'all_rates' => $data['all_rates'],
                 'kiosk_enabled' => $data['kiosk_enabled'],
+                'needs_id' => $data['needs_id'],
                 'is_vat_exempt' => $data['is_vat_exempt'],
                 'is_active' => $data['is_active'],
                 'rate_ids' => $rateIds,
@@ -95,6 +96,7 @@ final class SaveDiscount
                 'value' => $discount->value,
                 'all_rates' => $discount->all_rates,
                 'kiosk_enabled' => $discount->kiosk_enabled,
+                'needs_id' => $discount->needs_id,
                 'is_vat_exempt' => $discount->is_vat_exempt,
                 'is_active' => $discount->is_active,
                 'rate_ids' => $current,

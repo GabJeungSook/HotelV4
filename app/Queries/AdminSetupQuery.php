@@ -158,6 +158,7 @@ final class AdminSetupQuery
                 'value' => $d->value,
                 'all_rates' => $d->all_rates,
                 'kiosk_enabled' => $d->kiosk_enabled,
+                'needs_id' => $d->needs_id,
                 'is_vat_exempt' => $d->is_vat_exempt,
                 'is_active' => $d->is_active,
                 'rate_ids' => $d->rates->pluck('id')->map(fn ($id): int => (int) $id)->values()->all(),
@@ -262,6 +263,19 @@ final class AdminSetupQuery
                 [PaymentMethod::Cash, PaymentMethod::Gcash, PaymentMethod::Card],
             ),
             'active_discounts' => Discount::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->where('is_active', true)->count(),
+            'discounts' => Discount::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->with('rates')->orderBy('name')->get()
+                ->map(fn (Discount $d): array => [
+                    'id' => $d->id,
+                    'name' => $d->name,
+                    'kind' => $d->kind->value,
+                    'value' => $d->value,
+                    'all_rates' => $d->all_rates,
+                    'kiosk_enabled' => $d->kiosk_enabled,
+                    'needs_id' => $d->needs_id,
+                    'is_vat_exempt' => $d->is_vat_exempt,
+                    'is_active' => $d->is_active,
+                    'rate_ids' => $d->rates->pluck('id')->map(fn ($id): int => (int) $id)->values()->all(),
+                ])->values()->all(),
             'shifts' => ShiftDefinition::query()->withoutGlobalScopes()->where('branch_id', $branch->id)->orderBy('sort_order')->get()
                 ->map(fn (ShiftDefinition $d): array => [
                     'id' => $d->id, 'name' => $d->name, 'starts_at' => substr((string) $d->starts_at, 0, 5), 'ends_at' => substr((string) $d->ends_at, 0, 5), 'is_active' => $d->is_active,

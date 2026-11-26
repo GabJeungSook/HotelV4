@@ -68,7 +68,7 @@ final class KioskController extends Controller
     public function hold(KioskHoldRequest $request, HoldRoom $holdRoom): RedirectResponse
     {
         Gate::authorize('hold', Stay::class);
-        /** @var array{room_type_id: int|string, kind?: string|null, hours?: int|string|null, days?: int|string|null, guest_name: string, guest_mobile?: string|null, idempotency_key: string} $data */
+        /** @var array{room_type_id: int|string, kind?: string|null, hours?: int|string|null, days?: int|string|null, guest_name: string, guest_mobile?: string|null, discount_id?: int|string|null, idempotency_key: string} $data */
         $data = $request->validated();
         $kind = ($data['kind'] ?? null) === 'long_stay' ? StayKind::LongStay : StayKind::Hourly;
         $quantity = $kind === StayKind::LongStay ? (int) ($data['days'] ?? 0) : (int) ($data['hours'] ?? 0);
@@ -81,6 +81,7 @@ final class KioskController extends Controller
             $data['guest_name'],
             $data['guest_mobile'] ?? null,
             $data['idempotency_key'],
+            isset($data['discount_id']) ? (int) $data['discount_id'] : null,
         );
 
         return redirect()->route('kiosk.held', ['code' => $stay->code]);

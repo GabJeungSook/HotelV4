@@ -13,6 +13,7 @@ use App\Actions\Stays\CheckOutGuest;
 use App\Actions\Stays\ConfirmKioskHold;
 use App\Actions\Stays\ExtendStay;
 use App\Actions\Stays\ReleaseKioskHold;
+use App\Actions\Stays\ResolveHeldDiscount;
 use App\Actions\Stays\TakePayment;
 use App\Actions\Stays\TransferRoom;
 use App\Actions\Stays\VoidLine;
@@ -169,6 +170,20 @@ final class StayController extends Controller
         $request->session()->flash(self::SLIP_KEY, $checkedIn->id);
 
         return redirect()->route('stays.show', $checkedIn);
+    }
+
+    /** Verify or revoke a discount the guest ticked at the kiosk, on the confirm screen (7). */
+    public function resolveDiscount(Request $request, Stay $stay, ResolveHeldDiscount $resolve): RedirectResponse
+    {
+        Gate::authorize('update', $stay);
+        $verified = $request->boolean('verified');
+        $resolve->handle($this->user($request), $stay, $verified);
+        Inertia::flash('toast', [
+            'type' => $verified ? 'success' : 'info',
+            'message' => $verified ? 'ID verified. The discount stays on the bill.' : 'Discount revoked. The bill is now at the plain rate.',
+        ]);
+
+        return redirect()->route('stays.confirm', $stay);
     }
 
     /** "Release room" on the holds sheet (5) or on 7, after the confirm dialog. */

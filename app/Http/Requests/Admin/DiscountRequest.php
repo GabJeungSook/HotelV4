@@ -23,6 +23,7 @@ final class DiscountRequest extends FormRequest
             'value' => ['required', 'integer', 'min:1', 'max:100000000'],
             'all_rates' => ['required', 'boolean'],
             'kiosk_enabled' => ['required', 'boolean'],
+            'needs_id' => ['required', 'boolean'],
             'is_vat_exempt' => ['required', 'boolean'],
             'is_active' => ['required', 'boolean'],
             'rate_ids' => ['array'],

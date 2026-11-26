@@ -1,7 +1,7 @@
 <!-- Mockup 46 -->
 <script setup lang="ts">
 import type { UseFormSubmitOptions } from '@inertiajs/core';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import MoneyInput from '@/Components/MoneyInput.vue';
@@ -77,10 +77,24 @@ interface Shift {
     is_active: boolean;
 }
 
+interface Discount {
+    id: number;
+    name: string;
+    kind: 'fixed' | 'percent';
+    value: number;
+    all_rates: boolean;
+    kiosk_enabled: boolean;
+    needs_id: boolean;
+    is_vat_exempt: boolean;
+    is_active: boolean;
+    rate_ids: number[];
+}
+
 const props = defineProps<{
     branch: Settings;
     methods: { value: string; label: string }[];
     active_discounts: number;
+    discounts: Discount[];
     shifts: Shift[];
     lists: { key: string; label: string; rows: ListRow[] }[];
 }>();
@@ -284,6 +298,23 @@ function saveReason(): void {
 
     reasonForm.submit(row ? 'put' : 'post', row ? route('admin.lists.update', { list: key, reason: row.id }) : route('admin.lists.store', { list: key }), done(() => (reasonOpen.value = false)));
 }
+
+// Discounts ----------------------------------------------------------------------------------
+const togglingId = ref<number | null>(null);
+
+function discountValue(d: Discount): string {
+    return d.kind === 'percent' ? `${d.value}%` : `${formatMoney(d.value, 'tile')} off`;
+}
+
+/** Flip a discount on or off in place; the full discount is sent so the audited action records only the active change. New check-ins use it; open stays keep their price. */
+function toggleDiscount(d: Discount, on: boolean): void {
+    togglingId.value = d.id;
+    router.put(
+        route('admin.discounts.update', d.id),
+        { name: d.name, kind: d.kind, value: d.value, all_rates: d.all_rates, kiosk_enabled: d.kiosk_enabled, needs_id: d.needs_id, is_vat_exempt: d.is_vat_exempt, is_active: on, rate_ids: d.rate_ids },
+        { preserveScroll: true, onFinish: () => (togglingId.value = null) },
+    );
+}
 </script>
 
 <template>
@@ -334,6 +365,29 @@ function saveReason(): void {
                     </div>
                 </dl>
                 <UButton class="mt-2" color="neutral" variant="outline" size="sm" icon="i-solar-add-square-linear" label="Add shift" @click="openShift(null)" />
+            </section>
+
+            <section class="rounded-card border border-default bg-default px-[18px] py-4" data-group="discounts">
+                <div class="mb-2 flex items-center">
+                    <h3 class="text-[15px] font-semibold text-highlighted">Discounts</h3>
+                    <UButton class="ms-auto" color="neutral" variant="ghost" size="sm" icon="i-solar-pen-bold-duotone" label="Edit in Rates" :to="route('admin.rates')" />
+                </div>
+                <dl v-if="discounts.length" class="flex flex-col">
+                    <div v-for="d in discounts" :key="d.id" class="flex items-center justify-between gap-3 border-b border-default py-2 text-[13px] last:border-b-0">
+                        <dt class="flex flex-wrap items-center gap-1.5">
+                            <span class="font-semibold" :class="d.is_active ? 'text-highlighted' : 'text-dimmed'">{{ d.name }}</span>
+                            <span class="num text-muted">{{ discountValue(d) }}</span>
+                            <StatusLabel v-if="d.kiosk_enabled && d.needs_id" tone="primary" label="Kiosk · guest tick" />
+                            <StatusLabel v-else-if="d.kiosk_enabled" tone="primary" label="Kiosk · auto" />
+                            <StatusLabel v-if="d.is_vat_exempt" tone="info" label="VAT-exempt" />
+                        </dt>
+                        <dd>
+                            <USwitch :model-value="d.is_active" :disabled="togglingId === d.id" :aria-label="`${d.name} active`" @update:model-value="(v) => toggleDiscount(d, v === true)" />
+                        </dd>
+                    </div>
+                </dl>
+                <EmptyState v-else compact title="No discounts yet." />
+                <p class="mt-2.5 text-[12px] text-muted">Turn a discount on or off here. Set its amount or percent, rates and kiosk options in Rates.</p>
             </section>
         </div>
 

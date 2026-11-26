@@ -28,10 +28,11 @@ class DiscountSeeder extends Seeder
             Rate::query()->where('branch_id', $branchId)->where('stay_kind', StayKind::Hourly)->where('hours', 6)->pluck('id'),
         );
 
+        // Senior citizen and PWD: guest-ticked at the kiosk, verified by ID at the desk.
         foreach (['Senior citizen', 'PWD'] as $name) {
             Discount::query()->create([
                 'branch_id' => $branchId, 'name' => $name, 'kind' => DiscountKind::Percent, 'value' => 20,
-                'all_rates' => true, 'is_vat_exempt' => true,
+                'all_rates' => true, 'kiosk_enabled' => true, 'needs_id' => true, 'is_vat_exempt' => true,
             ]);
         }
     }

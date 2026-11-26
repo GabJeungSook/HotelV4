@@ -22,7 +22,7 @@ class Discount extends Model
     /** @use HasFactory<DiscountFactory> */
     use HasFactory;
 
-    protected $fillable = ['branch_id', 'name', 'kind', 'value', 'all_rates', 'kiosk_enabled', 'is_vat_exempt', 'is_active'];
+    protected $fillable = ['branch_id', 'name', 'kind', 'value', 'all_rates', 'kiosk_enabled', 'needs_id', 'is_vat_exempt', 'is_active'];
 
     protected function casts(): array
     {
@@ -31,6 +31,7 @@ class Discount extends Model
             'value' => 'integer',
             'all_rates' => 'boolean',
             'kiosk_enabled' => 'boolean',
+            'needs_id' => 'boolean',
             'is_vat_exempt' => 'boolean',
             'is_active' => 'boolean',
             'created_at' => 'immutable_datetime',

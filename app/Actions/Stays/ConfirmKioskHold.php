@@ -7,6 +7,7 @@ namespace App\Actions\Stays;
 use App\Enums\PaymentMethod;
 use App\Enums\RoomStatus;
 use App\Enums\StayState;
+use App\Exceptions\ActionRefused;
 use App\Exceptions\HoldExpired;
 use App\Exceptions\RoomNotAvailable;
 use App\Models\Branch;
@@ -94,6 +95,11 @@ final class ConfirmKioskHold
 
         if ($room->status !== RoomStatus::Available || ! $room->is_active) {
             throw RoomNotAvailable::room($room->number, $room->id);
+        }
+
+        // A discount the guest ticked at the kiosk must be checked (ID verified or revoked) first.
+        if ($locked->discount_unverified) {
+            throw ActionRefused::because('Check the guest’s ID for the discount they claimed, or revoke it, before taking payment.');
         }
 
         $branch = Branch::query()->findOrFail($locked->branch_id);

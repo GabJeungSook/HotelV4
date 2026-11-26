@@ -41,6 +41,7 @@ Route::middleware(['auth', 'pin.set', 'role:frontdesk,supervisor'])->group(funct
         // Kiosk holds (5, 7), APP_FLOW §4.6 and §8.1.
         Route::get('/stays/{stay}/confirm', [StayController::class, 'confirm'])->name('stays.confirm');
         Route::post('/stays/{stay}/confirm', [StayController::class, 'confirmStore'])->name('stays.confirm.store');
+        Route::post('/stays/{stay}/confirm/discount', [StayController::class, 'resolveDiscount'])->name('stays.confirm.discount');
         Route::post('/stays/{stay}/release', [StayController::class, 'release'])->name('stays.release');
         Route::post('/stays/{stay}/charges', [StayController::class, 'charge'])->name('stays.charge');
         Route::post('/stays/{stay}/payments', [StayController::class, 'pay'])->name('stays.pay');

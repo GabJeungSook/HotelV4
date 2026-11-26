@@ -95,7 +95,7 @@ final class KioskScreenQuery
             return null;
         }
 
-        ['quote' => $quote, 'discount' => $discount] = $this->offer->quote($branch->id, $card, $type->id, $kind, $quantity, $this->clock->now(), $room->id, $room->floor_id);
+        ['quote' => $quote, 'discount' => $discount, 'selectable' => $selectable] = $this->offer->quote($branch->id, $card, $type->id, $kind, $quantity, $this->clock->now(), $room->id, $room->floor_id);
         $label = self::stayLabel($kind, $quantity);
 
         return [
@@ -105,11 +105,20 @@ final class KioskScreenQuery
             'quantity' => $quantity,
             'stay_label' => $label,
             'room_amount' => $quote->roomAmount->centavos(),
+            // The promo that applies by itself (no ID). Null when none is offered on this rate.
             'discount' => $discount === null ? null : [
                 'name' => $discount->name,
                 'amount' => $quote->discountAmount->centavos(),
                 'text' => "{$discount->name} discount for {$quantity}-".($kind === StayKind::LongStay ? 'day' : 'hour').' stays.',
             ],
+            // Guest-ticked discounts allowed on this rate (senior citizen, PWD): each with the bill
+            // it would produce, so the kiosk can offer a toggle and show the effect with no round-trip.
+            'selectable' => array_map(fn (array $s): array => [
+                'id' => (int) $s['discount']->id,
+                'name' => $s['discount']->name,
+                'discount_amount' => $s['quote']->discountAmount->centavos(),
+                'total' => $s['quote']->totalToCollect()->centavos(),
+            ], $selectable),
             'deposit' => ['name' => $branch->deposit_name, 'amount' => $quote->depositAmount->centavos()],
             'total' => $quote->totalToCollect()->centavos(),
         ];

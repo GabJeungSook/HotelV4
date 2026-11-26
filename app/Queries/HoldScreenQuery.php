@@ -107,6 +107,9 @@ final class HoldScreenQuery
                 'floor' => $floor === null ? '' : $floor->number.'F',
                 'stay' => $this->screens->optionLabel($stay),
                 'discount' => $discountText,
+                // A guest-ticked discount claimed at the kiosk, pending an ID check at the desk.
+                'discount_name' => $discount?->name,
+                'discount_unverified' => $stay->discount_unverified && $discount !== null,
                 'expires_at' => $stay->hold_expires_at?->toIso8601String(),
                 'expired' => $stay->state !== StayState::Held || $stay->hold_expires_at === null || ! $stay->hold_expires_at->greaterThan($now),
                 'state' => $stay->state->value,

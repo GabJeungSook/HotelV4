@@ -32,6 +32,8 @@ interface Hold {
     floor: string;
     stay: string;
     discount: string;
+    discount_name: string | null;
+    discount_unverified: boolean;
     expires_at: string | null;
     expired: boolean;
     state: string;
@@ -80,8 +82,13 @@ const changeMode = computed({
     set: (v: string) => (form.keep_change = v === 'keep'),
 });
 
-const ready = computed(() => !expired.value && props.total !== null && (isCash.value ? form.tendered >= total.value : form.reference_no.trim() !== ''));
+const ready = computed(() => !expired.value && !props.hold.discount_unverified && props.total !== null && (isCash.value ? form.tendered >= total.value : form.reference_no.trim() !== ''));
 const error = computed(() => (flash.value.error && !refused.value ? flash.value.error.message : undefined));
+
+/** The front desk verifies the claimed PWD/Senior ID, or revokes the discount (re-prices the hold). */
+function resolveDiscount(verified: boolean): void {
+    router.post(route('stays.confirm.discount', props.hold.id), { verified }, { preserveScroll: true });
+}
 
 function submit(): void {
     if (!ready.value) {
@@ -132,6 +139,22 @@ async function release(): Promise<void> {
         />
         <UAlert v-else-if="error" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" class="mb-4" :description="error" />
         <UAlert v-if="missing" color="error" variant="subtle" icon="i-solar-danger-triangle-bold-duotone" class="mb-4" :title="missing" description="Ask the admin to add the rate. The app will not check in a guest without a price." />
+
+        <div v-if="hold.discount_unverified && !expired" class="mb-4 rounded-card border border-warn-line bg-warn-50 p-4" data-test="discount-verify">
+            <div class="flex items-start gap-3">
+                <UIcon name="i-solar-shield-warning-bold-duotone" class="mt-0.5 size-5 shrink-0 text-warn" aria-hidden="true" />
+                <div class="min-w-0 flex-1">
+                    <b class="text-[14px] font-semibold text-highlighted">Check the guest’s {{ hold.discount_name }} ID</b>
+                    <p class="mt-0.5 text-[13px] text-muted">
+                        The guest claimed the {{ hold.discount_name }} discount at the kiosk. Verify the ID before taking payment, or revoke it to charge the plain rate.
+                    </p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <UButton size="sm" icon="i-solar-check-circle-bold-duotone" label="ID verified — keep discount" data-test="discount-verify-ok" @click="resolveDiscount(true)" />
+                        <UButton size="sm" color="neutral" variant="outline" icon="i-solar-close-circle-linear" label="No valid ID — revoke" data-test="discount-revoke" @click="resolveDiscount(false)" />
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <form class="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1" @submit.prevent="submit">
             <section class="rounded-card border border-default bg-default p-5">

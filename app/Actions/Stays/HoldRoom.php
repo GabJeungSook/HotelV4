@@ -51,7 +51,7 @@ final class HoldRoom
         private readonly Transaction $transaction,
     ) {}
 
-    public function handle(User $kiosk, int $roomTypeId, StayKind $kind, int $quantity, string $guestName, ?string $guestMobile, string $idempotencyKey): Stay
+    public function handle(User $kiosk, int $roomTypeId, StayKind $kind, int $quantity, string $guestName, ?string $guestMobile, string $idempotencyKey, ?int $selectedDiscountId = null): Stay
     {
         $existing = $this->replay($idempotencyKey);
 
@@ -75,7 +75,7 @@ final class HoldRoom
         }
 
         try {
-            return $this->transaction->run(fn (): Stay => $this->hold((int) $kiosk->branch_id, $roomTypeId, $kind, $quantity, $name, $mobile, $idempotencyKey));
+            return $this->transaction->run(fn (): Stay => $this->hold((int) $kiosk->branch_id, $roomTypeId, $kind, $quantity, $name, $mobile, $idempotencyKey, $selectedDiscountId));
         } catch (QueryException $e) {
             if (DuplicateKey::on($e, 'stays_idempotency_unique')) {
                 return $this->replay($idempotencyKey) ?? throw $e;
@@ -85,7 +85,7 @@ final class HoldRoom
         }
     }
 
-    private function hold(int $branchId, int $roomTypeId, StayKind $kind, int $quantity, string $name, ?string $mobile, string $idempotencyKey): Stay
+    private function hold(int $branchId, int $roomTypeId, StayKind $kind, int $quantity, string $name, ?string $mobile, string $idempotencyKey, ?int $selectedDiscountId = null): Stay
     {
         $branch = Branch::query()->withoutGlobalScopes()->findOrFail($branchId);
         $kindEnabled = $kind === StayKind::LongStay ? $branch->long_stay_enabled : $branch->hourly_enabled;
@@ -122,7 +122,7 @@ final class HoldRoom
             throw RoomTaken::room($room->number, $room->id);
         }
 
-        ['quote' => $quote, 'discount' => $discount] = $this->offer->quote($branchId, $card, $type->id, $kind, $quantity, $now, $room->id, $room->floor_id);
+        ['quote' => $quote, 'discount' => $discount] = $this->offer->quote($branchId, $card, $type->id, $kind, $quantity, $now, $room->id, $room->floor_id, $selectedDiscountId);
         $code = $this->numbers->next($branch);
 
         try {
@@ -140,6 +140,8 @@ final class HoldRoom
                 'nights' => $kind === StayKind::Overnight ? $quantity : null,
                 'days' => $kind === StayKind::LongStay ? $quantity : null,
                 'discount_id' => $discount?->id,
+                // A guest-ticked (needs-ID) discount is unverified until the desk checks the ID.
+                'discount_unverified' => $discount !== null && $discount->needs_id,
                 'quoted_amount' => $quote->netRoomAmount(),
                 'hold_expires_at' => $expiresAt,
                 // The latest the stay could end; ConfirmKioskHold sets it again from the check-in.

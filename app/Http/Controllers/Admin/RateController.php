@@ -68,7 +68,7 @@ final class RateController extends AdminController
         return $request->filled('amount') && $request->integer('amount') > 0 ? Money::ofCentavos($request->integer('amount')) : null;
     }
 
-    /** @return array{name: string, kind: DiscountKind, value: int, all_rates: bool, kiosk_enabled: bool, is_vat_exempt: bool, is_active: bool} */
+    /** @return array{name: string, kind: DiscountKind, value: int, all_rates: bool, kiosk_enabled: bool, needs_id: bool, is_vat_exempt: bool, is_active: bool} */
     private function discountData(Request $request): array
     {
         return [
@@ -77,6 +77,7 @@ final class RateController extends AdminController
             'value' => $request->integer('value'),
             'all_rates' => $request->boolean('all_rates'),
             'kiosk_enabled' => $request->boolean('kiosk_enabled'),
+            'needs_id' => $request->boolean('needs_id'),
             'is_vat_exempt' => $request->boolean('is_vat_exempt'),
             'is_active' => $request->boolean('is_active'),
         ];

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Stays\ConfirmKioskHold;
 use App\Actions\Stays\HoldRoom;
 use App\Actions\Stays\ReleaseKioskHold;
+use App\Actions\Stays\ResolveHeldDiscount;
 use App\Actions\Stays\ReserveRoom;
 use App\Enums\DepositType;
 use App\Enums\LineKind;
@@ -98,14 +99,52 @@ it('kiosk cannot send a price: the hold is priced from the rate table whatever i
         'price' => 100,
         'amount' => 100,
         'room_id' => Hotel::room('3A')->id,
-        'discount_id' => Hotel::discount('Senior citizen')->id,
     ])->assertRedirect();
 
     $stay = Stay::query()->sole();
 
     expect($stay->quoted_amount?->centavos())->toBe(40000)
         ->and($stay->room->number)->toBe('201')
-        ->and($stay->discount_id)->toBe(Hotel::discount('Promo')->id);
+        ->and($stay->discount_id)->toBe(Hotel::discount('Promo')->id)
+        ->and($stay->discount_unverified)->toBeFalse();
+});
+
+it('applies the senior / PWD discount the guest ticked, flagged unverified for the front desk', function (): void {
+    $this->actingAs($this->kiosk)->post('/kiosk/hold', [
+        'room_type_id' => $this->deluxe->id,
+        'hours' => 6,
+        'guest_name' => 'Carlo Dumandan',
+        'idempotency_key' => (string) Str::uuid(),
+        'discount_id' => Hotel::discount('Senior citizen')->id,
+    ])->assertRedirect();
+
+    $stay = Stay::query()->sole();
+
+    // Senior citizen 20% off ₱450 = ₱360 (replaces the auto promo), pending ID at the desk.
+    expect($stay->discount_id)->toBe(Hotel::discount('Senior citizen')->id)
+        ->and($stay->discount_unverified)->toBeTrue()
+        ->and($stay->quoted_amount?->centavos())->toBe(36000);
+});
+
+it('ignores a discount the guest cannot pick at the kiosk, keeping the auto promo', function (): void {
+    // A discount that is not kiosk-selectable (here, limited to a rate the Deluxe 6h stay is not).
+    $other = Hotel::discount('Senior citizen');
+    $other->update(['all_rates' => false]);
+    $other->rates()->sync([]); // allowed on no rate, so not eligible for this stay
+
+    $this->actingAs($this->kiosk)->post('/kiosk/hold', [
+        'room_type_id' => $this->deluxe->id,
+        'hours' => 6,
+        'guest_name' => 'Carlo Dumandan',
+        'idempotency_key' => (string) Str::uuid(),
+        'discount_id' => $other->id,
+    ])->assertRedirect();
+
+    $stay = Stay::query()->sole();
+
+    expect($stay->discount_id)->toBe(Hotel::discount('Promo')->id)
+        ->and($stay->discount_unverified)->toBeFalse()
+        ->and($stay->quoted_amount?->centavos())->toBe(40000);
 });
 
 it('hold blocks the room for walk-in: a check-in to a held room is refused as room just taken', function (): void {
@@ -169,6 +208,50 @@ it('confirms a hold: the stay is checked in from now with the room line, discoun
         ->and($payment->change_amount?->centavos())->toBe(40000)
         ->and(app(StayQuery::class)->balanceDue($stay->id)->isZero())->toBeTrue()
         ->and(app(StayQuery::class)->depositHeld($stay->id, DepositType::Key)->centavos())->toBe(20000);
+});
+
+it('refuses to confirm a hold whose kiosk discount has not been verified at the desk', function (): void {
+    $stay = app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, StayKind::Hourly, 6, 'Carlo Dumandan', '09175550142', (string) Str::uuid(), Hotel::discount('Senior citizen')->id);
+    Hotel::openShift();
+    $before = kioskLedger();
+
+    expect($stay->discount_unverified)->toBeTrue();
+    expect(fn () => app(ConfirmKioskHold::class)->handle(Hotel::frontdesk(), $stay, PaymentMethod::Cash, (string) Str::uuid(), Money::ofCentavos(100000)))
+        ->toThrow(ActionRefused::class);
+    expect(kioskLedger())->toBe($before);
+});
+
+it('verifies the ID: the claimed discount stays and the guest checks in with it', function (): void {
+    $stay = app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, StayKind::Hourly, 6, 'Carlo Dumandan', '09175550142', (string) Str::uuid(), Hotel::discount('Senior citizen')->id);
+    Hotel::openShift();
+
+    app(ResolveHeldDiscount::class)->handle(Hotel::frontdesk(), $stay, true);
+
+    expect($stay->fresh()?->discount_unverified)->toBeFalse()
+        ->and($stay->fresh()?->discount_id)->toBe(Hotel::discount('Senior citizen')->id);
+
+    app(ConfirmKioskHold::class)->handle(Hotel::frontdesk(), $stay, PaymentMethod::Cash, (string) Str::uuid(), Money::ofCentavos(100000));
+
+    // Senior citizen 20% off ₱450 = ₱90 off; the discount line is recorded.
+    expect(FolioLine::query()->where('stay_id', $stay->id)->orderBy('id')->pluck('amount')->map(fn ($m) => $m->centavos())->all())->toBe([45000, -9000])
+        ->and(FolioLine::query()->where('stay_id', $stay->id)->where('kind', LineKind::Discount)->value('description'))->toBe('Senior citizen');
+});
+
+it('revokes the discount: the hold is re-priced at the plain rate and no discount is charged', function (): void {
+    $stay = app(HoldRoom::class)->handle($this->kiosk, $this->deluxe->id, StayKind::Hourly, 6, 'Carlo Dumandan', '09175550142', (string) Str::uuid(), Hotel::discount('Senior citizen')->id);
+    Hotel::openShift();
+
+    app(ResolveHeldDiscount::class)->handle(Hotel::frontdesk(), $stay, false);
+
+    expect($stay->fresh()?->discount_id)->toBeNull()
+        ->and($stay->fresh()?->discount_unverified)->toBeFalse()
+        ->and($stay->fresh()?->quoted_amount?->centavos())->toBe(45000);
+
+    app(ConfirmKioskHold::class)->handle(Hotel::frontdesk(), $stay, PaymentMethod::Cash, (string) Str::uuid(), Money::ofCentavos(100000));
+
+    // The plain ₱450 room line, with no discount line.
+    expect(FolioLine::query()->where('stay_id', $stay->id)->where('kind', LineKind::Discount)->exists())->toBeFalse()
+        ->and(FolioLine::query()->where('stay_id', $stay->id)->where('kind', LineKind::Room)->value('amount')?->centavos())->toBe(45000);
 });
 
 it('confirm after expiry refused: HoldExpired, the stay is expired and nothing is written', function (): void {

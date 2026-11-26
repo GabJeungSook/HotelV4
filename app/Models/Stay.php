@@ -30,7 +30,7 @@ class Stay extends Model
     protected $fillable = [
         'branch_id', 'code', 'state', 'source', 'room_id', 'room_type_id',
         'guest_name', 'guest_mobile', 'plate_number',
-        'stay_kind', 'hours', 'nights', 'days', 'discount_id', 'quoted_amount',
+        'stay_kind', 'hours', 'nights', 'days', 'discount_id', 'discount_unverified', 'quoted_amount',
         'arrival_at', 'hold_expires_at', 'checked_in_at', 'expected_checkout_at', 'checked_out_at',
         'cycle_hours_used', 'checkin_shift_id', 'checkout_shift_id', 'checked_in_by', 'checked_out_by',
         'closed_reason', 'idempotency_key',
@@ -42,6 +42,7 @@ class Stay extends Model
             'state' => StayState::class,
             'source' => StaySource::class,
             'stay_kind' => StayKind::class,
+            'discount_unverified' => 'boolean',
             'quoted_amount' => Money::class,
             'arrival_at' => 'immutable_datetime',
             'hold_expires_at' => 'immutable_datetime',

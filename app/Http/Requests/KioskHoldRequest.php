@@ -28,6 +28,9 @@ final class KioskHoldRequest extends FormRequest
             'days' => ['nullable', 'required_if:kind,long_stay', 'integer', 'min:1', 'max:31'],
             'guest_name' => ['required', 'string', 'max:80', 'regex:/(?:\p{L}.*){3}/u'],
             'guest_mobile' => ['nullable', 'string', 'regex:/^09\d{9}$/'],
+            // A discount the guest ticked at the kiosk (senior citizen, PWD). Validated and applied
+            // server-side: it is honoured only when it is kiosk-selectable and allowed on the rate.
+            'discount_id' => ['nullable', 'integer'],
             'idempotency_key' => ['required', 'uuid'],
         ];
     }
