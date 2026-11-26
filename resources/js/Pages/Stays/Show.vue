@@ -46,6 +46,7 @@ const props = defineProps<{
         guest_mobile: string | null;
         plate_number: string | null;
         room: string | null;
+        room_id: number | null;
         type: string;
         checked_in_at: string | null;
         expected_checkout_at: string | null;
@@ -219,6 +220,7 @@ function lineMenu(line: Line) {
             <span class="text-muted">{{ stay.code }}</span>
             <template v-if="stay.guest_mobile"><span class="text-dimmed">·</span><span class="text-default">{{ stay.guest_mobile }}</span></template>
             <template v-if="stay.plate_number"><span class="text-dimmed">·</span><span class="text-default">{{ stay.plate_number }}</span></template>
+            <UButton v-if="stay.room_id" class="ms-auto" color="neutral" variant="ghost" size="xs" icon="i-solar-history-linear" label="Room history" @click="router.visit(route('rooms.history', stay.room_id))" />
         </div>
 
         <div class="grid grid-cols-[minmax(0,1fr)_300px] gap-4 max-[900px]:grid-cols-1">

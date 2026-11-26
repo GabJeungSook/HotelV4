@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { formatDateTime, formatDuration } from '@/Composables/useDateTime';
 import { formatMoney } from '@/Composables/useMoney';
@@ -134,6 +135,10 @@ function open(): void {
         emit('select', props.room);
     }
 }
+
+function history(): void {
+    router.visit(route('rooms.history', props.room.id));
+}
 </script>
 
 <template>
@@ -171,9 +176,21 @@ function open(): void {
             {{ timeText }}
         </td>
         <td class="px-2 py-2.5 text-right whitespace-nowrap num" :class="room.status === 'blocked' ? 'text-muted' : ''">{{ room.balance ? formatMoney(room.balance) : '' }}</td>
-        <td class="w-20 py-2.5 ps-2 pe-5 text-right whitespace-nowrap">
-            <span v-if="room.status === 'vacant'" class="font-medium text-primary">Check in</span>
-            <span v-else-if="actionable" class="text-muted" aria-hidden="true">›</span>
+        <td class="w-24 py-2.5 ps-2 pe-5 text-right whitespace-nowrap">
+            <div class="flex items-center justify-end gap-2">
+                <button
+                    type="button"
+                    class="hm-focus rounded p-0.5 text-muted opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 hover:text-primary"
+                    :aria-label="`Room ${room.number} history`"
+                    title="Room history"
+                    @click.stop="history"
+                    @keydown.enter.stop="history"
+                >
+                    <UIcon name="i-solar-history-bold-duotone" class="size-4" />
+                </button>
+                <span v-if="room.status === 'vacant'" class="font-medium text-primary">Check in</span>
+                <span v-else-if="actionable" class="text-muted" aria-hidden="true">›</span>
+            </div>
         </td>
     </tr>
 </template>

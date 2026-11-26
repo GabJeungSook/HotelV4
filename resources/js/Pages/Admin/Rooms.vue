@@ -254,7 +254,12 @@ const canAddRoom = computed(() => props.floors.length > 0 && props.types.some((t
                                 <StatusLabel v-if="!r.is_active" class="ms-1" tone="neutral" label="Off" />
                             </td>
                             <td>{{ r.is_kiosk_enabled ? 'Yes' : '—' }}</td>
-                            <td class="text-right"><UButton color="neutral" variant="ghost" size="sm" icon="i-solar-pen-2-linear" label="Edit" @click="openRoom(r)" /></td>
+                            <td class="text-right">
+                                <div class="flex items-center justify-end gap-1">
+                                    <UButton color="neutral" variant="ghost" size="sm" icon="i-solar-history-linear" label="History" @click="router.visit(route('rooms.history', r.id))" />
+                                    <UButton color="neutral" variant="ghost" size="sm" icon="i-solar-pen-2-linear" label="Edit" @click="openRoom(r)" />
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

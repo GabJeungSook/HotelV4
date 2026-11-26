@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\RoomHistoryController;
 use App\Http\Controllers\WelcomeController;
 use App\Models\User;
 use App\Support\Clock;
@@ -42,6 +43,13 @@ Route::middleware(['auth', 'pin.set'])->group(function (): void {
     Route::post('/notifications/seen', [NotificationController::class, 'seen'])
         ->middleware('role:frontdesk,supervisor,backoffice,admin,owner')
         ->name('notifications.seen');
+
+    // All-time room history (new screen): reachable from the board and Admin → Rooms. Branch is
+    // enforced by BranchScope on the bound room plus RoomPolicy::viewHistory.
+    Route::get('/rooms/{room}/history', [RoomHistoryController::class, 'show'])
+        ->whereNumber('room')
+        ->middleware('role:frontdesk,supervisor,admin,owner')
+        ->name('rooms.history');
 });
 
 // Component gallery (ROADMAP phase 1), local only: every Nuxt UI component we use, every
