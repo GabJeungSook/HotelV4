@@ -165,8 +165,8 @@ const stayText = (kind: string, q: number | null) => (q === null ? '' : formatSt
             </section>
 
             <div class="flex flex-col gap-4">
-                <section class="rounded-card border border-default bg-default px-5 py-[18px]" data-leaving>
-                    <div class="mb-3.5 flex min-h-[30px] items-center gap-2.5">
+                <section class="rounded-card border border-default bg-default px-5 pt-4 pb-[18px]" data-leaving>
+                    <div class="mb-3.5 flex items-center gap-2.5">
                         <h2 class="text-[14.5px] font-semibold text-highlighted">Leaving soon</h2>
                         <span class="ms-auto text-xs text-muted">next {{ today.due_soon_minutes }} min</span>
                     </div>
@@ -184,8 +184,8 @@ const stayText = (kind: string, q: number | null) => (q === null ? '' : formatSt
                     </ul>
                     <p v-else class="text-[12.5px] text-muted">Nobody is due out in the next {{ today.due_soon_minutes }} minutes.</p>
                 </section>
-                <section class="rounded-card border border-default bg-default px-5 py-[18px]" data-arriving>
-                    <div class="mb-3.5 flex min-h-[30px] items-center gap-2.5">
+                <section class="rounded-card border border-default bg-default px-5 pt-4 pb-[18px]" data-arriving>
+                    <div class="mb-3.5 flex items-center gap-2.5">
                         <h2 class="text-[14.5px] font-semibold text-highlighted">Arriving</h2>
                         <span class="ms-auto text-xs text-muted">today</span>
                     </div>
