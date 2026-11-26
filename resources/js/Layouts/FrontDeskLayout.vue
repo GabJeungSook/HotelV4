@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue';
 import ConnectionBar from '@/Components/ConnectionBar.vue';
 import OverdueBar from '@/Components/OverdueBar.vue';
 import PinSwitch from '@/Components/PinSwitch.vue';
+import ShiftOperators from '@/Components/ShiftOperators.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import { useConnection } from '@/Composables/useConnection';
 import { formatDateTime, formatDuration } from '@/Composables/useDateTime';
@@ -110,6 +111,8 @@ function signOut(): void {
         @switch-user="switching = true"
     >
         <template #status>
+            <ShiftOperators class="max-lg:hidden" />
+            <span v-if="shiftChip && shared.shift?.members?.length" class="mx-0.5 h-4 w-px bg-(--hm-line-strong) max-lg:hidden" aria-hidden="true" />
             <StatusLabel v-if="shiftChip" :tone="shiftChip.tone" :label="shiftChip.label" />
             <UButton v-if="props.shift ? props.shift.closable : canClose" color="neutral" variant="outline" size="sm" label="Close shift" data-close-shift @click="closeShift" />
         </template>

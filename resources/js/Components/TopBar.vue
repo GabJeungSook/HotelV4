@@ -54,8 +54,8 @@ function search(): void {
                 placeholder="Search rooms or guests"
                 aria-label="Search rooms or guests"
                 size="md"
-                class="w-[200px]"
-                :ui="{ base: 'h-[34px] ring-default text-[12.5px] pe-14', leadingIcon: 'size-[15px] text-faint', trailing: 'pe-1.5' }"
+                class="w-[280px]"
+                :ui="{ base: 'h-[34px] ring-default text-[12.5px] pe-16', leadingIcon: 'size-[15px] text-faint', trailing: 'pe-1.5' }"
             >
                 <template #trailing>
                     <kbd class="rounded-[5px] border border-default bg-muted px-1.5 text-[10.5px] leading-[18px] font-medium text-muted">Ctrl K</kbd>
