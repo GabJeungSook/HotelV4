@@ -8,6 +8,7 @@ import PeriodSegments from '@/Components/PeriodSegments.vue';
 import PersonAvatar from '@/Components/PersonAvatar.vue';
 import type { StatCardProps } from '@/Components/StatCard.vue';
 import StaysTimeline, { type TimelineFloor, type TimelineRoom } from '@/Components/StaysTimeline.vue';
+import StatCard from '@/Components/StatCard.vue';
 import StatCards from '@/Components/StatCards.vue';
 import StatusLabel from '@/Components/StatusLabel.vue';
 import { formatDateTime, formatDuration, formatStayLength } from '@/Composables/useDateTime';
@@ -77,9 +78,15 @@ const cards = computed<StatCardProps[]>(() => {
             sub: c.unpaid ? `Room ${list(props.today.unpaid_rooms, 2)}` : 'all settled',
             to: props.today.unpaid_stay_id ? route('stays.show', props.today.unpaid_stay_id) : undefined,
         },
-        { label: 'Kiosk holds', value: c.holds, sub: holdLeft.value !== null ? `${formatDuration(holdLeft.value, 'countdown')} left` : 'none', to: route('board') },
     ];
 });
+// Kiosk holds sits in the right column, above Leaving soon, so the two line up.
+const kioskCard = computed<StatCardProps>(() => ({
+    label: 'Kiosk holds',
+    value: props.today.counts.holds,
+    sub: holdLeft.value !== null ? `${formatDuration(holdLeft.value, 'countdown')} left` : 'none',
+    to: route('board'),
+}));
 
 /** The timeline shows one floor at a time (segments) and can narrow to one kind of room. */
 const floorItems = computed(() => props.today.timeline.map((f) => ({ value: f.label, label: f.label })));
@@ -139,8 +146,9 @@ const stayText = (kind: string, q: number | null) => (q === null ? '' : formatSt
             <UButton :to="route('board')" color="neutral" variant="outline" icon="i-solar-bed-bold-duotone" label="Room board" />
             <UButton :to="route('board', { tab: 'vacant' })" icon="i-solar-add-square-linear" label="Walk-in check-in" />
         </PageHeader>
-        <StatCards :items="cards" />
         <div class="mt-4 grid grid-cols-1 items-start gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_300px]">
+          <div class="flex min-w-0 flex-col gap-4">
+            <StatCards :items="cards" />
             <section class="min-w-0 overflow-hidden rounded-card border border-default bg-default" data-rooms-today>
                 <div class="flex min-h-[30px] flex-wrap items-center gap-2.5 px-5 pt-4">
                     <div>
@@ -163,8 +171,10 @@ const stayText = (kind: string, q: number | null) => (q === null ? '' : formatSt
                     <UButton :to="route('board')" variant="ghost" size="sm" label="Open the room board" class="ms-auto" />
                 </div>
             </section>
+          </div>
 
             <div class="flex flex-col gap-4">
+                <StatCard v-bind="kioskCard" />
                 <section class="rounded-card border border-default bg-default px-5 pt-4 pb-[18px]" data-leaving>
                     <div class="mb-3.5 flex items-center gap-2.5">
                         <h2 class="text-[14.5px] font-semibold text-highlighted">Leaving soon</h2>
