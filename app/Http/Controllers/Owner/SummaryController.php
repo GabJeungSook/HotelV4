@@ -7,12 +7,16 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\ShiftSession;
+use App\Models\User;
+use App\Queries\ReportScreenQuery;
 use App\Services\ReportService;
+use App\Services\ZReportExport;
 use App\Support\Clock;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 /**
  * Owner summary (39) at /owner/summary: sales, check-ins, occupancy, short and over across
@@ -22,7 +26,7 @@ use Inertia\Response;
  */
 final class SummaryController extends Controller
 {
-    public function index(Request $request, ReportService $reports, Clock $clock): Response
+    public function index(Request $request, ReportService $reports, Clock $clock, ReportScreenQuery $screens, ZReportExport $export): Response|HttpResponse
     {
         $all = Branch::query()->withoutGlobalScopes()->orderBy('name')->get(['id', 'name']);
         $chosen = $request->filled('branch') && $request->query('branch') !== 'all' ? $all->firstWhere('id', $request->integer('branch')) : null;
@@ -60,12 +64,21 @@ final class SummaryController extends Controller
         $prevTo = $from->subDay();
         $prevFrom = $prevTo->subDays($length - 1);
 
+        $summary = $reports->summary($ids, $from->toDateString(), $to->toDateString());
+
+        if ($request->query('export') === 'csv') {
+            /** @var User $user */
+            $user = $request->user();
+
+            return $export->table($screens->ownerSummaryTables($summary), $user, (int) $ids[0], null, "owner-summary-{$from->toDateString()}-{$to->toDateString()}.csv");
+        }
+
         return Inertia::render('Owner/Summary', [
             'range' => $range,
             'date' => $date->toDateString(),
             'branch' => $chosen === null ? 'all' : $chosen->id,
             'branches' => $all->map(fn (Branch $b): array => ['id' => $b->id, 'name' => $b->name])->values()->all(),
-            'summary' => $reports->summary($ids, $from->toDateString(), $to->toDateString()),
+            'summary' => $summary,
             'compare' => $reports->summary($ids, $prevFrom->toDateString(), $prevTo->toDateString())['total'],
             'breakdown' => $reports->salesBreakdown($ids, $from->toDateString(), $to->toDateString()),
             'days' => $days,

@@ -4,6 +4,7 @@ import { Head, router } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import VBars from '@/Components/Charts/VBars.vue';
 import DateNav from '@/Components/DateNav.vue';
+import ExportMenu from '@/Components/ExportMenu.vue';
 import PeriodSegments from '@/Components/PeriodSegments.vue';
 import SalesOverview, { type Overview } from '@/Components/SalesOverview.vue';
 import type { StatCardProps } from '@/Components/StatCard.vue';
@@ -61,6 +62,10 @@ const range = ref(props.range);
 const date = ref(props.date);
 const branch = ref(String(props.branch));
 watch([range, date, branch], ([r, d, b]) => router.get(route('owner.summary'), { range: r === 'week' ? undefined : r, date: d, branch: b === 'all' ? undefined : b } as never, { preserveScroll: true }));
+
+function download(): void {
+    window.location.href = route('owner.summary', { range: range.value === 'week' ? undefined : range.value, date: date.value, branch: branch.value === 'all' ? undefined : branch.value, export: 'csv' } as never);
+}
 
 const occ = (r: SummaryRow) => (r.room_days === 0 ? '—' : `${Math.round((r.occupied * 100) / r.room_days)}%`);
 const occNum = (r: SummaryRow) => (r.room_days === 0 ? 0 : (r.occupied * 100) / r.room_days);
@@ -127,6 +132,7 @@ const short = (c: number) => (c === 0 ? formatMoney(0, 'wholeColumn') : formatMo
     <OwnerLayout current="summary" :title="`Branch comparison · ${heading}`" subtitle="Closed-books sales, cash and occupancy — branch by branch">
         <PageHeader>
             <PeriodSegments v-model="branch" label="Branch" :items="picker" />
+            <ExportMenu csv :print="false" @csv="download" />
         </PageHeader>
         <div class="mb-4 flex flex-wrap items-center gap-3">
             <PeriodSegments

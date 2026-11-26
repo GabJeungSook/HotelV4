@@ -362,4 +362,36 @@ final class ReportScreenQuery
             ],
         ];
     }
+
+    /**
+     * CSV for the owner's consolidated summary: one row per branch, then the All total.
+     *
+     * @param  array<string, mixed>  $summary
+     * @return list<array<string, mixed>>
+     */
+    public function ownerSummaryTables(array $summary): array
+    {
+        $peso = static fn (mixed $c): string => number_format(((int) $c) / 100, 2);
+        $rows = array_map(static fn (array $r): array => [
+            (string) $r['name'],
+            $peso($r['sales']),
+            $peso($r['rooms']),
+            $peso($r['extras']),
+            $peso($r['cash']),
+            $peso($r['gcash']),
+            $peso($r['card']),
+            $peso($r['expenses']),
+            $peso($r['net']),
+            (string) $r['checkins'],
+            $r['occupied'].'/'.$r['room_days'],
+            $peso($r['short']),
+            $peso($r['over']),
+        ], [...$summary['rows'], $summary['total']]);
+
+        return [[
+            'title' => "Owner summary {$summary['from']} to {$summary['to']}",
+            'columns' => ['Branch', 'Sales', 'Rooms', 'Extras', 'Cash', 'GCash', 'Card', 'Expenses', 'Net', 'Check-ins', 'Occupied/room-days', 'Short', 'Over'],
+            'rows' => $rows,
+        ]];
+    }
 }
