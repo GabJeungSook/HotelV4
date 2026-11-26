@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\BranchStatus;
 use App\Enums\ExtensionRule;
 use App\Enums\PaymentMethod;
+use App\Enums\VatMode;
 use App\Support\Money;
 use Database\Factories\BranchFactory;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
@@ -36,7 +37,7 @@ class Branch extends Model
         'kiosk_enabled', 'kiosk_hold_minutes', 'kiosk_checkout_enabled', 'reservations_enabled', 'reservation_release_minutes', 'event_hall_enabled',
         'pos_enabled', 'housekeeping_enabled', 'cleaning_deadline_minutes', 'cleaning_target_minutes', 'cleaning_urgent_minutes',
         'house_rules', 'next_stay_number', 'next_pos_number', 'next_z_number', 'next_day_z_number',
-        'shift_stale_block_minutes', 'vat_enabled', 'vat_rate_percent', 'tin', 'registered_name', 'welcome_enabled',
+        'shift_stale_block_minutes', 'vat_enabled', 'vat_rate_percent', 'vat_mode', 'vat_amount', 'tin', 'registered_name', 'welcome_enabled',
     ];
 
     protected function casts(): array
@@ -59,6 +60,8 @@ class Branch extends Model
             'pos_enabled' => 'boolean',
             'housekeeping_enabled' => 'boolean',
             'vat_enabled' => 'boolean',
+            'vat_mode' => VatMode::class,
+            'vat_amount' => Money::class,
             'welcome_enabled' => 'boolean',
             'extension_per_hour_amount' => Money::class,
             'deposit_amount' => Money::class,

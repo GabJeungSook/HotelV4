@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Admin;
 
 use App\Actions\Admin\UpdateBranchSettings;
+use App\Enums\VatMode;
 use App\Services\CurrentBranch;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -70,9 +71,11 @@ final class BranchSettingsRequest extends FormRequest
             'cleaning_deadline_minutes' => $minutes,
             'cleaning_target_minutes' => $minutes,
             'cleaning_urgent_minutes' => $minutes,
-            // VAT
+            // VAT: a percentage split per line, or a fixed peso amount per taxable transaction.
             'vat_enabled' => $flag,
+            'vat_mode' => ['sometimes', 'required', Rule::enum(VatMode::class)],
             'vat_rate_percent' => ['sometimes', 'required', 'integer', 'between:1,100'],
+            'vat_amount' => ['sometimes', 'required', 'integer', 'min:1'],
             'tin' => ['sometimes', 'nullable', 'string', 'max:20'],
             'registered_name' => ['sometimes', 'nullable', 'string', 'max:120'],
             // branch details, slip and house rules

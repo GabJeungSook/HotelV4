@@ -8,6 +8,7 @@ use App\Enums\ExtensionRule;
 use App\Enums\PaymentMethod;
 use App\Enums\StayKind;
 use App\Enums\StayState;
+use App\Enums\VatMode;
 use App\Exceptions\ActionRefused;
 use App\Models\Branch;
 use App\Models\Rate;
@@ -45,11 +46,11 @@ final class UpdateBranchSettings
             'kiosk_enabled', 'kiosk_hold_minutes', 'kiosk_checkout_enabled', 'reservations_enabled', 'reservation_release_minutes', 'event_hall_enabled',
             'pos_enabled', 'housekeeping_enabled', 'cleaning_deadline_minutes', 'cleaning_target_minutes', 'cleaning_urgent_minutes',
         ],
-        'vat' => ['vat_enabled', 'vat_rate_percent', 'tin', 'registered_name'],
+        'vat' => ['vat_enabled', 'vat_mode', 'vat_rate_percent', 'vat_amount', 'tin', 'registered_name'],
         'printing' => ['name', 'slip_header', 'address', 'house_rules'],
     ];
 
-    private const MONEY = ['extension_per_hour_amount', 'deposit_amount', 'lost_key_amount', 'lost_remote_amount'];
+    private const MONEY = ['extension_per_hour_amount', 'deposit_amount', 'lost_key_amount', 'lost_remote_amount', 'vat_amount'];
 
     private const TIMES = ['overnight_checkin_time', 'overnight_checkout_time'];
 
@@ -155,6 +156,10 @@ final class UpdateBranchSettings
 
         if ($s['vat_enabled'] && (blank($s['tin']) || blank($s['registered_name']))) {
             throw ActionRefused::because('A VAT-registered branch needs its TIN and registered name for the Z-report.');
+        }
+
+        if ($s['vat_enabled'] && ($s['vat_mode'] ?? 'percent') === VatMode::Amount->value && (int) ($s['vat_amount'] ?? 0) <= 0) {
+            throw ActionRefused::because('A fixed-amount VAT needs the peso amount charged per transaction.');
         }
 
         if ($s['extension_rule'] === ExtensionRule::PerHour->value && (int) $s['extension_per_hour_amount'] <= 0) {

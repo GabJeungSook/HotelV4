@@ -201,11 +201,14 @@ final class ZPaper
             $tax = (int) ($vat['vat'] ?? 0);
             $exempt = (int) ($vat['exempt'] ?? 0);
             $equals('VAT block', $net, $vatable + $tax + $exempt);
+            $vatLabel = ($vat['mode'] ?? 'percent') === 'amount'
+                ? 'VAT (fixed)'
+                : 'VAT '.(int) ($vat['rate'] ?? 0).'%';
             $sections[] = [
                 'key' => 'vat', 'title' => 'VAT', 'layout' => 'lines', 'column' => 'right',
                 'lines' => [
                     self::line('VATable sales', $vatable),
-                    self::line('VAT '.(int) ($vat['rate'] ?? 0).'%', $tax),
+                    self::line($vatLabel, $tax),
                     self::line('VAT-exempt sales', $exempt),
                 ],
             ];

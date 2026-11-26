@@ -70,7 +70,11 @@ final class Totals
         }
 
         if (isset($sum['vat']) && is_array($sum['vat']) && is_array($shifts[0]['vat'] ?? null)) {
+            // The VAT config (mode, rate, fixed amount) describes the branch, so it is taken from the
+            // first shift, not summed; only vatable/vat/exempt accumulate across shifts.
+            $sum['vat']['mode'] = $shifts[0]['vat']['mode'] ?? 'percent';
             $sum['vat']['rate'] = $shifts[0]['vat']['rate'] ?? 0;
+            $sum['vat']['amount'] = $shifts[0]['vat']['amount'] ?? 0;
         }
 
         return $sum;

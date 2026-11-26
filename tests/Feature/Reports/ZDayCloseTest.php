@@ -274,7 +274,7 @@ it('adds the VAT block only when the branch has VAT switched on', function (): v
     $paper = $this->reports->zReport($am);
     $vat = collect(collect($paper['sections'])->firstWhere('key', 'vat')['lines'])->pluck('amount', 'label');
 
-    expect($am->totals['vat'])->toEqual(['rate' => 12, 'vatable' => 58036, 'vat' => 6964, 'exempt' => 28000])
+    expect($am->totals['vat'])->toEqual(['mode' => 'percent', 'rate' => 12, 'amount' => 0, 'vatable' => 58036, 'vat' => 6964, 'exempt' => 28000])
         ->and($vat->all())->toBe(['VATable sales' => 58036, 'VAT 12%' => 6964, 'VAT-exempt sales' => 28000])
         ->and($vat->sum())->toBe($paper['figures']['net_sales'])
         ->and($paper['header']['tin'])->toBe('123-456-789-000')

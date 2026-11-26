@@ -12,6 +12,7 @@ use App\Enums\LineKind;
 use App\Enums\PaymentKind;
 use App\Enums\PaymentMethod;
 use App\Enums\PrintDocument;
+use App\Enums\VatMode;
 use App\Models\Approval;
 use App\Models\Branch;
 use App\Models\CashMovement;
@@ -69,9 +70,14 @@ final class ReportService
      */
     public function recompute(ShiftSession $shift): array
     {
-        $frozen = is_array($shift->totals['vat'] ?? null) ? (int) ($shift->totals['vat']['rate'] ?? 0) : false;
+        $frozen = $shift->totals['vat'] ?? null;
+        $config = is_array($frozen)
+            ? (($frozen['mode'] ?? 'percent') === VatMode::Amount->value
+                ? ['mode' => VatMode::Amount->value, 'amount' => (int) ($frozen['amount'] ?? 0)]
+                : ['mode' => VatMode::Percent->value, 'rate' => (int) ($frozen['rate'] ?? 0)])
+            : false;
 
-        return $this->computeShiftTotals($shift, $this->forwardedIn($shift), ShiftForwardedStay::query()->where('shift_session_id', $shift->id)->orderBy('id')->get(), vatRate: $frozen);
+        return $this->computeShiftTotals($shift, $this->forwardedIn($shift), ShiftForwardedStay::query()->where('shift_session_id', $shift->id)->orderBy('id')->get(), vat: $config);
     }
 
     /**
@@ -92,13 +98,13 @@ final class ReportService
     /**
      * @param  Collection<int, ShiftForwardedStay>  $forwardedIn  rows the previous shift forwarded out
      * @param  Collection<int, ShiftForwardedStay>  $forwardedOut  rows this shift forwards out
-     * @param  int|false|null  $vatRate  null: the branch's VAT setting now (at the close); false: no
-     *                                   VAT; a rate: that rate. A recompute passes what was frozen,
-     *                                   so switching VAT on or off later does not look like a change
-     *                                   to an old shift.
+     * @param  array{mode: string, rate?: int, amount?: int}|false|null  $vat  null: the branch's VAT
+     *                                                                         setting now (at the close); false: no VAT; an array: that
+     *                                                                         exact VAT config. A recompute passes what was frozen, so
+     *                                                                         switching VAT later does not look like a change to an old shift.
      * @return array<string, mixed>
      */
-    public function computeShiftTotals(ShiftSession $shift, Collection $forwardedIn, Collection $forwardedOut, ?CarbonImmutable $until = null, int|false|null $vatRate = null): array
+    public function computeShiftTotals(ShiftSession $shift, Collection $forwardedIn, Collection $forwardedOut, ?CarbonImmutable $until = null, array|false|null $vat = null): array
     {
         $lines = FolioLine::query()->withoutGlobalScopes()->where('shift_session_id', $shift->id)->get();
         $payments = Payment::query()->withoutGlobalScopes()->where('shift_session_id', $shift->id)->get();
@@ -250,7 +256,7 @@ final class ReportService
                 'pos_orders' => ['first' => $orders->first()?->order_no, 'last' => $orders->last()?->order_no, 'count' => $orders->count()],
             ],
             'drawer' => $drawer,
-            'vat' => $this->vat($shift->branch_id, $lines, $vatRate),
+            'vat' => $this->vat($shift->branch_id, $lines, $vat),
         ];
     }
 
@@ -337,21 +343,29 @@ final class ReportService
 
     /**
      * The VAT block (TRD §4.10), only when the branch has VAT switched on; otherwise null and
-     * nothing here runs. Prices are VAT-inclusive. Per line: vatable = amount / (1 + rate),
-     * rounded half-up to the centavo, vat = amount − vatable; the room and discount lines of a
-     * stay whose discount is VAT-exempt (senior citizen, PWD) are reported as exempt.
+     * nothing here runs. Prices are VAT-inclusive, and the room and discount lines of a stay whose
+     * discount is VAT-exempt (senior citizen, PWD) are reported as exempt. Two modes:
+     *  - percent: per line vatable = amount / (1 + rate), rounded half-up; vat = amount − vatable.
+     *  - amount: a fixed peso amount per taxable transaction (distinct stay or sale); vat = amount ×
+     *    count (never more than taxable sales), vatable = taxable sales − vat (no per-line split).
+     * Either way vatable + vat + exempt = net sales, which the Z-report checks.
      *
      * @param  Collection<int, FolioLine>  $lines
-     * @return array{rate: int, vatable: int, vat: int, exempt: int}|null
+     * @param  array{mode: string, rate?: int, amount?: int}|false|null  $config
+     * @return array{mode: string, rate: int, amount: int, vatable: int, vat: int, exempt: int}|null
      */
-    private function vat(int $branchId, Collection $lines, int|false|null $rate): ?array
+    private function vat(int $branchId, Collection $lines, array|false|null $config): ?array
     {
-        if ($rate === null) {
+        if ($config === null) {
             $branch = Branch::query()->withoutGlobalScopes()->find($branchId);
-            $rate = $branch === null || ! $branch->vat_enabled ? false : (int) $branch->vat_rate_percent;
+            $config = $branch === null || ! $branch->vat_enabled
+                ? false
+                : ($branch->vat_mode === VatMode::Amount
+                    ? ['mode' => VatMode::Amount->value, 'amount' => $branch->vat_amount->centavos()]
+                    : ['mode' => VatMode::Percent->value, 'rate' => (int) $branch->vat_rate_percent]);
         }
 
-        if ($rate === false) {
+        if ($config === false) {
             return null;
         }
 
@@ -360,9 +374,15 @@ final class ReportService
             ->whereHas('discount', fn ($q) => $q->withoutGlobalScopes()->where('is_vat_exempt', true))
             ->pluck('id')->all();
 
+        $amountMode = $config['mode'] === VatMode::Amount->value;
+        $rate = (int) ($config['rate'] ?? 0);
+        $flat = (int) ($config['amount'] ?? 0);
+
         $vatable = 0;
         $vat = 0;
         $exempt = 0;
+        $taxableGross = 0;
+        $owners = [];
 
         foreach ($lines as $line) {
             $amount = $line->amount->centavos();
@@ -373,12 +393,26 @@ final class ReportService
                 continue;
             }
 
+            if ($amountMode) {
+                $taxableGross += $amount;
+                $owners[$line->stay_id !== null ? 's'.$line->stay_id : ($line->pos_order_id !== null ? 'p'.$line->pos_order_id : 'h'.$line->hall_booking_id)] = true;
+
+                continue;
+            }
+
             $net = self::divideHalfUp($amount * 100, 100 + $rate);
             $vatable += $net;
             $vat += $amount - $net;
         }
 
-        return ['rate' => $rate, 'vatable' => $vatable, 'vat' => $vat, 'exempt' => $exempt];
+        if ($amountMode) {
+            $vat = min($flat * count($owners), max(0, $taxableGross));
+            $vatable = $taxableGross - $vat;
+
+            return ['mode' => VatMode::Amount->value, 'rate' => 0, 'amount' => $flat, 'vatable' => $vatable, 'vat' => $vat, 'exempt' => $exempt];
+        }
+
+        return ['mode' => VatMode::Percent->value, 'rate' => $rate, 'amount' => 0, 'vatable' => $vatable, 'vat' => $vat, 'exempt' => $exempt];
     }
 
     /** a / b rounded half away from zero, in integers (no floats for money). */

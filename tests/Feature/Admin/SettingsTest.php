@@ -9,6 +9,7 @@ use App\Actions\Admin\UpdateBranchSettings;
 use App\Enums\PaymentMethod;
 use App\Enums\ReasonKind;
 use App\Enums\StayKind;
+use App\Enums\VatMode;
 use App\Exceptions\ActionRefused;
 use App\Exceptions\InvalidStayOption;
 use App\Models\AuditLog;
@@ -110,6 +111,15 @@ it('saves the modules, the stale-shift limit, the VAT block and the slip setting
         ->and(AuditLog::query()->where('action', 'settings.updated')->count())->toBe(3);
 });
 
+it('saves VAT as a fixed peso amount per transaction', function (): void {
+    ($this->update)(['vat_enabled' => true, 'vat_mode' => 'amount', 'vat_amount' => 5000, 'tin' => '123-456-789-000', 'registered_name' => 'Dalisay Hospitality Inc.']);
+
+    $branch = Hotel::branch();
+    expect($branch->vat_enabled)->toBeTrue()
+        ->and($branch->vat_mode)->toBe(VatMode::Amount)
+        ->and($branch->vat_amount->centavos())->toBe(5000);
+});
+
 it('refuses settings that would break the branch', function (array $values, string $message): void {
     $before = Hotel::branch()->toArray();
 
@@ -120,6 +130,7 @@ it('refuses settings that would break the branch', function (array $values, stri
     'no payment method' => [['payment_methods' => []], 'at least one payment method'],
     'no kind of stay' => [['hourly_enabled' => false, 'overnight_enabled' => false, 'long_stay_enabled' => false], 'at least one kind of stay'],
     'VAT without TIN' => [['vat_enabled' => true, 'tin' => null], 'TIN and registered name'],
+    'VAT fixed amount of zero' => [['vat_enabled' => true, 'vat_mode' => 'amount', 'vat_amount' => 0, 'tin' => '123', 'registered_name' => 'Co.'], 'fixed-amount VAT needs the peso amount'],
     'a counter is not a setting' => [['next_z_number' => 1], 'not branch settings'],
     'per hour without an amount' => [['extension_rule' => 'per_hour', 'extension_per_hour_amount' => 0], 'amount per hour'],
 ]);

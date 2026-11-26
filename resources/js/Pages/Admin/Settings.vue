@@ -56,7 +56,9 @@ interface Settings {
     cleaning_target_minutes: number;
     cleaning_urgent_minutes: number;
     vat_enabled: boolean;
+    vat_mode: 'percent' | 'amount';
     vat_rate_percent: number;
+    vat_amount: number;
     tin: string | null;
     registered_name: string | null;
     slip_header: string;
@@ -132,7 +134,7 @@ const GROUP_KEYS: Record<Group, (keyof Settings)[]> = {
         'cleaning_target_minutes',
         'cleaning_urgent_minutes',
     ],
-    vat: ['vat_enabled', 'vat_rate_percent', 'tin', 'registered_name'],
+    vat: ['vat_enabled', 'vat_mode', 'vat_rate_percent', 'vat_amount', 'tin', 'registered_name'],
     printing: ['name', 'slip_header', 'address', 'house_rules'],
 };
 const GROUP_TITLE: Record<Group, string> = { stays: 'Stays', money: 'Money', shifts: 'Shifts', modules: 'Modules', vat: 'VAT', printing: 'Branch details' };
@@ -265,7 +267,7 @@ const summary = computed<Record<'stays' | 'money' | 'modules' | 'vat', Row[]>>((
         { key: 'housekeeping', label: 'Housekeeping', value: b.value.housekeeping_enabled ? `On · ${minutes(b.value.cleaning_deadline_minutes)} / ${minutes(b.value.cleaning_target_minutes)}` : 'Off', hint: 'Rooms go to cleaning at check-out for the roomboys to clean.' },
     ],
     vat: [
-        { key: 'vat', label: 'VAT-registered', value: b.value.vat_enabled ? `Yes · ${b.value.vat_rate_percent}%` : 'No', hint: 'Adds the VAT block to the Z-report; prices are VAT-inclusive.' },
+        { key: 'vat', label: 'VAT-registered', value: b.value.vat_enabled ? `Yes · ${b.value.vat_mode === 'amount' ? `${formatMoney(b.value.vat_amount, 'tile')} per transaction` : `${b.value.vat_rate_percent}%`}` : 'No', hint: 'Adds the VAT block to the Z-report; a percentage split per line, or a fixed amount per transaction.' },
         { key: 'tin', label: 'TIN', value: b.value.tin || '—', hint: 'Your BIR taxpayer identification number, shown on receipts.' },
         { key: 'registered_name', label: 'Registered name', value: b.value.registered_name || '—', hint: 'The registered business name printed on official receipts.' },
     ],
@@ -645,7 +647,13 @@ function toggleDiscount(d: Discount, on: boolean): void {
 
                     <template v-else-if="editRow === 'vat'">
                         <USwitch v-model="form.vat_enabled" label="VAT-registered" description="Adds the VAT block to the Z-report; prices are VAT-inclusive." />
-                        <UFormField v-if="form.vat_enabled" label="VAT rate (%)" :error="form.errors.vat_rate_percent"><UInput v-model.number="form.vat_rate_percent" type="number" :min="1" :max="100" class="w-28" /></UFormField>
+                        <template v-if="form.vat_enabled">
+                            <UFormField label="How VAT is charged" help="A percentage of each sale (split per line on the Z-report), or a fixed peso amount per transaction.">
+                                <USelect v-model="form.vat_mode" :items="[{ label: 'Percentage', value: 'percent' }, { label: 'Fixed amount', value: 'amount' }]" class="w-48" />
+                            </UFormField>
+                            <UFormField v-if="form.vat_mode === 'amount'" label="VAT per transaction" :error="form.errors.vat_amount" help="Charged once per stay or sale."><MoneyInput v-model="form.vat_amount" /></UFormField>
+                            <UFormField v-else label="VAT rate (%)" :error="form.errors.vat_rate_percent"><UInput v-model.number="form.vat_rate_percent" type="number" :min="1" :max="100" class="w-28" /></UFormField>
+                        </template>
                     </template>
                     <template v-else-if="editRow === 'tin'">
                         <UFormField label="TIN" :error="form.errors.tin"><UInput v-model="form.tin" maxlength="20" class="w-full" placeholder="000-000-000-000" /></UFormField>
@@ -777,7 +785,11 @@ function toggleDiscount(d: Discount, on: boolean): void {
                     <template v-else-if="group === 'vat'">
                         <USwitch v-model="form.vat_enabled" label="VAT-registered" description="Adds the VAT block to the Z-report; prices are VAT-inclusive." />
                         <template v-if="form.vat_enabled">
-                            <UFormField label="VAT rate (%)" :error="form.errors.vat_rate_percent"><UInput v-model.number="form.vat_rate_percent" type="number" :min="1" :max="100" class="w-28" /></UFormField>
+                            <UFormField label="How VAT is charged" help="A percentage of each sale (split per line on the Z-report), or a fixed peso amount per transaction.">
+                                <USelect v-model="form.vat_mode" :items="[{ label: 'Percentage', value: 'percent' }, { label: 'Fixed amount', value: 'amount' }]" class="w-48" />
+                            </UFormField>
+                            <UFormField v-if="form.vat_mode === 'amount'" label="VAT per transaction" :error="form.errors.vat_amount" help="Charged once per stay or sale."><MoneyInput v-model="form.vat_amount" /></UFormField>
+                            <UFormField v-else label="VAT rate (%)" :error="form.errors.vat_rate_percent"><UInput v-model.number="form.vat_rate_percent" type="number" :min="1" :max="100" class="w-28" /></UFormField>
                             <UFormField label="TIN" :error="form.errors.tin"><UInput v-model="form.tin" maxlength="20" class="w-full" placeholder="000-000-000-000" /></UFormField>
                             <UFormField label="Registered name" :error="form.errors.registered_name"><UInput v-model="form.registered_name" maxlength="120" class="w-full" /></UFormField>
                         </template>
