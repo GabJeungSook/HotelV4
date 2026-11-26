@@ -280,4 +280,36 @@ final class ReportScreenQuery
             $r['rows'],
         )]];
     }
+
+    /**
+     * CSV for the guest-movements report: the movement log, then arrivals by room type.
+     *
+     * @param  array<string, mixed>  $r
+     * @return list<array<string, mixed>>
+     */
+    public function guestMovementsTables(array $r): array
+    {
+        return [
+            [
+                'title' => "Guest movements {$r['from']} to {$r['to']}",
+                'columns' => ['Time', 'Type', 'Guest', 'Code', 'Room', 'Room type', 'Details', 'By', 'Amount'],
+                'rows' => array_map(fn (array $m): array => [
+                    CarbonImmutable::parse((string) $m['at'])->setTimezone(Clock::displayTimezone())->format('Y-m-d H:i'),
+                    ucfirst((string) $m['kind']),
+                    (string) $m['guest'],
+                    (string) $m['code'],
+                    (string) $m['room'],
+                    (string) $m['room_type'],
+                    (string) $m['details'],
+                    (string) $m['by'],
+                    ((int) $m['amount']) !== 0 ? number_format(((int) $m['amount']) / 100, 2) : '',
+                ], $r['rows']),
+            ],
+            [
+                'title' => 'Arrivals by room type',
+                'columns' => ['Room type', 'Arrivals'],
+                'rows' => array_map(fn (array $x): array => [(string) $x['type'], (string) $x['count']], $r['mix']),
+            ],
+        ];
+    }
 }

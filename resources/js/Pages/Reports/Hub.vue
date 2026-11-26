@@ -23,6 +23,7 @@ const cards = computed(() => [
     { title: 'Daily sales', text: 'Sales by category, by day, week or month', href: route('reports.daily'), icon: 'i-solar-chart-2-bold-duotone', tile: 'bg-info-50 text-info' },
     { title: 'Z-report', text: 'Per-room chart and floor totals for one shift', href: props.latest_shift_id ? route('reports.z', props.latest_shift_id) : route('reports.shifts'), icon: 'i-solar-list-bold-duotone', tile: 'bg-violet-50 text-violet' },
     { title: 'Occupancy & guests', text: 'Check-ins, check-outs, extensions, transfers', href: route('reports.occupancy'), icon: 'i-solar-bed-bold-duotone', tile: 'bg-ok-50 text-ok' },
+    { title: 'Guest movements', text: 'A log of arrivals, departures, extensions, transfers + guest mix', href: route('reports.guests'), icon: 'i-solar-users-group-rounded-bold-duotone', tile: 'bg-teal-50 text-teal' },
     { title: 'Housekeeping', text: 'Cleans, time taken, late rooms', href: route('reports.housekeeping'), icon: 'i-solar-broom-bold-duotone', tile: 'bg-clay-50 text-clay' },
     { title: 'Inventory', text: 'Stock in, sold, wastage, on hand', href: route('reports.inventory'), icon: 'i-solar-box-bold-duotone', tile: 'bg-warn-50 text-warn' },
     { title: 'Audit trail', text: 'Voids, cancels, transfers, approvals', href: route('reports.audit'), icon: 'i-solar-lock-bold-duotone', tile: 'bg-grey-50 text-muted' },

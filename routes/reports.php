@@ -27,6 +27,7 @@ Route::middleware(['auth', 'pin.set', 'role:backoffice,supervisor,admin,owner'])
     Route::get('/daily/{date}/z.csv', [ReportController::class, 'dayCsv'])->name('daily.z.csv');
     Route::post('/daily/{date}/print', [ReportController::class, 'dayPrint'])->name('daily.print');
 
+    Route::get('/guests', [ReportController::class, 'guests'])->name('guests');
     Route::get('/occupancy', [ReportController::class, 'occupancy'])->name('occupancy');
     Route::get('/housekeeping', [ReportController::class, 'housekeeping'])->name('housekeeping');
     Route::get('/inventory', [ReportController::class, 'inventory'])->name('inventory');

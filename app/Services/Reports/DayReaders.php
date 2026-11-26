@@ -9,6 +9,7 @@ use App\Enums\CleaningStatus;
 use App\Enums\LineKind;
 use App\Enums\PaymentMethod;
 use App\Enums\ShiftStatus;
+use App\Enums\StayKind;
 use App\Enums\StayState;
 use App\Models\Approval;
 use App\Models\AuditLog;
@@ -22,6 +23,7 @@ use App\Models\RoomType;
 use App\Models\ShiftSession;
 use App\Models\Stay;
 use App\Models\StayRoom;
+use App\Models\TransferReason;
 use App\Models\User;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
@@ -390,6 +392,136 @@ trait DayReaders
             'total' => $total,
             'lists' => ['start' => $list($atStart), 'in' => $list($in), 'out' => $list($out), 'end' => $list($atEnd), 'cancelled' => $list($cancelled), 'overstayed' => $list($overstayed)],
             'checks' => $atStart->count() + $in->count() - $out->count() === $atEnd->count() ? [] : ['In house at start + checked in − checked out does not equal in house at end.'],
+        ];
+    }
+
+    /**
+     * Guest movements (new report): a per-guest log of arrivals, departures, extensions and
+     * transfers over a day, week or month, newest first, with the mix of arrivals by room type.
+     * Filterable by movement kind. Read-only from the ledger and stays.
+     *
+     * @return array<string, mixed>
+     */
+    public function guestMovements(int $branchId, string $date, string $range = 'day', string $type = 'all'): array
+    {
+        $days = BusinessDay::range($date, $range);
+        [$start] = $this->days->window($branchId, $days[0]);
+        [, $end] = $this->days->window($branchId, end($days));
+
+        $names = User::query()->withoutGlobalScopes()->where('branch_id', $branchId)->pluck('name', 'id');
+        $typeNames = RoomType::query()->withoutGlobalScopes()->where('branch_id', $branchId)->orderBy('id')->pluck('name', 'id');
+        $reasons = TransferReason::query()->withoutGlobalScopes()->where('branch_id', $branchId)->pluck('name', 'id');
+        $roomNo = Room::query()->withoutGlobalScopes()->where('branch_id', $branchId)->pluck('number', 'id');
+
+        $rows = [];
+        $mix = [];
+
+        $stays = Stay::query()->withoutGlobalScopes()->where('branch_id', $branchId)->whereNotNull('checked_in_at')
+            ->where(fn ($q) => $q->whereBetween('checked_in_at', [$start, $end])->orWhereBetween('checked_out_at', [$start, $end]))
+            ->get();
+        $stayById = $stays->keyBy('id');
+
+        $departedIds = [];
+        foreach ($stays as $s) {
+            if ($s->state !== StayState::Cancelled && $s->checked_in_at->greaterThanOrEqualTo($start) && $s->checked_in_at->lessThan($end)) {
+                $rows[] = self::movement($s->checked_in_at, 'arrival', $s, $roomNo, $typeNames, self::stayOption($s).' · '.$s->source->label(), (string) ($names[$s->checked_in_by] ?? ''), $s->quoted_amount?->centavos() ?? 0);
+                $mix[$s->room_type_id] = ($mix[$s->room_type_id] ?? 0) + 1;
+            }
+            if ($s->checked_out_at !== null && $s->checked_out_at->greaterThanOrEqualTo($start) && $s->checked_out_at->lessThan($end)) {
+                $departedIds[] = $s->id;
+            }
+        }
+
+        $departTotals = FolioLine::query()->withoutGlobalScopes()->whereIn('stay_id', $departedIds)->whereNull('reversal_of_id')
+            ->selectRaw('stay_id, SUM(amount) as total')->groupBy('stay_id')->pluck('total', 'stay_id');
+        foreach ($departedIds as $id) {
+            $s = $stayById[$id];
+            $rows[] = self::movement($s->checked_out_at, 'departure', $s, $roomNo, $typeNames, 'Checked out', (string) ($names[$s->checked_out_by] ?? ''), (int) ($departTotals[$id] ?? 0));
+        }
+
+        $extLines = FolioLine::query()->withoutGlobalScopes()->where('branch_id', $branchId)->where('kind', LineKind::Extension)
+            ->whereNull('reversal_of_id')->whereDoesntHave('reversal')->whereBetween('occurred_at', [$start, $end])->whereNotNull('stay_id')->get();
+        $extStays = Stay::query()->withoutGlobalScopes()->whereIn('id', $extLines->pluck('stay_id')->unique())->get()->keyBy('id');
+        foreach ($extLines as $l) {
+            $s = $extStays[$l->stay_id] ?? null;
+            if ($s !== null) {
+                $rows[] = self::movement($l->occurred_at, 'extension', $s, $roomNo, $typeNames, ($l->description ?? '') !== '' ? $l->description : 'Extension', (string) ($names[$l->created_by] ?? ''), $l->amount?->centavos() ?? 0);
+            }
+        }
+
+        $transfers = StayRoom::query()->whereNotNull('transfer_reason_id')->whereBetween('from_at', [$start, $end])->get();
+        $tStays = Stay::query()->withoutGlobalScopes()->whereIn('id', $transfers->pluck('stay_id')->unique())->where('branch_id', $branchId)->get()->keyBy('id');
+        foreach ($transfers as $t) {
+            $s = $tStays[$t->stay_id] ?? null;
+            if ($s !== null) {
+                $detail = 'Moved to Room '.($roomNo[$t->room_id] ?? '?').(isset($reasons[$t->transfer_reason_id]) ? ' · '.$reasons[$t->transfer_reason_id] : '');
+                $rows[] = self::movement($t->from_at, 'transfer', $s, $roomNo, $typeNames, $detail, '', 0, (string) ($roomNo[$t->room_id] ?? ''));
+            }
+        }
+
+        usort($rows, static fn (array $a, array $b): int => $b['sort'] <=> $a['sort']);
+
+        $counts = ['arrival' => 0, 'departure' => 0, 'extension' => 0, 'transfer' => 0];
+        foreach ($rows as $r) {
+            $counts[$r['kind']]++;
+        }
+
+        if ($type !== 'all') {
+            $rows = array_values(array_filter($rows, static fn (array $r): bool => $r['kind'] === $type));
+        }
+        $rows = array_map(static function (array $r): array {
+            unset($r['sort']);
+
+            return $r;
+        }, $rows);
+
+        $mixRows = [];
+        foreach ($typeNames as $id => $name) {
+            $mixRows[] = ['type' => $name, 'count' => $mix[$id] ?? 0];
+        }
+
+        return [
+            'date' => $date,
+            'range' => $range,
+            'from' => $days[0],
+            'to' => end($days),
+            'type' => $type,
+            'counts' => $counts,
+            'rows' => $rows,
+            'mix' => $mixRows,
+        ];
+    }
+
+    /** The stay-option label for a movement (e.g. "6 hrs", "overnight", "3 days"). */
+    private static function stayOption(Stay $s): string
+    {
+        return match ($s->stay_kind) {
+            StayKind::Hourly => ($s->hours ?? 0).' hrs',
+            StayKind::Overnight => ($s->nights ?? 1) === 1 ? 'overnight' : ($s->nights ?? 1).' nights',
+            StayKind::LongStay => ($s->days ?? 1).' '.(($s->days ?? 1) === 1 ? 'day' : 'days'),
+        };
+    }
+
+    /**
+     * One movement row for the guest-movements log.
+     *
+     * @param  Collection<int, string>  $roomNo
+     * @param  Collection<int, string>  $typeNames
+     * @return array<string, mixed>
+     */
+    private static function movement(CarbonImmutable $at, string $kind, Stay $stay, Collection $roomNo, Collection $typeNames, string $details, string $by, int $amount, ?string $room = null): array
+    {
+        return [
+            'at' => $at->toIso8601String(),
+            'sort' => $at->getTimestamp(),
+            'kind' => $kind,
+            'guest' => $stay->guest_name,
+            'code' => $stay->code,
+            'room' => $room ?? (string) ($roomNo[$stay->room_id] ?? ''),
+            'room_type' => (string) ($typeNames[$stay->room_type_id] ?? ''),
+            'details' => $details,
+            'by' => $by,
+            'amount' => $amount,
         ];
     }
 

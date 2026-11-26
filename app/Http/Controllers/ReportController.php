@@ -338,6 +338,25 @@ final class ReportController extends Controller
         return Inertia::render('Reports/Audit', ['report' => $report]);
     }
 
+    /** Guest movements (new): arrivals, departures, extensions and transfers over a range, or its CSV. */
+    public function guests(ReportRequest $request): Response|HttpResponse
+    {
+        $branch = $this->branch($request);
+        $type = (string) $request->query('type', 'all');
+        $report = $this->reports->guestMovements(
+            $branch->id,
+            $request->businessDate($this->clock->localDate()),
+            (string) $request->query('range', 'day'),
+            in_array($type, ['arrival', 'departure', 'extension', 'transfer'], true) ? $type : 'all',
+        );
+
+        if ($request->query('export') === 'csv') {
+            return $this->export->table($this->screens->guestMovementsTables($report), $this->user($request), $branch->id, null, "guest-movements-{$report['from']}-{$report['to']}.csv");
+        }
+
+        return Inertia::render('Reports/Guests', ['report' => $report]);
+    }
+
     /** The branch of this request: the user's own, or for an owner `?branch=`, the opened one, or the first. */
     private function branch(Request $request): Branch
     {
